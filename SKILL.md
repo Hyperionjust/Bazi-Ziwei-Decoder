@@ -111,7 +111,7 @@ npx tsx dump-text.ts --input=chart.json --output=chart.txt
 #### Step 3 — 长文版（用户选 1 / 2 / 3+A / 3+C）
 读取对应长文提示词（`bazi-prompt.md` / `ziwei-prompt.md` / `zonghe-yinzheng-prompt.md`），喂入 `chart.txt`，输出 Markdown 长文。
 
-> **八字独立（选 1）专属**：①**输出最开头必先整段输出 `prompts/disclaimer-preamble.md`**（成长心态两段），再进正文；②按 `prompts/output-mode-B.md` 走【总领速览 + 按需下钻】——默认先出速览（顶部告示 + 定调锚点 + 固定章号菜单），用户回「详细展开第 X 章」再只深写该章并在顶部复述锚点；③正文按 **五行→十神→神煞→大运** 骨架，注入所选流派的 `prompt_inject` / `pillar_emphasis` 并强制神煞铁律；④除非用户在 Step0 选"完整报告"，否则不一次性下灌全文、不诱导继续。
+> **八字独立（选 1）专属**：①**输出最开头必先整段输出 `prompts/disclaimer-preamble.md`**（成长心态两段），再进正文；②按 `prompts/output-mode-B.md` 走【总领速览 + 按需下钻】——默认先出速览（顶部告示 + 定调锚点 + 固定章号菜单），用户回「详细展开第 X 章」再只深写该章并在顶部复述锚点；③正文按 **五行→十神→神煞→大运** 骨架，注入所选流派的 `prompt_inject` / `pillar_emphasis` / `literature`，**严格在该派方法论内、以该派文献为核心分析、不串派**（见 bazi-prompt「流派忠实度」一节；仅『不限/open』才多派并陈），并强制神煞铁律；④除非用户在 Step0 选"完整报告"，否则不一次性下灌全文、不诱导继续。
 
 > 综合印证（3+A）的前置条件：先跑八字 + 紫微独立分析拿到中间报告，再喂给 `zonghe-yinzheng-prompt.md`。
 > 如输出被截断，分段输出。
