@@ -1,0 +1,479 @@
+{
+  "_meta": {
+    "purpose": "神煞引擎回归测试基线。四柱为【测试输入】,非声称来自某真实生辰(生辰→四柱属 yiqi-core 职责,另测)。预期命中由人工对照《三命通会》起法表逐项核验。",
+    "断言语义": "expect_present: 每项 id 必须命中,且其 pillars 为实际命中柱的子集;expect_absent: 这些 id 不得命中;expect_count: 该派命中总数须恰等(用于流派门控)。",
+    "校验状态": "全部用例已由 shensha.ts 引擎跑过且与手工推导一致(详见交接说明)。"
+  },
+  "cases": [
+    {
+      "id": "c1_ziping",
+      "note": "覆盖 dayGan(羊刃) + sanhe年seed(将星/桃花) + xunkong(空亡) + dexiu复合(申子辰月德秀俱见) + 凶煞(灾煞)。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "己",
+            "zhi": "卯"
+          },
+          "month": {
+            "gan": "丙",
+            "zhi": "子"
+          },
+          "day": {
+            "gan": "戊",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "戊",
+            "zhi": "午"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_present": [
+        {
+          "id": "yangren",
+          "name": "羊刃",
+          "pillars": [
+            "日",
+            "时"
+          ]
+        },
+        {
+          "id": "jiangxing",
+          "name": "将星",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "taohua_xianchi",
+          "name": "桃花",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "kongwang",
+          "name": "空亡",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "dexiu_guiren",
+          "name": "德秀贵人",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "zaisha",
+          "name": "灾煞",
+          "pillars": [
+            "月"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "tianyi_guiren",
+        "lushen",
+        "yima"
+      ]
+    },
+    {
+      "id": "c2_ziping",
+      "note": "覆盖 fixed_pillars(魁罡=庚辰日) + sanqi(地下三奇甲戊庚顺布年月日) + sanhe(华盖) + dayGan(金舆)。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "甲",
+            "zhi": "戌"
+          },
+          "month": {
+            "gan": "戊",
+            "zhi": "辰"
+          },
+          "day": {
+            "gan": "庚",
+            "zhi": "辰"
+          },
+          "hour": {
+            "gan": "丙",
+            "zhi": "戌"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_present": [
+        {
+          "id": "kuigang",
+          "name": "魁罡",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "sanqi",
+          "name": "三奇",
+          "pillars": [
+            "年月日"
+          ]
+        },
+        {
+          "id": "huagai",
+          "name": "华盖",
+          "pillars": [
+            "年",
+            "时"
+          ]
+        },
+        {
+          "id": "jinyu",
+          "name": "金舆",
+          "pillars": [
+            "年",
+            "时"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "tianyi_guiren",
+        "yangren",
+        "lushen"
+      ]
+    },
+    {
+      "id": "c3_ziping",
+      "note": "覆盖 sanhe 年seed 与日支不同局(年支寅·火局 / 日支申·水局),验证 seed 取年支也能命中 + 禄神 + 太极。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "甲",
+            "zhi": "寅"
+          },
+          "month": {
+            "gan": "丙",
+            "zhi": "寅"
+          },
+          "day": {
+            "gan": "庚",
+            "zhi": "申"
+          },
+          "hour": {
+            "gan": "戊",
+            "zhi": "寅"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_present": [
+        {
+          "id": "lushen",
+          "name": "禄神",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "yima",
+          "name": "驿马",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "taiji_guiren",
+          "name": "太极贵人",
+          "pillars": [
+            "年"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "tianyi_guiren",
+        "yangren",
+        "taohua_xianchi",
+        "kongwang"
+      ]
+    },
+    {
+      "id": "c4_ziping_male",
+      "note": "覆盖 gender_chong(元辰,阳男→冲前一位) + 羊刃 + 将星 + 灾煞 + 孤辰。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "甲",
+            "zhi": "子"
+          },
+          "month": {
+            "gan": "辛",
+            "zhi": "未"
+          },
+          "day": {
+            "gan": "丙",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "庚",
+            "zhi": "寅"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_present": [
+        {
+          "id": "yuanchen",
+          "name": "元辰",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "yangren",
+          "name": "羊刃",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "jiangxing",
+          "name": "将星",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "zaisha",
+          "name": "灾煞",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "guchen_guasu",
+          "name": "孤辰寡宿",
+          "pillars": [
+            "时"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "taohua_xianchi",
+        "tianyi_guiren"
+      ]
+    },
+    {
+      "id": "c4_ziping_female_genderflip",
+      "note": "同 c4 盘但女命:阴男阳女→冲后一位=巳,盘中无巳→元辰应消失。验证性别分支。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "甲",
+            "zhi": "子"
+          },
+          "month": {
+            "gan": "辛",
+            "zhi": "未"
+          },
+          "day": {
+            "gan": "丙",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "庚",
+            "zhi": "寅"
+          }
+        },
+        "gender": "female"
+      },
+      "lineage": "ziping",
+      "expect_present": [
+        {
+          "id": "yangren",
+          "name": "羊刃",
+          "pillars": [
+            "日"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "yuanchen"
+      ]
+    },
+    {
+      "id": "c1_gate_ditian",
+      "note": "流派门控:同 c1 盘,滴天髓只开 空亡+羊刃,其余一律不出。最关键的『镜片』测试。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "己",
+            "zhi": "卯"
+          },
+          "month": {
+            "gan": "丙",
+            "zhi": "子"
+          },
+          "day": {
+            "gan": "戊",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "戊",
+            "zhi": "午"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ditian",
+      "expect_count": 2,
+      "expect_present": [
+        {
+          "id": "yangren",
+          "name": "羊刃",
+          "pillars": [
+            "日",
+            "时"
+          ]
+        },
+        {
+          "id": "kongwang",
+          "name": "空亡",
+          "pillars": [
+            "月"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "jiangxing",
+        "taohua_xianchi",
+        "dexiu_guiren",
+        "zaisha",
+        "hongyan"
+      ]
+    },
+    {
+      "id": "c1_gate_mangpai",
+      "note": "流派门控:同 c1 盘,盲派核心象=羊刃+空亡+桃花(禄/华盖/驿马本盘无),计 3。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "己",
+            "zhi": "卯"
+          },
+          "month": {
+            "gan": "丙",
+            "zhi": "子"
+          },
+          "day": {
+            "gan": "戊",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "戊",
+            "zhi": "午"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "mangpai",
+      "expect_count": 3,
+      "expect_present": [
+        {
+          "id": "yangren",
+          "name": "羊刃",
+          "pillars": [
+            "日",
+            "时"
+          ]
+        },
+        {
+          "id": "kongwang",
+          "name": "空亡",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "taohua_xianchi",
+          "name": "桃花",
+          "pillars": [
+            "月"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "jiangxing",
+        "dexiu_guiren",
+        "zaisha"
+      ]
+    },
+    {
+      "id": "c8_sanqi_order_neg",
+      "note": "三奇严格顺布:戊甲庚(年月日)非顺序甲戊庚→不作奇。验证倒乱不作奇。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "戊",
+            "zhi": "辰"
+          },
+          "month": {
+            "gan": "甲",
+            "zhi": "寅"
+          },
+          "day": {
+            "gan": "庚",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "丙",
+            "zhi": "子"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_absent": [
+        "sanqi"
+      ]
+    },
+    {
+      "id": "c9_sanqi_order_pos_mds",
+      "note": "三奇严格顺布:乙丙丁(月日时)恰顺序→天上三奇命中@月日时。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "甲",
+            "zhi": "子"
+          },
+          "month": {
+            "gan": "乙",
+            "zhi": "丑"
+          },
+          "day": {
+            "gan": "丙",
+            "zhi": "寅"
+          },
+          "hour": {
+            "gan": "丁",
+            "zhi": "卯"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_present": [
+        {
+          "id": "sanqi",
+          "name": "三奇",
+          "pillars": [
+            "月日时"
+          ]
+        }
+      ]
+    }
+  ]
+}

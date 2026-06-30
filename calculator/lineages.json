@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "purpose": "流派 = 解读层镜片,不改排盘。算法层(chart.json)流派中立;本文件决定:用神模型、神煞白名单+权重、技法关键词、四支柱侧重、推荐文献。注入八字 prompt 的 {{lineage}} 块。",
+    "神煞权重": "0=不用 / 1=作象·轻 / 2=常用·重。引擎以 lineage.shensha_policy 过滤 shensha.json 的命中结果。",
+    "未选/不限": "id=open,默认推荐。按 tier 全列、用神综合并陈、标注分歧。",
+    "全局铁律": "任何派,神煞只增色不定大局;与五行/十神/格局/用神核心冲突,以核心为准。"
+  },
+  "lineages": {
+    "ziping": {
+      "name": "子平派(传统/格局派)",
+      "yongshen_model": "格局用神:月令定格,以月令之财官印食杀伤六神立六格,用神为格局之核心",
+      "core_techniques": ["月令取格", "六格成败救应", "喜用忌神", "天透地藏", "杂气取格"],
+      "deemphasize": [],
+      "pillar_emphasis": { "五行": "旺衰+调候为辅", "十神": "格局十神(主)", "神煞": "丰富·作辅助吉凶", "大运": "格局喜忌随运" },
+      "literature": ["渊海子平", "三命通会", "子平真诠", "星平会海"],
+      "shensha_policy": { "default_weight": 1, "whitelist": { "tianyi_guiren": 2, "wenchang_guiren": 2, "tiande_guiren": 2, "yuede_guiren": 2, "dexiu_guiren": 2, "sanqi": 2, "jiangxing": 2, "huagai": 2, "taohua_xianchi": 1, "yangren": 2, "kuigang": 2, "jiesha": 1, "wangshen": 1, "zaisha": 1, "guchen_guasu": 1, "yuanchen": 1 }, "blacklist": [] },
+      "prompt_inject": "本次按【子平格局派】。先以月令定格(财官印食杀伤六格),论格局成败救应,定喜用忌神;十神支柱以格局为骨。神煞内容可丰富展开,但仅作吉凶增色,不得反推翻格局结论。"
+    },
+
+    "ditian": {
+      "name": "滴天髓派(旺衰/中和派)",
+      "yongshen_model": "平衡用神:扶抑/调候/通关,以日主旺衰与五行气势流通定喜忌,贵中和",
+      "core_techniques": ["日主旺衰", "五行气势流通", "旺者宜泄·弱者宜生·旺极宜泄·弱极宜克", "从象/化象", "母子相生源流"],
+      "deemphasize": ["神煞", "纳音", "奇格外格"],
+      "pillar_emphasis": { "五行": "核心(旺衰·中和·气势·流通)", "十神": "扶抑喜忌", "神煞": "弱化·基本不展开", "大运": "顺逆气势取喜忌" },
+      "literature": ["滴天髓(任铁樵阐微)", "穷通宝鉴(调候)"],
+      "shensha_policy": { "default_weight": 0, "whitelist": { "kongwang": 1, "yangren": 1 }, "blacklist": [] },
+      "prompt_inject": "本次按【滴天髓旺衰派】。以阴阳五行生克为正理,核心讲日主旺衰、气势流通、中和。神煞默认不展开(任铁樵明言当时弊在过重格局神煞而忽略五行);仅在结构上可提空亡、羊刃。严禁堆神煞。"
+    },
+
+    "shenfeng": {
+      "name": "神峰通考派",
+      "yongshen_model": "病药用神:先看日干次看月令,取最旺/最矛盾五行为『病』,去病之字为『药』",
+      "core_techniques": ["病药说", "动静说(天干动·地支静)", "盖头说(运干克支)", "不拘月令", "雕枯旺弱·损益生长八法"],
+      "deemphasize": ["神煞(列为谬说)", "纳音论命", "外格"],
+      "pillar_emphasis": { "五行": "核心(病药·损益)", "十神": "破格损用为病、救应为药", "神煞": "批判·原则上略过", "大运": "盖头·动静定运吉凶" },
+      "literature": ["神峰通考(命理正宗·张楠)"],
+      "shensha_policy": { "default_weight": 0, "whitelist": { "yangren": 1, "kongwang": 1, "kuigang": 1 }, "blacklist": [] },
+      "prompt_inject": "本次按【神峰通考病药派】。以病药为第一要义:找全局最旺/最矛盾之神为病,取去病之字为药;辅以动静、盖头、不拘月令。张楠批『以神煞论命』为谬说,故神煞默认略过;羊刃/魁罡/空亡可在格局层提及,不另起神煞章。"
+    },
+
+    "mangpai": {
+      "name": "盲派",
+      "yongshen_model": "功神:弃旺衰、废用忌,看命局做功关系组合(功神/废神),非传统用神",
+      "core_techniques": ["理法(做功70%)", "象法(取象20%·干支象/宫位象/十神象/神煞象)", "技法(断六亲灾约10%)", "宾主", "体用", "刑冲合害穿墓", "带象换象共象化象"],
+      "deemphasize": ["日主旺衰", "格局用神"],
+      "pillar_emphasis": { "五行": "改为·干支之象与做功基础(非旺衰平衡)", "十神": "核心(做功·宾主·体用·十神活象)", "神煞": "仅核心若干·并入象法", "大运": "做功应期·大运流年触发" },
+      "literature": ["口传歌诀为主(《盲派断命秘典》等),无统一经典"],
+      "shensha_policy": { "default_weight": 0, "whitelist": { "lushen": 2, "yangren": 2, "huagai": 2, "yima": 2, "kongwang": 2, "taohua_xianchi": 1 }, "blacklist": [] },
+      "prompt_inject": "本次按【盲派】。弃旺衰、废用忌,以『做功』为纲(功神/废神),辅以宾主体用与刑冲合害穿墓取象。『五行』支柱改述为干支之象与做功基础,不讲旺衰平衡。神煞只取禄、羊刃、华盖(墓)、驿马、空亡、桃花并入象法,其余不用。"
+    },
+
+    "duanshi_TODO": {
+      "name": "新派·段氏盲派(段建业)  ⚠ STUB·待 cowork 补",
+      "_status": "用户暂缺《段氏理象学》/《盲派命理》原文。以下为可填骨架(loop),凡 TODO 处落 cowork 用段氏文献补全。",
+      "yongshen_model": "做功(扬弃用神论,以做功理论解读命理结构) — 与盲派同源,细则 TODO",
+      "core_techniques_TODO": ["宾主", "体用", "干支配置", "做功方式", "制局通辨", "理法/象法/技法", "TODO: 段氏特有判词与流程补此"],
+      "deemphasize": ["日主旺衰", "格局用神"],
+      "pillar_emphasis": { "五行": "干支象/做功基础(同盲派)", "十神": "做功·宾主·体用(主)", "神煞": "神煞类象(段氏只列5项)", "大运": "做功应期 TODO" },
+      "literature_TODO": ["段建业《盲派命理》", "段建业《段氏理象学》(第四章第六节·神煞类象)"],
+      "shensha_policy": {
+        "_note": "段氏《理象学》神煞类象仅列:禄神类象、羊刃类象、墓库之象、驿马类象、空亡类象。权重与『象解』待文献补。",
+        "default_weight": 0,
+        "whitelist_TODO": { "lushen": "TODO权重+象解", "yangren": "TODO", "huagai": "TODO(墓库之象)", "yima": "TODO", "kongwang": "TODO" },
+        "blacklist": []
+      },
+      "xiang_jie_TODO": {
+        "_note": "段氏把神煞当『类象』而非吉凶签。每项需补:象意、做功中的角色、断事示例。cowork 在此填。",
+        "禄神类象": "TODO",
+        "羊刃类象": "TODO",
+        "墓库之象": "TODO",
+        "驿马之象": "TODO",
+        "空亡类象": "TODO"
+      },
+      "prompt_inject_TODO": "本次按【段氏盲派】。框架同盲派(做功/宾主/体用),神煞仅用禄/刃/墓/马/空亡作类象。TODO: 段氏特有判词、做功流程、神煞类象解,以《段氏理象学》补全后替换本句。"
+    },
+
+    "open": {
+      "name": "不限流派(默认·推荐)",
+      "yongshen_model": "综合并陈:格局用神 + 旺衰平衡 + 病药 三套结论并列,冲突时标注分歧与置信度",
+      "core_techniques": ["兼采月令格局", "日主旺衰中和", "做功取象(择要)", "刑冲合害"],
+      "deemphasize": [],
+      "pillar_emphasis": { "五行": "旺衰+统计+调候(全)", "十神": "格局+十神分布(全)", "神煞": "按 tier 全列·T1重T2中凶煞辅", "大运": "喜忌+应期" },
+      "literature": ["渊海子平", "三命通会", "子平真诠", "滴天髓", "穷通宝鉴", "神峰通考"],
+      "shensha_policy": { "default_weight": 1, "whitelist": { "tianyi_guiren": 2, "wenchang_guiren": 2, "taohua_xianchi": 2, "yima": 2, "huagai": 2, "jiangxing": 2, "yangren": 2, "lushen": 2, "kongwang": 2, "dexiu_guiren": 2, "sanqi": 2, "tiande_guiren": 2, "yuede_guiren": 2 }, "blacklist": [] },
+      "prompt_inject": "本次【不限流派】。四支柱(五行→十神→神煞→大运)全展开;用神层同时给格局派/旺衰派/病药派三视角,出现分歧时明说哪派、为何、置信度。神煞按 tier 呈现,needs_review 项标注『起法待核』。"
+    }
+  }
+}
