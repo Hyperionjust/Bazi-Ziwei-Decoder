@@ -9,8 +9,8 @@
 ### 目录
 
 - [✨ 主要功能](#-主要功能)
-- [🚀 快速开始（通用三步）](#-快速开始通用三步)
-- [📦 安装 / 使用指南](#-安装--使用指南) ｜ [Claude](#-claude原生最省事) · [ChatGPT](#-chatgpt做成-custom-gpt) · [Gemini](#-gemini做成-gem) · [DeepSeek](#-deepseek) · [Kimi](#-kimi)
+- [🚀 快速开始 · Claude（直接用，最省事）](#-快速开始--claude直接用最省事)
+- [📦 其他模型（ChatGPT · Gemini · DeepSeek · Kimi）](#-其他模型chatgpt--gemini--deepseek--kimi)
 - [📚 详细参考](#-详细参考术语--参数--清单)
 - [🙏 致谢 & 协议](#-致谢--开源协议) ｜ [⚠️ 免责声明](#️-免责声明)
 
@@ -42,9 +42,29 @@
 
 ---
 
-## 🚀 快速开始（通用三步）
+## 🚀 快速开始 · Claude（直接用，最省事）
 
-> 前提：电脑装了 [Node.js](https://nodejs.org)（18+）。**任何大模型都先做这三步拿到命盘文本 `chart.txt`。**
+在 Claude 上**开箱即用**：装好后直接说生辰，排盘 / 选流派 / 解读全自动，无需手动敲任何命令。
+
+1. **安装**：把本仓库的 `bazi-ziwei-decoder.skill` 点「Save skill」一键装入；或把整个文件夹放进 Claude 的 skills 目录（Claude Code / Cowork）。
+2. **首次依赖**（仅一次）：算法层依赖只有一个 `lunar-typescript`，Claude 首次排盘报缺依赖时在 `calculator/` 跑 `npm install` 即可。
+3. **直接问**，例如：
+
+   > 我是 1990 年 6 月 15 日下午 2 点半出生的男生，**按子平派**看八字。
+
+   Claude 会自动：排盘（算法层）→ 按所选流派出**总领速览**（开头先给成长心态声明 + 章号菜单）→ 你回「**详细展开第 6 章**」再深写婚恋那一章。
+
+> 想换流派直接说「改用滴天髓 / 盲派看」即可；不指定则默认「不限（多视角并陈）」。
+
+---
+
+## 📦 其他模型（ChatGPT · Gemini · DeepSeek · Kimi）
+
+> 这些平台**不能在云端跑排盘脚本**。所以统一是：**先在本机把盘排好（下面「第一步」），拿到命盘文本 `chart.txt`，再喂给模型**——模型只解读、不排盘。换流派＝改 `--lineage` 重排一次。
+
+### 第一步：本机排盘（通用三步）
+
+> 前提：电脑装了 [Node.js](https://nodejs.org)（18+）。
 
 ```bash
 # 0) 进入算法层目录，装依赖（仅首次；依赖只有一个 lunar-typescript）
@@ -59,23 +79,11 @@ npx tsx run-chart.ts --year=1990 --month=6 --day=15 --hour=14 --minute=30 \
 npx tsx dump-text.ts --input=chart.json --output=chart.txt
 ```
 
-**第 3 步：把 `chart.txt` ＋ 提示词喂给大模型** —— 打开 `prompts/bazi-prompt.md`，连同 `chart.txt` 一起发给模型，它就按「成长心态声明 → 五行 → 十神 → 神煞 → 大运 → 六维事项」、并**严格依所选流派与其文献**输出解读。
-
-> 记住：**模型只读 `chart.txt` 做解读，不自己排盘。** 这就是本基板的全部意义。
-
----
-
-## 📦 安装 / 使用指南
-
-> 除 **Claude** 外，下面这些平台**不能在云端跑排盘脚本**。所以统一是：**先在本机完成上面「快速开始」三步拿到 `chart.txt`，再喂给模型**——模型只解读、不排盘。换流派＝改 `--lineage` 重排一次。
-
-### 🟣 Claude（原生，最省事）
-
-把整个基板文件夹放进 Claude 的 skills 目录（Claude Code / Cowork），或直接「Save skill」安装本仓库的 `.skill` 包。之后直接说「我是 1990 年 6 月 15 日下午 2 点半出生的男生，按子平派看八字」，skill 会**自动**跑算法层、选流派、出解读，无需手动敲命令。
+拿到 `chart.txt` 后，按下面对应平台把它 + `prompts/bazi-prompt.md` 喂给模型即可。
 
 ### 🟢 ChatGPT（做成 Custom GPT）
 
-> 需要 ChatGPT **Plus / Team / Enterprise**。排盘在你电脑上跑（快速开始 1–2 步），`chart.txt` 贴进对话即可。
+> 需要 ChatGPT **Plus / Team / Enterprise**。
 
 1. 左下角头像 → **My GPTs** → **Create a GPT** → 切到 **Configure** 标签。
 2. **Name**：八字命理助手。
@@ -87,8 +95,6 @@ npx tsx dump-text.ts --input=chart.json --output=chart.txt
 📎 [Creating and editing GPTs（官方）](https://help.openai.com/en/articles/8554397-creating-and-editing-gpts)
 
 ### 🔵 Gemini（做成 Gem）
-
-> 用 Gemini 的「Gems」自定义助手。同样：本机排盘，`chart.txt` 喂进去。
 
 1. 打开 Gemini → 左侧 **Gems / Gem manager** → **New Gem**。
 2. **Instructions**：粘贴 `prompts/bazi-prompt.md`（＋ disclaimer ＋ output-mode-B）。可点魔法棒让 Gemini 帮你润色。
