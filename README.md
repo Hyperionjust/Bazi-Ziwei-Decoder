@@ -1,224 +1,171 @@
 # Bazi-Ziwei-Decoder · 八字紫微命理基板
 
-> **版本 `v1.2.0`** ｜ 神煞 + 流派镜片 · 超级魔改版 ｜ 协议 MIT ｜ 📜 [更新日志 CHANGELOG](./CHANGELOG.md)
+> `v1.2.0` ｜ 神煞 + 流派镜片 ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
 
-> 📦 本基板基于 [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill)（MIT，排盘内核源自 [Yiqi 八字紫微排盘系统](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)）的开源资料，**进一步超级魔改而来**——在其精准排盘内核之上，再叠加神煞引擎、流派镜片、成长心态、按需下钻、文献核验五层。
+基于 [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill) 超级魔改，排盘内核源自 [Yiqi](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)。
 
-一个**精准排盘 + 多流派解读**的命理 AI 基板。核心理念一句话：**排盘交给算法，解读交给大模型，绝不让 AI 自己瞎排盘。** 普通大模型直接「帮我算八字」常把日柱、大运排错——一步错、满盘垮；本基板用内置算法层把四柱 / 十神 / 大运 / 神煞**算准**，再把「命盘文本」喂给大模型只做**解读**。
+精准排盘 + 多流派解读的命理基板。核心一句话：**排盘交给算法，解读交给大模型，绝不让 AI 瞎排盘。** 普通模型直接算八字常把日柱大运排错；本基板用算法层把四柱、十神、大运、神煞算准，再喂给模型只做解读。
 
 ### 目录
 
-- [✨ 主要功能](#-主要功能)
-- [🚀 快速开始 · Claude（直接用，最省事）](#-快速开始--claude直接用最省事)
-- [📦 其他模型（ChatGPT · Gemini · DeepSeek · Kimi）](#-其他模型chatgpt--gemini--deepseek--kimi)
-- [📚 详细参考](#-详细参考术语--参数--清单)
-- [🙏 致谢 & 协议](#-致谢--开源协议) ｜ [⚠️ 免责声明](#️-免责声明)
+- [主要功能](#-主要功能)
+- [安装与使用](#-安装与使用)（Claude · Gemini · Kimi · Codex · ChatGPT · DeepSeek）
+- [详细参考](#-详细参考)
+- [致谢 & 协议](#-致谢--协议) ｜ [免责声明](#️-免责声明)
 
 ---
 
 ## ✨ 主要功能
 
-### 🔥 魔改特色功能（本基板新增 —— 相比原版的「超级魔改」）
+### 🔥 魔改特色
 
-| # | 特色功能 | 说明 |
+| # | 特色 | 说明 |
 |---|---|---|
-| 1 | **神煞进算法层** | 24 个神煞由代码精准起例（数据驱动、每个都带《三命通会》等**文献出处**），不再靠模型凭记忆瞎报。 |
-| 2 | **流派镜片（6 派）** | 子平 / 滴天髓 / 神峰通考 / 盲派 / 段氏 / 不限。**只换「怎么解读」，绝不改「排了什么」**——同一盘换流派，四柱不变、神煞展开与用神视角随派变。 |
-| 3 | **按流派 + 文献为核心解读** | 选定流派后，模型**严格在该派方法论内、以该派代表文献为核心**分析，不串派、宁存疑勿乱用（仅「不限」才多派并陈）。 |
-| 4 | **成长心态声明置顶** | 每次八字分析开头先讲「为什么会越算越不好」+「以成长心态看命」，反焦虑、反宿命。 |
-| 5 | **总领速览 + 按需下钻** | 第一回合先给一页全局速览（含章号菜单），你说「详细展开第 6 章」才深写那一章——不一次性灌长文、不诱导你继续算。 |
-| 6 | **文献核验 + 防编造铁律** | 起法有分歧/查不到的，宁可标「⚠起法待核」也**绝不编**。文昌/福星还做**古法交叉校验**（通行版命中时，再核一遍《三命通会》古法，没有就提示「古法无」）。 |
-| 7 | **自带回归测试** | `schema-check`（配置自检）+ 9 例神煞 fixtures，改完一键验证不跑偏。 |
+| 1 | 神煞进算法层 | 24 神煞代码起例、数据驱动、每个带文献出处，不靠模型瞎报。 |
+| 2 | 流派镜片 6 派 | 子平 / 滴天髓 / 神峰 / 盲派 / 段氏 / 不限。只换解读、不改排盘；换流派四柱不变，神煞与用神随派变。 |
+| 3 | 按流派 + 文献解读 | 选定流派后严格用该派方法、以该派文献为核心，不串派。 |
+| 4 | 成长心态置顶 | 每次开头先讲「越算越不好」的原理与成长心态，反焦虑反宿命。 |
+| 5 | 总领速览 + 按需下钻 | 先给全局速览与章号菜单，你说「展开第 6 章」才深写，不灌长文。 |
+| 6 | 文献核验防编造 | 起法查不到就标待核、绝不编；文昌福星做古法交叉校验。 |
+| 7 | 自带回归测试 | schema-check + 9 例 fixtures，改完一键验证。 |
 
-> 神煞铁律：**神煞只增色、不定大局**；与五行/十神/格局/用神核心冲突时，一律以核心为准。
+> 铁律：神煞只增色、不定大局，与五行十神格局用神冲突时以核心为准。
 
-### 🧱 基础功能（继承自基板的精准排盘内核）
+### 🧱 基础功能
 
-- **精准排盘**：四柱 / 十神 / 藏干 / 星运 / 自坐 / 纳音 / 大运 / 流年（源自 Yiqi 排盘内核，免「LLM 瞎排」）。
-- **紫微斗数**：十二宫 / 主辅星 / 生年四化 / 大限 / 流年 / 命主身主 / 五行局。
-- **enrich 补层**：格局 / 旺衰（四维评分）/ 调候用神 / 五行统计 / 刑冲合害 / 盖头截脚。
-- **三种分析**：八字独立 · 紫微独立 · **八字＋紫微综合印证**（两盘交叉对账）。
-- **两种输出**：📜 长文深度版（Markdown）· 🎴 结构化海报版（单文件 HTML，可截图分享）。
+精准排盘四柱十神大运、紫微十二宫四化大限、格局旺衰调候刑冲合害等补层；支持八字 / 紫微 / 综合印证；长文与 HTML 海报两种输出。
 
 ---
 
-## 🚀 快速开始 · Claude（直接用，最省事）
+## 🧭 安装与使用
 
-在 Claude 上**开箱即用**：装好后直接说生辰，排盘 / 选流派 / 解读全自动，无需手动敲任何命令。
+排盘由内置算法层完成，模型只做解读。支持 Skills 且能运行代码的 Agent（Claude、Kimi Code、Gemini CLI）可直接调用；纯聊天模型需先在本机排盘、再将结果粘贴给模型。请先获取文件，再按所用模型操作。
 
-1. **安装**：把本仓库的 `bazi-ziwei-decoder.skill` 点「Save skill」一键装入；或把整个文件夹放进 Claude 的 skills 目录（Claude Code / Cowork）。
-2. **首次依赖**（仅一次）：算法层依赖只有一个 `lunar-typescript`，Claude 首次排盘报缺依赖时在 `calculator/` 跑 `npm install` 即可。
-3. **直接问**，例如：
+**获取文件**（通用，三选一）：GitHub 页面点 `<> Code` → Download ZIP 后解压；或在 Releases 下载 `bazi-ziwei-decoder.skill`；或 `git clone https://github.com/<用户名>/Bazi-Ziwei-Decoder.git`。得到 `Bazi-Ziwei-Decoder` 文件夹。
 
-   > 我是 1990 年 6 月 15 日下午 2 点半出生的男生，**按子平派**看八字。
+### 1. Claude
 
-   Claude 会自动：排盘（算法层）→ 按所选流派出**总领速览**（开头先给成长心态声明 + 章号菜单）→ 你回「**详细展开第 6 章**」再深写婚恋那一章。
+适用于 Claude 桌面版（Cowork）与 Claude Code；安装后排盘、解读全自动，无需命令行。
 
-> 想换流派直接说「改用滴天髓 / 盲派看」即可；不指定则默认「不限（多视角并陈）」。
+1. 安装：桌面版将 `bazi-ziwei-decoder.skill` 拖入对话，点 **Save skill**；Claude Code 将文件夹放入 `~/.claude/skills/`（Windows 为 `C:\Users\<用户名>\.claude\skills\`）。
+2. 首次排盘若提示缺少依赖，Claude 会在 `calculator/` 目录自动执行一次 `npm install`。
+3. 使用：在对话中提供出生日期、时间、性别与流派。例：「1990 年 6 月 15 日 14:30 男，按子平派看八字」。
 
----
+### 2. Gemini
 
-## 📦 其他模型（ChatGPT · Gemini · DeepSeek · Kimi）
+Gemini CLI 支持 SKILL.md 技能并可运行脚本，安装后自动排盘（需已安装 Node.js）。
 
-> 这些平台**不能在云端跑排盘脚本**。所以统一是：**先在本机把盘排好（下面「第一步」），拿到命盘文本 `chart.txt`，再喂给模型**——模型只解读、不排盘。换流派＝改 `--lineage` 重排一次。
+1. 安装 Gemini CLI，参见 [官方文档](https://geminicli.com/docs/cli/skills/)。
+2. 将 `Bazi-Ziwei-Decoder` 文件夹复制到技能目录 `~/.gemini/skills/bazi-ziwei-decoder/`（须包含 `SKILL.md`）。
+3. 启动 Gemini CLI，提供生辰与流派，CLI 会自动识别技能并排盘解读。
+4. 仅使用 Gemini 网页版（不安装 CLI）时：按第 6 节完成本机排盘，再将 `chart.txt` 粘贴给它。
 
-### 第一步：本机排盘（通用三步）
+### 3. Kimi
 
-> 前提：电脑装了 [Node.js](https://nodejs.org)（18+）。
+Kimi Code CLI 原生支持 SKILL.md 技能（需已安装 Node.js）。
 
-```bash
-# 0) 进入算法层目录，装依赖（仅首次；依赖只有一个 lunar-typescript）
-cd calculator
-npm install
+1. 安装 Kimi Code CLI，参见 [官方文档](https://www.kimi.com/zh-cn/help/agent/use-skills-in-code)。
+2. 将 `Bazi-Ziwei-Decoder` 文件夹放入 Kimi Code 的用户级 Skills 目录（对所有项目生效，路径见文档）。
+3. 在会话中输入 `/skill:bazi-ziwei-decoder`，或直接提供生辰由其自动识别。
+4. 仅使用 Kimi 网页版时：按第 6 节完成本机排盘，再上传 `chart.txt`。
 
-# 1) 排盘：生辰 → 命盘 JSON（--lineage 选流派，只影响解读镜片，不改排盘）
-npx tsx run-chart.ts --year=1990 --month=6 --day=15 --hour=14 --minute=30 \
-  --gender=male --lineage=ziping --output=chart.json
+### 4. Codex
 
-# 2) 转成可读「文本盘」
-npx tsx dump-text.ts --input=chart.json --output=chart.txt
-```
+OpenAI Codex CLI 支持 SKILL.md 技能（2025 年底起）并可运行脚本，安装后自动排盘（需已安装 Node.js）。
 
-拿到 `chart.txt` 后，按下面对应平台把它 + `prompts/bazi-prompt.md` 喂给模型即可。
+1. 安装 Codex CLI，参见 [官方文档](https://developers.openai.com/codex/skills)。
+2. 将 `Bazi-Ziwei-Decoder` 文件夹放入 Codex 的 Skills 目录（如 `~/.codex/skills/`，具体路径见文档），须包含 `SKILL.md`。
+3. 在会话中用 `/skills` 选择该技能，或直接提供生辰由其自动识别，Codex 会运行排盘并解读。
 
-### 🟢 ChatGPT（做成 Custom GPT）
+### 5. ChatGPT
 
-> 需要 ChatGPT **Plus / Team / Enterprise**。
+需具备代码解释器（Plus / Team / Enterprise）；可在其容器内运行排盘脚本，无需本机操作。
 
-1. 左下角头像 → **My GPTs** → **Create a GPT** → 切到 **Configure** 标签。
-2. **Name**：八字命理助手。
-3. **Instructions**：把 `prompts/bazi-prompt.md` 全文粘进去；再附上 `prompts/disclaimer-preamble.md`、`prompts/output-mode-B.md` 两份内容。
-4. **Knowledge → Upload files**：上传 `prompts/` 提示词、`calculator/lineages.json`、`calculator/shensha.json`，以及一两份示例 `chart.txt`（最多 20 个文件）。
-5. 右侧 **Preview** 贴一份 `chart.txt` 测试 → 满意后点右上 **Create / Update**，选「仅自己」或「有链接可用」。
-6. 以后每次：本机排盘得到 `chart.txt` → 丢给这个 GPT。
+1. 在对话中上传 `bazi-ziwei-decoder.zip`。
+2. 指示其执行：解压后进入 `calculator` 运行 `npm install`，再用 `run-chart.ts`、`dump-text.ts` 排盘，最后按 `prompts/bazi-prompt.md` 及所选流派解读。
+3. 可选：创建启用代码解释器的 Custom GPT，将提示词置于 Instructions、项目置于 Knowledge，此后仅需提供生辰。参见 [创建 Custom GPT](https://help.openai.com/en/articles/8554397-creating-and-editing-gpts)。
 
-📎 [Creating and editing GPTs（官方）](https://help.openai.com/en/articles/8554397-creating-and-editing-gpts)
+### 6. DeepSeek 及其他纯聊天模型
 
-### 🔵 Gemini（做成 Gem）
+适用于 DeepSeek 网页版、Gemini / Kimi 网页版等无法运行代码的场景，需先在本机排盘。
 
-1. 打开 Gemini → 左侧 **Gems / Gem manager** → **New Gem**。
-2. **Instructions**：粘贴 `prompts/bazi-prompt.md`（＋ disclaimer ＋ output-mode-B）。可点魔法棒让 Gemini 帮你润色。
-3. **Knowledge → Add files**：上传 `prompts/`、`lineages.json`、`shensha.json`、示例 `chart.txt`（每个 Gem 最多 10 个文件）。
-4. 右侧 **Preview** 测试 → 点 **Save**（只预览不点保存不会存）。
-5. 以后：本机排盘出 `chart.txt` → 在这个 Gem 里发给它。
+1. 安装 Node.js：访问 [nodejs.org](https://nodejs.org) 下载 LTS 版并安装；打开终端（Windows 搜索「PowerShell」，macOS 打开「终端」），输入 `node -v`，显示版本号即成功。
+2. 本机排盘：在终端进入 `calculator` 目录，依次执行——
 
-📎 [Tips for creating custom Gems（官方）](https://support.google.com/gemini/answer/15235603)
+   ```bash
+   npm install
+   npx tsx run-chart.ts --year=1990 --month=6 --day=15 --hour=14 --minute=30 --gender=male --lineage=ziping --output=chart.json
+   npx tsx dump-text.ts --input=chart.json --output=chart.txt
+   ```
 
-### 🟠 DeepSeek
+   完成后 `calculator` 目录生成 `chart.txt`。
+3. 交给模型：新建对话，先粘贴 `prompts/bazi-prompt.md`（及 `disclaimer-preamble.md`、`output-mode-B.md`），再上传或粘贴 `chart.txt`，要求其按提示词与所选流派解读。DeepSeek 用 chat.deepseek.com；Gemini 网页可存成 Gem；Kimi 网页可一次传多份文件。
 
-> 网页版没有「自定义助手」入口，但支持**文件上传**。每次把提示词 + 命盘一起给它。
+## 📚 详细参考
 
-1. 本机跑通用三步，拿到 `chart.txt`。
-2. 打开 [chat.deepseek.com](https://chat.deepseek.com)，新建对话。
-3. 第一条消息：**先粘贴 `prompts/bazi-prompt.md` 全文**（＋ disclaimer ＋ output-mode-B），再**上传或粘贴 `chart.txt`**，说明「按上面的提示词、严格依所选流派解读这份命盘，先出成长心态声明与总领速览」。
-4. 换流派：改 `--lineage` 重排，拿新的 `chart.txt` 再发。
-5. 小技巧：把这套提示词存进浏览器「常用语 / 收藏」，免得每次复制。
-
-📎 [DeepSeek API Docs（系统提示参考）](https://api-docs.deepseek.com/)
-
-### 🟡 Kimi
-
-> Kimi（Moonshot）长上下文、可一次传多份文件，很适合贴长提示词 + 命盘。
-
-1. 本机跑通用三步，拿到 `chart.txt`。
-2. 打开 [kimi.com](https://www.kimi.com)，新建对话。
-3. **上传文件**：把 `prompts/bazi-prompt.md`、`disclaimer-preamble.md`、`output-mode-B.md` 和 `chart.txt` 一起拖进去。
-4. 发一句：「严格按 bazi-prompt 的提示词与所选流派镜片解读 chart.txt 这份命盘；开头先出成长心态声明，再走总领速览。」
-5. 换流派同样是重排 `chart.txt` 再传。
-
-📎 [How to use Kimi（指南）](https://kimi-ai.chat/guide/how-to-use-kimi-ai/)
-
----
-
-## 📚 详细参考（术语 · 参数 · 清单）
-
-### 一、流派镜片对照（`--lineage` 取值）
+### 一、流派镜片 `--lineage`
 
 | key | 流派 | 用神模型 | 神煞展开 |
 |---|---|---|---|
-| `ziping` | 子平派（格局） | 月令定格、六格成败救应、喜用忌神 | 丰富，作辅助吉凶 |
-| `ditian` | 滴天髓（旺衰/中和） | 日主旺衰、五行气势流通、贵中和 | 弱化（≈ 仅羊刃、空亡） |
-| `shenfeng` | 神峰通考（病药） | 找全局最旺/矛盾为「病」、去病之字为「药」 | 批判，原则略过 |
-| `mangpai` | 盲派（做功） | 弃旺衰废用忌、看命局「做功」组合 | 只取核心象：禄/刃/华盖(墓)/驿马/空亡/桃花 |
-| `duanshi_TODO` | 新派·段氏盲派 | 同源做功（⚠ 文献未补，**stub**，自动退回盲派近似） | 段氏《理象学》5 类象，待补 |
-| `open` | **不限/综合（默认）** | 格局 + 旺衰 + 病药 三视角并陈、冲突标分歧 | 按 tier 全列 |
+| `ziping` | 子平（格局） | 月令定格、六格成败、喜用忌神 | 丰富 |
+| `ditian` | 滴天髓（旺衰中和） | 日主旺衰、气势流通、贵中和 | 弱化，约仅羊刃空亡 |
+| `shenfeng` | 神峰（病药） | 取最旺矛盾为病、去病之字为药 | 批判略过 |
+| `mangpai` | 盲派（做功） | 弃旺衰、看命局做功组合 | 只取禄刃墓马空亡桃花 |
+| `duanshi_TODO` | 段氏盲派 | 同源做功，文献未补，stub 退回盲派 | 段氏 5 类象待补 |
+| `open` | 不限 · 默认 | 格局 + 旺衰 + 病药三视角并陈 | 按 tier 全列 |
 
-> 流派是**解读层镜片**：换流派只改「展开哪些神煞、用神看哪派、依哪家文献」，**四柱/十神/大运/神煞命中本身永不变**。除「不限」外，模型会**严格在该派方法论内、以该派文献为核心**分析，不串派。
+> 流派只是解读镜片：换流派只改展开哪些神煞、用哪家方法与文献，四柱十神大运神煞命中不变。除 open 外严格按该派文献解读、不串派。
 
 ### 二、命令行参数
 
-`run-chart.ts`（排盘）：
+`run-chart.ts`：`--year --month --day --hour --minute --gender` 必填；`--lineage` 选流派、不传只写中立全集；`--isLunar=true` 农历；`--timeZone` 默认 8；`--output` 输出路径。
+`dump-text.ts`：`--input=chart.json --output=chart.txt`。
+> 用钟表时间，不做真太阳时校正，范围约 1900–2100。
 
-| 参数 | 必填 | 说明 |
-|---|---|---|
-| `--year/--month/--day/--hour/--minute` | ✅ | 出生年月日时分（24 小时制） |
-| `--gender` | ✅ | `male` / `female`（或 男/女） |
-| `--lineage` | 否 | 流派 key（见上表）；不传=只写中立全集神煞 |
-| `--isLunar` | 否 | `true`=输入为农历（默认公历） |
-| `--timeZone` | 否 | 时区，默认 8 |
-| `--output` | 否 | 输出 JSON 路径；不传则打印到 stdout |
+### 三、神煞清单 24
 
-`dump-text.ts`（转文本盘）：`--input=chart.json [--output=chart.txt]`
+- T1 核心 9：天乙 · 文昌 · 桃花 · 驿马 · 华盖 · 将星 · 羊刃 · 禄神 · 空亡
+- T2 常用 8：天德 · 月德 · 太极 · 金舆 · 魁罡 · 国印 · 福星 · 红艳
+- 复合 2：德秀 · 三奇
+- T3 凶煞 5：劫煞 · 亡神 · 灾煞 · 孤辰寡宿 · 元辰
 
-> 排盘直接用钟表时间，不做真太阳时经度校正；范围约 1900–2100。
+起例出处见 `shensha.json` 的 source 字段，多为《三命通会》。
 
-### 三、神煞清单（24，带 tier 与出处）
+### 四、文献核验 & 防编造
 
-- **T1 核心（9）**：天乙贵人 · 文昌贵人 · 桃花(咸池) · 驿马 · 华盖 · 将星 · 羊刃 · 禄神 · 空亡
-- **T2 常用（8）**：天德贵人 · 月德贵人 · 太极贵人 · 金舆 · 魁罡 · 国印贵人 · 福星贵人 · 红艳煞
-- **COMPOUND 复合（2）**：德秀贵人 · 三奇（严格顺布连珠）
-- **T3 凶煞（5）**：劫煞 · 亡神 · 灾煞 · 孤辰寡宿 · 元辰
-
-起例与象解全部抄自 `shensha.json` 的 `source` 字段（多为《三命通会》卷二/卷三/卷六）。
-
-### 四、文献核验 & 防编造（本基板底线）
-
-- 每个神煞起例都标 `source`（文献出处）；起法有分歧/不在所引文献的，标 `needs_review` 并在文本盘打「⚠起法待核」。
-- **古法交叉校验（文昌/福星）**：以通行版为命中主表，命中时再用《三命通会》古法核一遍——古法亦合→标「古法亦合@柱」；古法无→标「古法无」；古法原文字句残损/未列全的部分→标「未校验」而**不编造**。
-- **解读层同理**：选定流派后以该派文献为核心、不串派；某结论该派文献无据则标存疑，不借他派充数。
-- 本版 `needs_review` 已全部消化（红艳对齐三命通会原文、国印纳入、元辰实现、三奇启用严格顺布、魁罡戊辰/羊刃阴干刃按文献默认关闭）。详见 `CHANGELOG.md` / `CHANGES-v2.md`。
+- 每个神煞标 source 文献出处；有分歧或查不到就标 needs_review、文本盘打「⚠起法待核」。
+- 文昌福星古法交叉校验：通行版命中时核一遍《三命通会》古法，无则标「古法无」，原文残损未列全的标「未校验」，绝不编。
+- 解读层同理，按该派文献、不串派。
+- 本版 needs_review 已全部消化，详见 `CHANGELOG.md`。
 
 ### 五、目录结构
 
 ```
 Bazi-Ziwei-Decoder/
-├── SKILL.md                      # skill 主控（决策门 / 流程 / 约束）
-├── CHANGELOG.md                  # 版本更新日志（每版 update）
-├── CHANGES-v2.md                 # 详细变更摘要 + 文献核验结论
-├── prompts/
-│   ├── disclaimer-preamble.md    # ⭐ 成长心态声明（开头必出）
-│   ├── output-mode-B.md          # ⭐ 总领速览 + 按需下钻
-│   ├── bazi-prompt.md            # 八字解读（流派忠实度+神煞+disclaimer+模式B）
-│   ├── ziwei-prompt.md / zonghe-*.md
-└── calculator/
-    ├── run-chart.ts              # 生辰 → 命盘 JSON（+神煞）
-    ├── dump-text.ts              # JSON → 文本盘
-    ├── shensha.ts / shensha.json # 神煞引擎 + 单一事实源
-    ├── lineages.json             # 流派配置（用神模型/神煞权重/文献）
-    ├── schema-check.ts           # 配置自检
-    ├── fixtures/                 # 神煞回归测试（9 例）
-    ├── yiqi-core/ · bazi-enrich/ # 排盘内核 + 补层（已 vendored）
-    └── dist/                     # 预编译 JS（`node dist/...` 亦可）
+├── SKILL.md            主控：决策门 / 流程 / 约束
+├── CHANGELOG.md        版本更新日志
+├── prompts/            disclaimer · output-mode-B · bazi-prompt 等
+└── calculator/         run-chart · dump-text · shensha 引擎 · lineages · yiqi-core · fixtures
 ```
 
-### 六、自检 / 测试
+### 六、自检
 
 ```bash
 cd calculator
-npx tsx schema-check.ts                 # 配置一致性，exit 0 为过
-cd fixtures && npx tsx test-shensha.ts  # 9 例神煞回归，全绿为过
+npx tsx schema-check.ts
+cd fixtures && npx tsx test-shensha.ts
 ```
 
 ---
 
-## 🙏 致谢 & 开源协议
+## 🙏 致谢 & 协议
 
-- **基板**：[dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill)（MIT）—— 本项目在其之上超级魔改。
-- **排盘内核**：[Yiqi 八字紫微排盘系统](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)（MIT，vendored 于 `calculator/yiqi-core/`）。
-- **农历换算**：[lunar-typescript](https://github.com/6tail/lunar-typescript)（MIT）。
+- 基板：[dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill)，MIT。
+- 排盘内核：[Yiqi](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)，MIT。
+- 农历换算：[lunar-typescript](https://github.com/6tail/lunar-typescript)，MIT。
 
-本基板沿用 **MIT 协议**；魔改部分（神煞引擎 / 流派配置 / prompts / 文献核验）同以 MIT 发布。详见 `NOTICE` 与 `LICENSE`。
+本项目 MIT，详见 `NOTICE` 与 `LICENSE`。
 
 ## ⚠️ 免责声明
 
-本基板基于传统八字与紫微斗数理论框架，**仅供文化研究与自我观照参考**，不构成医疗、投资、婚姻、法律等任何决策依据。命运由个人选择与客观环境共同塑造——你始终是自己命运的主笔人。
+仅供文化研究与自我观照参考，不构成医疗、投资、婚姻、法律等任何决策依据。命运由个人选择与客观环境共同塑造。
