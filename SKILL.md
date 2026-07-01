@@ -35,7 +35,7 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 
 **问题 1：要看哪种命理？**
 > "我可以做三种分析：
-> 1. **八字独立分析**（事业 / 财运 / 婚恋 / 子女 / 六亲 / 健康，按八字格局推演 — 长文输出）
+> 1. **八字独立分析**（事业 / 财运 / 婚恋 / 子女 / 六亲 / 健康 — 提供长文 / 可视化海报 / 两种都要）
 > 2. **紫微独立分析**（十二宫 + 大限 + 生年四化 + 流年 — 长文输出）
 > 3. **八字 + 紫微综合印证**（两盘交叉对账 — 提供长文 / 可视化海报 / 两种都要）"
 
@@ -45,24 +45,26 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 > B. **🎴 结构化海报版**（单文件 HTML，可截图分享）
 > C. **两种都要**"
 
-**如果用户选 1（八字独立），追问问题 2′：流派镜片 + 输出形态**
+**如果用户选 1（八字独立），追问问题 2′：流派镜片 + 呈现形态**
 > "八字可按不同**流派镜片**解读（只影响怎么读，不影响排盘）：
 > ① 子平派（格局）② 滴天髓（旺衰中和）③ 神峰通考（病药）④ 盲派（做功）⑤ 新派·段氏盲派 ⑥ 不限/综合（默认，多视角并陈）
-> 输出形态：**总领速览（默认，先给全局再按需展开某章）** / **完整报告（一次出全，仅 Cowork 长输出线建议）**"
+> 呈现形态：A. **📜 长文深度版**（默认；总领速览 + 按需下钻，完整报告仅 Cowork 线建议） / B. **🎴 结构化海报版**（单文件 HTML，可截图分享） / C. **两种都要**"
 
-> 流派只换"解读镜片"：神煞展开多少、用神视角随派变（子平丰富、滴天髓≈只羊刃空亡、盲派只取核心象）；**四柱/十神/大运/神煞命中本身不变**。段氏文献未补时退回盲派框架近似。`--lineage` 取值：`ziping/ditian/shenfeng/mangpai/duanshi_TODO/open`。
+> 流派只换"解读镜片"：神煞展开多少、用神视角随派变（子平丰富、滴天髓≈只羊刃空亡、盲派只取核心象）；**四柱/十神/大运/神煞命中本身不变**。段氏已据《象的应用》《八字断句集》填入（取象六法 + 做功）。`--lineage` 取值：`ziping/ditian/shenfeng/mangpai/duanshi/open`。
 
 **根据选择加载相应提示词和模板**：
 
 | 用户选 | 加载提示词 | 模板 | 输出 |
 |---|---|---|---|
-| 1 | `prompts/disclaimer-preamble.md` ＋ `prompts/bazi-prompt.md`（注入所选流派 + `output-mode-B`） | — | Markdown（开头必出 disclaimer，默认总领速览） |
+| 1 + A（长文·默认） | `prompts/disclaimer-preamble.md` ＋ `prompts/bazi-prompt.md`（注入所选流派 + `output-mode-B`） | — | Markdown（开头必出 disclaimer，默认总领速览） |
+| 1 + B（海报） | `prompts/bazi-poster.md` | `templates/report-bazi-poster.html` | `<name>-bazi.html`（`render --mode=bazi`） |
+| 1 + C（两者） | 上述两份都跑 | 同上 | Markdown + HTML 两份 |
 | 2 | `prompts/ziwei-prompt.md` | — | Markdown 对话回复 |
 | 3 + A | `prompts/zonghe-yinzheng-prompt.md` | — | Markdown 对话回复 |
 | 3 + B | `prompts/zonghe-poster.md` | `templates/report-zonghe-poster.html` | `<name>-zonghe.html` |
 | 3 + C | 上述两份都跑 | 同上 | Markdown + HTML 两份 |
 
-> **海报模板仅综合印证一种**。八字独立 / 紫微独立只有长文输出（用户深度阅读用）。这是经过设计的——海报是综合印证独占的杀手锏，承担社交分享 + 用户惊艳的角色。
+> **海报现有两种**：综合印证海报（3+B/3+C）与**八字独立海报（1+B/1+C）**；紫微独立暂只长文。八字海报为**单系统**（无双盘 verdict/consistency/conflict），走 `render --mode=bazi`。
 
 ---
 
@@ -74,7 +76,7 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 cd calculator
 # 八字独立分析推荐 tsx 直跑(免编译)。--lineage 仅用于"神煞镜片"+解读视角, 绝不改排盘; 不传=中立全集。
 npx tsx run-chart.ts --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gender=male \
-  --lineage=<ziping|ditian|shenfeng|mangpai|duanshi_TODO|open> --output=chart.json
+  --lineage=<ziping|ditian|shenfeng|mangpai|duanshi|open> --output=chart.json
 # (若已 npx tsc 编译, 亦可 node dist/run-chart.js ...; shensha.json/lineages.json 自动从上层目录解析)
 ```
 
@@ -116,23 +118,23 @@ npx tsx dump-text.ts --input=chart.json --output=chart.txt
 > 综合印证（3+A）的前置条件：先跑八字 + 紫微独立分析拿到中间报告，再喂给 `zonghe-yinzheng-prompt.md`。
 > 如输出被截断，分段输出。
 
-#### Step 3 — 海报版（仅用户选 3+B 或 3+C）
-1. 读取 `prompts/zonghe-poster.md`，喂入 `chart.txt`
-2. LLM **必须输出严格 JSON**（不是 Markdown）——提示词末尾会要求"直接以 `{` 开头"，照办即可
-3. 把 LLM 输出的 JSON 保存为 `analysis.json`
-4. 调用渲染脚本：
-   ```bash
-   cd calculator
-   node dist/render.js \
-     --chart=chart.json \
-     --analysis=analysis.json \
-     --template=../templates/report-zonghe-poster.html \
-     --output=<user-name>-<date>.html \
-     --currentYear=<YYYY>
-   ```
-5. 把生成的 HTML 文件路径告诉用户，让其用浏览器打开
+#### Step 3 — 海报版（3+B/3+C 综合印证海报 · 或 1+B/1+C 八字独立海报）
 
-> **重要**：海报版的视觉由 HTML 模板决定，**LLM 只产数据不产 HTML**。如果 LLM 输出含 markdown 包装（如 \`\`\`json … \`\`\`），渲染前需剥掉。
+**通用**：对应提示词让 LLM **输出严格 JSON**（非 Markdown，末尾要求"直接以 `{` 开头"）→ 存为 `analysis.json` → 渲染。**LLM 只产数据不产 HTML**；若输出含 ```json 包装，渲染前剥掉。生成后把 HTML 路径告诉用户用浏览器打开。
+
+**综合印证海报（3+B/3+C）** — 提示词 `prompts/zonghe-poster.md`：
+```bash
+cd calculator
+npx tsx render.ts --chart=chart.json --analysis=analysis.json \
+  --template=../templates/report-zonghe-poster.html --output=<name>-zonghe.html --currentYear=<YYYY>
+```
+
+**八字独立海报（1+B/1+C）** — 提示词 `prompts/bazi-poster.md`，**必带 `--mode=bazi`**（单系统；盘面数据由算法层注入，LLM 只产解读性字段）：
+```bash
+cd calculator
+npx tsx render.ts --mode=bazi --chart=chart.json --analysis=analysis.json \
+  --template=../templates/report-bazi-poster.html --output=<name>-bazi.html --currentYear=<YYYY>
+```
 
 ---
 
@@ -192,13 +194,15 @@ ls node_modules >/dev/null 2>&1 || npm install
 │   ├── bazi-prompt.md                ← 八字独立分析（v2：流派+神煞+disclaimer+模式B）
 │   ├── ziwei-prompt.md               ← 紫微独立分析（长文）
 │   ├── zonghe-yinzheng-prompt.md     ← ⭐ 综合印证（长文）
-│   └── zonghe-poster.md              ← ⭐ 综合印证（海报版 JSON 输出）
+│   ├── zonghe-poster.md              ← ⭐ 综合印证海报（JSON 输出）
+│   └── bazi-poster.md                ← ⭐ 八字独立海报（JSON 输出·单系统）
 ├── templates/
-│   └── report-zonghe-poster.html     ← 综合印证海报模板（占位符）
+│   ├── report-zonghe-poster.html     ← 综合印证海报模板（占位符）
+│   └── report-bazi-poster.html       ← 八字独立海报模板（占位符）
 └── fixtures/                         ← 7 个验证案例（Case A-G）
 ```
 
-**注**：HTML 渲染目前**仅支持综合印证模式**。如用户选了八字独立 / 紫微独立又问"能不能出 HTML 报告"，告知"目前 HTML 海报仅对综合印证开放，建议选综合印证（含八字+紫微）以拿到海报"。
+**注**：HTML 海报现支持**综合印证（`render` 默认模式）**与**八字独立（`render --mode=bazi`）**两种；紫微独立暂只长文。
 
 ---
 

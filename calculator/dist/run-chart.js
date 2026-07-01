@@ -4,7 +4,7 @@
 // 用法:
 //   npx tsx run-chart.ts --year=2000 --month=1 --day=1 --hour=12 --minute=0 --gender=male
 //   可选: --isLunar=true --timeZone=8 --output=path/to/file.json
-//   可选: --lineage=ziping|ditian|shenfeng|mangpai|duanshi_TODO|open
+//   可选: --lineage=ziping|ditian|shenfeng|mangpai|duanshi|open
 //          (流派仅用于"出文镜片"——过滤+权重展示, 绝不改排盘; 不传则只写中立全集)
 //
 // 不指定 --output 则打印到 stdout

@@ -310,6 +310,120 @@ function analysisToFlat(analysis: any): Record<string, any> {
   return out;
 }
 
+// ===================== BAZI-ONLY POSTER (--mode=bazi) =====================
+const GAN_WX: Record<string,string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+const ZHI_WX: Record<string,string> = {寅:'木',卯:'木',巳:'火',午:'火',申:'金',酉:'金',亥:'水',子:'水',辰:'土',戌:'土',丑:'土',未:'土'};
+const ZODIAC: Record<string,string> = {子:'鼠',丑:'牛',寅:'虎',卯:'兔',辰:'龙',巳:'蛇',午:'马',未:'羊',申:'猴',酉:'鸡',戌:'狗',亥:'猪'};
+const SS_KEY: Record<string,string> = {比肩:'bijian',劫财:'jiecai',食神:'shishen',伤官:'shangguan',偏财:'piancai',正财:'zhengcai',七杀:'qisha',七煞:'qisha',正官:'zhengguan',偏印:'pianyin',枭神:'pianyin',正印:'zhengyin'};
+const SS_POL: Record<string,string> = {吉:'good','中性':'neutral',凶:'warn'};
+
+function shenshaByPillarBazi(chart:any): Record<string,string[]> {
+  const hits = chart.bazi?.enrichment?.神煞?.hits || [];
+  const m: Record<string,string[]> = {年:[],月:[],日:[],时:[]};
+  for (const h of hits) for (const pl of (h.pillars||[])) if (m[pl]) m[pl].push(`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`);
+  return m;
+}
+
+function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
+  const out: Record<string,any> = {};
+  const bi = chart.bazi.birthInfo, bz = chart.bazi, en = bz.enrichment||{}, zw = chart.ziwei||{};
+  currentYear = currentYear || new Date().getFullYear();
+  const virtualAge = currentYear - bi.year + 1;
+  const p2 = (n:number)=>String(n).padStart(2,'0');
+  out['meta.solar_date'] = `${bi.year}-${p2(bi.month)}-${p2(bi.day)} ${p2(bi.hour)}:${p2(bi.minute)}`;
+  out['meta.true_solar_time'] = out['meta.solar_date'];
+  out['meta.solar_correction'] = '未做真太阳时校正（钟表时间）';
+  out['meta.lunar_date'] = zw.lunarDate ? `${zw.lunarDate.year}年${zw.lunarDate.monthCn}月${zw.lunarDate.dayCn}` : '-';
+  out['meta.gender'] = bi.gender==='male'?'男':'女';
+  out['meta.age_virtual'] = String(virtualAge);
+  out['meta.current_year'] = String(currentYear);
+  const now=new Date(); out['meta.gen_time']=`${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
+  out['meta.day_master'] = bz.dayMaster || bz.siZhu.day.gan;
+  out['meta.zodiac'] = ZODIAC[bz.siZhu.year.zhi]||'-';
+  out['meta.wangshuai'] = en.旺衰?.verdict || '-';
+  out['meta.geju_full'] = en.格局?.primary || '-';
+  out['meta.qiyun'] = bz.dayunStart!=null ? `${bz.dayunStart}岁起运` : '-';
+  out['meta.name']='-'; out['meta.birthplace']='-'; out['meta.minggong']='-'; out['meta.taiyuan']='-'; out['meta.direction_note']='';
+  const cangGanFmt=(arr:any[])=>(arr||[]).map((x:any)=>`${x.gan}(${x.shiShen||''})`).join(' ');
+  const cnMap:any={year:'年',month:'月',day:'日',hour:'时'};
+  const ssP = shenshaByPillarBazi(chart);
+  for (const k of ['year','month','day','hour']) {
+    const gz=bz.siZhu[k];
+    out[`bazi.${k}.gan`]=gz.gan; out[`bazi.${k}.zhi`]=gz.zhi;
+    out[`bazi.${k}.gan_wx`]=GAN_WX[gz.gan]||'-'; out[`bazi.${k}.zhi_wx`]=ZHI_WX[gz.zhi]||'-';
+    if (k!=='day') out[`bazi.${k}.shiShen`]=bz.shiShen?.[k]||'-';
+    out[`bazi.${k}.cangGanHtml`]=cangGanFmt(bz.cangGan?.[k]);
+    out[`bazi.${k}.zhangSheng`]=bz.zhangSheng?.[k]||'-';
+    out[`bazi.${k}.ziZuo`]=en.自坐?.[cnMap[k]]||en.自坐?.[k]||'-';
+    out[`bazi.${k}.naYin`]=bz.naYin?.[k]||'-';
+    out[`bazi.${k}.shenshaHtml`]=(ssP[cnMap[k]]||[]).join(' ')||'—';
+  }
+  const wx = en.五行统计?.withCangGan || en.五行统计?.surface || en.五行统计 || {};
+  const wxKeys:[string,string][]=[['mu','木'],['huo','火'],['tu','土'],['jin','金'],['shui','水']];
+  let wxTotal=0; for (const [,cn] of wxKeys) wxTotal += (+wx[cn]||0);
+  out['wuxing.total']=String(wxTotal||0);
+  for (const [py,cn] of wxKeys){ const v=+wx[cn]||0; out[`wuxing.${py}`]=String(v); out[`wuxing.${py}_pct`]=String(wxTotal?Math.round(v/wxTotal*100):0); }
+  const tgCount:Record<string,number>={};
+  const addSS=(sx?:string)=>{ if(!sx)return; const key=SS_KEY[sx]; if(key) tgCount[key]=(tgCount[key]||0)+1; };
+  for (const k of ['year','month','hour']) addSS(bz.shiShen?.[k]);
+  for (const k of ['year','month','day','hour']) for (const cg of (bz.cangGan?.[k]||[])) addSS(cg.shiShen);
+  const tgAll=['bijian','jiecai','shishen','shangguan','piancai','zhengcai','qisha','zhengguan','pianyin','zhengyin'];
+  let tgTotal=0; for (const t of tgAll) tgTotal+=(tgCount[t]||0);
+  for (const t of tgAll){ const n=tgCount[t]||0; out[`tg.${t}_n`]=String(n); out[`tg.${t}_pct`]=String(tgTotal?Math.round(n/tgTotal*100):0); }
+  const bd = en.旺衰?.breakdown || {};
+  const mk=(v:any)=>v?['yes','✓']:['no','✗'];
+  const [dlc,dlm]=mk(bd.得令),[ddc,ddm]=mk(bd.得地),[dsc,dsm]=mk(bd.得势);
+  out['dm.deling_class']=dlc; out['dm.deling_mark']=dlm; out['dm.dedi_class']=ddc; out['dm.dedi_mark']=ddm; out['dm.deshi_class']=dsc; out['dm.deshi_mark']=dsm;
+  const sc = en.旺衰?.score ?? 0;
+  out['dm.score_pct']=String(Math.max(0,Math.min(100,Math.round((sc+10)*5))));
+  out['dm.score_label']=en.旺衰?.verdict||'-'; out['dm.verdict']=en.旺衰?.verdict||'-';
+  out['geju.name']=en.格局?.primary||'-'; out['geju.confidence']=en.格局?.confidence||'-';
+  out['geju.chenge']=en.格局?.chenge || (en.格局?.primary&&en.格局.primary!=='-'?'成格':'-');
+  const allHits = en.神煞?.hits||[];
+  out['shensha.list_html']= allHits.length? allHits.map((h:any)=>`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`).join(' ') : '—';
+  const dyArr=(bz.dayun||[]).slice(0,10);
+  let curDy:any=null; for (const d of dyArr) if (d.startAge<=virtualAge&&virtualAge<=d.endAge) curDy=d;
+  for (let i=0;i<10;i++){ const d=dyArr[i];
+    if(!d){ ['gz','age_range','shishen','start_year'].forEach(f=>out[`dayun.${i}.${f}`]='-'); out[`dayun.${i}.current_class`]=''; out[`dayun.${i}.luck_class`]='luck-ping'; continue; }
+    out[`dayun.${i}.gz`]=d.ganZhi.gan+d.ganZhi.zhi;
+    out[`dayun.${i}.age_range`]=`${d.startAge}-${d.endAge}`;
+    out[`dayun.${i}.start_year`]=String(d.startYear||'-');
+    out[`dayun.${i}.shishen`]=((d.ganShiShen||'').slice(0,1))+((d.zhiShiShen||'').slice(0,1));
+    out[`dayun.${i}.current_class`]=(curDy&&d===curDy)?'current':'';
+    out[`dayun.${i}.luck_class`]='luck-ping';
+  }
+  out['dayun.head_note']='';
+  const lnArr=((curDy?.liuNian)||[]).slice(0,10);
+  for (let i=0;i<10;i++){ const ln=lnArr[i];
+    if(!ln){ ['year','gz','shishen'].forEach(f=>out[`liunian.${i}.${f}`]='-'); out[`liunian.${i}.current_class`]=''; out[`liunian.${i}.luck_class`]='luck-ping'; continue; }
+    out[`liunian.${i}.year`]=String(ln.year);
+    out[`liunian.${i}.gz`]=ln.ganZhi.gan+ln.ganZhi.zhi;
+    out[`liunian.${i}.shishen`]=ln.ganShiShen?((ln.ganShiShen.slice(0,1))+((ln.zhiShiShen?.slice(0,1))||'')):'';
+    out[`liunian.${i}.current_class`]=(ln.age===virtualAge)?'current':'';
+    out[`liunian.${i}.luck_class`]='luck-ping';
+  }
+  out['liunian.head_note']='';
+  return out;
+}
+
+function analysisToFlatBazi(a:any): Record<string,any> {
+  const out:Record<string,any>={};
+  if(a.meta){ if(a.meta.archetype_name)out['meta.archetype_name']=a.meta.archetype_name; if(a.meta.axis_oneliner)out['meta.axis_oneliner']=a.meta.axis_oneliner; if(a.meta.name)out['meta.name']=a.meta.name; if(a.meta.direction_note)out['meta.direction_note']=a.meta.direction_note; }
+  if(a.dm?.desc_html)out['dm.desc_html']=a.dm.desc_html;
+  if(a.geju?.sub_html)out['geju.sub_html']=a.geju.sub_html;
+  if(a.wuxing?.note_html)out['wuxing.note_html']=a.wuxing.note_html;
+  if(a.tg){ if(a.tg.mech_html)out['tg.mech_html']=a.tg.mech_html; if(a.tg.plain_html)out['tg.plain_html']=a.tg.plain_html; }
+  if(a.yongshen)for(const k of ['yong_html','ji_html','xi_text','tiaohou_html','note_html'])if(a.yongshen[k]!=null)out[`yongshen.${k}`]=a.yongshen[k];
+  if(a.interp)for(const k of ['personality_html','career_html','marriage_html','health_html'])if(a.interp[k]!=null)out[`interp.${k}`]=a.interp[k];
+  if(a.kaiyun)for(const k of ['fang_html','se_html','shu_html','tiaohou_html','ye','yong_html'])if(a.kaiyun[k]!=null)out[`kaiyun.${k}`]=a.kaiyun[k];
+  if(Array.isArray(a.timeline))for(let i=0;i<5;i++){ const t=a.timeline[i]||{}; for(const f of ['age','year','run','run_class','desc','marker_class'])out[`timeline.${i}.${f}`]=t[f]!=null?t[f]:'-'; }
+  if(a.dayun_head_note)out['dayun.head_note']=a.dayun_head_note;
+  if(a.liunian_head_note)out['liunian.head_note']=a.liunian_head_note;
+  if(Array.isArray(a.dayun_luck))a.dayun_luck.forEach((v:string,i:number)=>{ if(i<10&&v)out[`dayun.${i}.luck_class`]=v; });
+  if(Array.isArray(a.liunian_luck))a.liunian_luck.forEach((v:string,i:number)=>{ if(i<10&&v)out[`liunian.${i}.luck_class`]=v; });
+  return out;
+}
+
 function renderTemplate(template: string, data: Record<string, any>): string {
   let html = template;
   // 第一轮: 精确替换
@@ -332,9 +446,13 @@ function main() {
   const analysis = args.analysis ? JSON.parse(fs.readFileSync(args.analysis, 'utf-8')) : {};
   const template = fs.readFileSync(args.template, 'utf-8');
 
-  const chartFlat = chartToFlat(chart, args.currentYear ? +args.currentYear : undefined);
-  const analysisFlat = analysisToFlat(analysis);
-  const data = { ...chartFlat, ...analysisFlat };
+  const mode = args.mode || 'zonghe';
+  let data: Record<string, any>;
+  if (mode === 'bazi') {
+    data = { ...chartToFlatBazi(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlatBazi(analysis) };
+  } else {
+    data = { ...chartToFlat(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlat(analysis) };
+  }
 
   const html = renderTemplate(template, data);
 

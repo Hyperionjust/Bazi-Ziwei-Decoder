@@ -11,6 +11,13 @@
 - 古法「未校验」项补全：文昌甲乙句（《三命通会》原文残损）、福星丙–癸（「余倒推」未列全）。
 - 纯八字海报模板（独立 HTML，单系统）。
 
+## [1.3.0] · 2026-06-30 · 段氏流派落地 + 八字独立海报
+### Added 新增
+- **八字独立海报**：新增单系统海报模板 `templates/report-bazi-poster.html` + 提示词 `prompts/bazi-poster.md` + `render.ts --mode=bazi` 分支；Step0「八字独立」像综合印证一样可选 **长文 / 海报 / 两者**。单系统，无双盘 verdict/consistency/conflict；盘面数据由算法层注入、LLM 只产解读字段。
+- **段氏盲派流派落地**：据段建业《象的应用》《八字断句集》填入段氏（`duanshi_TODO`→`duanshi`）——取象六法（共象/化象/墓象/换象/带象/局象）+ 做功 + 断语；神煞并入「神煞象」、权重比照同源盲派并**注明《理象学》神煞类象专表未在所供资料、不臆造**。段氏镜片现可正常计算命中。
+### Changed 调整
+- `duanshi_TODO` 引用全部更新为 `duanshi`（lineages / SKILL / run-chart / bazi-prompt / README）。
+
 ## [1.2.0] · 2026-06-30 · 流派忠实度 & 文档重排
 ### Changed 调整
 - **流派忠实度（解读层强化）**：选定流派后，模型**严格在该派 `core_techniques` 内、以该派文献（`literature`）为核心**分析，回避该派 `deemphasize` 判法，**不串派**；某结论该派文献无据则标存疑而非借他派——仅「不限 / open」才多派并陈。`bazi-prompt.md` 新增「流派忠实度」核心原则节，注入 `{{lineage.literature}}` / `{{lineage.deemphasize}}`；SKILL.md 同步约束。
