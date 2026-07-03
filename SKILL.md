@@ -47,10 +47,10 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 
 **如果用户选 1（八字独立），追问问题 2′：流派镜片 + 呈现形态**
 > "八字可按不同**流派镜片**解读（只影响怎么读，不影响排盘）：
-> ① 子平派（格局）② 滴天髓（旺衰中和）③ 神峰通考（病药）④ 盲派（做功）⑤ 新派·段氏盲派 ⑥ 不限/综合（默认，多视角并陈）
+> ① 子平派（格局）② 滴天髓（旺衰中和）③ 神峰通考（病药）④ 盲派（做功·含段氏取象，段氏特有分析标注〔段氏〕）⑤ 新派·段氏盲派 ⑥ 不限/综合（默认，多视角并陈）
 > 呈现形态：A. **📜 长文深度版**（默认；总领速览 + 按需下钻，完整报告仅 Cowork 线建议） / B. **🎴 结构化海报版**（单文件 HTML，可截图分享） / C. **两种都要**"
 
-> 流派只换"解读镜片"：神煞展开多少、用神视角随派变（子平丰富、滴天髓≈只羊刃空亡、盲派只取核心象；**现代神煞 MODERN 层仅『不限/open』启用**——红鸾/天喜/童子/孤鸾/阴差阳错/十恶大败/四废/天罗地网/天医/流霞/血刃/天厨，多版本查法任一命中即写并在 via 标注口诀/版本）；**四柱/十神/大运/神煞命中本身不变**。段氏已据《象的应用》《八字断句集》填入（取象六法 + 做功）。`--lineage` 取值：`ziping/ditian/shenfeng/mangpai/duanshi/open`。
+> 流派只换"解读镜片"：神煞展开多少、用神视角随派变（子平丰富、滴天髓≈只羊刃空亡、盲派只取核心象；**现代神煞 MODERN 层仅『不限/open』启用**——红鸾/天喜/童子/孤鸾/阴差阳错/十恶大败/四废/天罗地网/天医/流霞/血刃/天厨，多版本查法任一命中即写并在 via 标注口诀/版本）；**四柱/十神/大运/神煞命中本身不变**。段氏已据《象的应用》《八字断句集》填入（取象六法 + 做功）。`--lineage` 取值：`ziping/ditian/shenfeng/mangpai/open`（`duanshi` 保留为盲派别名）。
 
 **根据选择加载相应提示词和模板**：
 
@@ -78,7 +78,7 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 # 零安装直跑(推荐):dist-bundle 为自足单文件(依赖已打入),node 即可,无需 npm install
 # --lineage 仅用于"神煞镜片"+解读视角, 绝不改排盘; 不传=中立全集。<skill-root>=技能安装根目录
 node <skill-root>/calculator/dist-bundle/run-chart.js --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gender=male \
-  --lineage=<ziping|ditian|shenfeng|mangpai|duanshi|open> --output=<工作目录>/chart.json
+  --lineage=<ziping|ditian|shenfeng|mangpai|open> --output=<工作目录>/chart.json
 # (开发环境可写、已装依赖时,亦可 npx tsx run-chart.ts ... / node dist/run-chart.js ...;
 #  shensha.json/lineages.json 自动从 dist-bundle 上层目录解析,只读也没问题)
 ```

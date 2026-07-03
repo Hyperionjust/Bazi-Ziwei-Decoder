@@ -13928,7 +13928,7 @@ function main() {
     const lin = JSON.parse(fs.readFileSync(resolveData("lineages.json"), "utf-8"));
     const shenChart = { siZhu: chart.bazi.siZhu, gender: birthInfo.gender };
     const fullHits = computeShensha(shenChart, defs, lin.lineages["open"].shensha_policy);
-    const LK_CN = { ziping: "\u5B50\u5E73", ditian: "\u6EF4\u5929\u9AD3", shenfeng: "\u795E\u5CF0", mangpai: "\u76F2\u6D3E", duanshi: "\u6BB5\u6C0F" };
+    const LK_CN = { ziping: "\u5B50\u5E73", ditian: "\u6EF4\u5929\u9AD3", shenfeng: "\u795E\u5CF0", mangpai: "\u76F2\u6D3E(\u542B\u6BB5\u6C0F)" };
     const defById = {};
     for (const sd of defs.shensha) defById[sd.id] = sd;
     for (const h of fullHits) {
@@ -13951,7 +13951,8 @@ function main() {
     }
     const enr = chart.bazi.enrichment || (chart.bazi.enrichment = {});
     enr.\u795E\u715E = { policy: "open(\u5168\u96C6\xB7\u6D41\u6D3E\u4E2D\u7ACB)", hits: fullHits };
-    const lineageKey = args.lineage;
+    const lineageKey = args.lineage === "duanshi" ? "mangpai" : args.lineage;
+    if (args.lineage === "duanshi") console.error("[lineage] \u6BB5\u6C0F\u5DF2\u5E76\u5165\u76F2\u6D3E\u955C\u7247(\u6BB5\u6C0F\u7279\u6709\u6280\u6CD5\u5728\u89E3\u8BFB\u4E2D\u6807\u6CE8\u3014\u6BB5\u6C0F\u3015),\u6309 mangpai \u8BA1\u7B97");
     if (lineageKey && lin.lineages[lineageKey]) {
       const L = lin.lineages[lineageKey];
       const pol = L.shensha_policy || { default_weight: 0, whitelist: {}, blacklist: [] };

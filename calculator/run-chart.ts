@@ -96,7 +96,7 @@ function main() {
 
     const fullHits = computeShensha(shenChart, defs, lin.lineages['open'].shensha_policy);
     // v1.6: 每个命中附「派系侧重」(各传统流派对该神煞的使用权重),供 open 模式解读时标注强弱分歧
-    const LK_CN: Record<string, string> = { ziping: '子平', ditian: '滴天髓', shenfeng: '神峰', mangpai: '盲派', duanshi: '段氏' };
+    const LK_CN: Record<string, string> = { ziping: '子平', ditian: '滴天髓', shenfeng: '神峰', mangpai: '盲派(含段氏)' }; // v2.0 段氏并入盲派
     const defById: Record<string, any> = {};
     for (const sd of defs.shensha) defById[sd.id] = sd;
     for (const h of fullHits as any[]) {
@@ -120,7 +120,8 @@ function main() {
     const enr: any = chart.bazi.enrichment || (chart.bazi.enrichment = {});
     enr.神煞 = { policy: 'open(全集·流派中立)', hits: fullHits };
 
-    const lineageKey = args.lineage;
+    const lineageKey = args.lineage === 'duanshi' ? 'mangpai' : args.lineage; // v2.0 段氏并入盲派(别名兼容)
+    if (args.lineage === 'duanshi') console.error('[lineage] 段氏已并入盲派镜片(段氏特有技法在解读中标注〔段氏〕),按 mangpai 计算');
     if (lineageKey && lin.lineages[lineageKey]) {
       const L = lin.lineages[lineageKey];
       const pol = L.shensha_policy || { default_weight: 0, whitelist: {}, blacklist: [] };
