@@ -186,6 +186,13 @@
   .wx-木 { color: var(--jade); } .wx-火 { color: var(--vermillion); }
   .wx-土 { color: var(--gold); } .wx-金 { color: var(--metal); }
   .wx-水 { color: var(--water); }
+  /* 五行色块(用/忌/喜/调候元素打底,渲染层自动包裹) */
+  .wx-chip { display: inline-block; padding: 0 6px; border-radius: 3px; font-weight: 700; line-height: 1.8; margin: 0 1px; }
+  .wx-chip.wx-木 { background: rgba(74,124,78,.14); color: var(--jade); }
+  .wx-chip.wx-火 { background: rgba(193,67,47,.13); color: var(--vermillion); }
+  .wx-chip.wx-土 { background: rgba(160,124,74,.16); color: var(--gold); }
+  .wx-chip.wx-金 { background: rgba(125,125,132,.16); color: var(--metal); }
+  .wx-chip.wx-水 { background: rgba(42,74,114,.13); color: var(--water); }
   .pcol .p-canggan {
     padding: 5px 8px; border-top: 1px dashed var(--line-soft);
     font-size: 10px; color: var(--ink-soft); line-height: 1.6;
@@ -355,6 +362,16 @@
   .section h2 small { font-size: 10px; color: var(--ink-faint); font-weight: 400; letter-spacing: 0; }
   .prose { font-size: 12px; line-height: 2; color: var(--ink); text-align: justify; }
   .prose.lead { border-left: 3px solid var(--indigo); background: var(--paper-card); padding: 10px 14px; }
+  /* 合冲刑害 / 运岁引动 行 */
+  .hc-table { display: flex; flex-direction: column; gap: 5px; }
+  .hc-row { display: flex; gap: 8px; align-items: baseline; font-size: 10.5px; line-height: 1.7; border-bottom: 1px dashed var(--line-faint); padding-bottom: 4px; }
+  .hc-type { flex: 0 0 56px; font-weight: 700; color: var(--ink); }
+  .hc-mem { flex: 0 0 auto; color: var(--ink-soft); }
+  .hc-status { flex: 0 0 auto; font-weight: 700; }
+  .hc-status.st-on { color: var(--vermillion); }
+  .hc-status.st-off { color: var(--ink-faint); }
+  .hc-status.st-mid { color: var(--indigo); }
+  .hc-cause { flex: 1; color: var(--ink-soft); }
   .hl { color: var(--vermillion); font-weight: 700; }
   .hl-good { color: var(--jade); font-weight: 700; }
 
@@ -407,6 +424,7 @@
   .ky-row .ky-v { color: var(--ink); line-height: 1.7; }
   .ky-row .ky-v .em { color: var(--jade); font-weight: 600; }
   .ky-row .ky-v .avoid { color: var(--vermillion); }
+  .ky-note { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line-faint); font-size: 11px; line-height: 1.9; color: var(--ink-soft); }
   .ky-tag { display: inline-block; padding: 1px 8px; margin: 0 3px 3px 0; border: 1px solid var(--line-soft); border-radius: 3px; font-size: 11px; color: var(--ink); background: rgba(255,255,255,0.5); }
 
   /* footer */
@@ -673,11 +691,21 @@
       <h2><span class="num-box">04</span>健康提示</h2>
       <div class="prose">{{interp.health_html}}</div>
     </section>
+    <section class="section">
+      <h2><span class="num-box">05</span>作用关系 · 合冲刑害 <small>（{{hechong.policy}} · 状态由算法层裁决）</small></h2>
+      <div class="hc-table">{{hechong.rows_html}}</div>
+      <div class="prose lead" style="margin-top:12px;">{{hechong.reading_html}}</div>
+    </section>
+    <section class="section">
+      <h2><span class="num-box">06</span>运岁引动 <small>（大运 / 流年与原局的作用 · 应期线索）</small></h2>
+      <div class="hc-table">{{yunsui.rows_html}}</div>
+      <div class="prose lead" style="margin-top:12px;">{{yunsui.reading_html}}</div>
+    </section>
   </div>
 
-  <!-- ============ 05 人生关键节点时间轴 ============ -->
+  <!-- ============ 07 人生关键节点时间轴 ============ -->
   <section class="section">
-    <h2><span class="num-box">05</span>人生关键节点 <small>（基于大运流年推衍的五个里程碑）</small></h2>
+    <h2><span class="num-box">07</span>人生关键节点 <small>（基于大运流年推衍的五个里程碑）</small></h2>
     <div class="timeline-legend">
       <span><span class="dot up"></span>上升 / 进取期</span>
       <span><span class="dot flat"></span>平稳 / 名位期</span>
@@ -717,14 +745,15 @@
     </div>
   </section>
 
-  <!-- ============ 06 神煞速览 / 07 开运调理 ============ -->
+  <!-- ============ 08 神煞速览 / 09 开运调理 ============ -->
   <div class="row-2col">
     <section class="section">
-      <h2><span class="num-box">06</span>神煞速览</h2>
+      <h2><span class="num-box">08</span>神煞速览</h2>
       <div class="shensha-list">{{shensha.list_html}}</div>
+      <div class="prose" style="margin-top:10px;">{{shensha.reading_html}}</div>
     </section>
     <section class="section">
-      <h2><span class="num-box">07</span>开运调理</h2>
+      <h2><span class="num-box">09</span>开运调理</h2>
       <div class="kaiyun-grid">
         <div class="ky-row"><span class="ky-k">用神</span><span class="ky-v">{{kaiyun.yong_html}}</span></div>
         <div class="ky-row"><span class="ky-k">吉方</span><span class="ky-v">{{kaiyun.fang_html}}</span></div>
@@ -732,7 +761,11 @@
         <div class="ky-row"><span class="ky-k">吉数</span><span class="ky-v num">{{kaiyun.shu_html}}</span></div>
         <div class="ky-row"><span class="ky-k">宜业</span><span class="ky-v">{{kaiyun.ye}}</span></div>
         <div class="ky-row"><span class="ky-k">调候</span><span class="ky-v">{{kaiyun.tiaohou_html}}</span></div>
+        <div class="ky-row"><span class="ky-k">宜往</span><span class="ky-v">{{kaiyun.place_html}}</span></div>
+        <div class="ky-row"><span class="ky-k">宜置</span><span class="ky-v">{{kaiyun.item_html}}</span></div>
+        <div class="ky-row"><span class="ky-k">宜学</span><span class="ky-v">{{kaiyun.skill_html}}</span></div>
       </div>
+      <div class="ky-note">{{kaiyun.note_html}}</div>
     </section>
   </div>
 

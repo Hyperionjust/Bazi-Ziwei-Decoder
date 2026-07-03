@@ -6,6 +6,7 @@ export type GanRelation = {
   type: '天干合'|'天干相克'|'天干同';
   gans: Tiangan[];
   pillars: string[];
+  detail?: string;   // 如:争合(妒合)标注
 };
 
 const GAN_HE_PAIRS: Array<[Tiangan, Tiangan, string]> = [
@@ -32,6 +33,15 @@ export function detectGanRelations(gans: Record<Pillar, Tiangan>): GanRelation[]
       if (rel === '克' || rel === '被克') {
         out.push({type:'天干相克', gans:[a.gan, b.gan], pillars:[a.pillar, b.pillar]});
       }
+    }
+  }
+  // 争合(妒合):同一干位被两处以上合(如两庚合一乙)→ 各合标注,合力分散不化
+  const hePairs = out.filter(r => r.type === '天干合');
+  const seatCount: Record<string, number> = {};
+  for (const r of hePairs) for (const p of r.pillars) seatCount[p] = (seatCount[p] || 0) + 1;
+  for (const r of hePairs) {
+    if (r.pillars.some(p => seatCount[p] > 1)) {
+      r.detail = (r.detail ? r.detail + '·' : '') + '争合(妒合,合力分散,不作化论)';
     }
   }
   return out;

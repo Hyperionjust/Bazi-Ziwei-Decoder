@@ -12,6 +12,8 @@ import { createChart } from './yiqi-core/index';
 import { getZhiCangGanFull } from './yiqi-core/bazi';
 import { enrichBazi } from './bazi-enrich/enrich';
 import { computeShensha } from './shensha';
+import { adjudicateInteractions } from './bazi-enrich/interactions';
+import { analyzeYunSui } from './bazi-enrich/yunsui';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -93,6 +95,28 @@ function main() {
     const shenChart = { siZhu: chart.bazi.siZhu, gender: birthInfo.gender };
 
     const fullHits = computeShensha(shenChart, defs, lin.lineages['open'].shensha_policy);
+    // v1.6: 每个命中附「派系侧重」(各传统流派对该神煞的使用权重),供 open 模式解读时标注强弱分歧
+    const LK_CN: Record<string, string> = { ziping: '子平', ditian: '滴天髓', shenfeng: '神峰', mangpai: '盲派', duanshi: '段氏' };
+    const defById: Record<string, any> = {};
+    for (const sd of defs.shensha) defById[sd.id] = sd;
+    for (const h of fullHits as any[]) {
+      const lw: Record<string, number> = {};
+      for (const [lk, cn] of Object.entries(LK_CN)) {
+        const pol = lin.lineages[lk]?.shensha_policy;
+        if (!pol) continue;
+        let w = 0;
+        if (!(pol.blacklist || []).includes(h.id)) {
+          const raw = pol.whitelist?.[h.id];
+          const tier = defById[h.id]?.tier;
+          if (tier === 'MODERN') w = typeof raw === 'number' ? raw : 0;
+          else if (typeof raw === 'number') w = raw;
+          else if (typeof raw === 'string') w = 0;
+          else w = pol.default_weight || 0;
+        }
+        lw[cn] = w;
+      }
+      h.lineage_weights = lw;
+    }
     const enr: any = chart.bazi.enrichment || (chart.bazi.enrichment = {});
     enr.神煞 = { policy: 'open(全集·流派中立)', hits: fullHits };
 
@@ -105,6 +129,47 @@ function main() {
       chart.meta = Object.assign({}, chart.meta, { lineage: lineageKey, lineageName: L.name });
     } else if (lineageKey) {
       console.error(`[shensha] 未知流派 '${lineageKey}', 已忽略(仅写中立全集)`);
+    }
+
+    // Step 3.5: 合冲刑害作用裁决(v1.5) — 中立视图按 open 通则(带分歧标注),
+    //           传 --lineage 时另附该派规则集裁决视图;运岁引动为中立检测。
+    try {
+      const siZhuCN: any = {
+        年: chart.bazi.siZhu.year, 月: chart.bazi.siZhu.month,
+        日: chart.bazi.siZhu.day, 时: chart.bazi.siZhu.hour,
+      };
+      const openIP = lin.lineages['open'].interaction_policy;
+      if (openIP) {
+        enr.作用关系 = { policy: 'open(通则+分歧标注)', ...adjudicateInteractions(siZhuCN, openIP) };
+        const lk = args.lineage;
+        if (lk && lin.lineages[lk] && lk !== 'open' && lin.lineages[lk].interaction_policy) {
+          enr.作用关系.lineage = { id: lk, name: lin.lineages[lk].name,
+            ...adjudicateInteractions(siZhuCN, lin.lineages[lk].interaction_policy) };
+        }
+      }
+      const curYear = args.currentYear ? parseInt(args.currentYear, 10) : new Date().getFullYear();
+      enr.运岁引动 = analyzeYunSui(siZhuCN, chart.bazi.dayun || [], curYear);
+
+      // v1.6.2: 胎元(月干进一,月支进三) + 命宫(14/26 减月时支数,五虎遁取干)
+      const GAN10 = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+      const ZHI12 = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+      const mGan = chart.bazi.siZhu.month.gan, mZhi = chart.bazi.siZhu.month.zhi, hZhi = chart.bazi.siZhu.hour.zhi;
+      const taiGan = GAN10[(GAN10.indexOf(mGan) + 1) % 10];
+      const taiZhi = ZHI12[(ZHI12.indexOf(mZhi) + 3) % 12];
+      enr.胎元 = taiGan + taiZhi;
+      // 支数以寅=1…丑=12
+      const numOf = (z: string) => ((ZHI12.indexOf(z) - 2 + 12) % 12) + 1;
+      const sum = numOf(mZhi) + numOf(hZhi);
+      const n = (sum < 14 ? 14 : 26) - sum;              // 命宫支数(寅=1)
+      const mgZhi = ZHI12[(n - 1 + 2) % 12];
+      // 五虎遁:年干起寅月干,顺数至命宫支
+      const WUHU: Record<string, string> = { 甲: '丙', 己: '丙', 乙: '戊', 庚: '戊', 丙: '庚', 辛: '庚', 丁: '壬', 壬: '壬', 戊: '甲', 癸: '甲' };
+      const yinGan = WUHU[chart.bazi.siZhu.year.gan];
+      const steps = (ZHI12.indexOf(mgZhi) - 2 + 12) % 12; // 从寅数到命宫支
+      const mgGan = GAN10[(GAN10.indexOf(yinGan) + steps) % 10];
+      enr.命宫 = mgGan + mgZhi;
+    } catch (e) {
+      console.error('[interactions] 计算跳过(非致命):', (e as Error)?.message || e);
     }
   } catch (e) {
     console.error('[shensha] 计算跳过(非致命):', (e as Error)?.message || e);

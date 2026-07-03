@@ -3,7 +3,7 @@
 import { Dizhi, DIZHI, ZHI_CANG_GAN, Tiangan } from './tables';
 
 export type ZhiRelation = {
-  type: '六冲'|'六合'|'三合'|'三会'|'相刑'|'自刑'|'六害'|'暗合'|'拱合'|'拱会';
+  type: '六冲'|'六合'|'三合'|'半合'|'三会'|'相刑'|'自刑'|'六害'|'相破'|'暗合'|'拱合'|'拱会';
   zhi: Dizhi[];      // 参与的地支
   pillars: string[]; // 参与的柱名(年/月/日/时)
   detail?: string;   // 备注，如拱合的目标支
@@ -46,6 +46,12 @@ const ZI_XING: Dizhi[] = ['辰','午','酉','亥']; // 自刑
 // 六害
 const LIU_HAI: [Dizhi, Dizhi][] = [
   ['子','未'],['丑','午'],['寅','巳'],['卯','辰'],['申','亥'],['酉','戌']
+];
+
+// 相破(六破)。巳申/寅亥与六合(及三刑)重叠,破力轻,标注之
+const LIU_PO: Array<[Dizhi, Dizhi, string?]> = [
+  ['子','酉'],['午','卯'],['辰','丑'],['戌','未'],
+  ['巳','申','与六合/三刑重叠,破力轻'],['寅','亥','与六合重叠,破力轻']
 ];
 
 // 暗合 — 地支藏干之间相合
@@ -122,16 +128,32 @@ export function detectZhiRelations(zhis: Record<Pillar, Dizhi>): ZhiRelation[] {
     }
   }
 
-  // 三合 / 三会 / 半合 / 拱合 / 拱会
+  // 相破
+  for (const [a, b] of pairs) {
+    for (const [x, y, po_note] of LIU_PO) {
+      if ((a.zhi === x && b.zhi === y) || (a.zhi === y && b.zhi === x)) {
+        out.push({type:'相破', zhi:[a.zhi, b.zhi], pillars:[a.pillar, b.pillar], detail: po_note});
+      }
+    }
+  }
+
+  // 三合 / 半合 / 拱合 / 三会 / 拱会
+  // 三合组按[生,旺,库]排列:二支时——缺库=生旺半合,缺生=旺库半合(均含旺神,半局有效);
+  // 缺旺=生库拱旺神(虚拱,不成半局)。此为通行分法(拱合严格指虚拱中神)。
   for (const sh of SAN_HE) {
     const present = list.filter(p => sh.zhi.includes(p.zhi));
     const distinctZhi = [...new Set(present.map(p => p.zhi))];
     if (distinctZhi.length === 3) {
       out.push({type:'三合', zhi: distinctZhi as Dizhi[], pillars: present.map(p=>p.pillar), detail: `三合${sh.wuxing}局`});
     } else if (distinctZhi.length === 2) {
-      // 缺一支 → 拱合
       const missing = sh.zhi.find(z => !distinctZhi.includes(z))!;
-      out.push({type:'拱合', zhi: distinctZhi as Dizhi[], pillars: present.map(p=>p.pillar), detail: `拱合${missing}(${sh.wuxing}局)`});
+      const missIdx = sh.zhi.indexOf(missing); // 0=生 1=旺 2=库
+      if (missIdx === 1) {
+        out.push({type:'拱合', zhi: distinctZhi as Dizhi[], pillars: present.map(p=>p.pillar), detail: `生库拱旺神${missing}(${sh.wuxing}局·虚拱)`});
+      } else {
+        const kind = missIdx === 2 ? '生旺' : '旺库';
+        out.push({type:'半合', zhi: distinctZhi as Dizhi[], pillars: present.map(p=>p.pillar), detail: `${sh.wuxing}局半合(${kind},含旺神)`});
+      }
     }
   }
   for (const sh of SAN_HUI) {
@@ -147,7 +169,7 @@ export function detectZhiRelations(zhis: Record<Pillar, Dizhi>): ZhiRelation[] {
 
   // 暗合 — 地支藏干相合
   // 规则: 仅在该地支对没有其他显式关系(六冲/六合/六害/三合/三会/拱合/拱会/相刑)时才报暗合
-  const explicitTypes: ZhiRelation['type'][] = ['六冲','六合','六害','三合','三会','拱合','拱会','相刑','自刑'];
+  const explicitTypes: ZhiRelation['type'][] = ['六冲','六合','六害','三合','半合','三会','拱合','拱会','相刑','自刑','相破'];
   function hasExplicit(za: Dizhi, zb: Dizhi): boolean {
     return out.some(r =>
       explicitTypes.includes(r.type) &&

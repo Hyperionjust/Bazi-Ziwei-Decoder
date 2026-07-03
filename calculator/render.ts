@@ -318,7 +318,8 @@ const SS_KEY: Record<string,string> = {比肩:'bijian',劫财:'jiecai',食神:'s
 const SS_POL: Record<string,string> = {吉:'good','中性':'neutral',凶:'warn'};
 
 function shenshaByPillarBazi(chart:any): Record<string,string[]> {
-  const hits = chart.bazi?.enrichment?.神煞?.hits || [];
+  const ss = chart.bazi?.enrichment?.神煞;
+  const hits = (ss?.lineage?.hits) || ss?.hits || []; // 流派镜片优先(修:海报曾漏用中立全集)
   const m: Record<string,string[]> = {年:[],月:[],日:[],时:[]};
   for (const h of hits) for (const pl of (h.pillars||[])) if (m[pl]) m[pl].push(`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`);
   return m;
@@ -343,7 +344,7 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   out['meta.wangshuai'] = en.旺衰?.verdict || '-';
   out['meta.geju_full'] = en.格局?.primary || '-';
   out['meta.qiyun'] = bz.dayunStart!=null ? `${bz.dayunStart}岁起运` : '-';
-  out['meta.name']='-'; out['meta.birthplace']='-'; out['meta.minggong']='-'; out['meta.taiyuan']='-'; out['meta.direction_note']='';
+  out['meta.name']='命主'; out['meta.birthplace']='-'; out['meta.minggong']=en.命宫||'-'; out['meta.taiyuan']=en.胎元||'-'; out['meta.direction_note']='';
   const cangGanFmt=(arr:any[])=>(arr||[]).map((x:any)=>`${x.gan}(${x.shiShen||''})`).join(' ');
   const cnMap:any={year:'年',month:'月',day:'日',hour:'时'};
   const ssP = shenshaByPillarBazi(chart);
@@ -379,8 +380,32 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   out['dm.score_label']=en.旺衰?.verdict||'-'; out['dm.verdict']=en.旺衰?.verdict||'-';
   out['geju.name']=en.格局?.primary||'-'; out['geju.confidence']=en.格局?.confidence||'-';
   out['geju.chenge']=en.格局?.chenge || (en.格局?.primary&&en.格局.primary!=='-'?'成格':'-');
-  const allHits = en.神煞?.hits||[];
+  const allHits = (en.神煞?.lineage?.hits) || en.神煞?.hits || []; // 流派镜片优先
   out['shensha.list_html']= allHits.length? allHits.map((h:any)=>`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`).join(' ') : '—';
+  // v1.6: 合冲刑害(作用关系)注入 — 有流派视图用流派视图,否则用 open 通则
+  const ix = en.作用关系;
+  const ixView = ix?.lineage || ix;
+  out['hechong.policy'] = ix?.lineage ? `${ix.lineage.name}规则集` : (ix ? '通则(不限流派)' : '-');
+  const stCls = (st:string)=> (st==='生效'||st==='成局'||st==='合而化') ? 'st-on' : (st==='被解'||st==='被绊'||st==='合而不化(绊)') ? 'st-off' : 'st-mid';
+  const ixItems = (ixView?.items)||[];
+  out['hechong.rows_html'] = ixItems.length ? ixItems.map((r:any)=>
+    `<div class="hc-row"><span class="hc-type">${r.type}</span><span class="hc-mem">${(r.members||[]).join('')}(${(r.pillars||[]).join('-')}·${r.distance})</span><span class="hc-status ${stCls(r.status)}">【${r.status}】</span><span class="hc-cause">${r.cause||''}</span></div>`
+  ).join('') : '<div class="hc-row"><span class="hc-cause">本盘干支之间无显著合冲刑害关系</span></div>';
+  // v1.6: 运岁引动注入 — 大运引动全列 + 当前大运流年(有引动的年份)
+  const ys = en.运岁引动;
+  const ysRows: string[] = [];
+  for (const dstep of (ys?.大运引动||[])) {
+    for (const h of (dstep.hits||[])) ysRows.push(
+      `<div class="hc-row"><span class="hc-type">${h.type}</span><span class="hc-mem">大运${dstep.干支} ${dstep.年龄}</span><span class="hc-cause">${h.desc}</span></div>`);
+  }
+  for (const y of (ys?.当前大运流年?.流年||[])) {
+    if (y.年 < currentYear || y.年 >= currentYear + 5) continue; // 【用户定】海报只看今年起未来5年
+    const all=[...(y.vs原局||[]),...(y.vs大运||[])];
+    if (all.length) ysRows.push(
+      `<div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">${y.年} ${y.干支}</span><span class="hc-cause">${all.map((h:any)=>`[${h.type}]`).join('')} ${all.map((h:any)=>h.desc.replace(/^(大运|流年)/,'')).join(';')}</span></div>`);
+  }
+  out['yunsui.rows_html'] = ysRows.length ? ysRows.join('') : '<div class="hc-row"><span class="hc-cause">运岁与原局无显著引动</span></div>';
+  out['hechong.reading_html']='-'; out['yunsui.reading_html']='-'; out['shensha.reading_html']='-';
   const dyArr=(bz.dayun||[]).slice(0,10);
   let curDy:any=null; for (const d of dyArr) if (d.startAge<=virtualAge&&virtualAge<=d.endAge) curDy=d;
   for (let i=0;i<10;i++){ const d=dyArr[i];
@@ -393,7 +418,14 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
     out[`dayun.${i}.luck_class`]='luck-ping';
   }
   out['dayun.head_note']='';
-  const lnArr=((curDy?.liuNian)||[]).slice(0,10);
+  // 未起运(当前年不在任何大运内):合成 currentYear 起 10 个流年干支,避免整条裸横杠
+  const GAN10=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'], ZHI12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  const gzOfYear=(y:number)=>GAN10[(y-4)%10]+ZHI12[(y-4)%12];
+  let lnSrc=(curDy?.liuNian)||[];
+  let synth=false;
+  if(!lnSrc.length){ synth=true; lnSrc=Array.from({length:10},(_,i)=>({year:currentYear!+i, ganZhi:{gan:gzOfYear(currentYear!+i)[0], zhi:gzOfYear(currentYear!+i)[1]}, age:(currentYear!+i)-bi.year+1})); }
+  const lnArr=lnSrc.slice(0,10);
+  if(synth) out['liunian.head_note']='尚未起运·列当前年起十年';
   for (let i=0;i<10;i++){ const ln=lnArr[i];
     if(!ln){ ['year','gz','shishen'].forEach(f=>out[`liunian.${i}.${f}`]='-'); out[`liunian.${i}.current_class`]=''; out[`liunian.${i}.luck_class`]='luck-ping'; continue; }
     out[`liunian.${i}.year`]=String(ln.year);
@@ -402,8 +434,21 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
     out[`liunian.${i}.current_class`]=(ln.age===virtualAge)?'current':'';
     out[`liunian.${i}.luck_class`]='luck-ping';
   }
-  out['liunian.head_note']='';
+  if(!synth) out['liunian.head_note']='';
   return out;
+}
+
+// v1.6.1: 用/忌/喜/调候字段的干支五行元素自动加色块(连续同五行字符并为一个 chip)
+function wxChip(s:any): any {
+  if (!s || typeof s !== 'string' || s.includes('wx-chip')) return s;
+  return s.replace(/[甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥木火土金水]+/g, (run:string) => {
+    const wxOf = (ch:string)=> (GAN_WX as any)[ch] || (ZHI_WX as any)[ch] || ('木火土金水'.includes(ch) ? ch : '');
+    const first = wxOf(run[0]);
+    if (first && [...run].every(c => wxOf(c) === first)) {
+      return `<span class="wx-chip wx-${first}">${run}</span>`;
+    }
+    return [...run].map(c => { const w = wxOf(c); return w ? `<span class="wx-chip wx-${w}">${c}</span>` : c; }).join('');
+  });
 }
 
 function analysisToFlatBazi(a:any): Record<string,any> {
@@ -413,9 +458,14 @@ function analysisToFlatBazi(a:any): Record<string,any> {
   if(a.geju?.sub_html)out['geju.sub_html']=a.geju.sub_html;
   if(a.wuxing?.note_html)out['wuxing.note_html']=a.wuxing.note_html;
   if(a.tg){ if(a.tg.mech_html)out['tg.mech_html']=a.tg.mech_html; if(a.tg.plain_html)out['tg.plain_html']=a.tg.plain_html; }
-  if(a.yongshen)for(const k of ['yong_html','ji_html','xi_text','tiaohou_html','note_html'])if(a.yongshen[k]!=null)out[`yongshen.${k}`]=a.yongshen[k];
+  if(a.yongshen)for(const k of ['yong_html','ji_html','xi_text','tiaohou_html'])if(a.yongshen[k]!=null)out[`yongshen.${k}`]=wxChip(a.yongshen[k]);
+  if(a.yongshen?.note_html!=null)out['yongshen.note_html']=a.yongshen.note_html;
   if(a.interp)for(const k of ['personality_html','career_html','marriage_html','health_html'])if(a.interp[k]!=null)out[`interp.${k}`]=a.interp[k];
-  if(a.kaiyun)for(const k of ['fang_html','se_html','shu_html','tiaohou_html','ye','yong_html'])if(a.kaiyun[k]!=null)out[`kaiyun.${k}`]=a.kaiyun[k];
+  if(a.kaiyun)for(const k of ['fang_html','se_html','shu_html','ye','place_html','item_html','skill_html','note_html'])if(a.kaiyun[k]!=null)out[`kaiyun.${k}`]=a.kaiyun[k];
+  for(const k of ['tiaohou_html','yong_html'])if(a.kaiyun?.[k]!=null)out[`kaiyun.${k}`]=wxChip(a.kaiyun[k]);
+  if(a.hechong?.reading_html)out['hechong.reading_html']=a.hechong.reading_html;
+  if(a.yunsui?.reading_html)out['yunsui.reading_html']=a.yunsui.reading_html;
+  if(a.shensha?.reading_html)out['shensha.reading_html']=a.shensha.reading_html;
   if(Array.isArray(a.timeline))for(let i=0;i<5;i++){ const t=a.timeline[i]||{}; for(const f of ['age','year','run','run_class','desc','marker_class'])out[`timeline.${i}.${f}`]=t[f]!=null?t[f]:'-'; }
   if(a.dayun_head_note)out['dayun.head_note']=a.dayun_head_note;
   if(a.liunian_head_note)out['liunian.head_note']=a.liunian_head_note;
@@ -439,7 +489,7 @@ function renderTemplate(template: string, data: Record<string, any>): string {
 function main() {
   const args = parseArgs();
   if (!args.chart || !args.template) {
-    console.error('Usage: npx tsx render.ts --chart=chart.json [--analysis=analysis.json] --template=path/to/template.html [--output=out.html]');
+    console.error('Usage: npx tsx render.ts --chart=chart.json [--analysis=analysis.json] --template=path/to/template.html [--output=out.html] [--mode=zonghe|bazi] [--currentYear=YYYY] [--name=命主姓名]');
     process.exit(1);
   }
   const chart = JSON.parse(fs.readFileSync(args.chart, 'utf-8'));
@@ -454,6 +504,15 @@ function main() {
     data = { ...chartToFlat(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlat(analysis) };
   }
 
+  if (args.name) data['meta.name'] = args.name; // --name 兜底(analysis 未给姓名时)
+  // 规格对齐校验:dayun_luck/liunian_luck 长度与数据源不一致时给 warning(不中断)
+  if (mode === 'bazi') {
+    const steps = (chart.bazi?.dayun || []).length;
+    if (Array.isArray(analysis.dayun_luck) && analysis.dayun_luck.length !== steps)
+      console.error(`[render][warn] dayun_luck 项数(${analysis.dayun_luck.length}) ≠ 算法层大运步数(${steps}),多余项忽略/缺项按 luck-ping`);
+    if (Array.isArray(analysis.liunian_luck) && analysis.liunian_luck.length !== 10)
+      console.error(`[render][warn] liunian_luck 项数(${analysis.liunian_luck.length}) ≠ 10,多余项忽略/缺项按 luck-ping`);
+  }
   const html = renderTemplate(template, data);
 
   if (args.output) {

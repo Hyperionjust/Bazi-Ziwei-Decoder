@@ -72,12 +72,15 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 
 **绝对不要让 AI 自己排八字或紫微**。必须调用算法层脚本：
 
+> **⚠ 只读目录须知（重要）**：Skill 安装后位于**只读缓存目录**——**不要** `cd` 进技能目录写文件、**不要**在里面 `npm install`、`--output` **一律指向会话工作目录**。下方零安装路径无需任何依赖安装。
+
 ```bash
-cd calculator
-# 八字独立分析推荐 tsx 直跑(免编译)。--lineage 仅用于"神煞镜片"+解读视角, 绝不改排盘; 不传=中立全集。
-npx tsx run-chart.ts --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gender=male \
-  --lineage=<ziping|ditian|shenfeng|mangpai|duanshi|open> --output=chart.json
-# (若已 npx tsc 编译, 亦可 node dist/run-chart.js ...; shensha.json/lineages.json 自动从上层目录解析)
+# 零安装直跑(推荐):dist-bundle 为自足单文件(依赖已打入),node 即可,无需 npm install
+# --lineage 仅用于"神煞镜片"+解读视角, 绝不改排盘; 不传=中立全集。<skill-root>=技能安装根目录
+node <skill-root>/calculator/dist-bundle/run-chart.js --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gender=male \
+  --lineage=<ziping|ditian|shenfeng|mangpai|duanshi|open> --output=<工作目录>/chart.json
+# (开发环境可写、已装依赖时,亦可 npx tsx run-chart.ts ... / node dist/run-chart.js ...;
+#  shensha.json/lineages.json 自动从 dist-bundle 上层目录解析,只读也没问题)
 ```
 
 **注意**：`run-chart.ts` 的 stdout 是纯 JSON，stderr 是 debug 信息。**重定向时只取 stdout**（`> chart.json`），不要 `2>&1`。
@@ -86,6 +89,8 @@ npx tsx run-chart.ts --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gen
 - `bazi`：四柱 / 十神 / 星运 / 自坐 / 纳音 / 藏干 / 大运（含 startAge/endAge/startYear/endYear）
 - `bazi.enrichment`：格局 / 旺衰 / 调候 / 五行旺相 / 五行统计 / 天干关系 / 地支关系 / 整柱判定
 - `bazi.enrichment.神煞`：神煞命中（`hits`＝中立全集；传 `--lineage` 时附 `lineage.hits`＝该派镜片过滤子集，带 tier / 权重 / `needs_review`）
+- `bazi.enrichment.作用关系`：合冲刑害**裁决**（v1.5）——每条带状态(生效/被解/被绊/合而化…)与依据；默认 open 通则+`divergence` 分歧标注，传 `--lineage` 时附该派规则集视图（`lineage.items`）
+- `bazi.enrichment.运岁引动`：大运/流年×原局+岁运互动（冲提纲/凑局凑刑/岁运并临/天克地冲/伏吟反吟；中立检测，`--currentYear` 定当前大运，缺省=系统年）
 - `ziwei`：十二宫 / 生年四化 / 大限 / 阴阳 / 五行局 / 命主身主
 
 > **关键约束**：纯 LLM 排盘会错排日柱 → 日主 → 格局 → 用神，全链失真。Case B 测试证明 DeepSeek/Gemini 自行排盘均出错。算法层不可绕过。
@@ -97,7 +102,7 @@ npx tsx run-chart.ts --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gen
 LLM 读 JSON 不如读结构化文本。把 Step 1 的 JSON 转成文墨天机风格的树状文本：
 
 ```bash
-npx tsx dump-text.ts --input=chart.json --output=chart.txt
+node <skill-root>/calculator/dist-bundle/dump-text.js --input=<工作目录>/chart.json --output=<工作目录>/chart.txt
 ```
 
 文本盘包含：
@@ -122,20 +127,18 @@ npx tsx dump-text.ts --input=chart.json --output=chart.txt
 
 **通用**：对应提示词让 LLM **输出严格 JSON**（非 Markdown，末尾要求"直接以 `{` 开头"）→ 存为 `analysis.json` → 渲染。**LLM 只产数据不产 HTML**；若输出含 ```json 包装，渲染前剥掉。生成后把 HTML 路径告诉用户用浏览器打开。
 
-> **海报文字长度规则【用户定】**：标签/表格/条目类字段守字数上限保版式；**解读类字段（提示词内标〔段落〕者）不限篇幅，但每个必须是成型段落**——至少 3~5 个完整句子、有盘面依据、有白话落地，**禁止一句话敷衍**；模板高度自动撑开，不会溢出。
+> **海报文字规则【用户定】**：标签/表格/条目类字段守字数上限保版式；**解读类字段（〔段落〕）不限篇幅，每个至少 6~10 句（约 200 字起），2~3 句不合格**；海报为长图、不限一页高度，宁详勿略。**口吻一律第二人称对话式（「你是…」「你会…」），不用「命主」播报腔**。八字海报含「作用关系·合冲刑害」「运岁引动」两个新区块（盘面行由算法注入，解读段由 LLM 产出）。
 
 **综合印证海报（3+B/3+C）** — 提示词 `prompts/zonghe-poster.md`：
 ```bash
-cd calculator
-npx tsx render.ts --chart=chart.json --analysis=analysis.json \
-  --template=../templates/report-zonghe-poster.html --output=<name>-zonghe.html --currentYear=<YYYY>
+node <skill-root>/calculator/dist-bundle/render.js --chart=<工作目录>/chart.json --analysis=<工作目录>/analysis.json \
+  --template=<skill-root>/templates/report-zonghe-poster.html --output=<工作目录>/<name>-zonghe.html --currentYear=<YYYY>
 ```
 
 **八字独立海报（1+B/1+C）** — 提示词 `prompts/bazi-poster.md`，**必带 `--mode=bazi`**（单系统；盘面数据由算法层注入，LLM 只产解读性字段）：
 ```bash
-cd calculator
-npx tsx render.ts --mode=bazi --chart=chart.json --analysis=analysis.json \
-  --template=../templates/report-bazi-poster.html --output=<name>-bazi.html --currentYear=<YYYY>
+node <skill-root>/calculator/dist-bundle/render.js --mode=bazi --chart=<工作目录>/chart.json --analysis=<工作目录>/analysis.json \
+  --template=<skill-root>/templates/report-bazi-poster.html --output=<工作目录>/<name>-bazi.html --currentYear=<YYYY>
 ```
 
 ---
@@ -146,10 +149,11 @@ npx tsx render.ts --mode=bazi --chart=chart.json --analysis=analysis.json \
 
 > 自检命令在 `TEST-GUIDE.md` 中由人工按需运行，不在 Agent 的职责范围内。Agent 主动跑会浪费 token + 触发上下文压缩。
 
-依赖检查（仅在用户首次提供生辰、Agent 准备跑 run-chart.ts 报错时）：
+依赖说明：**首选 `calculator/dist-bundle/*.js`（自足单文件，依赖已打入，`node` 直跑，零安装、兼容只读目录）**。
+仅当 bundle 缺失或需要改源码重编译时才需要依赖，且**必须把 `calculator/` 复制到可写工作目录再装**（技能目录只读）：
 ```bash
-cd <skill-root>/calculator
-ls node_modules >/dev/null 2>&1 || npm install
+cp -r <skill-root>/calculator <工作目录>/calculator && cd <工作目录>/calculator
+rm -f package-lock.json && npm install   # 锁文件源不可达时删除后再装
 ```
 也就是说，依赖问题**报错时再修**，不要装好就主动检查。
 
@@ -186,7 +190,7 @@ ls node_modules >/dev/null 2>&1 || npm install
 │   ├── shensha.json                  ← 神煞单一事实源（起法/tier/出处/needs_review）
 │   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
 │   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
-│   ├── fixtures/                     ← 神煞回归测试（shensha-cases.json + test-shensha.ts，12 例）
+│   ├── fixtures/                     ← 回归测试（神煞 13 例 + 合冲刑害裁决/运岁 test-relations.ts 17 项）
 │   ├── package.json                  ← 算法层依赖声明
 │   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
 │   └── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱）

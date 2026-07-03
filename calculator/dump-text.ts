@@ -159,7 +159,19 @@ function dumpBazi(b: any, bi: any): string[] {
         const where = (h.pillars || []).join('') || '-';
         const via = h.via ? `  (via ${h.via})` : '';
         const flag = h.needs_review ? '  ⚠起法待核' : '';
-        lines.push(`${pre}${h.name} [${h.tier}·${polCn[h.polarity]||h.polarity}] @${where}${via}${flag}`);
+        let lwStr = '';
+        if (h.lineage_weights) {
+          const zh: string[] = [], can: string[] = [], no: string[] = [];
+          for (const [cn, w] of Object.entries(h.lineage_weights as Record<string, number>)) {
+            if (w >= 2) zh.push(cn); else if (w >= 1) can.push(cn); else no.push(cn);
+          }
+          const seg: string[] = [];
+          if (zh.length) seg.push(`重用:${zh.join('·')}`);
+          if (can.length) seg.push(`参用:${can.join('·')}`);
+          if (no.length) seg.push(`不用:${no.join('·')}`);
+          lwStr = `  〔派系侧重 ${seg.join(' / ')}〕`;
+        }
+        lines.push(`${pre}${h.name} [${h.tier}·${polCn[h.polarity]||h.polarity}] @${where}${via}${flag}${lwStr}`);
         if (h.classical_check) lines.push(`│   ↳ ${h.classical_check}`);
         if (h.needs_review) review.push(h.name);
       });
@@ -224,11 +236,51 @@ function dumpBazi(b: any, bi: any): string[] {
     // 整柱
     const zp = en.整柱;
     if (zp && Array.isArray(zp) && zp.length > 0) {
-      lines.push('│ └整柱判定');
+      lines.push('│ ├整柱判定');
       zp.forEach((p:any, i:number) => {
         const last = i === zp.length-1;
-        lines.push(`│   ${last?'└':'├'}${p.pillar}柱 ${p.gan}${p.zhi} : ${p.verdict}`);
+        lines.push(`│ │ ${last?'└':'├'}${p.pillar}柱 ${p.gan}${p.zhi} : ${p.verdict}`);
       });
+    }
+    // 作用关系(合冲刑害裁决 v1.5)
+    const ix = en.作用关系;
+    const fmtItems = (items: any[], prefix: string) => {
+      items.forEach((r: any, i: number) => {
+        const last = i === items.length - 1;
+        const mem = (r.members || []).join('');
+        const pil = (r.pillars || []).join('-');
+        const divg = r.divergence ? `  ⚖分歧:${r.divergence}` : '';
+        lines.push(`${prefix}${last ? '└' : '├'}${r.type} ${mem}(${pil}柱·${r.distance}) 【${r.status}】 ${r.cause}${divg}`);
+      });
+    };
+    if (ix && Array.isArray(ix.items) && ix.items.length > 0) {
+      lines.push(`│ ├作用关系(合冲刑害裁决·${ix.policy || '通则'})`);
+      fmtItems(ix.items, '│ │ ');
+      if (ix.lineage && Array.isArray(ix.lineage.items) && ix.lineage.items.length > 0) {
+        lines.push(`│ ├作用关系·流派视图(${ix.lineage.name}) — ${ix.lineage.policy_note || ''}`);
+        fmtItems(ix.lineage.items, '│ │ ');
+      }
+    }
+    // 运岁引动(v1.5)
+    const ys = en.运岁引动;
+    if (ys) {
+      lines.push('│ └运岁引动(大运/流年×原局+岁运互动·中立检测)');
+      (ys.大运引动 || []).forEach((d: any) => {
+        lines.push(`│   ├大运${d.步} ${d.干支} ${d.年龄}`);
+        d.hits.forEach((h: any, i: number) => {
+          const last = i === d.hits.length - 1;
+          lines.push(`│   │ ${last ? '└' : '├'}[${h.type}] ${h.desc}`);
+        });
+      });
+      const cd = ys.当前大运流年;
+      if (cd && cd.流年 && cd.流年.length > 0) {
+        lines.push(`│   └当前大运 ${cd.大运} 流年引动`);
+        cd.流年.forEach((y: any, yi: number) => {
+          const lastY = yi === cd.流年.length - 1;
+          const all = [...(y.vs原局 || []), ...(y.vs大运 || [])];
+          lines.push(`│     ${lastY ? '└' : '├'}${y.年} ${y.干支} : ${all.map((h: any) => `[${h.type}]${h.desc.replace(/^流年/, '')}`).join(' ; ')}`);
+        });
+      }
     }
   }
   lines.push('');
