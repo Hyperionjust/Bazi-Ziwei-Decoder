@@ -122,6 +122,8 @@ npx tsx dump-text.ts --input=chart.json --output=chart.txt
 
 **通用**：对应提示词让 LLM **输出严格 JSON**（非 Markdown，末尾要求"直接以 `{` 开头"）→ 存为 `analysis.json` → 渲染。**LLM 只产数据不产 HTML**；若输出含 ```json 包装，渲染前剥掉。生成后把 HTML 路径告诉用户用浏览器打开。
 
+> **海报文字长度规则【用户定】**：标签/表格/条目类字段守字数上限保版式；**解读类字段（提示词内标〔段落〕者）不限篇幅，但每个必须是成型段落**——至少 3~5 个完整句子、有盘面依据、有白话落地，**禁止一句话敷衍**；模板高度自动撑开，不会溢出。
+
 **综合印证海报（3+B/3+C）** — 提示词 `prompts/zonghe-poster.md`：
 ```bash
 cd calculator

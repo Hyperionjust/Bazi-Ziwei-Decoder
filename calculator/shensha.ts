@@ -30,6 +30,7 @@ interface ShenshaDef {
   exclude_base?: boolean;                // yueZhi_to:月支自身不计
   day_night?: any;                       // 天乙:昼夜贵分层
   day_gan_bonus?: boolean;               // 月德:日上见标注
+  also_year_gan?: boolean;               // dayGan:年干兼查(天乙/太极/国印,base 声明『或年干』)
   ciguan_ganlu_variant?: Record<string, string>; // 学堂词馆:干禄词馆变体
 }
 interface ShenshaConfig { config: { sanhe_groups: Record<string, string[]>; sanhe_seed: string[]; lu_table: Record<string,string>; }; shensha: ShenshaDef[]; }
@@ -92,25 +93,32 @@ function evalDef(c: Chart, d: ShenshaDef, cfg: ShenshaConfig['config']): { pilla
   switch (d.method) {
 
     case 'dayGan': {
-      // 以日干(古法可兼年干)查目标地支
-      const g = c.siZhu.day.gan;
-      const tgt = d.table?.[g];
-      if (!tgt) return null;
-      const p = pillarsWithZhi(c, tgt);
-      if (!p.length) return null;
-      let via = `日干${g}`;
-      // 天乙贵人:昼夜贵分层标注(卯~申时=昼用阳贵,酉~寅时=夜用阴贵;不改命中判定)
-      if (d.day_night) {
-        const isDay = DAY_HOURS.has(c.siZhu.hour.zhi);
-        const yangT = d.day_night['阳贵(昼贵)'] || {};
-        const yinT  = d.day_night['阴贵(夜贵)'] || {};
-        const duty  = isDay ? yangT[g] : yinT[g];
-        const hitZhis = [...new Set(zhiList(c).filter(x => ([] as string[]).concat(tgt).includes(x.zhi)).map(x => x.zhi))];
-        const tags = hitZhis.map(z =>
-          z === yangT[g] ? `${z}(阳贵)` : z === yinT[g] ? `${z}(阴贵)` : z);
-        via += `·${isDay ? '昼' : '夜'}生当值${duty}${hitZhis.includes(duty) ? '(命中✓)' : '(未见)'}·${tags.join('/')}`;
+      // 以日干为主;base 声明『(或年干)』者(also_year_gan=true)年干兼查——union 命中,via 标注来源【用户定,对齐 _meta 并查政策】
+      const seeds: [string, string][] = [['日干', c.siZhu.day.gan]];
+      if (d.also_year_gan && c.siZhu.year.gan !== c.siZhu.day.gan) seeds.push(['年干', c.siZhu.year.gan]);
+      const parts: string[] = [];
+      const hitP: string[] = [];
+      for (const [seat, g] of seeds) {
+        const tgt = d.table?.[g];
+        if (!tgt) continue;
+        const p = pillarsWithZhi(c, tgt);
+        if (!p.length) continue;
+        let part = `${seat}${g}(@${p.join('')})`;
+        // 天乙贵人:昼夜贵分层标注,只挂在日干种子上(当值贵以日干论;不改命中判定)
+        if (seat === '日干' && d.day_night) {
+          const isDay = DAY_HOURS.has(c.siZhu.hour.zhi);
+          const yangT = d.day_night['阳贵(昼贵)'] || {};
+          const yinT  = d.day_night['阴贵(夜贵)'] || {};
+          const duty  = isDay ? yangT[g] : yinT[g];
+          const hitZhis = [...new Set(zhiList(c).filter(x => ([] as string[]).concat(tgt).includes(x.zhi)).map(x => x.zhi))];
+          const tags = hitZhis.map(z =>
+            z === yangT[g] ? `${z}(阳贵)` : z === yinT[g] ? `${z}(阴贵)` : z);
+          part += `·${isDay ? '昼' : '夜'}生当值${duty}${hitZhis.includes(duty) ? '(命中✓)' : '(未见)'}·${tags.join('/')}`;
+        }
+        parts.push(part);
+        hitP.push(...p);
       }
-      return { pillars: p, via };
+      return hitP.length ? { pillars: [...new Set(hitP)], via: parts.join('/') } : null;
     }
 
     case 'sanhe': {

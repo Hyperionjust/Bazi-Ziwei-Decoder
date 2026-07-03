@@ -7,7 +7,7 @@
   "cases": [
     {
       "id": "c1_ziping",
-      "note": "覆盖 dayGan(羊刃) + sanhe年seed(将星/桃花) + xunkong(空亡) + dexiu复合(申子辰月德秀俱见) + 凶煞(灾煞)。",
+      "note": "覆盖 dayGan(羊刃) + sanhe年seed(将星/桃花) + xunkong(空亡) + dexiu复合(申子辰月德秀俱见) + 凶煞(灾煞)。【v3.1:年干兼查落地,天乙经年干己→子@月命中(日干戊→丑未仍不中),absent 改 present。】",
       "chart": {
         "siZhu": {
           "year": {
@@ -73,10 +73,16 @@
           "pillars": [
             "月"
           ]
+        },
+        {
+          "id": "tianyi_guiren",
+          "name": "天乙贵人",
+          "pillars": [
+            "月"
+          ]
         }
       ],
       "expect_absent": [
-        "tianyi_guiren",
         "lushen",
         "yima"
       ]
@@ -201,7 +207,7 @@
     },
     {
       "id": "c4_ziping_male",
-      "note": "覆盖 gender_chong(元辰,阳男→冲前一位) + 羊刃 + 将星 + 灾煞 + 孤辰。",
+      "note": "覆盖 gender_chong(元辰,阳男→冲前一位) + 羊刃 + 将星 + 灾煞 + 孤辰。【v3.1 更新:年干兼查落地后,天乙经年干甲→未@月命中(日干丙→亥酉仍不中),原 absent 断言按新政策改为 present。】",
       "chart": {
         "siZhu": {
           "year": {
@@ -259,11 +265,17 @@
           "pillars": [
             "时"
           ]
+        },
+        {
+          "id": "tianyi_guiren",
+          "name": "天乙贵人",
+          "pillars": [
+            "月"
+          ]
         }
       ],
       "expect_absent": [
-        "taohua_xianchi",
-        "tianyi_guiren"
+        "taohua_xianchi"
       ]
     },
     {
@@ -477,7 +489,7 @@
     },
     {
       "id": "v3_A_open",
-      "note": "v3新增覆盖A(open):学堂词馆(金命学堂巳@时·偏)/天福(甲→酉@月)/日德(甲寅)/月德合(巳酉丑→乙@月)/红鸾(戌→巳@时)/童子(秋·寅@日)/孤鸾(甲寅口诀本版)/四废(秋甲寅)/流霞(甲→酉双版)/血刃(酉月→戌@年,exclude_base)/天厨(甲→巳双版)。负例:天罗地网(金命+无对)/天喜/日贵/十恶大败。",
+      "note": "v3新增覆盖A(open):学堂词馆(金命学堂巳@时·偏)/天福(甲→酉@月)/日德(甲寅)/月德合(巳酉丑→乙@月)/红鸾(戌→巳@时)/童子(秋·寅@日)/孤鸾(甲寅口诀本版)/四废(秋甲寅)/流霞(甲→酉双版)/血刃(酉月→戌@年,exclude_base)/天厨(甲→巳双版)。负例:天罗地网(金命+无对)/天喜/日贵/十恶大败。【v3.1:太极贵人经年干庚→寅@日新增命中,21→22。】",
       "chart": {
         "siZhu": {
           "year": {
@@ -500,7 +512,7 @@
         "gender": "male"
       },
       "lineage": "open",
-      "expect_count": 21,
+      "expect_count": 22,
       "expect_present": [
         {
           "id": "xuetang_ciguan",
@@ -585,6 +597,13 @@
           "pillars": [
             "年"
           ]
+        },
+        {
+          "id": "taiji_guiren",
+          "name": "太极贵人",
+          "pillars": [
+            "日"
+          ]
         }
       ],
       "expect_absent": [
@@ -600,7 +619,7 @@
     },
     {
       "id": "v3_A_ziping_modern_gate",
-      "note": "MODERN 门禁:同盘换子平派,现代神煞(红鸾/童子/孤鸾/四废/流霞/血刃/天厨)必须全部消失;传统新增(学堂词馆/天福/日德/月德合)保留。",
+      "note": "MODERN 门禁:同盘换子平派,现代神煞(红鸾/童子/孤鸾/四废/流霞/血刃/天厨)必须全部消失;传统新增(学堂词馆/天福/日德/月德合)保留。【v3.1:太极年干兼查命中,14→15。】",
       "chart": {
         "siZhu": {
           "year": {
@@ -623,7 +642,7 @@
         "gender": "male"
       },
       "lineage": "ziping",
-      "expect_count": 14,
+      "expect_count": 15,
       "expect_present": [
         {
           "id": "xuetang_ciguan",
@@ -796,6 +815,42 @@
         "fude_xiuqi",
         "tianyi_doctor"
       ]
+    },
+    {
+      "id": "v3_C_tianyi_yeargan_boundary",
+      "note": "边界:天乙年干中、日干不中——日干甲→丑未全无,年干乙→子申,申@时命中;验证 also_year_gan 的 union 行为与 via 来源标注。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "乙",
+            "zhi": "巳"
+          },
+          "month": {
+            "gan": "戊",
+            "zhi": "寅"
+          },
+          "day": {
+            "gan": "甲",
+            "zhi": "午"
+          },
+          "hour": {
+            "gan": "壬",
+            "zhi": "申"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "open",
+      "expect_present": [
+        {
+          "id": "tianyi_guiren",
+          "name": "天乙贵人",
+          "pillars": [
+            "时"
+          ]
+        }
+      ],
+      "expect_absent": []
     }
   ]
 }
