@@ -1,6 +1,6 @@
 # Bazi-Ziwei-Decoder · 八字紫微命理基板
 
-> `v1.5.0` ｜ 神煞 + 流派镜片 + 作用裁决 ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
+> `v1.6.5` ｜ 神煞 + 流派镜片 + 作用裁决 + 零安装海报链路 ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
 
 基于 [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill) 超级魔改，排盘内核源自 [Yiqi](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)。
 
@@ -28,13 +28,16 @@
 | 4 | 成长心态置顶 | 每次开头先讲「越算越不好」的原理与成长心态，反焦虑反宿命。 |
 | 5 | 总领速览 + 按需下钻 | 先给全局速览与章号菜单，你说「展开第 6 章」才深写，不灌长文。 |
 | 6 | 文献核验防编造 | 起法查不到就标待核、绝不编；文昌福星做古法交叉校验。 |
-| 7 | 自带回归测试 | schema-check + 9 例 fixtures，改完一键验证。 |
+| 7 | 自带回归测试 | schema-check + 神煞 13 例 + 合冲刑害/运岁 17 项 + 模板完整性门禁，改完一键验证。 |
+| 8 | 零安装可跑 | `calculator/dist-bundle/` 三个 esbuild 自足单文件，`node` 直跑、免 `npm install`、兼容技能只读安装目录。 |
+| 9 | 海报长图版 | 八字独立海报：日主固定句式(十干意象定表)、结构块两句制、四大解读详写、合冲刑害/运岁引动区块、吉绿凶红着色、用忌喜调候五行色块、开运宜往宜置宜学；全程第二人称口吻。 |
+| 10 | 胎元命宫 + 派系侧重 | 胎元/命宫补算入盘;不限流派下每个神煞标注五派「重用/参用/不用」;调候以《穷通宝鉴》120 格为基准文献。 |
 
 > 铁律：神煞只增色、不定大局，与五行十神格局用神冲突时以核心为准。
 
 ### 🧱 基础功能
 
-精准排盘四柱十神大运、紫微十二宫四化大限、格局旺衰调候刑冲合害等补层；支持八字 / 紫微 / 综合印证；长文与 HTML 海报（综合印证 + 八字独立）两种输出。
+精准排盘四柱十神大运（含胎元/命宫）、紫微十二宫四化大限、格局旺衰调候（穷通宝鉴 120 格）、合冲刑害作用裁决、运岁引动等补层；支持八字 / 紫微 / 综合印证；长文与 HTML 长图海报（综合印证 + 八字独立）两种输出。
 
 ---
 
@@ -119,8 +122,10 @@ OpenAI Codex CLI 支持 SKILL.md 技能（2025 年底起）并可运行脚本，
 
 ### 二、命令行参数
 
-`run-chart.ts`：`--year --month --day --hour --minute --gender` 必填；`--lineage` 选流派、不传只写中立全集；`--isLunar=true` 农历；`--timeZone` 默认 8；`--output` 输出路径。
+`run-chart.ts`：`--year --month --day --hour --minute --gender` 必填；`--lineage` 选流派、不传只写中立全集；`--isLunar=true` 农历；`--timeZone` 默认 8；`--currentYear` 定当前大运/流年（缺省=系统年）；`--output` 输出路径。
 `dump-text.ts`：`--input=chart.json --output=chart.txt`。
+`render.ts`：`--chart --analysis --template --output` + `--mode=zonghe|bazi`、`--currentYear=YYYY`、`--name=命主姓名`。
+> **零安装**：以上三个入口均有 `dist-bundle/` 自足版本，`node dist-bundle/run-chart.js ...` 直跑，无需安装依赖（只读目录可用）。
 > 用钟表时间，不做真太阳时校正，范围约 1900–2100。
 
 ### 三、神煞清单 43
@@ -131,7 +136,7 @@ OpenAI Codex CLI 支持 SKILL.md 技能（2025 年底起）并可运行脚本，
 - T3 凶煞 5：劫煞 · 亡神 · 灾煞 · 孤辰寡宿 · 元辰
 - MODERN 现代 12（**仅『不限流派 open』启用**，引擎白名单强制门禁）：红鸾 · 天喜 · 童子煞 · 孤鸾煞 · 阴差阳错 · 十恶大败 · 四废 · 天罗地网 · 天医 · 流霞 · 血刃 · 天厨
 
-起例出处见 `shensha.json` 的 source 字段，多为《三命通会》；现代层多版本查法（童子/流霞/血刃/天厨/天罗地网/孤鸾）按【任一查法命中即写】政策，命中 via 标注所用口诀/版本。
+起例出处见 `shensha.json` 的 source 字段，多为《三命通会》；现代层多版本查法（童子/流霞/血刃/天厨/天罗地网/孤鸾）按【任一查法命中即写】政策，命中 via 标注所用口诀/版本。不限流派下每个命中另附「派系侧重」（五传统派 重用/参用/不用），供解读标注分歧；天乙分昼夜贵当值、月德标日干见足格。
 
 ### 四、文献核验 & 防编造
 
@@ -146,8 +151,14 @@ OpenAI Codex CLI 支持 SKILL.md 技能（2025 年底起）并可运行脚本，
 Bazi-Ziwei-Decoder/
 ├── SKILL.md            主控：决策门 / 流程 / 约束
 ├── CHANGELOG.md        版本更新日志
-├── prompts/            disclaimer · output-mode-B · bazi-prompt 等
-└── calculator/         run-chart · dump-text · shensha 引擎 · lineages · yiqi-core · fixtures
+├── prompts/            disclaimer · output-mode-B · bazi-prompt · bazi-poster · zonghe-poster 等
+├── templates/          海报模板（八字独立 + 综合印证，含完整性门禁校验）
+└── calculator/
+    ├── run-chart · dump-text · render      三入口（dist/ 编译版 · dist-bundle/ 零安装自足版）
+    ├── shensha 引擎 + shensha.json         43 神煞 SSOT（T1/T2/T3/COMPOUND/MODERN）
+    ├── bazi-enrich/                        格局旺衰调候 · 合冲刑害裁决(interactions) · 运岁引动(yunsui)
+    ├── lineages.json                       六派镜片（神煞白名单 + 作用规则集 + 文献）
+    └── fixtures/                           回归测试（神煞13例 · 关系17项 · 模板门禁）
 ```
 
 ### 六、自检
@@ -155,7 +166,10 @@ Bazi-Ziwei-Decoder/
 ```bash
 cd calculator
 npx tsx schema-check.ts
-cd fixtures && npx tsx test-shensha.ts
+cd fixtures
+npx tsx test-shensha.ts      # 神煞 13 例
+npx tsx test-relations.ts    # 合冲刑害裁决 + 运岁 17 项
+npx tsx check-template.ts    # 海报模板完整性(结尾/开闭平衡/占位符)
 ```
 
 ---
