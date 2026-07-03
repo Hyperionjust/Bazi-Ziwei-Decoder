@@ -474,6 +474,328 @@
           ]
         }
       ]
+    },
+    {
+      "id": "v3_A_open",
+      "note": "v3新增覆盖A(open):学堂词馆(金命学堂巳@时·偏)/天福(甲→酉@月)/日德(甲寅)/月德合(巳酉丑→乙@月)/红鸾(戌→巳@时)/童子(秋·寅@日)/孤鸾(甲寅口诀本版)/四废(秋甲寅)/流霞(甲→酉双版)/血刃(酉月→戌@年,exclude_base)/天厨(甲→巳双版)。负例:天罗地网(金命+无对)/天喜/日贵/十恶大败。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "庚",
+            "zhi": "戌"
+          },
+          "month": {
+            "gan": "乙",
+            "zhi": "酉"
+          },
+          "day": {
+            "gan": "甲",
+            "zhi": "寅"
+          },
+          "hour": {
+            "gan": "己",
+            "zhi": "巳"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "open",
+      "expect_count": 21,
+      "expect_present": [
+        {
+          "id": "xuetang_ciguan",
+          "name": "学堂词馆",
+          "pillars": [
+            "时"
+          ]
+        },
+        {
+          "id": "tianfu_guiren",
+          "name": "天福贵人",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "ride",
+          "name": "日德",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "yuedehe",
+          "name": "月德合",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "hongluan",
+          "name": "红鸾",
+          "pillars": [
+            "时"
+          ]
+        },
+        {
+          "id": "tongzisha",
+          "name": "童子煞",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "guluansha",
+          "name": "孤鸾煞",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "sifei",
+          "name": "四废",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "liuxia",
+          "name": "流霞",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "xueren",
+          "name": "血刃",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "tianchu_guiren",
+          "name": "天厨贵人",
+          "pillars": [
+            "时"
+          ]
+        },
+        {
+          "id": "yuede_guiren",
+          "name": "月德贵人",
+          "pillars": [
+            "年"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "tianluodiwang",
+        "tianxi",
+        "rigui",
+        "shiedabai",
+        "yinchayangcuo",
+        "tianyi_doctor",
+        "tiandehe",
+        "fude_xiuqi"
+      ]
+    },
+    {
+      "id": "v3_A_ziping_modern_gate",
+      "note": "MODERN 门禁:同盘换子平派,现代神煞(红鸾/童子/孤鸾/四废/流霞/血刃/天厨)必须全部消失;传统新增(学堂词馆/天福/日德/月德合)保留。",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "庚",
+            "zhi": "戌"
+          },
+          "month": {
+            "gan": "乙",
+            "zhi": "酉"
+          },
+          "day": {
+            "gan": "甲",
+            "zhi": "寅"
+          },
+          "hour": {
+            "gan": "己",
+            "zhi": "巳"
+          }
+        },
+        "gender": "male"
+      },
+      "lineage": "ziping",
+      "expect_count": 14,
+      "expect_present": [
+        {
+          "id": "xuetang_ciguan",
+          "name": "学堂词馆",
+          "pillars": [
+            "时"
+          ]
+        },
+        {
+          "id": "tianfu_guiren",
+          "name": "天福贵人",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "ride",
+          "name": "日德",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "yuedehe",
+          "name": "月德合",
+          "pillars": [
+            "月"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "hongluan",
+        "tongzisha",
+        "guluansha",
+        "sifei",
+        "liuxia",
+        "xueren",
+        "tianchu_guiren",
+        "tianxi",
+        "yinchayangcuo",
+        "shiedabai",
+        "tianluodiwang",
+        "tianyi_doctor"
+      ]
+    },
+    {
+      "id": "v3_B_open",
+      "note": "v3新增覆盖B(open):天乙昼夜标注(丙→亥@年,巳时昼生当值酉未见·亥阴贵)/正词馆(丁亥土命自坐词馆亥·正)/天德合(辰月→丁@年)/月德合(申子辰→丁@年)/天福(丙→子@日)/红鸾(亥→辰@月)/童子双法(春·子@日+土命·巳@时)/阴差阳错(丙子+时柱癸巳再见)/天罗地网双法(土命地网辰巳+互见)/天厨双版(法诀丙→子@日+子平丙→巳@时)。(华盖/将星/劫煞/亡神经日支子→申子辰种子命中,年日双seed政策)",
+      "chart": {
+        "siZhu": {
+          "year": {
+            "gan": "丁",
+            "zhi": "亥"
+          },
+          "month": {
+            "gan": "甲",
+            "zhi": "辰"
+          },
+          "day": {
+            "gan": "丙",
+            "zhi": "子"
+          },
+          "hour": {
+            "gan": "癸",
+            "zhi": "巳"
+          }
+        },
+        "gender": "female"
+      },
+      "lineage": "open",
+      "expect_count": 19,
+      "expect_present": [
+        {
+          "id": "tianyi_guiren",
+          "name": "天乙贵人",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "xuetang_ciguan",
+          "name": "学堂词馆",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "tiandehe",
+          "name": "天德合",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "yuedehe",
+          "name": "月德合",
+          "pillars": [
+            "年"
+          ]
+        },
+        {
+          "id": "tianfu_guiren",
+          "name": "天福贵人",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "hongluan",
+          "name": "红鸾",
+          "pillars": [
+            "月"
+          ]
+        },
+        {
+          "id": "tongzisha",
+          "name": "童子煞",
+          "pillars": [
+            "日",
+            "时"
+          ]
+        },
+        {
+          "id": "yinchayangcuo",
+          "name": "阴差阳错",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "tianluodiwang",
+          "name": "天罗地网",
+          "pillars": [
+            "月",
+            "时"
+          ]
+        },
+        {
+          "id": "tianchu_guiren",
+          "name": "天厨贵人",
+          "pillars": [
+            "日",
+            "时"
+          ]
+        },
+        {
+          "id": "taohua_xianchi",
+          "name": "桃花",
+          "pillars": [
+            "日"
+          ]
+        },
+        {
+          "id": "yima",
+          "name": "驿马",
+          "pillars": [
+            "时"
+          ]
+        }
+      ],
+      "expect_absent": [
+        "tianxi",
+        "guluansha",
+        "shiedabai",
+        "sifei",
+        "liuxia",
+        "xueren",
+        "rigui",
+        "ride",
+        "fude_xiuqi",
+        "tianyi_doctor"
+      ]
     }
   ]
 }

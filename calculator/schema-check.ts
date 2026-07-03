@@ -19,7 +19,7 @@ const engineMethods = new Set(
   [...tsSrc.matchAll(/case\s+'([^']+)':/g)].map(m => m[1])
 );
 
-const ALLOWED_TIERS = new Set(['T1', 'T2', 'T3', 'COMPOUND']);
+const ALLOWED_TIERS = new Set(['T1', 'T2', 'T3', 'COMPOUND', 'MODERN']);
 const REQUIRED = ['id', 'name', 'tier', 'method', 'source'];
 const ids = new Set<string>();
 

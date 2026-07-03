@@ -50,7 +50,7 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 > ① 子平派（格局）② 滴天髓（旺衰中和）③ 神峰通考（病药）④ 盲派（做功）⑤ 新派·段氏盲派 ⑥ 不限/综合（默认，多视角并陈）
 > 呈现形态：A. **📜 长文深度版**（默认；总领速览 + 按需下钻，完整报告仅 Cowork 线建议） / B. **🎴 结构化海报版**（单文件 HTML，可截图分享） / C. **两种都要**"
 
-> 流派只换"解读镜片"：神煞展开多少、用神视角随派变（子平丰富、滴天髓≈只羊刃空亡、盲派只取核心象）；**四柱/十神/大运/神煞命中本身不变**。段氏已据《象的应用》《八字断句集》填入（取象六法 + 做功）。`--lineage` 取值：`ziping/ditian/shenfeng/mangpai/duanshi/open`。
+> 流派只换"解读镜片"：神煞展开多少、用神视角随派变（子平丰富、滴天髓≈只羊刃空亡、盲派只取核心象；**现代神煞 MODERN 层仅『不限/open』启用**——红鸾/天喜/童子/孤鸾/阴差阳错/十恶大败/四废/天罗地网/天医/流霞/血刃/天厨，多版本查法任一命中即写并在 via 标注口诀/版本）；**四柱/十神/大运/神煞命中本身不变**。段氏已据《象的应用》《八字断句集》填入（取象六法 + 做功）。`--lineage` 取值：`ziping/ditian/shenfeng/mangpai/duanshi/open`。
 
 **根据选择加载相应提示词和模板**：
 
@@ -184,7 +184,7 @@ ls node_modules >/dev/null 2>&1 || npm install
 │   ├── shensha.json                  ← 神煞单一事实源（起法/tier/出处/needs_review）
 │   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
 │   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
-│   ├── fixtures/                     ← 神煞回归测试（shensha-cases.json + test-shensha.ts，7 例）
+│   ├── fixtures/                     ← 神煞回归测试（shensha-cases.json + test-shensha.ts，12 例）
 │   ├── package.json                  ← 算法层依赖声明
 │   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
 │   └── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱）

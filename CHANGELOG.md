@@ -11,6 +11,20 @@
 - 古法「未校验」项补全：文昌甲乙句（《三命通会》原文残损）、福星丙–癸（「余倒推」未列全）。
 - 纯八字海报模板（独立 HTML，单系统）。
 
+## [1.4.0] · 2026-07-03 · 神煞大扩充（三命通会补缺 + 现代 MODERN 层）
+### Added 新增
+- **三命通会侧补缺 5 项**：学堂词馆（纳音长生/临官，正偏判定 + 干禄词馆变体表）、天福贵人（官星坐禄）、日贵（4 日）、日德（5 日）、福德秀气（15 日）。
+- **二德之合**：天德合、月德合（由天德/月德表推五合/六合）。
+- **天乙贵人昼夜分层**：阳贵/阴贵分表（协纪辨方系），卯~申时昼生用阳贵当值、酉~寅时夜生用阴贵当值；命中标注当值与否，不改判定。
+- **月德「日上见」标注**：《三命通会》要日上见——via 标注「日干见(足格)/非日干见(力减)」。
+- **MODERN 现代神煞层 12 项（仅『不限流派 open』启用，引擎强制白名单门禁）**：红鸾、天喜、童子煞（季节法+纳音法 union）、孤鸾煞（核心五日+扩展三日）、阴差阳错、十恶大败、四废、天罗地网（古法纳音+互见法 union）、天医、流霞（两版 union）、血刃（月支法，exclude_base 防自命中）、天厨贵人（法诀版+子平版 union）。多版本查法【用户定：任一命中即写】，via 标注所用口诀/版本。
+- **新查法引擎 7 种**：`nayin_xuetang` / `yearZhi_to` / `tongzi` / `season_day` / `tianluo_diwang` / `yueZhi_prev` / `dayGan_multi`；`fixed_pillars` 增 `table_core`/`hour_note`，`yueZhi_to` 增 `exclude_base`。
+- 神煞回归测试 7→12 例（新增 v3 覆盖 A/B 盘 + MODERN 门禁负例），全部通过。
+### Changed 调整
+- `shensha.json` 24→43 项；`_meta` 增 tier=MODERN 与多版本政策说明。
+- `lineages.json`：open/ziping 白名单扩充；MODERN 仅 open 启用（传统流派自动隐藏）。
+- `bazi-prompt.md` / `SKILL.md`：神煞支柱增 via 细化标注转述要求、MODERN 层呈现规则。
+
 ## [1.3.0] · 2026-06-30 · 段氏流派落地 + 八字独立海报
 ### Added 新增
 - **八字独立海报**：新增单系统海报模板 `templates/report-bazi-poster.html` + 提示词 `prompts/bazi-poster.md` + `render.ts --mode=bazi` 分支；Step0「八字独立」像综合印证一样可选 **长文 / 海报 / 两者**。单系统，无双盘 verdict/consistency/conflict；盘面数据由算法层注入、LLM 只产解读字段。
