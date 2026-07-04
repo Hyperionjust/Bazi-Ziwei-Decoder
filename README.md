@@ -1,6 +1,6 @@
 # Bazi-Ziwei-Decoder · 八字紫微命理基板
 
-> `v2.0.0` ｜ 43 神煞 + 五派镜片 + 作用裁决 + 零安装海报链路 ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
+> `v2.1.3` ｜ 43 神煞 + 五派镜片 + 作用裁决 + 零安装海报链路 ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
 
 基于 [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill) 超级魔改，排盘内核源自 [Yiqi](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)。
 
