@@ -56,6 +56,21 @@ function main() {
     timeZone: args.timeZone ? +args.timeZone : 8,
   };
 
+  // v2.0.1: 输入校验 — 防 2/30 之类无效日期被 JS Date 静默滚动成合法盘(一步错满盘垮)
+  const fail = (msg: string) => { console.error(`[input] ${msg}`); process.exit(1); };
+  const bi = birthInfo;
+  if (!Number.isInteger(bi.year) || bi.year < 1900 || bi.year > 2100) fail(`year 无效或超范围(1900-2100): ${args.year}`);
+  if (!Number.isInteger(bi.month) || bi.month < 1 || bi.month > 12) fail(`month 无效(1-12): ${args.month}`);
+  if (!Number.isInteger(bi.hour) || bi.hour < 0 || bi.hour > 23) fail(`hour 无效(0-23): ${args.hour}`);
+  if (!Number.isInteger(bi.minute) || bi.minute < 0 || bi.minute > 59) fail(`minute 无效(0-59): ${args.minute}`);
+  if (!Number.isInteger(bi.day) || bi.day < 1) fail(`day 无效: ${args.day}`);
+  if (!bi.isLunar) {
+    const daysInMonth = new Date(bi.year, bi.month, 0).getDate();
+    if (bi.day > daysInMonth) fail(`无效公历日期: ${bi.year}-${bi.month}-${bi.day}(该月只有 ${daysInMonth} 天)`);
+  } else {
+    if (bi.day > 30) fail(`无效农历日期: 农历日最大 30, 得到 ${bi.day}`);
+  }
+
   // Step 1: Yiqi 算法层 — 四柱+紫微+大运+流年
   const chart: any = createChart(birthInfo);
 
@@ -125,7 +140,8 @@ function main() {
     if (lineageKey && lin.lineages[lineageKey]) {
       const L = lin.lineages[lineageKey];
       const pol = L.shensha_policy || { default_weight: 0, whitelist: {}, blacklist: [] };
-      const linHits = computeShensha(shenChart, defs, pol);
+      // open 镜片直接复用全集(含派系侧重字段);其余派重算过滤视图
+      const linHits = lineageKey === 'open' ? fullHits : computeShensha(shenChart, defs, pol);
       enr.神煞.lineage = { id: lineageKey, name: L.name, hits: linHits };
       chart.meta = Object.assign({}, chart.meta, { lineage: lineageKey, lineageName: L.name });
     } else if (lineageKey) {
@@ -142,7 +158,7 @@ function main() {
       const openIP = lin.lineages['open'].interaction_policy;
       if (openIP) {
         enr.作用关系 = { policy: 'open(通则+分歧标注)', ...adjudicateInteractions(siZhuCN, openIP) };
-        const lk = args.lineage;
+        const lk = args.lineage === 'duanshi' ? 'mangpai' : args.lineage;
         if (lk && lin.lineages[lk] && lk !== 'open' && lin.lineages[lk].interaction_policy) {
           enr.作用关系.lineage = { id: lk, name: lin.lineages[lk].name,
             ...adjudicateInteractions(siZhuCN, lin.lineages[lk].interaction_policy) };

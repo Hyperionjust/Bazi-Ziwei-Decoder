@@ -13900,6 +13900,22 @@ function main() {
     gender,
     timeZone: args.timeZone ? +args.timeZone : 8
   };
+  const fail = (msg) => {
+    console.error(`[input] ${msg}`);
+    process.exit(1);
+  };
+  const bi = birthInfo;
+  if (!Number.isInteger(bi.year) || bi.year < 1900 || bi.year > 2100) fail(`year \u65E0\u6548\u6216\u8D85\u8303\u56F4(1900-2100): ${args.year}`);
+  if (!Number.isInteger(bi.month) || bi.month < 1 || bi.month > 12) fail(`month \u65E0\u6548(1-12): ${args.month}`);
+  if (!Number.isInteger(bi.hour) || bi.hour < 0 || bi.hour > 23) fail(`hour \u65E0\u6548(0-23): ${args.hour}`);
+  if (!Number.isInteger(bi.minute) || bi.minute < 0 || bi.minute > 59) fail(`minute \u65E0\u6548(0-59): ${args.minute}`);
+  if (!Number.isInteger(bi.day) || bi.day < 1) fail(`day \u65E0\u6548: ${args.day}`);
+  if (!bi.isLunar) {
+    const daysInMonth = new Date(bi.year, bi.month, 0).getDate();
+    if (bi.day > daysInMonth) fail(`\u65E0\u6548\u516C\u5386\u65E5\u671F: ${bi.year}-${bi.month}-${bi.day}(\u8BE5\u6708\u53EA\u6709 ${daysInMonth} \u5929)`);
+  } else {
+    if (bi.day > 30) fail(`\u65E0\u6548\u519C\u5386\u65E5\u671F: \u519C\u5386\u65E5\u6700\u5927 30, \u5F97\u5230 ${bi.day}`);
+  }
   const chart = createChart(birthInfo);
   const dm = chart.bazi.dayMaster;
   const z = chart.bazi.siZhu;
@@ -13956,7 +13972,7 @@ function main() {
     if (lineageKey && lin.lineages[lineageKey]) {
       const L = lin.lineages[lineageKey];
       const pol = L.shensha_policy || { default_weight: 0, whitelist: {}, blacklist: [] };
-      const linHits = computeShensha(shenChart, defs, pol);
+      const linHits = lineageKey === "open" ? fullHits : computeShensha(shenChart, defs, pol);
       enr.\u795E\u715E.lineage = { id: lineageKey, name: L.name, hits: linHits };
       chart.meta = Object.assign({}, chart.meta, { lineage: lineageKey, lineageName: L.name });
     } else if (lineageKey) {
@@ -13972,7 +13988,7 @@ function main() {
       const openIP = lin.lineages["open"].interaction_policy;
       if (openIP) {
         enr.\u4F5C\u7528\u5173\u7CFB = { policy: "open(\u901A\u5219+\u5206\u6B67\u6807\u6CE8)", ...adjudicateInteractions(siZhuCN, openIP) };
-        const lk = args.lineage;
+        const lk = args.lineage === "duanshi" ? "mangpai" : args.lineage;
         if (lk && lin.lineages[lk] && lk !== "open" && lin.lineages[lk].interaction_policy) {
           enr.\u4F5C\u7528\u5173\u7CFB.lineage = {
             id: lk,
