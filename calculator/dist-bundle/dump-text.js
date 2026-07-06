@@ -179,6 +179,16 @@ function dumpBazi(b, bi) {
   const en = b.enrichment;
   if (en) {
     lines.push("\u251C\u7B97\u6CD5\u8865\u5C42");
+    const ya = en.\u7528\u795E\u5EFA\u8BAE;
+    if (ya) {
+      lines.push("\u2502 \u251C\u7528\u795E\u5EFA\u8BAE(\u7B97\u6CD5\u5C42\u4E09\u7EBF\u88C1\u51B3\xB7\u89E3\u8BFB\u53EA\u8F6C\u8FF0\u4E0D\u5F97\u81EA\u521B)");
+      lines.push(`\u2502 \u2502 \u251C\u6276\u6291\u7EBF : \u53D6[${(ya.\u6276\u6291?.\u53D6 || []).join("")}] \u5FCC[${(ya.\u6276\u6291?.\u5FCC || []).join("")}] \u2014 ${ya.\u6276\u6291?.\u4F9D\u636E || ""}${ya.\u6276\u6291?.\u4E34\u754C ? " \u26A0\u4E34\u754C" : ""}`);
+      lines.push(`\u2502 \u2502 \u251C\u8C03\u5019\u7EBF : \u53D6[${(ya.\u8C03\u5019?.\u53D6 || []).join("")}](${(ya.\u8C03\u5019?.\u53D6\u5E72 || []).join("")}) \u2014 ${ya.\u8C03\u5019?.\u4F9D\u636E || ""}`);
+      lines.push(`\u2502 \u2502 \u251C\u683C\u5C40\u7EBF : \u53D6[${(ya.\u683C\u5C40?.\u53D6 || []).join("")}] \u2014 ${ya.\u683C\u5C40?.\u4F9D\u636E || ""}(\u7F6E\u4FE1\u5EA6:${ya.\u683C\u5C40?.\u7F6E\u4FE1\u5EA6 || "-"})`);
+      lines.push(`\u2502 \u2502 \u251C\u6536\u655B : ${ya.\u6536\u655B ? "\u2713 \u5171\u8BC6\u7528\u795E[" + (ya.\u5171\u8BC6\u7528\u795E || []).join("") + "]" : "\u2717 \u4E0D\u6536\u655B"} | \u8FB9\u754C\u76D8 : ${ya.\u8FB9\u754C\u76D8 ? "\u662F" : "\u5426"}`);
+      if (ya.\u51FA\u53E3) lines.push(`\u2502 \u2502 \u251C\u51FA\u53E3(\u5355\u503C\u88C1\u51B3) : \u5F00\u8FD0\u7528\u795E[${(ya.\u51FA\u53E3.\u5F00\u8FD0\u7528\u795E || []).join("")}] \u559C[${(ya.\u51FA\u53E3.\u559C\u795E || []).join("")}] \u5FCC[${(ya.\u51FA\u53E3.\u5FCC\u795E || []).join("") || "\u65E0(\u4E34\u754C)"}] \u8C03\u5019[${ya.\u51FA\u53E3.\u8C03\u5019\u63D0\u793A || "-"}]${ya.\u51FA\u53E3.divergence ? "  " + ya.\u51FA\u53E3.divergence : ""}${ya.\u51FA\u53E3.\u7F3A\u8865\u8BF4\u660E ? "  \u3014" + ya.\u51FA\u53E3.\u7F3A\u8865\u8BF4\u660E + "\u3015" : ""}`);
+      lines.push(`\u2502 \u2502 \u2514\u51FA\u6587\u534F\u8BAE : ${ya.\u51FA\u6587\u534F\u8BAE || ""}`);
+    }
     lines.push(`\u2502 \u251C\u683C\u5C40 : ${en.\u683C\u5C40?.primary || "-"}  (\u7F6E\u4FE1\u5EA6: ${en.\u683C\u5C40?.confidence || "-"})`);
     if (en.\u683C\u5C40?.basis) lines.push(`\u2502 \u2502 \u2514\u4F9D\u636E : ${en.\u683C\u5C40.basis}`);
     if (en.\u683C\u5C40?.notes && en.\u683C\u5C40.notes.length) {
@@ -255,6 +265,9 @@ function dumpBazi(b, bi) {
     const ys = en.\u8FD0\u5C81\u5F15\u52A8;
     if (ys) {
       lines.push("\u2502 \u2514\u8FD0\u5C81\u5F15\u52A8(\u5927\u8FD0/\u6D41\u5E74\xD7\u539F\u5C40+\u5C81\u8FD0\u4E92\u52A8\xB7\u4E2D\u7ACB\u68C0\u6D4B)");
+      if (Array.isArray(ys.\u5EFA\u8BAE\u8282\u70B9) && ys.\u5EFA\u8BAE\u8282\u70B9.length) {
+        lines.push(`\u2502   \u251C\u5EFA\u8BAE\u8282\u70B9(timeline \u9009\u70B9\u767D\u540D\u5355\xB7\u91CD\u7EA7\u5FC5\u9009): ${ys.\u5EFA\u8BAE\u8282\u70B9.map((n) => `${n.\u5E74}(${n.\u5C81}\u5C81)${n.\u8F7D\u4F53}\xB7${n.\u6807\u8BB0}[${n.\u6743\u91CD}]`).join(" / ")}`);
+      }
       (ys.\u5927\u8FD0\u5F15\u52A8 || []).forEach((d) => {
         lines.push(`\u2502   \u251C\u5927\u8FD0${d.\u6B65} ${d.\u5E72\u652F} ${d.\u5E74\u9F84}`);
         d.hits.forEach((h, i) => {

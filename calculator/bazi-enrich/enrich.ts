@@ -7,6 +7,7 @@ import { countWuXing, wuXingMonthStatus } from './wu-xing';
 import { judgeWangShuai } from './wang-shuai';
 import { judgeGeJu } from './ge-ju';
 import { getTiaoHou } from './tiao-hou';
+import { adviseYongShen, YongShenAdvice } from './yongshen';
 
 type Pillar = '年'|'月'|'日'|'时';
 type GanZhi = {gan: Tiangan, zhi: Dizhi};
@@ -18,6 +19,7 @@ export type BaziEnrichment = {
   调候用神: string[];
   格局: ReturnType<typeof judgeGeJu>;
   旺衰: ReturnType<typeof judgeWangShuai>;
+  用神建议: YongShenAdvice;
   天干关系: ReturnType<typeof detectGanRelations>;
   地支关系: ReturnType<typeof detectZhiRelations>;
   整柱: ReturnType<typeof judgePillars>;
@@ -33,13 +35,20 @@ export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
     ziZuo[p] = getChangSheng(siZhu[p].gan, siZhu[p].zhi);
   }
 
+  const geJu = judgeGeJu(siZhu);
+  const wangShuai = judgeWangShuai(siZhu);
+  const tiaoHou = getTiaoHou(dm, monthZhi);
+  const wxCount = countWuXing(siZhu, dm);
+  const wxForYs: Record<string, number> = (wxCount as any).withCangGan || (wxCount as any).surface || (wxCount as any);
+
   return {
     自坐: ziZuo,
     五行旺相: wuXingMonthStatus(monthZhi),
-    五行统计: countWuXing(siZhu, dm),
-    调候用神: getTiaoHou(dm, monthZhi),
-    格局: judgeGeJu(siZhu),
-    旺衰: judgeWangShuai(siZhu),
+    五行统计: wxCount,
+    调候用神: tiaoHou,
+    格局: geJu,
+    旺衰: wangShuai,
+    用神建议: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs),
     天干关系: detectGanRelations({
       年: siZhu.年.gan, 月: siZhu.月.gan, 日: siZhu.日.gan, 时: siZhu.时.gan
     }),

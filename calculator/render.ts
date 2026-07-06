@@ -382,6 +382,24 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   out['geju.chenge']=en.格局?.chenge || (en.格局?.primary&&en.格局.primary!=='-'?'成格':'-');
   const allHits = (en.神煞?.lineage?.hits) || en.神煞?.hits || []; // 流派镜片优先
   out['shensha.list_html']= allHits.length? allHits.map((h:any)=>`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`).join(' ') : '—';
+  // v2.3: 用神出口注入 — 用/忌/喜/调候/开运方色数由算法层确定性生成,LLM 产出将被忽略
+  const yaX = en.用神建议;
+  if (yaX?.出口) {
+    const ck = yaX.出口;
+    out['yongshen.yong_html'] = wxChip((yaX.边界盘 || !yaX.收敛)
+      ? `护体:${(yaX.调候?.取干 || []).join('')}<br>发用:${(yaX.格局?.取 || []).join('、')}`
+      : (yaX.共识用神 || []).join('、'));
+    out['yongshen.xi_text'] = wxChip((ck.喜神 || []).join('、'));
+    out['yongshen.ji_html'] = (ck.忌神 || []).length ? wxChip(ck.忌神.join('、')) : '无明显忌神(临界盘,以流通为要)';
+    out['yongshen.tiaohou_html'] = wxChip(ck.调候提示 || '-');
+    out['yongshen.divergence_note'] = [ck.divergence, ck.缺补说明].filter(Boolean).join('　');
+    out['kaiyun.yong_html'] = wxChip((ck.开运用神 || []).join('、'));
+    out['kaiyun.fang_html'] = (ck.吉方 || []).join('·');
+    out['kaiyun.se_html'] = (ck.吉色 || []).join('·');
+    out['kaiyun.shu_html'] = (ck.吉数 || []).join('、');
+    out['kaiyun.tiaohou_html'] = wxChip(ck.调候提示 || '-');
+    out['__algo_yongshen'] = '1';
+  }
   // v1.6: 合冲刑害(作用关系)注入 — 有流派视图用流派视图,否则用 open 通则
   const ix = en.作用关系;
   const ixView = ix?.lineage || ix;
@@ -435,6 +453,39 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
     out[`liunian.${i}.luck_class`]='luck-ping';
   }
   if(!synth) out['liunian.head_note']='';
+  // v2.3: 大运/流年顺逆配色算法化 — 干支五行对照出口喜忌打分,重级引动降档
+  if (yaX?.出口) {
+    const likes = new Set([...(yaX.出口.开运用神 || []), ...(yaX.出口.喜神 || [])]);
+    const dislikes = new Set(yaX.出口.忌神 || []);
+    const gzScore = (gan: string, zhi: string) => {
+      let sc = 0;
+      for (const wx of [GAN_WX[gan], ZHI_WX[zhi]]) { if (likes.has(wx)) sc++; else if (dislikes.has(wx)) sc--; }
+      return sc;
+    };
+    const downgrade = (cls: string) => cls === 'luck-ji' ? 'luck-ping' : 'luck-xiong';
+    const heavyByStep: Record<number, boolean> = {};
+    for (const st of (en.运岁引动?.大运引动 || []))
+      heavyByStep[st.步 - 1] = (st.hits || []).some((h: any) => h.type === '天克地冲' || h.type === '伏吟');
+    for (let i = 0; i < 10; i++) {
+      const d = dyArr[i]; if (!d) continue;
+      let cls = (() => { const sc = gzScore(d.ganZhi.gan, d.ganZhi.zhi); return sc >= 1 ? 'luck-ji' : sc <= -1 ? 'luck-xiong' : 'luck-ping'; })();
+      if (heavyByStep[i]) cls = downgrade(cls);
+      out[`dayun.${i}.luck_class`] = cls;
+    }
+    const heavyYear: Record<number, boolean> = {};
+    for (const y of (en.运岁引动?.当前大运流年?.流年 || [])) {
+      const all = [...(y.vs原局 || []), ...(y.vs大运 || [])];
+      heavyYear[y.年] = all.some((h: any) => h.type === '天克地冲' || h.type === '伏吟' || h.type === '岁运并临');
+    }
+    for (let i = 0; i < 10; i++) {
+      const ln = lnArr[i]; if (!ln) continue;
+      let cls = (() => { const sc = gzScore(ln.ganZhi.gan, ln.ganZhi.zhi); return sc >= 1 ? 'luck-ji' : sc <= -1 ? 'luck-xiong' : 'luck-ping'; })();
+      if (heavyYear[ln.year]) cls = downgrade(cls);
+      out[`liunian.${i}.luck_class`] = cls;
+    }
+    out['__algo_luck'] = '1';
+  }
+
   return out;
 }
 
@@ -499,7 +550,19 @@ function main() {
   const mode = args.mode || 'zonghe';
   let data: Record<string, any>;
   if (mode === 'bazi') {
-    data = { ...chartToFlatBazi(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlatBazi(analysis) };
+    const chartFlat = chartToFlatBazi(chart, args.currentYear ? +args.currentYear : undefined);
+    const analysisFlat = analysisToFlatBazi(analysis);
+    // v2.3: 算法已裁决的字段忽略 analysis 同名产出(同盘可复现)
+    if (chartFlat['__algo_yongshen']) {
+      for (const k of ['yongshen.yong_html','yongshen.xi_text','yongshen.ji_html','yongshen.tiaohou_html','yongshen.divergence_note',
+                       'kaiyun.yong_html','kaiyun.fang_html','kaiyun.se_html','kaiyun.shu_html','kaiyun.tiaohou_html']) delete analysisFlat[k];
+      delete chartFlat['__algo_yongshen'];
+    }
+    if (chartFlat['__algo_luck']) {
+      for (const k of Object.keys(analysisFlat)) if (/\.(luck_class)$/.test(k)) delete analysisFlat[k];
+      delete chartFlat['__algo_luck'];
+    }
+    data = { ...chartFlat, ...analysisFlat };
   } else {
     data = { ...chartToFlat(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlat(analysis) };
   }

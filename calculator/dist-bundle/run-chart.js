@@ -13135,6 +13135,100 @@ function getTiaoHou(dayMaster, monthZhi) {
   return TIAO_HOU[dayMaster][monthZhi];
 }
 
+// bazi-enrich/yongshen.ts
+var SHENG = { \u6728: "\u706B", \u706B: "\u571F", \u571F: "\u91D1", \u91D1: "\u6C34", \u6C34: "\u6728" };
+var KE = { \u6728: "\u571F", \u571F: "\u6C34", \u6C34: "\u706B", \u706B: "\u91D1", \u91D1: "\u6728" };
+var inv = (m) => Object.fromEntries(Object.entries(m).map(([a, b]) => [b, a]));
+var SHENG_WO = inv(SHENG);
+var KE_WO = inv(KE);
+var WX_FANG = { \u6728: "\u4E1C", \u706B: "\u5357", \u571F: "\u4E2D\xB7\u897F\u5357", \u91D1: "\u897F", \u6C34: "\u5317" };
+var WX_SE = { \u6728: "\u9752\u7EFF", \u706B: "\u8D64\u7EA2", \u571F: "\u9EC4\u8910", \u91D1: "\u767D\u91D1", \u6C34: "\u84DD\u9ED1" };
+var WX_SHU = { \u6728: "3\xB78", \u706B: "2\xB77", \u571F: "5\xB710", \u91D1: "4\xB79", \u6C34: "1\xB76" };
+var GEJU_RULE = {
+  \u6B63\u5B98\u683C: { rel: ["\u8017", "\u5370"], why: "\u5B98\u683C\u987A\u7528:\u8D22\u751F\u5B98\u3001\u5370\u62A4\u8EAB,\u5FCC\u4F24\u5B98\u89C1\u5B98" },
+  \u4E03\u6740\u683C: { rel: ["\u6CC4", "\u5370"], why: "\u6740\u683C\u9006\u7528:\u98DF\u795E\u5236\u6740\u6216\u5370\u5316\u6740" },
+  \u6B63\u8D22\u683C: { rel: ["\u6CC4", "\u5236"], why: "\u8D22\u683C\u987A\u7528:\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u6740\u62A4\u8D22,\u5FCC\u6BD4\u52AB\u593A\u8D22" },
+  \u504F\u8D22\u683C: { rel: ["\u6CC4", "\u5236"], why: "\u8D22\u683C\u987A\u7528:\u98DF\u4F24\u751F\u8D22\u3001\u5B98\u6740\u62A4\u8D22,\u5FCC\u6BD4\u52AB\u593A\u8D22" },
+  \u6B63\u5370\u683C: { rel: ["\u5236", "\u6BD4"], why: "\u5370\u683C\u987A\u7528:\u5B98\u6740\u751F\u5370\u3001\u6BD4\u52AB\u5F97\u5370\u4E4B\u751F,\u5FCC\u8D22\u574F\u5370" },
+  \u504F\u5370\u683C: { rel: ["\u5236", "\u6BD4"], why: "\u5370\u683C\u987A\u7528:\u5B98\u6740\u751F\u5370,\u5FCC\u8D22\u574F\u5370(\u67AD\u795E\u559C\u98DF\u5236\u5904\u53E6\u8BBA)" },
+  \u98DF\u795E\u683C: { rel: ["\u8017"], why: "\u98DF\u795E\u683C\u987A\u7528:\u98DF\u795E\u751F\u8D22,\u5FCC\u504F\u5370\u593A\u98DF" },
+  \u4F24\u5B98\u683C: { rel: ["\u5370", "\u8017"], why: "\u4F24\u5B98\u9006\u7528:\u914D\u5370\u5236\u4F24\u6216\u4F24\u5B98\u751F\u8D22" },
+  \u6BD4\u80A9\u683C: { rel: ["\u5236", "\u6CC4"], why: "\u7984\u5203\u6BD4\u52AB:\u5B98\u6740\u5236\u8EAB\u3001\u98DF\u4F24\u6CC4\u79C0" },
+  \u52AB\u8D22\u683C: { rel: ["\u5236", "\u6CC4"], why: "\u7984\u5203\u6BD4\u52AB:\u5B98\u6740\u5236\u8EAB\u3001\u98DF\u4F24\u6CC4\u79C0" },
+  \u7F8A\u5203\u683C: { rel: ["\u5236", "\u6CC4"], why: "\u7F8A\u5203\u9006\u7528:\u5B98\u6740\u5236\u5203\u4E3A\u4E0A,\u98DF\u4F24\u6CC4\u79C0\u6B21\u4E4B" },
+  \u5EFA\u7984\u683C: { rel: ["\u5236", "\u6CC4"], why: "\u5EFA\u7984:\u5B98\u6740\u5236\u8EAB\u3001\u98DF\u4F24\u6CC4\u79C0,\u5FCC\u518D\u5E2E\u8EAB" }
+};
+function relToWx(dmWx, rel) {
+  switch (rel) {
+    case "\u6CC4":
+      return SHENG[dmWx];
+    case "\u8017":
+      return KE[dmWx];
+    case "\u5236":
+      return KE_WO[dmWx];
+    case "\u5370":
+      return SHENG_WO[dmWx];
+    case "\u6BD4":
+      return dmWx;
+  }
+}
+function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
+  const dmWx = GAN_WUXING[dayMaster];
+  const xie = SHENG[dmWx], hao = KE[dmWx], zhi = KE_WO[dmWx], yin = SHENG_WO[dmWx];
+  const linJie = Math.abs(ws.score) <= 2 || ws.verdict === "\u4E2D\u548C";
+  let fuYi;
+  if (ws.verdict === "\u6781\u65FA(\u53EF\u80FD\u4ECE\u5F3A)" || ws.verdict === "\u504F\u65FA" || !linJie && ws.score > 0) {
+    fuYi = { \u53D6: [xie, hao, zhi], \u5FCC: [yin, dmWx], \u4F9D\u636E: `\u8EAB\u5F3A(score=${ws.score}):\u5B9C\u6CC4(${xie})\u8017(${hao})\u5236(${zhi}),\u5FCC\u5370\u6BD4\u518D\u5E2E\u8EAB`, \u4E34\u754C: linJie };
+  } else if (ws.verdict === "\u6781\u5F31(\u53EF\u80FD\u4ECE\u5F31)" || ws.verdict === "\u504F\u5F31" || !linJie && ws.score < 0) {
+    fuYi = { \u53D6: [yin, dmWx], \u5FCC: [zhi, hao], \u4F9D\u636E: `\u8EAB\u5F31(score=${ws.score}):\u5B9C\u5370(${yin})\u6BD4(${dmWx})\u751F\u6276,\u5FCC\u5B98\u6740\u8D22\u518D\u514B\u8017`, \u4E34\u754C: linJie };
+  } else {
+    fuYi = { \u53D6: [], \u5FCC: [], \u4F9D\u636E: `\u4E2D\u548C\u4E34\u754C(score=${ws.score}):\u6276\u6291\u7EBF\u4E0D\u5355\u72EC\u53D6\u7528,\u968F\u683C\u5C40\u4E0E\u8C03\u5019`, \u4E34\u754C: true };
+  }
+  const thGans = (tiaoHouGans || []).map((s) => (s || "").charAt(0)).filter((g) => GAN_WUXING[g]);
+  const thWx = [...new Set(thGans.map((g) => GAN_WUXING[g]))];
+  const tiaoHou = { \u53D6\u5E72: tiaoHouGans || [], \u53D6: thWx, \u4F9D\u636E: `\u7A77\u901A\u5B9D\u9274120\u683C\u5B9A\u4F8B:${dayMaster}\u65E5\u4E3B\u672C\u6708\u5148${(tiaoHouGans || []).join("\u540E")}` };
+  const rule = GEJU_RULE[geju.primary];
+  const gjWx = rule ? [...new Set(rule.rel.map((r) => relToWx(dmWx, r)))] : [];
+  const gejuLine = { \u683C: geju.primary, \u53D6: gjWx, \u4F9D\u636E: rule ? rule.why : `${geju.primary}\u65E0\u5B9A\u4F8B\u6620\u5C04,\u4EE5\u683C\u5C40\u6210\u8D25\u6551\u5E94\u8BBA`, \u7F6E\u4FE1\u5EA6: geju.confidence };
+  const sets = [fuYi.\u53D6, thWx, gjWx].filter((a) => a.length > 0);
+  let consensus = sets.length ? [...sets[0]] : [];
+  for (const s of sets.slice(1)) consensus = consensus.filter((x) => s.includes(x));
+  const \u6536\u655B = sets.length >= 2 && consensus.length > 0;
+  const \u8FB9\u754C\u76D8 = linJie || ws.confidence !== "\u9AD8" || geju.confidence === "\u4F4E";
+  const \u51FA\u6587\u534F\u8BAE = \u6536\u655B && !\u8FB9\u754C\u76D8 ? `\u4E09\u7EBF\u6536\u655B,\u5171\u8BC6\u7528\u795E=${consensus.join("\u3001")};\u53EF\u5F84\u4EE5\u5171\u8BC6\u7ACB\u8BBA,\u4F9D\u636E\u5408\u5E76\u8F6C\u8FF0\u3002` : `\u8FB9\u754C\u76D8/\u4E09\u7EBF\u4E0D\u6536\u655B\u2014\u2014\u3010\u4F53\u7528\u4E24\u5206,\u7981\u6B62\u5355\u9009\u3011:\u62A4\u4F53\u7EBF=\u8C03\u5019${thWx.join("\u3001")}(${(tiaoHouGans || []).join("")})${fuYi.\u53D6.length ? `\u4E0E\u6276\u6291${fuYi.\u53D6.join("\u3001")}` : ""},\u53D1\u7528\u7EBF=\u683C\u5C40${gjWx.join("\u3001") || "(\u4F9D\u6210\u8D25\u6551\u5E94)"};\u4E24\u7EBF\u5E76\u9648,\u663E\u5F0F\u6807\u6CE8\u300C\u2696\u5404\u6D3E\u5206\u6B67\u300D\u4E0E\u7F6E\u4FE1\u5EA6(\u65FA\u8870:${ws.confidence}/\u683C\u5C40:${geju.confidence}),\u4E0D\u5F97\u53EA\u62A5\u5176\u4E00\u3002`;
+  const pool = [...thWx, ...gjWx];
+  const pick = pool.find((w) => !fuYi.\u5FCC.includes(w));
+  const kaiYun = consensus.length ? consensus : pick ? [pick] : pool.length ? [pool[0]] : [dmWx];
+  const xiShen = gjWx.length ? gjWx : thWx;
+  const jiRaw = fuYi.\u5FCC.length ? fuYi.\u5FCC : [dmWx];
+  const jiShen = jiRaw.filter((w) => !kaiYun.includes(w) && !xiShen.includes(w));
+  const anchors = [.../* @__PURE__ */ new Set([...kaiYun, ...xiShen])].slice(0, 3);
+  const divergence = \u8FB9\u754C\u76D8 || !\u6536\u655B ? `\u2696\u8C03\u5019\u7EBF\u53D6${thWx.join("\u3001") || "-"}/\u683C\u5C40\u7EBF\u53D6${gjWx.join("\u3001") || "-"}\xB7\u65FA\u8870\u7F6E\u4FE1\u5EA6${ws.confidence}` : "";
+  let queBu = "";
+  if (wuxingCount) {
+    const missing = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"].filter((w) => !wuxingCount[w]);
+    const parts = [];
+    for (const w of missing) {
+      if (kaiYun.includes(w) || xiShen.includes(w)) parts.push(`\u7F3A${w}\u800C${w}\u6B63\u662F\u6240\u9700\u2014\u2014\u8865${w}\u6700\u5BF9\u75C7`);
+      else if (jiShen.includes(w)) parts.push(`\u7F3A${w}\u4E14${w}\u4E3A\u5FCC\u2014\u2014\u7F3A\u53CD\u6210\u6E05,\u65E0\u987B\u523B\u610F\u8865`);
+      else parts.push(`\u7F3A${w}\u4F46${w}\u975E\u672C\u76D8\u7528\u5FCC\u5173\u952E\u2014\u2014\u300C\u7F3A\u5565\u8865\u5565\u300D\u4E0D\u9002\u7528,\u4EE5\u7528\u795E\u4E3A\u51C6`);
+    }
+    queBu = parts.join(";");
+  }
+  const \u51FA\u53E3 = {
+    \u5F00\u8FD0\u7528\u795E: kaiYun,
+    \u559C\u795E: xiShen,
+    \u5FCC\u795E: jiShen,
+    \u8C03\u5019\u63D0\u793A: (tiaoHouGans || []).length ? `\u5148${(tiaoHouGans || []).join("\u540E")}` : "-",
+    \u5409\u65B9: anchors.map((w) => WX_FANG[w]),
+    \u5409\u8272: anchors.map((w) => WX_SE[w]),
+    \u5409\u6570: anchors.map((w) => WX_SHU[w]),
+    divergence,
+    \u7F3A\u8865\u8BF4\u660E: queBu
+  };
+  return { \u6276\u6291: fuYi, \u8C03\u5019: tiaoHou, \u683C\u5C40: gejuLine, \u5171\u8BC6\u7528\u795E: consensus, \u6536\u655B, \u8FB9\u754C\u76D8, \u51FA\u6587\u534F\u8BAE, \u51FA\u53E3 };
+}
+
 // bazi-enrich/enrich.ts
 function enrichBazi(siZhu) {
   const dm = siZhu.\u65E5.gan;
@@ -13143,13 +13237,19 @@ function enrichBazi(siZhu) {
   for (const p of ["\u5E74", "\u6708", "\u65E5", "\u65F6"]) {
     ziZuo[p] = getChangSheng2(siZhu[p].gan, siZhu[p].zhi);
   }
+  const geJu = judgeGeJu(siZhu);
+  const wangShuai = judgeWangShuai(siZhu);
+  const tiaoHou = getTiaoHou(dm, monthZhi);
+  const wxCount = countWuXing(siZhu, dm);
+  const wxForYs = wxCount.withCangGan || wxCount.surface || wxCount;
   return {
     \u81EA\u5750: ziZuo,
     \u4E94\u884C\u65FA\u76F8: wuXingMonthStatus(monthZhi),
-    \u4E94\u884C\u7EDF\u8BA1: countWuXing(siZhu, dm),
-    \u8C03\u5019\u7528\u795E: getTiaoHou(dm, monthZhi),
-    \u683C\u5C40: judgeGeJu(siZhu),
-    \u65FA\u8870: judgeWangShuai(siZhu),
+    \u4E94\u884C\u7EDF\u8BA1: wxCount,
+    \u8C03\u5019\u7528\u795E: tiaoHou,
+    \u683C\u5C40: geJu,
+    \u65FA\u8870: wangShuai,
+    \u7528\u795E\u5EFA\u8BAE: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs),
     \u5929\u5E72\u5173\u7CFB: detectGanRelations({
       \u5E74: siZhu.\u5E74.gan,
       \u6708: siZhu.\u6708.gan,
@@ -13839,11 +13939,19 @@ function suiVsYun(liuNian, daYun) {
   if (LIU_HAI2[liuNian.zhi] === daYun.zhi) hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u5BB3(\u7A7F)", desc: `\u6D41\u5E74\u652F${liuNian.zhi}\u5BB3(\u7A7F)\u5927\u8FD0\u652F${daYun.zhi}` });
   return hits;
 }
+function hitWeight(h) {
+  if (h.type === "\u5929\u514B\u5730\u51B2" || h.type === "\u4F0F\u541F" || h.type === "\u5C81\u8FD0\u5E76\u4E34") return "\u91CD";
+  if (h.type === "\u652F\u51B2" && h.desc.includes("\u51B2\u63D0\u7EB2")) return "\u91CD";
+  if (h.type === "\u652F\u51B2" || h.type === "\u81EA\u5211" || h.type === "\u51D1\u5168\u4E09\u5211" || h.type === "\u51D1\u6210\u4E09\u5408" || h.type === "\u76F8\u5211") return "\u4E2D";
+  return "\u8F7B";
+}
+var W_ORD = { \u91CD: 0, \u4E2D: 1, \u8F7B: 2 };
 function analyzeYunSui(siZhu, dayun, currentYear) {
   const res = {
-    \u8BF4\u660E: "\u8FD0\u5C81\u5F15\u52A8=\u5927\u8FD0/\u6D41\u5E74\u5E72\u652F\u4E0E\u539F\u5C40(\u53CA\u5C81\u8FD0\u4E4B\u95F4)\u7684\u5408\u51B2\u5211\u5BB3\u7834\u7A7F\u3001\u51D1\u5C40\u51D1\u5211\u4E0E\u4F0F\u53CD\u541F\u3002\u4E2D\u7ACB\u68C0\u6D4B+\u901A\u5219\u6807\u6CE8;\u4F5C\u7528\u53D6\u820D\u4E0E\u5409\u51F6\u968F\u6240\u9009\u6D41\u6D3E\u4E0E\u559C\u5FCC\u5B9A,\u8BE6\u89C1\u4F5C\u7528\u5173\u7CFB\u5757\u4E0E\u6D41\u6D3E\u955C\u7247\u3002",
+    \u8BF4\u660E: "\u8FD0\u5C81\u5F15\u52A8=\u5927\u8FD0/\u6D41\u5E74\u5E72\u652F\u4E0E\u539F\u5C40(\u53CA\u5C81\u8FD0\u4E4B\u95F4)\u7684\u5408\u51B2\u5211\u5BB3\u7834\u7A7F\u3001\u51D1\u5C40\u51D1\u5211\u4E0E\u4F0F\u53CD\u541F\u3002\u4E2D\u7ACB\u68C0\u6D4B+\u901A\u5219\u6807\u6CE8;\u4F5C\u7528\u53D6\u820D\u4E0E\u987A\u9006\u7A0B\u5EA6\u968F\u6240\u9009\u6D41\u6D3E\u4E0E\u559C\u5FCC\u5B9A,\u8BE6\u89C1\u4F5C\u7528\u5173\u7CFB\u5757\u4E0E\u6D41\u6D3E\u955C\u7247\u3002",
     \u5927\u8FD0\u5F15\u52A8: [],
-    \u5F53\u524D\u5927\u8FD0\u6D41\u5E74: null
+    \u5F53\u524D\u5927\u8FD0\u6D41\u5E74: null,
+    \u5EFA\u8BAE\u8282\u70B9: []
   };
   for (let i = 0; i < (dayun || []).length; i++) {
     const d = dayun[i];
@@ -13860,6 +13968,34 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
     }).filter((y) => y.vs\u539F\u5C40.length || y.vs\u5927\u8FD0.length);
     res.\u5F53\u524D\u5927\u8FD0\u6D41\u5E74 = { \u5927\u8FD0: dgz.gan + dgz.zhi + `(${cur.startYear}-${cur.endYear})`, \u6D41\u5E74: years };
   }
+  for (let i = 0; i < (dayun || []).length; i++) {
+    const d = dayun[i];
+    const hits = gzVsChart({ gan: d.ganZhi.gan, zhi: d.ganZhi.zhi }, siZhu, "\u5927\u8FD0");
+    const best = hits.slice().sort((a, b) => W_ORD[hitWeight(a)] - W_ORD[hitWeight(b)])[0];
+    res.\u5EFA\u8BAE\u8282\u70B9.push({
+      \u5E74: d.startYear,
+      \u5C81: d.startAge,
+      \u8F7D\u4F53: `\u5927\u8FD0${d.ganZhi.gan}${d.ganZhi.zhi}`,
+      \u6807\u8BB0: best ? `${best.type}(${best.vs})` : "\u5927\u8FD0\u4EA4\u63A5",
+      \u6743\u91CD: best ? hitWeight(best) : "\u8F7B"
+    });
+  }
+  if (cur) {
+    const dgz2 = { gan: cur.ganZhi.gan, zhi: cur.ganZhi.zhi };
+    for (const ln of cur.liuNian || []) {
+      const lgz = { gan: ln.ganZhi.gan, zhi: ln.ganZhi.zhi };
+      const all = [...gzVsChart(lgz, siZhu, "\u6D41\u5E74"), ...suiVsYun(lgz, dgz2)];
+      const heavy = all.filter((h) => hitWeight(h) === "\u91CD");
+      if (heavy.length) res.\u5EFA\u8BAE\u8282\u70B9.push({
+        \u5E74: ln.year,
+        \u5C81: ln.age ?? 0,
+        \u8F7D\u4F53: `\u6D41\u5E74${lgz.gan}${lgz.zhi}`,
+        \u6807\u8BB0: heavy.map((h) => h.type).join("+"),
+        \u6743\u91CD: "\u91CD"
+      });
+    }
+  }
+  res.\u5EFA\u8BAE\u8282\u70B9.sort((a, b) => a.\u5E74 - b.\u5E74);
   return res;
 }
 

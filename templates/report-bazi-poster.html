@@ -424,6 +424,8 @@
   .ky-row .ky-v { color: var(--ink); line-height: 1.7; }
   .ky-row .ky-v .em { color: var(--jade); font-weight: 600; }
   .ky-row .ky-v .avoid { color: var(--vermillion); }
+  .ys-divergence { font-size: 10px; color: var(--warn, #c97c3a); line-height: 1.7; margin-top: 4px; }
+  .ys-divergence:empty { display: none; }
   .ky-note { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line-faint); font-size: 11px; line-height: 1.9; color: var(--ink-soft); }
   .ky-tag { display: inline-block; padding: 1px 8px; margin: 0 3px 3px 0; border: 1px solid var(--line-soft); border-radius: 3px; font-size: 11px; color: var(--ink); background: rgba(255,255,255,0.5); }
 
@@ -624,6 +626,7 @@
         <div class="ys-item"><span class="ys-k">忌神</span><span>{{yongshen.ji_html}}</span></div>
         <div class="ys-item"><span class="ys-k">喜神</span><span style="font-size:12.5px;color:var(--ink-soft)">{{yongshen.xi_text}}</span></div>
         <div class="ys-item"><span class="ys-k">调候</span><span>{{yongshen.tiaohou_html}}</span></div>
+        <div class="ys-divergence">{{yongshen.divergence_note}}</div>
         <div class="ys-note">{{yongshen.note_html}}</div>
       </div>
     </div>
@@ -633,7 +636,7 @@
   <div class="strip">
     <div class="strip-head">
       <span><span class="sh-title">大运</span><span class="sh-note">　{{dayun.head_note}}</span></span>
-      <span class="luck-legend"><span><span class="luck-dot luck-ji"></span>吉</span><span><span class="luck-dot luck-ping"></span>平</span><span><span class="luck-dot luck-xiong"></span>凶</span></span>
+      <span class="luck-legend"><span><span class="luck-dot luck-ji"></span>顺风</span><span><span class="luck-dot luck-ping"></span>平路</span><span><span class="luck-dot luck-xiong"></span>逆风</span></span>
     </div>
     <div class="strip-row">
       <div class="cell {{dayun.0.current_class}}"><div class="gz">{{dayun.0.gz}}</div><div class="ss">{{dayun.0.shishen}}</div><div class="ages num">{{dayun.0.age_range}}</div><div class="ages num">{{dayun.0.start_year}}</div><span class="luck {{dayun.0.luck_class}}"></span></div>
@@ -653,7 +656,7 @@
   <div class="strip liunian">
     <div class="strip-head">
       <span><span class="sh-title">流年</span><span class="sh-note">　{{liunian.head_note}}</span></span>
-      <span class="strip-head-note" style="font-size:10px;color:var(--ink-soft)">色点=当年吉凶倾向</span>
+      <span class="strip-head-note" style="font-size:10px;color:var(--ink-soft)">色点=当年顺逆倾向</span>
     </div>
     <div class="strip-row">
       <div class="cell {{liunian.0.current_class}}"><div class="yr num">{{liunian.0.year}}</div><div class="gz">{{liunian.0.gz}}</div><div class="ss">{{liunian.0.shishen}}</div><span class="luck {{liunian.0.luck_class}}"></span></div>

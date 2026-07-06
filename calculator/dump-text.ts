@@ -184,6 +184,17 @@ function dumpBazi(b: any, bi: any): string[] {
   const en = b.enrichment;
   if (en) {
     lines.push('├算法补层');
+    // 用神建议(v2.2 算法层裁决,LLM 只转述不取舍)
+    const ya = en.用神建议;
+    if (ya) {
+      lines.push('│ ├用神建议(算法层三线裁决·解读只转述不得自创)');
+      lines.push(`│ │ ├扶抑线 : 取[${(ya.扶抑?.取||[]).join('')}] 忌[${(ya.扶抑?.忌||[]).join('')}] — ${ya.扶抑?.依据||''}${ya.扶抑?.临界?' ⚠临界':''}`);
+      lines.push(`│ │ ├调候线 : 取[${(ya.调候?.取||[]).join('')}](${(ya.调候?.取干||[]).join('')}) — ${ya.调候?.依据||''}`);
+      lines.push(`│ │ ├格局线 : 取[${(ya.格局?.取||[]).join('')}] — ${ya.格局?.依据||''}(置信度:${ya.格局?.置信度||'-'})`);
+      lines.push(`│ │ ├收敛 : ${ya.收敛?'✓ 共识用神['+(ya.共识用神||[]).join('')+']':'✗ 不收敛'} | 边界盘 : ${ya.边界盘?'是':'否'}`);
+      if (ya.出口) lines.push(`│ │ ├出口(单值裁决) : 开运用神[${(ya.出口.开运用神||[]).join('')}] 喜[${(ya.出口.喜神||[]).join('')}] 忌[${(ya.出口.忌神||[]).join('')||'无(临界)'}] 调候[${ya.出口.调候提示||'-'}]${ya.出口.divergence?'  '+ya.出口.divergence:''}${ya.出口.缺补说明?'  〔'+ya.出口.缺补说明+'〕':''}`);
+      lines.push(`│ │ └出文协议 : ${ya.出文协议||''}`);
+    }
     lines.push(`│ ├格局 : ${en.格局?.primary || '-'}  (置信度: ${en.格局?.confidence || '-'})`);
     if (en.格局?.basis) lines.push(`│ │ └依据 : ${en.格局.basis}`);
     if (en.格局?.notes && en.格局.notes.length) {
@@ -265,6 +276,9 @@ function dumpBazi(b: any, bi: any): string[] {
     const ys = en.运岁引动;
     if (ys) {
       lines.push('│ └运岁引动(大运/流年×原局+岁运互动·中立检测)');
+      if (Array.isArray(ys.建议节点) && ys.建议节点.length) {
+        lines.push(`│   ├建议节点(timeline 选点白名单·重级必选): ${ys.建议节点.map((n: any) => `${n.年}(${n.岁}岁)${n.载体}·${n.标记}[${n.权重}]`).join(' / ')}`);
+      }
       (ys.大运引动 || []).forEach((d: any) => {
         lines.push(`│   ├大运${d.步} ${d.干支} ${d.年龄}`);
         d.hits.forEach((h: any, i: number) => {

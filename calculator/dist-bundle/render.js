@@ -357,6 +357,21 @@ function chartToFlatBazi(chart, currentYear) {
   out["geju.chenge"] = en.\u683C\u5C40?.chenge || (en.\u683C\u5C40?.primary && en.\u683C\u5C40.primary !== "-" ? "\u6210\u683C" : "-");
   const allHits = en.\u795E\u715E?.lineage?.hits || en.\u795E\u715E?.hits || [];
   out["shensha.list_html"] = allHits.length ? allHits.map((h) => `<span class="ss-name ${SS_POL[h.polarity] || "neutral"}">${h.name}</span>`).join(" ") : "\u2014";
+  const yaX = en.\u7528\u795E\u5EFA\u8BAE;
+  if (yaX?.\u51FA\u53E3) {
+    const ck = yaX.\u51FA\u53E3;
+    out["yongshen.yong_html"] = wxChip(yaX.\u8FB9\u754C\u76D8 || !yaX.\u6536\u655B ? `\u62A4\u4F53:${(yaX.\u8C03\u5019?.\u53D6\u5E72 || []).join("")}<br>\u53D1\u7528:${(yaX.\u683C\u5C40?.\u53D6 || []).join("\u3001")}` : (yaX.\u5171\u8BC6\u7528\u795E || []).join("\u3001"));
+    out["yongshen.xi_text"] = wxChip((ck.\u559C\u795E || []).join("\u3001"));
+    out["yongshen.ji_html"] = (ck.\u5FCC\u795E || []).length ? wxChip(ck.\u5FCC\u795E.join("\u3001")) : "\u65E0\u660E\u663E\u5FCC\u795E(\u4E34\u754C\u76D8,\u4EE5\u6D41\u901A\u4E3A\u8981)";
+    out["yongshen.tiaohou_html"] = wxChip(ck.\u8C03\u5019\u63D0\u793A || "-");
+    out["yongshen.divergence_note"] = [ck.divergence, ck.\u7F3A\u8865\u8BF4\u660E].filter(Boolean).join("\u3000");
+    out["kaiyun.yong_html"] = wxChip((ck.\u5F00\u8FD0\u7528\u795E || []).join("\u3001"));
+    out["kaiyun.fang_html"] = (ck.\u5409\u65B9 || []).join("\xB7");
+    out["kaiyun.se_html"] = (ck.\u5409\u8272 || []).join("\xB7");
+    out["kaiyun.shu_html"] = (ck.\u5409\u6570 || []).join("\u3001");
+    out["kaiyun.tiaohou_html"] = wxChip(ck.\u8C03\u5019\u63D0\u793A || "-");
+    out["__algo_yongshen"] = "1";
+  }
   const ix = en.\u4F5C\u7528\u5173\u7CFB;
   const ixView = ix?.lineage || ix;
   out["hechong.policy"] = ix?.lineage ? `${ix.lineage.name}\u89C4\u5219\u96C6` : ix ? "\u901A\u5219(\u4E0D\u9650\u6D41\u6D3E)" : "-";
@@ -427,6 +442,48 @@ function chartToFlatBazi(chart, currentYear) {
     out[`liunian.${i}.luck_class`] = "luck-ping";
   }
   if (!synth) out["liunian.head_note"] = "";
+  if (yaX?.\u51FA\u53E3) {
+    const likes = /* @__PURE__ */ new Set([...yaX.\u51FA\u53E3.\u5F00\u8FD0\u7528\u795E || [], ...yaX.\u51FA\u53E3.\u559C\u795E || []]);
+    const dislikes = new Set(yaX.\u51FA\u53E3.\u5FCC\u795E || []);
+    const gzScore = (gan, zhi) => {
+      let sc2 = 0;
+      for (const wx2 of [GAN_WX[gan], ZHI_WX[zhi]]) {
+        if (likes.has(wx2)) sc2++;
+        else if (dislikes.has(wx2)) sc2--;
+      }
+      return sc2;
+    };
+    const downgrade = (cls) => cls === "luck-ji" ? "luck-ping" : "luck-xiong";
+    const heavyByStep = {};
+    for (const st of en.\u8FD0\u5C81\u5F15\u52A8?.\u5927\u8FD0\u5F15\u52A8 || [])
+      heavyByStep[st.\u6B65 - 1] = (st.hits || []).some((h) => h.type === "\u5929\u514B\u5730\u51B2" || h.type === "\u4F0F\u541F");
+    for (let i = 0; i < 10; i++) {
+      const d = dyArr[i];
+      if (!d) continue;
+      let cls = (() => {
+        const sc2 = gzScore(d.ganZhi.gan, d.ganZhi.zhi);
+        return sc2 >= 1 ? "luck-ji" : sc2 <= -1 ? "luck-xiong" : "luck-ping";
+      })();
+      if (heavyByStep[i]) cls = downgrade(cls);
+      out[`dayun.${i}.luck_class`] = cls;
+    }
+    const heavyYear = {};
+    for (const y of en.\u8FD0\u5C81\u5F15\u52A8?.\u5F53\u524D\u5927\u8FD0\u6D41\u5E74?.\u6D41\u5E74 || []) {
+      const all = [...y.vs\u539F\u5C40 || [], ...y.vs\u5927\u8FD0 || []];
+      heavyYear[y.\u5E74] = all.some((h) => h.type === "\u5929\u514B\u5730\u51B2" || h.type === "\u4F0F\u541F" || h.type === "\u5C81\u8FD0\u5E76\u4E34");
+    }
+    for (let i = 0; i < 10; i++) {
+      const ln = lnArr[i];
+      if (!ln) continue;
+      let cls = (() => {
+        const sc2 = gzScore(ln.ganZhi.gan, ln.ganZhi.zhi);
+        return sc2 >= 1 ? "luck-ji" : sc2 <= -1 ? "luck-xiong" : "luck-ping";
+      })();
+      if (heavyYear[ln.year]) cls = downgrade(cls);
+      out[`liunian.${i}.luck_class`] = cls;
+    }
+    out["__algo_luck"] = "1";
+  }
   return out;
 }
 function wxChip(s) {
@@ -507,7 +564,28 @@ function main() {
   const mode = args.mode || "zonghe";
   let data;
   if (mode === "bazi") {
-    data = { ...chartToFlatBazi(chart, args.currentYear ? +args.currentYear : void 0), ...analysisToFlatBazi(analysis) };
+    const chartFlat = chartToFlatBazi(chart, args.currentYear ? +args.currentYear : void 0);
+    const analysisFlat = analysisToFlatBazi(analysis);
+    if (chartFlat["__algo_yongshen"]) {
+      for (const k of [
+        "yongshen.yong_html",
+        "yongshen.xi_text",
+        "yongshen.ji_html",
+        "yongshen.tiaohou_html",
+        "yongshen.divergence_note",
+        "kaiyun.yong_html",
+        "kaiyun.fang_html",
+        "kaiyun.se_html",
+        "kaiyun.shu_html",
+        "kaiyun.tiaohou_html"
+      ]) delete analysisFlat[k];
+      delete chartFlat["__algo_yongshen"];
+    }
+    if (chartFlat["__algo_luck"]) {
+      for (const k of Object.keys(analysisFlat)) if (/\.(luck_class)$/.test(k)) delete analysisFlat[k];
+      delete chartFlat["__algo_luck"];
+    }
+    data = { ...chartFlat, ...analysisFlat };
   } else {
     data = { ...chartToFlat(chart, args.currentYear ? +args.currentYear : void 0), ...analysisToFlat(analysis) };
   }

@@ -96,10 +96,21 @@ function suiVsYun(liuNian, daYun) {
         hits.push({ vs: '大运', type: '支害(穿)', desc: `流年支${liuNian.zhi}害(穿)大运支${daYun.zhi}` });
     return hits;
 }
+// 引动权重:重=天克地冲/伏吟/岁运并临/冲提纲; 中=支冲/自刑/凑局凑刑; 轻=其余
+function hitWeight(h) {
+    if (h.type === '天克地冲' || h.type === '伏吟' || h.type === '岁运并临')
+        return '重';
+    if (h.type === '支冲' && h.desc.includes('冲提纲'))
+        return '重';
+    if (h.type === '支冲' || h.type === '自刑' || h.type === '凑全三刑' || h.type === '凑成三合' || h.type === '相刑')
+        return '中';
+    return '轻';
+}
+const W_ORD = { 重: 0, 中: 1, 轻: 2 };
 function analyzeYunSui(siZhu, dayun, currentYear) {
     const res = {
-        说明: '运岁引动=大运/流年干支与原局(及岁运之间)的合冲刑害破穿、凑局凑刑与伏反吟。中立检测+通则标注;作用取舍与吉凶随所选流派与喜忌定,详见作用关系块与流派镜片。',
-        大运引动: [], 当前大运流年: null
+        说明: '运岁引动=大运/流年干支与原局(及岁运之间)的合冲刑害破穿、凑局凑刑与伏反吟。中立检测+通则标注;作用取舍与顺逆程度随所选流派与喜忌定,详见作用关系块与流派镜片。',
+        大运引动: [], 当前大运流年: null, 建议节点: []
     };
     for (let i = 0; i < (dayun || []).length; i++) {
         const d = dayun[i];
@@ -117,5 +128,30 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
         }).filter((y) => y.vs原局.length || y.vs大运.length);
         res.当前大运流年 = { 大运: dgz.gan + dgz.zhi + `(${cur.startYear}-${cur.endYear})`, 流年: years };
     }
+    // ---- v2.3 建议节点(timeline 选点白名单):每步大运取最重引动;当前大运重级流年单列 ----
+    for (let i = 0; i < (dayun || []).length; i++) {
+        const d = dayun[i];
+        const hits = gzVsChart({ gan: d.ganZhi.gan, zhi: d.ganZhi.zhi }, siZhu, '大运');
+        const best = hits.slice().sort((a, b) => W_ORD[hitWeight(a)] - W_ORD[hitWeight(b)])[0];
+        res.建议节点.push({
+            年: d.startYear, 岁: d.startAge, 载体: `大运${d.ganZhi.gan}${d.ganZhi.zhi}`,
+            标记: best ? `${best.type}(${best.vs})` : '大运交接',
+            权重: best ? hitWeight(best) : '轻',
+        });
+    }
+    if (cur) {
+        const dgz2 = { gan: cur.ganZhi.gan, zhi: cur.ganZhi.zhi };
+        for (const ln of (cur.liuNian || [])) {
+            const lgz = { gan: ln.ganZhi.gan, zhi: ln.ganZhi.zhi };
+            const all = [...gzVsChart(lgz, siZhu, '流年'), ...suiVsYun(lgz, dgz2)];
+            const heavy = all.filter(h => hitWeight(h) === '重');
+            if (heavy.length)
+                res.建议节点.push({
+                    年: ln.year, 岁: ln.age ?? 0, 载体: `流年${lgz.gan}${lgz.zhi}`,
+                    标记: heavy.map(h => h.type).join('+'), 权重: '重',
+                });
+        }
+    }
+    res.建议节点.sort((a, b) => a.年 - b.年);
     return res;
 }
