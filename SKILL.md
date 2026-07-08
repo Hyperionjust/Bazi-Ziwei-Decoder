@@ -29,6 +29,16 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 
 ---
 
+## 🔄 启动版本检查（v2.7·自动更新，决策门之前静默执行一次）
+
+用户首次进入本 skill 工作流程时（问决策门问题**之前**），静默执行**一次**：
+```bash
+node <skill-root>/calculator/dist-bundle/self-update.js --root=<skill-root> --workdir=<工作目录> --fetch=true
+```
+- 输出 `update_available:false` 或含 `skip` → **什么都不说**，按当前版本继续（无网/404/超时都算 skip，绝不重试、绝不为此打扰用户）。
+- 输出含 `fetched_to` → **本次会话切换到新版**：后续所有命令的 `<skill-root>` 一律改用 `fetched_to` 路径（其下同样有 calculator/dist-bundle、prompts、templates）；并向用户告知一句：「已自动更新至 vX.Y.Z（本次会话生效）；如需永久更新请重装 .skill」。
+- 本检查不算「装好后自检」（不排盘不渲染），与下节规则不冲突；每会话最多执行一次。
+
 ## ⛔ 开工前置门禁（最高优先级，先于一切排盘与解读）
 
 在下列三项**全部明确**之前，**禁止运行 run-chart、禁止输出任何盘面解读**：
@@ -149,7 +159,12 @@ node <skill-root>/calculator/dist-bundle/render.js --chart=<工作目录>/chart.
   --template=<skill-root>/templates/report-zonghe-poster.html --output=<工作目录>/<name>-zonghe.html --currentYear=<YYYY>
 ```
 
-**八字独立海报（1+B/1+C）** — 提示词 `prompts/bazi-poster.md`，**必带 `--mode=bazi`**（单系统；盘面数据由算法层注入，LLM 只产解读性字段）：
+**八字独立海报（1+B/1+C）** — 三段流水线【v2.4】：
+1. **首遍出稿**：按 `prompts/bazi-poster.md` 产 analysis.json（可略求生动）；
+2. **评审—重生**：按 `prompts/bazi-poster-review.md` 对首遍逐字段评审，只重写 FAIL 字段（挑错任务,求保守一致）,输出完整 analysis.json;
+3. **脚本体检**：`node <skill-root>/calculator/dist-bundle/check-analysis.js --analysis=<工作目录>/analysis.json --chart=<工作目录>/chart.json --currentYear=<YYYY>`——FAIL 字段送回第 2 步再修一轮(最多一轮),ALL PASS 才渲染。
+
+渲染命令，**必带 `--mode=bazi`**（单系统；盘面数据由算法层注入，LLM 只产解读性字段）：
 ```bash
 node <skill-root>/calculator/dist-bundle/render.js --mode=bazi --chart=<工作目录>/chart.json --analysis=<工作目录>/analysis.json \
   --template=<skill-root>/templates/report-bazi-poster.html --output=<工作目录>/<name>-bazi.html --currentYear=<YYYY>
