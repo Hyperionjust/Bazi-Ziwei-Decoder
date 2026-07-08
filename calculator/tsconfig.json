@@ -17,6 +17,8 @@
     "dump-text.ts",
     "render.ts",
     "shensha.ts",
+    "check-analysis.ts",
+    "self-update.ts",
     "yiqi-core/**/*.ts",
     "bazi-enrich/**/*.ts"
   ],

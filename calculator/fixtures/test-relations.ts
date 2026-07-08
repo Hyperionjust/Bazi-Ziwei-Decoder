@@ -5,6 +5,8 @@ import { detectGanRelations } from '../bazi-enrich/gan-relations';
 import { adjudicateInteractions } from '../bazi-enrich/interactions';
 import { analyzeYunSui, gzVsChart, suiVsYun } from '../bazi-enrich/yunsui';
 import { enrichBazi } from '../bazi-enrich/enrich';
+import { detectRarePatterns } from '../bazi-enrich/rare';
+import { judgeSpouseProfile } from '../bazi-enrich/zhengyuan';
 import * as fs from 'fs'; import * as path from 'path';
 
 const lin = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'lineages.json'), 'utf-8'));
@@ -85,6 +87,26 @@ ok(typeof y1.出口.缺补说明 === 'string', '缺补说明字段存在');
 const QJ = {年:{gan:'丙',zhi:'子'},月:{gan:'甲',zhi:'午'},日:{gan:'己',zhi:'卯'},时:{gan:'乙',zhi:'亥'}} as any;
 const yq = (enrichBazi(QJ) as any).用神建议;
 ok(yq.出口.缺补说明.includes('缺金'), '缺金盘:缺补说明点名缺金并给结论');
+
+// 16) v2.5 罕象检测
+const SK = {年:{gan:'甲',zhi:'辰'},月:{gan:'乙',zhi:'丑'},日:{gan:'甲',zhi:'戌'},时:{gan:'乙',zhi:'未'}} as any; // 合成:四库全
+const rr = detectRarePatterns(SK, [], [], []);
+ok(rr.some(r=>r.名.includes('四库全') && r.罕见度==='极罕'), '四库全被识别为极罕');
+const rr2 = detectRarePatterns(SK, [{id:'dexiu_guiren',polarity:'吉',pillars:['年','月','日']},{id:'tianyi_guiren',polarity:'吉',pillars:['日']},{id:'tiande_guiren',polarity:'吉',pillars:['月']},{id:'yuede_guiren',polarity:'吉',pillars:['年']}], [], []);
+ok(rr2.some(r=>r.名==='德秀满盘'), '德秀满盘(≥3柱)被识别');
+ok(rr2.some(r=>r.名==='三德会聚'), '三德会聚被识别');
+ok(rr2[0].罕见度==='极罕', '排序:极罕在前');
+const rrN = detectRarePatterns({年:{gan:'庚',zhi:'午'},月:{gan:'戊',zhi:'寅'},日:{gan:'甲',zhi:'子'},时:{gan:'丙',zhi:'寅'}} as any, [], [], []);
+ok(!rrN.some(r=>r.罕见度==='极罕'), '普通盘无极罕误报');
+
+// 17) v2.6 正缘倾向判定
+const F1 = {年:{gan:'庚',zhi:'申'},月:{gan:'辛',zhi:'巳'},日:{gan:'甲',zhi:'子'},时:{gan:'丙',zhi:'寅'}} as any; // 女命,官杀(庚辛金)透年月
+const z1 = judgeSpouseProfile(F1, 'female');
+ok(z1.年龄倾向==='年长' && z1.置信==='高', `女命官杀透年月→年长(高): ${z1.年龄倾向}/${z1.置信}`);
+const M1 = {年:{gan:'甲',zhi:'寅'},月:{gan:'丙',zhi:'子'},日:{gan:'甲',zhi:'午'},时:{gan:'己',zhi:'巳'}} as any; // 男命,正财己土仅透时干
+const z2 = judgeSpouseProfile(M1, 'male');
+ok(z2.年龄倾向==='年轻', `男命财星独现时柱→年轻: ${z2.年龄倾向}`);
+ok(JSON.stringify(judgeSpouseProfile(F1,'female'))===JSON.stringify(z1), '正缘判定可复现');
 
 console.log(failed===0 ? `\n✅ 全部通过` : `\n❌ ${failed} 个失败`);
 process.exit(failed===0?0:1);

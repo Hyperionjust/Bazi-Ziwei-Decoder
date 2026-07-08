@@ -138,6 +138,15 @@ function dumpBazi(b, bi) {
     });
     lines.push("\u2502");
   }
+  const rare = b.enrichment?.\u7F55\u8C61;
+  if (rare && Array.isArray(rare) && rare.length > 0) {
+    lines.push(`\u251C\u7F55\u8C61 \u2B50(${rare.length}\u9879\xB7\u795E\u715E\u4E0E\u5408\u51B2\u5211\u5BB3\u7AE0\u987B\u4F18\u5148\u8BB2\u89E3,\u6309\u7F55\u89C1\u5EA6\u964D\u5E8F)`);
+    rare.forEach((r, i) => {
+      const last = i === rare.length - 1;
+      lines.push(`${last ? "\u2502 \u2514" : "\u2502 \u251C"}\u3010${r.\u7F55\u89C1\u5EA6}\u3011${r.\u540D} \u2014 ${r.\u6D89\u53CA} \u2014 ${r.\u8BF4\u660E}`);
+    });
+    lines.push("\u2502");
+  }
   const ss2 = b.enrichment?.\u795E\u715E;
   if (ss2) {
     const active = (ss2.lineage ? ss2.lineage.hits : ss2.hits) || [];
@@ -188,6 +197,10 @@ function dumpBazi(b, bi) {
       lines.push(`\u2502 \u2502 \u251C\u6536\u655B : ${ya.\u6536\u655B ? "\u2713 \u5171\u8BC6\u7528\u795E[" + (ya.\u5171\u8BC6\u7528\u795E || []).join("") + "]" : "\u2717 \u4E0D\u6536\u655B"} | \u8FB9\u754C\u76D8 : ${ya.\u8FB9\u754C\u76D8 ? "\u662F" : "\u5426"}`);
       if (ya.\u51FA\u53E3) lines.push(`\u2502 \u2502 \u251C\u51FA\u53E3(\u5355\u503C\u88C1\u51B3) : \u5F00\u8FD0\u7528\u795E[${(ya.\u51FA\u53E3.\u5F00\u8FD0\u7528\u795E || []).join("")}] \u559C[${(ya.\u51FA\u53E3.\u559C\u795E || []).join("")}] \u5FCC[${(ya.\u51FA\u53E3.\u5FCC\u795E || []).join("") || "\u65E0(\u4E34\u754C)"}] \u8C03\u5019[${ya.\u51FA\u53E3.\u8C03\u5019\u63D0\u793A || "-"}]${ya.\u51FA\u53E3.divergence ? "  " + ya.\u51FA\u53E3.divergence : ""}${ya.\u51FA\u53E3.\u7F3A\u8865\u8BF4\u660E ? "  \u3014" + ya.\u51FA\u53E3.\u7F3A\u8865\u8BF4\u660E + "\u3015" : ""}`);
       lines.push(`\u2502 \u2502 \u2514\u51FA\u6587\u534F\u8BAE : ${ya.\u51FA\u6587\u534F\u8BAE || ""}`);
+    }
+    const zy = en.\u6B63\u7F18\u503E\u5411;
+    if (zy) {
+      lines.push(`\u2502 \u251C\u6B63\u7F18\u503E\u5411(\u7B97\u6CD5\u5224\u5B9A\xB7\u753B\u50CF\u5E74\u9F84\u7167\u6284) : \u3010${zy.\u5E74\u9F84\u503E\u5411}\u3011\u7F6E\u4FE1${zy.\u7F6E\u4FE1} \u2014 ${zy.\u592B\u59BB\u661F}:${zy.\u661F\u4F4D};\u5BAB\u5750${zy.\u5BAB\u5750} \u2014 ${zy.\u4F9D\u636E}`);
     }
     lines.push(`\u2502 \u251C\u683C\u5C40 : ${en.\u683C\u5C40?.primary || "-"}  (\u7F6E\u4FE1\u5EA6: ${en.\u683C\u5C40?.confidence || "-"})`);
     if (en.\u683C\u5C40?.basis) lines.push(`\u2502 \u2502 \u2514\u4F9D\u636E : ${en.\u683C\u5C40.basis}`);

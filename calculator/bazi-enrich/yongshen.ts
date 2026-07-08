@@ -68,10 +68,14 @@ export function adviseYongShen(dayMaster: Tiangan, ws: WangShuaiResult, tiaoHouG
   // ---- 扶抑线(按旺衰分) ----
   const linJie = Math.abs(ws.score) <= 2 || ws.verdict === '中和';
   let fuYi: YongShenAdvice['扶抑'];
-  if (ws.verdict === '极旺(可能从强)' || ws.verdict === '偏旺' || (!linJie && ws.score > 0)) {
-    fuYi = { 取: [xie, hao, zhi], 忌: [yin, dmWx], 依据: `身强(score=${ws.score}):宜泄(${xie})耗(${hao})制(${zhi}),忌印比再帮身`, 临界: linJie };
-  } else if (ws.verdict === '极弱(可能从弱)' || ws.verdict === '偏弱' || (!linJie && ws.score < 0)) {
-    fuYi = { 取: [yin, dmWx], 忌: [zhi, hao], 依据: `身弱(score=${ws.score}):宜印(${yin})比(${dmWx})生扶,忌官杀财再克耗`, 临界: linJie };
+  const congQiang = ws.verdict === '极旺(可能从强)';
+  const congRuo = ws.verdict === '极弱(可能从弱)';
+  const cqNote = congQiang ? `;⚖若作从强格论则反取顺势(用印比${yin}、${dmWx},忌克泄),扶抑与从格为重大分歧,解读须并陈` : '';
+  const crNote = congRuo ? ';⚖若作从弱格论则反取顺势(顺财官食伤,忌印比帮身),扶抑与从格为重大分歧,解读须并陈' : '';
+  if (congQiang || ws.verdict === '偏旺' || (!linJie && ws.score > 0)) {
+    fuYi = { 取: [xie, hao, zhi], 忌: [yin, dmWx], 依据: `身强(score=${ws.score}):宜泄(${xie})耗(${hao})制(${zhi}),忌印比再帮身${cqNote}`, 临界: linJie };
+  } else if (congRuo || ws.verdict === '偏弱' || (!linJie && ws.score < 0)) {
+    fuYi = { 取: [yin, dmWx], 忌: [zhi, hao], 依据: `身弱(score=${ws.score}):宜印(${yin})比(${dmWx})生扶,忌官杀财再克耗${crNote}`, 临界: linJie };
   } else {
     fuYi = { 取: [], 忌: [], 依据: `中和临界(score=${ws.score}):扶抑线不单独取用,随格局与调候`, 临界: true };
   }
@@ -91,7 +95,7 @@ export function adviseYongShen(dayMaster: Tiangan, ws: WangShuaiResult, tiaoHouG
   let consensus: WuXing[] = sets.length ? [...sets[0]] : [];
   for (const s of sets.slice(1)) consensus = consensus.filter(x => s.includes(x));
   const 收敛 = sets.length >= 2 && consensus.length > 0;
-  const 边界盘 = linJie || ws.confidence !== '高' || geju.confidence === '低';
+  const 边界盘 = linJie || ws.confidence !== '高' || geju.confidence === '低' || congQiang || congRuo;
 
   const 出文协议 = 收敛 && !边界盘
     ? `三线收敛,共识用神=${consensus.join('、')};可径以共识立论,依据合并转述。`

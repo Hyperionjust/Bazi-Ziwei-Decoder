@@ -140,6 +140,17 @@ function dumpBazi(b: any, bi: any): string[] {
     lines.push('│');
   }
 
+  // 罕象块(v2.5) — 解读层在神煞/合冲刑害章须优先讲解
+  const rare = b.enrichment?.罕象;
+  if (rare && Array.isArray(rare) && rare.length > 0) {
+    lines.push(`├罕象 ⭐(${rare.length}项·神煞与合冲刑害章须优先讲解,按罕见度降序)`);
+    rare.forEach((r: any, i: number) => {
+      const last = i === rare.length - 1;
+      lines.push(`${last ? '│ └' : '│ ├'}【${r.罕见度}】${r.名} — ${r.涉及} — ${r.说明}`);
+    });
+    lines.push('│');
+  }
+
   // 神煞块 (T1: 算法层全集 / 流派镜片) — 神煞只增色, 不定大局
   const ss2 = b.enrichment?.神煞;
   if (ss2) {
@@ -194,6 +205,11 @@ function dumpBazi(b: any, bi: any): string[] {
       lines.push(`│ │ ├收敛 : ${ya.收敛?'✓ 共识用神['+(ya.共识用神||[]).join('')+']':'✗ 不收敛'} | 边界盘 : ${ya.边界盘?'是':'否'}`);
       if (ya.出口) lines.push(`│ │ ├出口(单值裁决) : 开运用神[${(ya.出口.开运用神||[]).join('')}] 喜[${(ya.出口.喜神||[]).join('')}] 忌[${(ya.出口.忌神||[]).join('')||'无(临界)'}] 调候[${ya.出口.调候提示||'-'}]${ya.出口.divergence?'  '+ya.出口.divergence:''}${ya.出口.缺补说明?'  〔'+ya.出口.缺补说明+'〕':''}`);
       lines.push(`│ │ └出文协议 : ${ya.出文协议||''}`);
+    }
+    // 正缘倾向(v2.6:画像年龄照抄本判定,不得自行裁量)
+    const zy = en.正缘倾向;
+    if (zy) {
+      lines.push(`│ ├正缘倾向(算法判定·画像年龄照抄) : 【${zy.年龄倾向}】置信${zy.置信} — ${zy.夫妻星}:${zy.星位};宫坐${zy.宫坐} — ${zy.依据}`);
     }
     lines.push(`│ ├格局 : ${en.格局?.primary || '-'}  (置信度: ${en.格局?.confidence || '-'})`);
     if (en.格局?.basis) lines.push(`│ │ └依据 : ${en.格局.basis}`);

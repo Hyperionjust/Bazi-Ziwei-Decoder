@@ -38,6 +38,8 @@ const enrich_1 = require("./bazi-enrich/enrich");
 const shensha_1 = require("./shensha");
 const interactions_1 = require("./bazi-enrich/interactions");
 const yunsui_1 = require("./bazi-enrich/yunsui");
+const rare_1 = require("./bazi-enrich/rare");
+const zhengyuan_1 = require("./bazi-enrich/zhengyuan");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 function parseArgs() {
@@ -196,6 +198,10 @@ function main() {
             }
             const curYear = args.currentYear ? parseInt(args.currentYear, 10) : new Date().getFullYear();
             enr.运岁引动 = (0, yunsui_1.analyzeYunSui)(siZhuCN, chart.bazi.dayun || [], curYear);
+            // v2.5: 罕象检测(四库全/德秀满盘/三德会聚等) — 罕见度由算法定义,解读层优先讲解
+            enr.罕象 = (0, rare_1.detectRarePatterns)(siZhuCN, fullHits, enr.地支关系 || [], enr.天干关系 || []);
+            // v2.6: 正缘倾向判定(年长/年轻/同龄) — 通行断法确定性计算,画像年龄照抄不裁量
+            enr.正缘倾向 = (0, zhengyuan_1.judgeSpouseProfile)(siZhuCN, birthInfo.gender);
             // v1.6.2: 胎元(月干进一,月支进三) + 命宫(14/26 减月时支数,五虎遁取干)
             const GAN10 = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
             const ZHI12 = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];

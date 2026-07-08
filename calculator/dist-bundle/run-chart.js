@@ -13177,10 +13177,14 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
   const xie = SHENG[dmWx], hao = KE[dmWx], zhi = KE_WO[dmWx], yin = SHENG_WO[dmWx];
   const linJie = Math.abs(ws.score) <= 2 || ws.verdict === "\u4E2D\u548C";
   let fuYi;
-  if (ws.verdict === "\u6781\u65FA(\u53EF\u80FD\u4ECE\u5F3A)" || ws.verdict === "\u504F\u65FA" || !linJie && ws.score > 0) {
-    fuYi = { \u53D6: [xie, hao, zhi], \u5FCC: [yin, dmWx], \u4F9D\u636E: `\u8EAB\u5F3A(score=${ws.score}):\u5B9C\u6CC4(${xie})\u8017(${hao})\u5236(${zhi}),\u5FCC\u5370\u6BD4\u518D\u5E2E\u8EAB`, \u4E34\u754C: linJie };
-  } else if (ws.verdict === "\u6781\u5F31(\u53EF\u80FD\u4ECE\u5F31)" || ws.verdict === "\u504F\u5F31" || !linJie && ws.score < 0) {
-    fuYi = { \u53D6: [yin, dmWx], \u5FCC: [zhi, hao], \u4F9D\u636E: `\u8EAB\u5F31(score=${ws.score}):\u5B9C\u5370(${yin})\u6BD4(${dmWx})\u751F\u6276,\u5FCC\u5B98\u6740\u8D22\u518D\u514B\u8017`, \u4E34\u754C: linJie };
+  const congQiang = ws.verdict === "\u6781\u65FA(\u53EF\u80FD\u4ECE\u5F3A)";
+  const congRuo = ws.verdict === "\u6781\u5F31(\u53EF\u80FD\u4ECE\u5F31)";
+  const cqNote = congQiang ? `;\u2696\u82E5\u4F5C\u4ECE\u5F3A\u683C\u8BBA\u5219\u53CD\u53D6\u987A\u52BF(\u7528\u5370\u6BD4${yin}\u3001${dmWx},\u5FCC\u514B\u6CC4),\u6276\u6291\u4E0E\u4ECE\u683C\u4E3A\u91CD\u5927\u5206\u6B67,\u89E3\u8BFB\u987B\u5E76\u9648` : "";
+  const crNote = congRuo ? ";\u2696\u82E5\u4F5C\u4ECE\u5F31\u683C\u8BBA\u5219\u53CD\u53D6\u987A\u52BF(\u987A\u8D22\u5B98\u98DF\u4F24,\u5FCC\u5370\u6BD4\u5E2E\u8EAB),\u6276\u6291\u4E0E\u4ECE\u683C\u4E3A\u91CD\u5927\u5206\u6B67,\u89E3\u8BFB\u987B\u5E76\u9648" : "";
+  if (congQiang || ws.verdict === "\u504F\u65FA" || !linJie && ws.score > 0) {
+    fuYi = { \u53D6: [xie, hao, zhi], \u5FCC: [yin, dmWx], \u4F9D\u636E: `\u8EAB\u5F3A(score=${ws.score}):\u5B9C\u6CC4(${xie})\u8017(${hao})\u5236(${zhi}),\u5FCC\u5370\u6BD4\u518D\u5E2E\u8EAB${cqNote}`, \u4E34\u754C: linJie };
+  } else if (congRuo || ws.verdict === "\u504F\u5F31" || !linJie && ws.score < 0) {
+    fuYi = { \u53D6: [yin, dmWx], \u5FCC: [zhi, hao], \u4F9D\u636E: `\u8EAB\u5F31(score=${ws.score}):\u5B9C\u5370(${yin})\u6BD4(${dmWx})\u751F\u6276,\u5FCC\u5B98\u6740\u8D22\u518D\u514B\u8017${crNote}`, \u4E34\u754C: linJie };
   } else {
     fuYi = { \u53D6: [], \u5FCC: [], \u4F9D\u636E: `\u4E2D\u548C\u4E34\u754C(score=${ws.score}):\u6276\u6291\u7EBF\u4E0D\u5355\u72EC\u53D6\u7528,\u968F\u683C\u5C40\u4E0E\u8C03\u5019`, \u4E34\u754C: true };
   }
@@ -13194,7 +13198,7 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
   let consensus = sets.length ? [...sets[0]] : [];
   for (const s of sets.slice(1)) consensus = consensus.filter((x) => s.includes(x));
   const \u6536\u655B = sets.length >= 2 && consensus.length > 0;
-  const \u8FB9\u754C\u76D8 = linJie || ws.confidence !== "\u9AD8" || geju.confidence === "\u4F4E";
+  const \u8FB9\u754C\u76D8 = linJie || ws.confidence !== "\u9AD8" || geju.confidence === "\u4F4E" || congQiang || congRuo;
   const \u51FA\u6587\u534F\u8BAE = \u6536\u655B && !\u8FB9\u754C\u76D8 ? `\u4E09\u7EBF\u6536\u655B,\u5171\u8BC6\u7528\u795E=${consensus.join("\u3001")};\u53EF\u5F84\u4EE5\u5171\u8BC6\u7ACB\u8BBA,\u4F9D\u636E\u5408\u5E76\u8F6C\u8FF0\u3002` : `\u8FB9\u754C\u76D8/\u4E09\u7EBF\u4E0D\u6536\u655B\u2014\u2014\u3010\u4F53\u7528\u4E24\u5206,\u7981\u6B62\u5355\u9009\u3011:\u62A4\u4F53\u7EBF=\u8C03\u5019${thWx.join("\u3001")}(${(tiaoHouGans || []).join("")})${fuYi.\u53D6.length ? `\u4E0E\u6276\u6291${fuYi.\u53D6.join("\u3001")}` : ""},\u53D1\u7528\u7EBF=\u683C\u5C40${gjWx.join("\u3001") || "(\u4F9D\u6210\u8D25\u6551\u5E94)"};\u4E24\u7EBF\u5E76\u9648,\u663E\u5F0F\u6807\u6CE8\u300C\u2696\u5404\u6D3E\u5206\u6B67\u300D\u4E0E\u7F6E\u4FE1\u5EA6(\u65FA\u8870:${ws.confidence}/\u683C\u5C40:${geju.confidence}),\u4E0D\u5F97\u53EA\u62A5\u5176\u4E00\u3002`;
   const pool = [...thWx, ...gjWx];
   const pick = pool.find((w) => !fuYi.\u5FCC.includes(w));
@@ -13999,6 +14003,113 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
   return res;
 }
 
+// bazi-enrich/rare.ts
+var GAN_HE3 = { \u7532: "\u5DF1", \u5DF1: "\u7532", \u4E59: "\u5E9A", \u5E9A: "\u4E59", \u4E19: "\u8F9B", \u8F9B: "\u4E19", \u4E01: "\u58EC", \u58EC: "\u4E01", \u620A: "\u7678", \u7678: "\u620A" };
+var LIU_CHONG3 = { \u5B50: "\u5348", \u5348: "\u5B50", \u4E11: "\u672A", \u672A: "\u4E11", \u5BC5: "\u7533", \u7533: "\u5BC5", \u536F: "\u9149", \u9149: "\u536F", \u8FB0: "\u620C", \u620C: "\u8FB0", \u5DF3: "\u4EA5", \u4EA5: "\u5DF3" };
+var RANK = { \u6781\u7F55: 0, \u7F55\u89C1: 1, \u5C11\u89C1: 2 };
+function detectRarePatterns(siZhu, shenshaHits, zhiRels, ganRels) {
+  const out = [];
+  const P = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
+  const zhis = P.map((p) => siZhu[p].zhi);
+  const gans = P.map((p) => siZhu[p].gan);
+  const zset = new Set(zhis);
+  const has4 = (group) => group.every((z) => zset.has(z));
+  if (has4(["\u8FB0", "\u620C", "\u4E11", "\u672A"])) out.push({ \u540D: "\u56DB\u5E93\u5168(\u56DB\u5927\u5893\u5E93\u9F50\u5168)", \u7F55\u89C1\u5EA6: "\u6781\u7F55", \u6D89\u53CA: "\u56DB\u652F\u8FB0\u620C\u4E11\u672A", \u8BF4\u660E: "\u8D22\u5B98\u5370\u98DF\u7686\u6709\u5E93\u85CF,\u53E4\u8BBA\u300C\u4EBA\u5143\u7528\u4E8B,\u5305\u85CF\u56DB\u65B9\u300D,\u4E3B\u6536\u7EB3\u683C\u5C40\u5B8F\u5927\u3001\u4E2D\u665A\u5E74\u84C4\u52BF\u6781\u539A,\u4EA6\u4E3B\u4E00\u751F\u591A\u805A\u6563\u5F00\u5408\u4E4B\u8BFE\u9898" });
+  if (has4(["\u5BC5", "\u7533", "\u5DF3", "\u4EA5"])) out.push({ \u540D: "\u56DB\u751F\u5168(\u56DB\u957F\u751F\u9F50)", \u7F55\u89C1\u5EA6: "\u6781\u7F55", \u6D89\u53CA: "\u56DB\u652F\u5BC5\u7533\u5DF3\u4EA5", \u8BF4\u660E: "\u56DB\u9A7F\u9A6C\u957F\u751F\u4E4B\u5730\u9F50\u805A,\u4E3B\u4E00\u751F\u52A8\u8C61\u6781\u5F3A\u3001\u5F00\u521B\u4E0D\u4F11,\u5B9C\u52A8\u4E0D\u5B9C\u5B88" });
+  if (has4(["\u5B50", "\u5348", "\u536F", "\u9149"])) out.push({ \u540D: "\u56DB\u6B63\u5168(\u56DB\u8D25/\u904D\u91CE\u6843\u82B1)", \u7F55\u89C1\u5EA6: "\u6781\u7F55", \u6D89\u53CA: "\u56DB\u652F\u5B50\u5348\u536F\u9149", \u8BF4\u660E: "\u56DB\u65FA\u4E4B\u6C14\u7EAF\u800C\u4E0D\u6742,\u53E4\u6709\u300C\u904D\u91CE\u6843\u82B1\u300D\u4E4B\u540D,\u4E3B\u6C14\u6027\u6781\u4E13\u3001\u9B45\u529B\u4E0E\u662F\u975E\u540C\u91CD" });
+  if (zset.size === 1) out.push({ \u540D: "\u56DB\u652F\u4E00\u5B57", \u7F55\u89C1\u5EA6: "\u6781\u7F55", \u6D89\u53CA: `\u56DB\u652F\u7686${zhis[0]}`, \u8BF4\u660E: "\u4E00\u6C14\u4E13\u65FA\u4E8E\u652F,\u6027\u60C5\u547D\u9014\u7686\u6781\u7AEF\u5316,\u6210\u8D25\u4FF1\u5927" });
+  const gcount = {};
+  for (const g of gans) gcount[g] = (gcount[g] || 0) + 1;
+  if (new Set(gans).size === 1) out.push({ \u540D: "\u5929\u5E72\u4E00\u5B57", \u7F55\u89C1\u5EA6: "\u6781\u7F55", \u6D89\u53CA: `\u56DB\u5E72\u7686${gans[0]}`, \u8BF4\u660E: "\u5929\u5143\u4E00\u6C14,\u53E4\u6CD5\u4E13\u8BBA\u4E4B\u683C,\u6C14\u7EAF\u800C\u5FD7\u4E00" });
+  else if (Object.values(gcount).some((n) => n === 3)) {
+    const g = Object.keys(gcount).find((k) => gcount[k] === 3);
+    out.push({ \u540D: "\u4E09\u670B(\u4E09\u5E72\u4E00\u5B57)", \u7F55\u89C1\u5EA6: "\u7F55\u89C1", \u6D89\u53CA: `\u4E09\u5E72\u7686${g}`, \u8BF4\u660E: "\u4E09\u5E72\u540C\u6C14\u5E76\u7ACB,\u4E3B\u5176\u4E94\u884C\u4E4B\u6027\u683C\u5916\u7A81\u51FA" });
+  }
+  {
+    const pairs = [];
+    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++)
+      if (GAN_HE3[gans[i]] === gans[j]) pairs.push(`${P[i]}${P[j]}`);
+    if (pairs.length >= 2) out.push({ \u540D: "\u5929\u5E72\u53CC\u5408", \u7F55\u89C1\u5EA6: "\u5C11\u89C1", \u6D89\u53CA: pairs.join("\u3001"), \u8BF4\u660E: "\u4E24\u7EC4\u5E72\u5408\u5E76\u89C1,\u4E3B\u4EBA\u9645\u7C98\u6027\u5F3A\u3001\u8BF8\u4E8B\u591A\u4EE5\u300C\u5408\u300D\u6210\u5C40,\u4EA6\u591A\u7ECA" });
+  }
+  for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+    const a = siZhu[P[i]], b = siZhu[P[j]];
+    if (a.gan === b.gan && a.zhi === b.zhi)
+      out.push({ \u540D: "\u539F\u5C40\u4F0F\u541F", \u7F55\u89C1\u5EA6: "\u5C11\u89C1", \u6D89\u53CA: `${P[i]}${P[j]}\u67F1${a.gan}${a.zhi}`, \u8BF4\u660E: "\u4E24\u67F1\u5E72\u652F\u5168\u540C,\u8BE5\u5BAB\u4F4D\u4E4B\u4E8B\u591A\u91CD\u590D\u518D\u73B0,\u5B9C\u4EE5\u53D8\u5E94\u9759" });
+    const ke = shengKe(GAN_WUXING[a.gan], GAN_WUXING[b.gan]) === "\u514B" || shengKe(GAN_WUXING[b.gan], GAN_WUXING[a.gan]) === "\u514B";
+    if (ke && LIU_CHONG3[a.zhi] === b.zhi)
+      out.push({ \u540D: "\u539F\u5C40\u5929\u514B\u5730\u51B2", \u7F55\u89C1\u5EA6: "\u7F55\u89C1", \u6D89\u53CA: `${P[i]}\u67F1${a.gan}${a.zhi}\xD7${P[j]}\u67F1${b.gan}${b.zhi}`, \u8BF4\u660E: "\u4E24\u67F1\u5BF9\u51B2\u5BF9\u514B,\u6240\u6D89\u4E24\u5BAB\u4E00\u751F\u4E92\u76F8\u7275\u52A8,\u5927\u52A8\u5927\u6210\u4E4B\u67A2\u7EBD" });
+  }
+  for (const r of zhiRels || []) {
+    if (r.type === "\u4E09\u5408") out.push({ \u540D: "\u4E09\u5408\u5C40\u5168", \u7F55\u89C1\u5EA6: "\u5C11\u89C1", \u6D89\u53CA: (r.zhi || []).join(""), \u8BF4\u660E: `${r.detail || "\u4E09\u5408\u6210\u5C40"},\u8BE5\u4E94\u884C\u4E4B\u52BF\u8D2F\u7A7F\u5168\u5C40` });
+    if (r.type === "\u4E09\u4F1A") out.push({ \u540D: "\u4E09\u4F1A\u65B9\u5168", \u7F55\u89C1\u5EA6: "\u5C11\u89C1", \u6D89\u53CA: (r.zhi || []).join(""), \u8BF4\u660E: `${r.detail || "\u4E09\u4F1A\u6210\u65B9"},\u65B9\u5C40\u4E4B\u529B\u5927\u4E8E\u4E09\u5408,\u4E00\u65B9\u4E4B\u6C14\u72EC\u5927` });
+  }
+  {
+    const chongs = (zhiRels || []).filter((r) => r.type === "\u516D\u51B2");
+    const uniq = new Set(chongs.map((r) => (r.zhi || []).slice().sort().join("")));
+    if (uniq.size >= 2) out.push({ \u540D: "\u53CC\u51B2\u5BF9\u5CD9", \u7F55\u89C1\u5EA6: "\u5C11\u89C1", \u6D89\u53CA: [...uniq].join("\u3001"), \u8BF4\u660E: "\u4E24\u7EC4\u5BF9\u51B2\u5E76\u5B58,\u5C40\u4E2D\u52A8\u8361\u4E4B\u8F74\u6709\u4E8C,\u4EBA\u751F\u591A\u53CC\u7EBF\u62C9\u626F" });
+  }
+  const hit = (id) => (shenshaHits || []).find((h) => h.id === id);
+  const dx = hit("dexiu_guiren");
+  if (dx && (dx.pillars || []).length >= 3) out.push({ \u540D: "\u5FB7\u79C0\u6EE1\u76D8", \u7F55\u89C1\u5EA6: "\u6781\u7F55", \u6D89\u53CA: `\u5FB7\u79C0\u8D35\u4EBA\u89C1\u4E8E${dx.pillars.join("")}\u67F1`, \u8BF4\u660E: "\u5FB7\u79C0\u672C\u4E3A\u590D\u5408\u8D35\u683C,\u904D\u5E03\u4E09\u67F1\u4EE5\u4E0A\u5C24\u7F55,\u4E3B\u806A\u660E\u6E29\u539A\u4E4B\u6C14\u8D2F\u5168\u5C40,\u9047\u8D22\u5B98\u5219\u8D35" });
+  if (hit("tianyi_guiren") && hit("tiande_guiren") && hit("yuede_guiren"))
+    out.push({ \u540D: "\u4E09\u5FB7\u4F1A\u805A", \u7F55\u89C1\u5EA6: "\u7F55\u89C1", \u6D89\u53CA: "\u5929\u4E59+\u5929\u5FB7+\u6708\u5FB7\u5E76\u89C1", \u8BF4\u660E: "\u81F3\u5C0A\u4E4B\u8D35\u4E0E\u4E8C\u5FB7\u540C\u663E,\u51F6\u715E\u96BE\u8FD1,\u9047\u96BE\u5448\u7965\u4E4B\u529B\u4E3A\u8BF8\u683C\u4E4B\u6700" });
+  if (hit("sanqi")) out.push({ \u540D: "\u4E09\u5947\u771F\u683C", \u7F55\u89C1\u5EA6: "\u7F55\u89C1", \u6D89\u53CA: hit("sanqi").via || "", \u8BF4\u660E: "\u4E09\u5947\u987B\u987A\u5E03\u8FDE\u73E0\u65B9\u771F,\u4E3B\u895F\u6000\u5353\u8D8A\u3001\u535A\u5B66\u591A\u80FD" });
+  {
+    const byP = {};
+    for (const h of shenshaHits || []) if (h.polarity === "\u5409") for (const p of h.pillars || []) byP[p] = (byP[p] || 0) + 1;
+    const best = Object.entries(byP).sort((a, b) => b[1] - a[1])[0];
+    if (best && best[1] >= 4) out.push({ \u540D: "\u5409\u661F\u805A\u67F1", \u7F55\u89C1\u5EA6: "\u7F55\u89C1", \u6D89\u53CA: `${best[0]}\u67F1\u53E0${best[1]}\u5409`, \u8BF4\u660E: `\u5409\u795E\u624E\u5806\u4E8E${best[0]}\u67F1,\u8BE5\u5BAB\u6240\u4E3B\u4E4B\u4EBA\u4E8B\u4E3A\u5168\u76D8\u6700\u5F97\u5929\u72EC\u539A\u5904` });
+  }
+  out.sort((a, b) => RANK[a.\u7F55\u89C1\u5EA6] - RANK[b.\u7F55\u89C1\u5EA6]);
+  return out;
+}
+
+// bazi-enrich/zhengyuan.ts
+function judgeSpouseProfile(siZhu, gender) {
+  const dm = siZhu.\u65E5.gan;
+  const primary = gender === "male" ? ["\u6B63\u8D22", "\u504F\u8D22"] : ["\u6B63\u5B98", "\u4E03\u6740"];
+  const starLabel = gender === "male" ? "\u8D22\u661F(\u59BB\u661F)" : "\u5B98\u6740(\u592B\u661F)";
+  const seats = [];
+  for (const p of ["\u5E74", "\u6708", "\u65F6"]) {
+    const ss = getShiShen2(dm, siZhu[p].gan);
+    if (primary.includes(ss)) seats.push({ p, via: `${p}\u5E72${siZhu[p].gan}(${ss})`, w: 2 });
+  }
+  for (const p of ["\u5E74", "\u6708", "\u65E5", "\u65F6"]) {
+    const benqi = ZHI_CANG_GAN[siZhu[p].zhi][0]?.gan;
+    if (benqi) {
+      const ss = getShiShen2(dm, benqi);
+      if (primary.includes(ss)) seats.push({ p, via: `${p}\u652F${siZhu[p].zhi}\u85CF${benqi}(${ss})`, w: 1 });
+    }
+  }
+  const POS = { \u5E74: 2, \u6708: 1, \u65E5: 0, \u65F6: -2 };
+  let score = 0, weight = 0;
+  for (const s of seats) {
+    score += POS[s.p] * s.w;
+    weight += s.w;
+  }
+  const gongBenqi = ZHI_CANG_GAN[siZhu.\u65E5.zhi][0]?.gan;
+  const gongSS = gongBenqi ? getShiShen2(dm, gongBenqi) : "";
+  let gongAdj = 0, gongNote = "";
+  if (gongSS === "\u6B63\u5370" || gongSS === "\u504F\u5370") {
+    gongAdj = 1;
+    gongNote = "\u914D\u5076\u5BAB\u5750\u5370,\u504F\u6210\u719F\u5E74\u957F\u4E4B\u6C14";
+  } else if (gongSS === "\u98DF\u795E" || gongSS === "\u4F24\u5B98") {
+    gongAdj = -1;
+    gongNote = "\u914D\u5076\u5BAB\u5750\u98DF\u4F24,\u504F\u9C9C\u6D3B\u5E74\u8F7B\u4E4B\u6C14";
+  } else if (gongSS === "\u6BD4\u80A9" || gongSS === "\u52AB\u8D22") {
+    gongNote = "\u914D\u5076\u5BAB\u5750\u6BD4\u52AB,\u540C\u8F88\u540C\u9891\u4E4B\u6C14";
+  }
+  score += gongAdj;
+  let \u503E\u5411;
+  if (score >= 2) \u503E\u5411 = "\u5E74\u957F";
+  else if (score <= -2) \u503E\u5411 = "\u5E74\u8F7B";
+  else \u503E\u5411 = "\u540C\u9F84";
+  const \u7F6E\u4FE1 = weight >= 2 ? "\u9AD8" : "\u4F4E";
+  const \u661F\u4F4D = seats.length ? seats.map((s) => s.via).join("\u3001") : "\u592B\u59BB\u661F\u4E0D\u663E\u4E8E\u5E72\u652F\u672C\u6C14";
+  const \u4F9D\u636E = seats.length ? `${starLabel}\u89C1\u4E8E${seats.map((s) => s.p).join("")}\u67F1(\u4F4D\u7F6E\u8BA1\u5206${score >= 0 ? "+" : ""}${score})${gongNote ? ";" + gongNote : ""}\u2014\u2014\u5E74\u6708\u4E3B\u957F\u8F88\u4E4B\u6C14\u3001\u65F6\u67F1\u4E3B\u665A\u8F88\u4E4B\u6C14,\u901A\u884C\u65AD\u6CD5` : `\u592B\u59BB\u661F\u4E0D\u663E,\u4EE5\u914D\u5076\u5BAB\u5750\u661F\u8BBA${gongNote ? "(" + gongNote + ")" : ""};\u7F18\u5206\u4FE1\u53F7\u504F\u665A\u504F\u6DE1,\u5224\u5B9A\u7F6E\u4FE1\u4F4E`;
+  return { \u5E74\u9F84\u503E\u5411: \u503E\u5411, \u7F6E\u4FE1, \u592B\u59BB\u661F: starLabel, \u661F\u4F4D, \u5BAB\u5750: gongSS || "-", \u4F9D\u636E };
+}
+
 // run-chart.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
@@ -14135,6 +14246,8 @@ function main() {
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : (/* @__PURE__ */ new Date()).getFullYear();
       enr.\u8FD0\u5C81\u5F15\u52A8 = analyzeYunSui(siZhuCN, chart.bazi.dayun || [], curYear);
+      enr.\u7F55\u8C61 = detectRarePatterns(siZhuCN, fullHits, enr.\u5730\u652F\u5173\u7CFB || [], enr.\u5929\u5E72\u5173\u7CFB || []);
+      enr.\u6B63\u7F18\u503E\u5411 = judgeSpouseProfile(siZhuCN, birthInfo.gender);
       const GAN10 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
       const ZHI12 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
       const mGan = chart.bazi.siZhu.month.gan, mZhi = chart.bazi.siZhu.month.zhi, hZhi = chart.bazi.siZhu.hour.zhi;
