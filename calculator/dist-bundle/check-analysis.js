@@ -29,12 +29,22 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // check-analysis.ts
 var check_analysis_exports = {};
 __export(check_analysis_exports, {
-  checkAnalysis: () => checkAnalysis
+  checkAnalysis: () => checkAnalysis,
+  checkMbti: () => checkMbti
 });
 module.exports = __toCommonJS(check_analysis_exports);
 var fs = __toESM(require("fs"));
 var strip = (s) => String(s || "").replace(/<[^>]+>/g, "");
 var sentences = (s) => strip(s).split(/[。！？!?]/).map((x) => x.trim()).filter(Boolean);
+var CHILD_MARK = /(从小|小时候|打小|孩提|学生时代|少年时|童年)/;
+var CHILD_ACT = /(习惯|牵头|攒局|张罗|带头|组织|分工|派活|主持|带队|发起|当班长|当过|干过|做过|拉着|老是|总能把|就爱管)/;
+function childhoodViolations(text) {
+  const out = [];
+  for (const sent of String(text).replace(/<[^>]+>/g, "").split(/[。！？!?\n]/)) {
+    if (CHILD_MARK.test(sent) && CHILD_ACT.test(sent)) out.push(sent.trim().slice(0, 40));
+  }
+  return out;
+}
 function checkAnalysis(a, chart, currentYear) {
   const R = {};
   const put = (k, bad, warn = []) => {
@@ -49,6 +59,8 @@ function checkAnalysis(a, chart, currentYear) {
     put("meta.archetype_name", bad);
   }
   const FORBID_ALL = ["tier", "needs_review", "lineage_weights", "\u547D\u4E3B", "\u8D77\u6CD5\u5F85\u6838"];
+  const FORBID_FREQ = ["\u591A\u534A\u662F\u4F60", "\u4F60\u603B\u662F", "\u4F60\u6BCF\u6B21", "\u4F60\u4ECE\u4E0D", "\u4F60\u4E00\u5B9A\u4F1A", "\u7B2C\u4E00\u4E2A\u60F3\u5230\u4F60"];
+  const FORBID_MECH = ["rubric", "\u7B97\u6CD5\u5C42", "\u6620\u5C04\u77E9\u9635", "\u51FA\u6587\u534F\u8BAE", "v3\u52A0\u5206", "v4\u52A0\u5206", "\u5FCC\u795E\u6298\u5411", "R1\u9A7F\u9A6C", "R2\u6587", "R3\u80CE\u5143", "\u8BC4\u5BA1\u904D", "\u4F53\u68C0\u5668", "\u6D3E\u7CFB\u4FA7\u91CD", "lineage"];
   const FORBID_SHUNNI = ["\u5927\u51F6", "\u707E\u5E74", "\u51F6\u5E74", "\u51F6\u661F"];
   const walk = (obj, path, fn) => {
     if (typeof obj === "string") fn(path, obj);
@@ -62,6 +74,9 @@ function checkAnalysis(a, chart, currentYear) {
       if (/^(hechong|yunsui|shensha|timeline)/.test(p)) {
         for (const w of FORBID_SHUNNI) if (v.includes(w)) bad.push(`${p} \u542B\u7EDD\u5BF9\u65AD\u8BED\u300C${w}\u300D(\u5E94\u7528\u987A\u98CE/\u9006\u98CE)`);
       }
+      for (const w of FORBID_FREQ) if (v.includes(w)) bad.push(`${p} \u542B\u884C\u4E3A\u9891\u7387\u65AD\u8A00\u300C${w}\u300D(\u80FD\u529B\u800C\u975E\u4E8B\u8FF9:\u6539\u5199\u4E3A\u80FD\u529B/\u7279\u8D28/\u6F5C\u529B\u53E5\u5F0F)`);
+      for (const w of FORBID_MECH) if (v.includes(w)) bad.push(`${p} \u6CC4\u6F0F\u5E55\u540E\u673A\u5236\u8BCD\u300C${w}\u300D(\u5E55\u540E\u53F0\u524D\u5206\u79BB:\u7528\u6237\u53EA\u770B\u7ED3\u8BBA)`);
+      for (const c of childhoodViolations(v)) bad.push(`${p} \u7AE5\u5E74\u884C\u4E3A\u65AD\u8A00\u300C${c}\u2026\u300D(\u7EC6\u5219:\u4ECE\u5C0F\u53EA\u80FD\u63A5\u6C14\u8D28\u4E0D\u80FD\u63A5\u884C\u4E3A,\u52A8\u4F5C\u53EF\u8BC1\u4F2A)`);
     });
     put("_\u5168\u5C40\u7981\u8BCD", bad);
   }
@@ -183,6 +198,76 @@ function checkAnalysis(a, chart, currentYear) {
   }
   return R;
 }
+var DM_IMG = {
+  \u7532: ["\u5927\u6811", "\u53C2\u5929", "\u4E54\u6728"],
+  \u4E59: ["\u82B1\u8349", "\u85E4\u8513", "\u85E4", "\u82B1\u6728"],
+  \u4E19: ["\u592A\u9633", "\u9A84\u9633", "\u65E5\u5149"],
+  \u4E01: ["\u70DB", "\u706F\u706B", "\u661F\u5149"],
+  \u620A: ["\u9AD8\u5C71", "\u5C71"],
+  \u5DF1: ["\u7530\u56ED", "\u7530", "\u6C83\u571F", "\u56ED\u571F"],
+  \u5E9A: ["\u5200", "\u5251", "\u65A7\u94BA"],
+  \u8F9B: ["\u73E0\u7389", "\u7389", "\u73E0", "\u91D1\u9970"],
+  \u58EC: ["\u6C5F\u6CB3", "\u6C5F", "\u6CB3", "\u5927\u6C34", "\u5954\u6D41"],
+  \u7678: ["\u96E8\u9732", "\u96E8", "\u9732", "\u7518\u9716"]
+};
+function checkMbti(a, chart) {
+  const R = {};
+  const bw = chart?.bazi?.enrichment?.\u516B\u7EF4\u7ED3\u6784 || {};
+  const allowed = new Set([bw.\u6700\u50CF\u7C7B\u578B, bw.\u5907\u9009\u7C7B\u578B, String(a?.meta?.tested_mbti || "").toUpperCase()].filter(Boolean));
+  const bad0 = [];
+  const walk = (obj, path, fn) => {
+    if (typeof obj === "string") fn(path, obj);
+    else if (obj && typeof obj === "object") for (const k of Object.keys(obj)) walk(obj[k], path ? path + "." + k : k, fn);
+  };
+  walk(a, "", (p, v) => {
+    for (const w of ["tier", "needs_review", "\u547D\u4E3B\u662F", "\u5927\u51F6", "\u707E\u5E74"]) if (v.includes(w)) bad0.push(`${p} \u542B\u300C${w}\u300D`);
+    for (const w of ["\u591A\u534A\u662F\u4F60", "\u4F60\u603B\u662F", "\u4F60\u6BCF\u6B21", "\u4F60\u4ECE\u4E0D", "\u4F60\u4E00\u5B9A\u4F1A", "\u7B2C\u4E00\u4E2A\u60F3\u5230\u4F60"]) if (v.includes(w)) bad0.push(`${p} \u542B\u884C\u4E3A\u9891\u7387\u65AD\u8A00\u300C${w}\u300D`);
+    for (const w of ["rubric", "\u7B97\u6CD5\u5C42", "\u6620\u5C04\u77E9\u9635", "\u51FA\u6587\u534F\u8BAE", "v3\u52A0\u5206", "v4\u52A0\u5206", "\u5FCC\u795E\u6298\u5411", "\u8BC4\u5BA1\u904D", "\u4F53\u68C0\u5668", "\u6D3E\u7CFB\u4FA7\u91CD"]) if (v.includes(w)) bad0.push(`${p} \u6CC4\u6F0F\u5E55\u540E\u673A\u5236\u8BCD\u300C${w}\u300D`);
+    for (const c of childhoodViolations(v)) bad0.push(`${p} \u7AE5\u5E74\u884C\u4E3A\u65AD\u8A00\u300C${c}\u2026\u300D(\u4ECE\u5C0F\u53EA\u80FD\u63A5\u6C14\u8D28\u4E0D\u80FD\u63A5\u884C\u4E3A)`);
+    if (/你是\s*[EI][NS][TF][JP]\b/.test(v)) bad0.push(`${p} \u51FA\u73B0\u300C\u4F60\u662FX\u578B\u300D\u65AD\u8A00(\u987B\u7528\u6700\u50CF/\u5E95\u76D8)`);
+    for (const m of v.match(/\b[EI][NS][TF][JP]\b/g) || []) if (!allowed.has(m)) bad0.push(`${p} \u51FA\u73B0\u76D8\u5916\u7C7B\u578B ${m}(\u5141\u8BB8:${[...allowed].join("/")})`);
+  });
+  R["_\u5168\u5C40"] = { status: bad0.length ? "FAIL" : "PASS", reasons: bad0 };
+  for (const k of ["overview_html", "sanguan_html", "friends_html", "love_html", "work_html", "family_html", "hobbies_html"]) {
+    const v = a?.[k];
+    const bad = [];
+    if (v == null || v === "-") {
+      R[k] = { status: "FAIL", reasons: ["\u7F3A\u5B57\u6BB5"] };
+      continue;
+    }
+    const n = sentences(v).length;
+    if (n < 4) bad.push(`\u5E94\u22654\u53E5,\u5B9E\u9645${n}`);
+    if (!/hl-good|class="hl"/.test(v)) bad.push("\u65E0\u7740\u8272");
+    R[k] = { status: bad.length ? "FAIL" : "PASS", reasons: bad };
+  }
+  const tested = String(a?.meta?.tested_mbti || "").trim();
+  {
+    const dmGan = chart?.bazi?.siZhu?.day?.gan;
+    const imgs = dmGan && DM_IMG[dmGan] || [];
+    const hasImg = (txt) => imgs.some((k) => String(txt || "").includes(k));
+    if (imgs.length) {
+      if (a?.mbti_tagline && !hasImg(a.mbti_tagline)) bad0.push(`mbti_tagline \u672A\u843D\u65E5\u4E3B\u610F\u8C61(\u610F\u8C61\u5AC1\u63A5:${dmGan}=${imgs[0]}\u2026)`);
+      if (tested && a?.diff_verdict && !hasImg(a.diff_verdict) && a?.diff_html && !hasImg(a.diff_html)) bad0.push(`diff \u5224\u8BCD\u4E0E\u6B63\u6587\u5747\u672A\u51FA\u73B0\u65E5\u4E3B\u610F\u8C61(\u610F\u8C61\u5AC1\u63A5\u94C1\u5F8B:${dmGan}=${imgs[0]}\u2026)`);
+    }
+    const dom = chart?.bazi?.enrichment?.\u516B\u7EF4\u7ED3\u6784?.\u4E3B\u5BFC;
+    const domDesc = { Te: "\u5916\u5411\u601D\u7EF4", Ti: "\u5185\u5411\u601D\u7EF4", Fe: "\u5916\u5411\u60C5\u611F", Fi: "\u5185\u5411\u60C5\u611F", Se: "\u5916\u5411\u611F\u89C9", Si: "\u5185\u5411\u611F\u89C9", Ne: "\u5916\u5411\u76F4\u89C9", Ni: "\u6536\u655B\u6D1E\u5BDF" };
+    if (dom && a?.overview_html && !String(a.overview_html).includes(dom) && !String(a.overview_html).includes(domDesc[dom] || "\xA7"))
+      bad0.push(`overview \u672A\u70B9\u540D\u4E3B\u5BFC\u529F\u80FD ${dom}(\u53D9\u4E8B\u6846\u67B6:MBTI \u4E3A\u4E3B\u8F74,\u516B\u5B57\u4E3A\u843D\u951A)`);
+  }
+  if (tested) {
+    const dv = strip(String(a?.diff_verdict || ""));
+    const dvBad = [];
+    if (!dv) dvBad.push("\u7F3A diff_verdict \u5224\u8BCD");
+    else {
+      if (!dv.startsWith("\u4F60\u662F")) dvBad.push("\u5224\u8BCD\u987B\u4EE5\u300C\u4F60\u662F\u300D\u5F00\u5934");
+      if (dv.length > 34) dvBad.push(`\u5224\u8BCD\u8FC7\u957F(${dv.length}>30\u5B57)`);
+    }
+    R["diff_verdict"] = { status: dvBad.length ? "FAIL" : "PASS", reasons: dvBad };
+    const len = strip(String(a?.diff_html || "")).length;
+    R["diff_html"] = { status: len >= 400 && len <= 650 ? "PASS" : "FAIL", reasons: len >= 400 && len <= 650 ? [] : [`\u5DEE\u5F02\u7248\u5757\u5E94450~600\u5B57\u5DE6\u53F3(400-650\u5BB9\u5DEE),\u5B9E\u9645${len}`] };
+  }
+  return R;
+}
 function main() {
   const args = {};
   for (const x of process.argv.slice(2)) {
@@ -202,7 +287,7 @@ function main() {
   }
   const chart = JSON.parse(fs.readFileSync(args.chart, "utf-8"));
   const cy = args.currentYear ? +args.currentYear : (/* @__PURE__ */ new Date()).getFullYear();
-  const rep = checkAnalysis(a, chart, cy);
+  const rep = args.mode === "mbti" ? checkMbti(a, chart) : checkAnalysis(a, chart, cy);
   const fails = Object.entries(rep).filter(([, r]) => r.status === "FAIL");
   console.log(JSON.stringify({ \u7ED3\u8BBA: fails.length ? `FAIL\xD7${fails.length}(\u9001\u56DE\u8BC4\u5BA1\u904D\u91CD\u751F)` : "ALL PASS", \u660E\u7EC6: rep }, null, 2));
   process.exit(fails.length ? 1 : 0);
@@ -210,5 +295,6 @@ function main() {
 if (require.main === module) main();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  checkAnalysis
+  checkAnalysis,
+  checkMbti
 });

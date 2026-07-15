@@ -225,7 +225,7 @@ function dumpBazi(b, bi) {
     // enrichBazi 补层
     const en = b.enrichment;
     if (en) {
-        lines.push('├算法补层');
+        lines.push('├算法补层 〔幕后施工图:以下机制信息(依据/审计/协议/侧重/rubric)仅供你推理,严禁向用户展示或解释;用户只看结论〕');
         // 用神建议(v2.2 算法层裁决,LLM 只转述不取舍)
         const ya = en.用神建议;
         if (ya) {
@@ -237,6 +237,15 @@ function dumpBazi(b, bi) {
             if (ya.出口)
                 lines.push(`│ │ ├出口(单值裁决) : 开运用神[${(ya.出口.开运用神 || []).join('')}] 喜[${(ya.出口.喜神 || []).join('')}] 忌[${(ya.出口.忌神 || []).join('') || '无(临界)'}] 调候[${ya.出口.调候提示 || '-'}]${ya.出口.divergence ? '  ' + ya.出口.divergence : ''}${ya.出口.缺补说明 ? '  〔' + ya.出口.缺补说明 + '〕' : ''}`);
             lines.push(`│ │ └出文协议 : ${ya.出文协议 || ''}`);
+        }
+        // 八维结构(v2.8:MBTI 语言映射,「最像类型」照抄)
+        const bw = en.八维结构;
+        if (bw) {
+            lines.push(`│ ├八维结构(荣格八维·MBTI映射参考·类型照抄) : 最像【${bw.最像类型}】备选【${bw.备选类型}】置信${bw.置信} — 主导${bw.主导}/辅助${bw.辅助}`);
+            lines.push(`│ │ ├八维: ${bw.八维.map((x) => `${x.功能}${x.百分比}%`).join(' ')}`);
+            if (bw.依据)
+                lines.push(`│ │ ├依据: ${bw.依据}`);
+            lines.push(`│ │ └声明: ${bw.声明}`);
         }
         // 正缘倾向(v2.6:画像年龄照抄本判定,不得自行裁量)
         const zy = en.正缘倾向;

@@ -24,6 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkAnalysis = checkAnalysis;
+exports.checkMbti = checkMbti;
 // check-analysis.ts — 海报 analysis.json 确定性体检(评审—重生 Pass 的脚本侧) v1
 // ---------------------------------------------------------------------------
 // 分工:本脚本查机器可判的形态红线(合法性/禁词/句式/白名单/着色/计数);
@@ -34,6 +35,17 @@ exports.checkAnalysis = checkAnalysis;
 const fs = __importStar(require("fs"));
 const strip = (s) => String(s || '').replace(/<[^>]+>/g, '');
 const sentences = (s) => strip(s).split(/[。！？!?]/).map(x => x.trim()).filter(Boolean);
+// v3.2.3(用户定) 童年断言细则:「从小」只能接气质不能接行为——童年限定词与可证伪动作词同句即违规
+const CHILD_MARK = /(从小|小时候|打小|孩提|学生时代|少年时|童年)/;
+const CHILD_ACT = /(习惯|牵头|攒局|张罗|带头|组织|分工|派活|主持|带队|发起|当班长|当过|干过|做过|拉着|老是|总能把|就爱管)/;
+function childhoodViolations(text) {
+    const out = [];
+    for (const sent of String(text).replace(/<[^>]+>/g, '').split(/[。！？!?\n]/)) {
+        if (CHILD_MARK.test(sent) && CHILD_ACT.test(sent))
+            out.push(sent.trim().slice(0, 40));
+    }
+    return out;
+}
 function checkAnalysis(a, chart, currentYear) {
     const R = {};
     const put = (k, bad, warn = []) => {
@@ -51,6 +63,8 @@ function checkAnalysis(a, chart, currentYear) {
     }
     // ---- 全局禁词(所有解读字段) ----
     const FORBID_ALL = ['tier', 'needs_review', 'lineage_weights', '命主', '起法待核'];
+    const FORBID_FREQ = ['多半是你', '你总是', '你每次', '你从不', '你一定会', '第一个想到你'];
+    const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3加分', 'v4加分', '忌神折向', 'R1驿马', 'R2文', 'R3胎元', '评审遍', '体检器', '派系侧重', 'lineage'];
     const FORBID_SHUNNI = ['大凶', '灾年', '凶年', '凶星']; // 精读/时间轴措辞
     const walk = (obj, path, fn) => {
         if (typeof obj === 'string')
@@ -71,6 +85,14 @@ function checkAnalysis(a, chart, currentYear) {
                 for (const w of FORBID_SHUNNI)
                     if (v.includes(w))
                         bad.push(`${p} 含绝对断语「${w}」(应用顺风/逆风)`);
+            for (const w of FORBID_FREQ)
+                if (v.includes(w))
+                    bad.push(`${p} 含行为频率断言「${w}」(能力而非事迹:改写为能力/特质/潜力句式)`);
+            for (const w of FORBID_MECH)
+                if (v.includes(w))
+                    bad.push(`${p} 泄漏幕后机制词「${w}」(幕后台前分离:用户只看结论)`);
+            for (const c of childhoodViolations(v))
+                bad.push(`${p} 童年行为断言「${c}…」(细则:从小只能接气质不能接行为,动作可证伪)`);
         });
         put('_全局禁词', bad);
     }
@@ -229,6 +251,92 @@ function checkAnalysis(a, chart, currentYear) {
     }
     return R;
 }
+// ---- v2.8: mbti 海报体检(--mode=mbti) ----
+// v3.4 意象嫁接:十干→日主意象关键词(任一命中即算落锚)
+const DM_IMG = {
+    甲: ['大树', '参天', '乔木'], 乙: ['花草', '藤蔓', '藤', '花木'], 丙: ['太阳', '骄阳', '日光'], 丁: ['烛', '灯火', '星光'],
+    戊: ['高山', '山'], 己: ['田园', '田', '沃土', '园土'], 庚: ['刀', '剑', '斧钺'], 辛: ['珠玉', '玉', '珠', '金饰'],
+    壬: ['江河', '江', '河', '大水', '奔流'], 癸: ['雨露', '雨', '露', '甘霖'],
+};
+function checkMbti(a, chart) {
+    const R = {};
+    const bw = chart?.bazi?.enrichment?.八维结构 || {};
+    const allowed = new Set([bw.最像类型, bw.备选类型, String(a?.meta?.tested_mbti || '').toUpperCase()].filter(Boolean));
+    const bad0 = [];
+    const walk = (obj, path, fn) => {
+        if (typeof obj === 'string')
+            fn(path, obj);
+        else if (obj && typeof obj === 'object')
+            for (const k of Object.keys(obj))
+                walk(obj[k], path ? path + '.' + k : k, fn);
+    };
+    walk(a, '', (p, v) => {
+        for (const w of ['tier', 'needs_review', '命主是', '大凶', '灾年'])
+            if (v.includes(w))
+                bad0.push(`${p} 含「${w}」`);
+        for (const w of ['多半是你', '你总是', '你每次', '你从不', '你一定会', '第一个想到你'])
+            if (v.includes(w))
+                bad0.push(`${p} 含行为频率断言「${w}」`);
+        for (const w of ['rubric', '算法层', '映射矩阵', '出文协议', 'v3加分', 'v4加分', '忌神折向', '评审遍', '体检器', '派系侧重'])
+            if (v.includes(w))
+                bad0.push(`${p} 泄漏幕后机制词「${w}」`);
+        for (const c of childhoodViolations(v))
+            bad0.push(`${p} 童年行为断言「${c}…」(从小只能接气质不能接行为)`);
+        if (/你是\s*[EI][NS][TF][JP]\b/.test(v))
+            bad0.push(`${p} 出现「你是X型」断言(须用最像/底盘)`);
+        for (const m of v.match(/\b[EI][NS][TF][JP]\b/g) || [])
+            if (!allowed.has(m))
+                bad0.push(`${p} 出现盘外类型 ${m}(允许:${[...allowed].join('/')})`);
+    });
+    R['_全局'] = { status: bad0.length ? 'FAIL' : 'PASS', reasons: bad0 };
+    for (const k of ['overview_html', 'sanguan_html', 'friends_html', 'love_html', 'work_html', 'family_html', 'hobbies_html']) {
+        const v = a?.[k];
+        const bad = [];
+        if (v == null || v === '-') {
+            R[k] = { status: 'FAIL', reasons: ['缺字段'] };
+            continue;
+        }
+        const n = sentences(v).length;
+        if (n < 4)
+            bad.push(`应≥4句,实际${n}`);
+        if (!/hl-good|class="hl"/.test(v))
+            bad.push('无着色');
+        R[k] = { status: bad.length ? 'FAIL' : 'PASS', reasons: bad };
+    }
+    const tested = String(a?.meta?.tested_mbti || '').trim();
+    // v3.4 意象嫁接 + MBTI 主轴(用户定)
+    {
+        const dmGan = chart?.bazi?.siZhu?.day?.gan;
+        const imgs = (dmGan && DM_IMG[dmGan]) || [];
+        const hasImg = (txt) => imgs.some(k => String(txt || '').includes(k));
+        if (imgs.length) {
+            if (a?.mbti_tagline && !hasImg(a.mbti_tagline))
+                bad0.push(`mbti_tagline 未落日主意象(意象嫁接:${dmGan}=${imgs[0]}…)`);
+            if (tested && a?.diff_verdict && !hasImg(a.diff_verdict) && a?.diff_html && !hasImg(a.diff_html))
+                bad0.push(`diff 判词与正文均未出现日主意象(意象嫁接铁律:${dmGan}=${imgs[0]}…)`);
+        }
+        const dom = chart?.bazi?.enrichment?.八维结构?.主导;
+        const domDesc = { Te: '外向思维', Ti: '内向思维', Fe: '外向情感', Fi: '内向情感', Se: '外向感觉', Si: '内向感觉', Ne: '外向直觉', Ni: '收敛洞察' };
+        if (dom && a?.overview_html && !String(a.overview_html).includes(dom) && !String(a.overview_html).includes(domDesc[dom] || '§'))
+            bad0.push(`overview 未点名主导功能 ${dom}(叙事框架:MBTI 为主轴,八字为落锚)`);
+    }
+    if (tested) {
+        const dv = strip(String(a?.diff_verdict || ''));
+        const dvBad = [];
+        if (!dv)
+            dvBad.push('缺 diff_verdict 判词');
+        else {
+            if (!dv.startsWith('你是'))
+                dvBad.push('判词须以「你是」开头');
+            if (dv.length > 34)
+                dvBad.push(`判词过长(${dv.length}>30字)`);
+        }
+        R['diff_verdict'] = { status: dvBad.length ? 'FAIL' : 'PASS', reasons: dvBad };
+        const len = strip(String(a?.diff_html || '')).length;
+        R['diff_html'] = { status: (len >= 400 && len <= 650) ? 'PASS' : 'FAIL', reasons: (len >= 400 && len <= 650) ? [] : [`差异版块应450~600字左右(400-650容差),实际${len}`] };
+    }
+    return R;
+}
 function main() {
     const args = {};
     for (const x of process.argv.slice(2)) {
@@ -250,7 +358,7 @@ function main() {
     }
     const chart = JSON.parse(fs.readFileSync(args.chart, 'utf-8'));
     const cy = args.currentYear ? +args.currentYear : new Date().getFullYear();
-    const rep = checkAnalysis(a, chart, cy);
+    const rep = (args.mode === 'mbti') ? checkMbti(a, chart) : checkAnalysis(a, chart, cy);
     const fails = Object.entries(rep).filter(([, r]) => r.status === 'FAIL');
     console.log(JSON.stringify({ 结论: fails.length ? `FAIL×${fails.length}(送回评审遍重生)` : 'ALL PASS', 明细: rep }, null, 2));
     process.exit(fails.length ? 1 : 0);

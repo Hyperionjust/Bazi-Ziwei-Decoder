@@ -426,6 +426,12 @@
   .ky-row .ky-v .avoid { color: var(--vermillion); }
   .ys-divergence { font-size: 10px; color: var(--warn, #c97c3a); line-height: 1.7; margin-top: 4px; }
   .ys-divergence:empty { display: none; }
+  .mbti-mini { display: flex; gap: 18px; align-items: flex-start; }
+  .mbti-type { font-size: 54px; font-weight: 900; color: var(--indigo); letter-spacing: 4px; line-height: 1; padding-top: 4px; }
+  .mbti-meta { flex: 1; font-size: 11px; color: var(--ink-soft); line-height: 1.9; }
+  .mbti-bars { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; }
+  .mbti-bars span { font-size: 10px; } .mbti-bars b { color: var(--ink); }
+  .mbti-note { font-size: 9.5px; color: var(--ink-faint); border-top: 1px dashed var(--line-faint); padding-top: 5px; margin-top: 3px; }
   .ky-note { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line-faint); font-size: 11px; line-height: 1.9; color: var(--ink-soft); }
   .ky-tag { display: inline-block; padding: 1px 8px; margin: 0 3px 3px 0; border: 1px solid var(--line-soft); border-radius: 3px; font-size: 11px; color: var(--ink); background: rgba(255,255,255,0.5); }
 
@@ -771,6 +777,19 @@
       <div class="ky-note">{{kaiyun.note_html}}</div>
     </section>
   </div>
+
+  <!-- ============ 10 你最像的是(八维映射·算法注入) ============ -->
+  <section class="section">
+    <h2><span class="num-box">10</span>你最像的是 <small>（荣格八维 × 十神能量 · 映射参考，非测评结果）</small></h2>
+    <div class="mbti-mini">
+      <div class="mbti-type num">{{mbti.type}}</div>
+      <div class="mbti-meta">
+        <div>备选 <b class="num">{{mbti.alt}}</b> · 置信{{mbti.conf}} · 主导{{mbti.dom}} / 辅助{{mbti.aux}}</div>
+        <div class="mbti-bars">{{mbti.bars_html}}</div>
+        <div class="mbti-note">先天能量结构在 MBTI 语言里的最近类型；实测类型受环境塑造可能不同——想深挖可生成「八字 MBTI 海报」。</div>
+      </div>
+    </div>
+  </section>
 
   <!-- ============ FOOTER ============ -->
   <div class="footer-disclaim">

@@ -7,6 +7,7 @@ import { analyzeYunSui, gzVsChart, suiVsYun } from '../bazi-enrich/yunsui';
 import { enrichBazi } from '../bazi-enrich/enrich';
 import { detectRarePatterns } from '../bazi-enrich/rare';
 import { judgeSpouseProfile } from '../bazi-enrich/zhengyuan';
+import { judgeBaWei } from '../bazi-enrich/bawei';
 import * as fs from 'fs'; import * as path from 'path';
 
 const lin = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'lineages.json'), 'utf-8'));
@@ -107,6 +108,88 @@ const M1 = {年:{gan:'甲',zhi:'寅'},月:{gan:'丙',zhi:'子'},日:{gan:'甲',z
 const z2 = judgeSpouseProfile(M1, 'male');
 ok(z2.年龄倾向==='年轻', `男命财星独现时柱→年轻: ${z2.年龄倾向}`);
 ok(JSON.stringify(judgeSpouseProfile(F1,'female'))===JSON.stringify(z1), '正缘判定可复现');
+
+// 18) v2.8 八维结构
+const BW = judgeBaWei({年:{gan:'甲',zhi:'子'},月:{gan:'丙',zhi:'寅'},日:{gan:'戊',zhi:'申'},时:{gan:'癸',zhi:'丑'}} as any);
+ok(/^[EI][NS][TF][JP]$/.test(BW.最像类型) && /^[EI][NS][TF][JP]$/.test(BW.备选类型), `八维输出合法类型: ${BW.最像类型}/${BW.备选类型}`);
+ok(BW.八维.length===8 && Math.abs(BW.八维.reduce((a,b)=>a+b.百分比,0)-100)<=4, '八维八项且百分比≈100');
+ok(JSON.stringify(judgeBaWei({年:{gan:'甲',zhi:'子'},月:{gan:'丙',zhi:'寅'},日:{gan:'戊',zhi:'申'},时:{gan:'癸',zhi:'丑'}} as any))===JSON.stringify(BW), '八维可复现');
+const EXTR=['Te','Fe','Se','Ne'], PERC=['Se','Si','Ne','Ni'];
+ok(EXTR.includes(BW.主导)!==EXTR.includes(BW.辅助) && PERC.includes(BW.主导)!==PERC.includes(BW.辅助), '功能栈约束:主辅内外相反且判断感知相反');
+
+// 19) v3.1 rubric 验收盘(假想盘·合成,无真实出生对应;历法自洽:甲年正月丙寅/戊日癸丑时):甲子 丙寅 戊申 癸丑
+const RB = {年:{gan:'甲',zhi:'子'},月:{gan:'丙',zhi:'寅'},日:{gan:'戊',zhi:'申'},时:{gan:'癸',zhi:'丑'}} as any;
+const RBctx = { shenshaHits: [
+  {id:'yima', pillars:['月'], needs_review:false},
+  {id:'wenchang_guiren', pillars:['月'], needs_review:false},
+  {id:'xuetang_ciguan', pillars:['月'], needs_review:false},
+  {id:'dexiu_guiren', pillars:['年','月','日','时'], needs_review:false},
+], rare: [{名:'德秀满盘'}], taiYuan:'丁巳', mingGong:'丙寅' };
+const rbV2 = judgeBaWei(RB, 'male', {...RBctx, rubric:'v2'} as any);
+const rbV2b = judgeBaWei(RB, 'male', {rubric:'v2'} as any);
+const rbV3 = judgeBaWei(RB, 'male', {...RBctx, rubric:'v3'} as any);
+const sc = (r:any,f:string)=>r.八维.find((x:any)=>x.功能===f).得分;
+const V2SNAP: Record<string,number> = {"Te":5.95,"Si":1.96,"Se":1.86,"Ni":1.82,"Ti":0.78,"Fi":0.72,"Ne":0.41,"Fe":0.09};
+ok(rbV2.八维.every((x:any)=>Math.abs(x.得分-V2SNAP[x.功能])<1e-9), 'v2 开关与旧版快照逐位一致');
+ok(JSON.stringify(rbV2)===JSON.stringify(rbV2b), 'v2 忽略 R1-R3 上下文(有无 opts 同)');
+ok(sc(rbV3,'Ne') > sc(rbV2,'Ne'), `Ne 严格高于 v2(${sc(rbV2,'Ne')}→${sc(rbV3,'Ne')})`);
+const aud = rbV3.依据.includes('v3加分:') ? rbV3.依据.split('v3加分:')[1].split(';⚠')[0] : '';
+ok(['R1驿马×1 Ne+0.15','R2文昌贵人×1','R2学堂词馆×1','R2德秀贵人×4','R3胎元丁巳','R3命宫丙寅'].every(k=>aud.includes(k)), '加分来源恰为 R1驿马×1+R2三笔(计数制)+R3两虚柱');
+ok((aud.match(/R1/g)||[]).length===1 && (aud.match(/R2/g)||[]).length===3 && (aud.match(/R3/g)||[]).length===2 && !aud.includes('满盘'), '无多余加分笔目(满盘不再另计)');
+// 19b) v3.2.1 四柱全见抬顶: 德秀×4 在盘→封顶 0.60→0.80,文昌0.15+学堂0.15+德秀0.40=0.70≤0.80 全额入账
+ok(aud.includes('R2德秀贵人×4 Ne+0.40/Ni+0.40'), '四柱全见抬顶:德秀×4 实得全额+0.40');
+// 19b2) 无×4 时仍 0.60 封顶: 三项各×3(0.30×3=0.90)→第三笔只进 0.60-0.60=0
+const capCtx = { shenshaHits: [
+  {id:'wenchang_guiren', pillars:['年','月','日'], needs_review:false},
+  {id:'xuetang_ciguan', pillars:['年','月','日'], needs_review:false},
+  {id:'dexiu_guiren', pillars:['年','月','日'], needs_review:false},
+] };
+const capR = judgeBaWei(RB, 'male', {...capCtx, rubric:'v3'} as any);
+const capB = judgeBaWei(RB, 'male', {rubric:'v3'} as any);
+ok(Math.abs(sc(capR,'Ni')-sc(capB,'Ni')-0.60)<1e-9, '无×4 时 R2 仍 0.60 封顶(0.90 名义→0.60 实得)');
+// 19c) R4 性情类神煞计数制 + 排除项
+const R4ctx = { shenshaHits: [
+  {id:'huagai', pillars:['年','日'], needs_review:false},
+  {id:'jiangxing', pillars:['月'], needs_review:false},
+  {id:'taohua_xianchi', pillars:['年','日','时'], needs_review:false},
+  {id:'yangren', pillars:['日'], needs_review:false},
+  {id:'tianyi_guiren', pillars:['年','时'], needs_review:false},
+] };
+const r4 = judgeBaWei(RB, 'male', {...R4ctx, rubric:'v3'} as any);
+const r4base = judgeBaWei(RB, 'male', {rubric:'v3'} as any);
+ok(Math.abs(sc(r4,'Ni')-sc(r4base,'Ni')-0.20)<1e-9, 'R4华盖×2→Ni+0.20');
+ok(Math.abs(sc(r4,'Te')-sc(r4base,'Te')-0.15)<1e-9, 'R4将星×1→Te+0.15');
+ok(Math.abs(sc(r4,'Fe')-sc(r4base,'Fe')-0.30)<1e-9, 'R4桃花×3→Fe+0.30');
+ok(!r4.依据.includes('羊刃') && !r4.依据.includes('天乙'), 'R4排除项:羊刃(双计)/天乙(际遇象)不计分');
+ok(rbV3.声明.includes('v3 rubric'), '声明追加 v3 说明');
+ok(rbV3.最像类型 !== rbV2.最像类型 ? (rbV3.置信 !== '高' && rbV3.依据.includes('排序变化')) : true, 'v2/v3 类型不一致时降档+注明');
+ok(/^[EI][NS][TF][JP]$|^—$/.test(rbV3.备选2) && rbV3.备选2 !== rbV3.最像类型, '备选2 合法且≠最像');
+// 20) v4 rubric:R5格局复合/R6忌神折向/R7身弱E轴/R4华盖加重(v2/v3 逐位回退不动)
+const v4base = judgeBaWei(RB, 'male', {rubric:'v4'} as any);
+const v3base2 = judgeBaWei(RB, 'male', {rubric:'v3'} as any);
+// RB dm戊:年干甲=七杀,月干丙=偏印 → 杀印相生透干恒检出
+ok(v4base.依据.includes('R5杀印相生'), 'R5杀印相生:七杀+印透干自动检出');
+ok(Math.abs(sc(v4base,'Ni') - sc(v3base2,'Ni') - 0.20) < 1e-9, 'R5杀印相生给 Ni+0.20(无其他上下文时恰差0.20)');
+const v4ji = judgeBaWei(RB, 'male', {rubric:'v4', jiShen:['木']} as any);
+ok(sc(v4ji,'Te') < sc(v4base,'Te') && sc(v4ji,'Ni') > sc(v4base,'Ni') && sc(v4ji,'Fi') > sc(v4base,'Fi'), 'R6忌神折向:官杀(忌)→Ni/Fi,Te 降');
+ok(v4ji.依据.includes('R6忌神折向'), 'R6 有审计笔目');
+ok(!judgeBaWei(RB,'male',{rubric:'v3', jiShen:['木']} as any).依据.includes('R6'), 'v3 忽略 jiShen(回退开关不漏)');
+const v4weak = judgeBaWei(RB, 'male', {rubric:'v4', wangShuai:'偏弱'} as any);
+ok(Math.abs(sc(v4weak,'Te') - sc(v4base,'Te')*0.88) < 0.015 && Math.abs(sc(v4weak,'Se') - sc(v4base,'Se')*0.88) < 0.015, 'R7偏弱:E轴×0.88(±舍入界)');
+ok(Math.abs(sc(judgeBaWei(RB,'male',{rubric:'v4', wangShuai:'极弱(可能从弱)'} as any),'Se') - sc(v4base,'Se')*0.80) < 0.015, 'R7极弱:E轴×0.80(±舍入界)');
+ok(Math.abs(sc(v4weak,'Ni') - sc(v4base,'Ni')) < 1e-9 && Math.abs(sc(v4weak,'Si') - sc(v4base,'Si')) < 1e-9, 'R7 不动 I 轴');
+const hgHit = [{id:'huagai', pillars:['日'], needs_review:false}];
+ok(Math.abs(sc(judgeBaWei(RB,'male',{rubric:'v4', shenshaHits:hgHit} as any),'Ni') - sc(v4base,'Ni') - 0.30) < 1e-9, 'R4华盖×1 v4 加重为+0.30');
+ok(Math.abs(sc(judgeBaWei(RB,'male',{rubric:'v3', shenshaHits:hgHit} as any),'Ni') - sc(v3base2,'Ni') - 0.15) < 1e-9, 'v3 华盖仍+0.15(回退不动)');
+// dm甲:丁=伤官+癸=正印 → 伤官佩印;丙=食神+庚=七杀 → 食神制杀
+ok(judgeBaWei({年:{gan:'丁',zhi:'卯'},月:{gan:'癸',zhi:'亥'},日:{gan:'甲',zhi:'子'},时:{gan:'乙',zhi:'丑'}} as any,'male',{rubric:'v4'} as any).依据.includes('R5伤官佩印'), 'R5伤官佩印检出(Ni+0.20,Fi+0.10)');
+ok(judgeBaWei({年:{gan:'丙',zhi:'寅'},月:{gan:'庚',zhi:'午'},日:{gan:'甲',zhi:'申'},时:{gan:'乙',zhi:'亥'}} as any,'male',{rubric:'v4'} as any).依据.includes('R5食神制杀'), 'R5食神制杀检出(Ti+0.20)');
+
+// 留档:既有合成盘 v2→v3 类型变化
+for (const [nm, sz] of [['盘A',{年:{gan:'甲',zhi:'子'},月:{gan:'丙',zhi:'寅'},日:{gan:'戊',zhi:'申'},时:{gan:'癸',zhi:'丑'}}],['盘B',{年:{gan:'丙',zhi:'子'},月:{gan:'甲',zhi:'午'},日:{gan:'己',zhi:'卯'},时:{gan:'乙',zhi:'亥'}}],['盘C',{年:{gan:'庚',zhi:'申'},月:{gan:'乙',zhi:'酉'},日:{gan:'甲',zhi:'申'},时:{gan:'庚',zhi:'午'}}]] as any[]) {
+  const a=judgeBaWei(sz,'male',{rubric:'v2'} as any).最像类型, b=judgeBaWei(sz,'male',{rubric:'v3'} as any).最像类型;
+  console.log(`  [留档] ${nm}: v2=${a} → v3=${b}${a!==b?' (变化)':''}`);
+}
 
 console.log(failed===0 ? `\n✅ 全部通过` : `\n❌ ${failed} 个失败`);
 process.exit(failed===0?0:1);

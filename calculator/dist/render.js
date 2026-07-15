@@ -464,6 +464,25 @@ function chartToFlatBazi(chart, currentYear) {
     out['hechong.reading_html'] = '-';
     out['yunsui.reading_html'] = '-';
     out['shensha.reading_html'] = '-';
+    // v2.8: 「你最像的是」小版块(全算法注入)
+    const bw = en.八维结构;
+    if (bw) {
+        out['mbti.type'] = bw.最像类型;
+        out['mbti.alt'] = bw.备选类型;
+        out['mbti.alt2'] = bw.备选2 || '—';
+        out['mbti.conf'] = bw.置信;
+        out['mbti.dom'] = bw.主导;
+        out['mbti.aux'] = bw.辅助;
+        out['mbti.bars_html'] = (bw.八维 || []).slice(0, 4).map((x) => `<span><b>${x.功能}</b> ${x.百分比}%</span>`).join(' ');
+    }
+    else {
+        out['mbti.type'] = '-';
+        out['mbti.alt'] = '-';
+        out['mbti.conf'] = '-';
+        out['mbti.dom'] = '-';
+        out['mbti.aux'] = '-';
+        out['mbti.bars_html'] = '';
+    }
     const dyArr = (bz.dayun || []).slice(0, 10);
     let curDy = null;
     for (const d of dyArr)
@@ -636,6 +655,182 @@ function analysisToFlatBazi(a) {
             out[`liunian.${i}.luck_class`] = v; });
     return out;
 }
+// ===================== MBTI POSTER (--mode=mbti) v2.8 =====================
+// v2.8.2: 古风 MBTI 人物(16p 扁平画风×汉服),按四大类群换装换道具,E/I 定神态,确定性生成
+function guFengCharSvg(type, gender) {
+    // v3.1.2: 正面低多边形站姿(回退 v3.1.0 构图) + 16 型服装全差异:
+    //   袍系×道具=四类群 | 袍色明暗+披帛=E/I | 头饰=SJ乌纱/N系J方冠/N系P逍遥巾/SP斗笠 | 腰佩=T剑柄/F玉环流苏
+    // v3.3: 分男女(32 变体)——女版换发式头饰(高髻步摇/单髻玉簪/双环髻/束发红绳)+鬓发耳坠花钿+裙摆,身体几何不动防叠压
+    const t = (type || 'XXXX').toUpperCase();
+    const F = gender === 'female' || gender === '女';
+    const N = t[1] === 'N', T = t[2] === 'T', J = t[3] === 'J', E = t[0] === 'E';
+    const grp = N ? (T ? 'NT' : 'NF') : (J ? 'SJ' : 'SP');
+    const C = {
+        NT: { m: '#6b5b8e', d: '#544672', dd: '#41365c', l: '#8d7db0', acc: '#b7a9d6', label: '军师' },
+        NF: { m: '#4a7c4e', d: '#3a633d', dd: '#2c4e2f', l: '#699e6d', acc: '#a9cbaa', label: '文士' },
+        SJ: { m: '#2a4a72', d: '#1f3a5c', dd: '#162c47', l: '#476a94', acc: '#9db6d4', label: '朝官' },
+        SP: { m: '#a0672a', d: '#835420', dd: '#684218', l: '#c08544', acc: '#e0b97f', label: '游侠' },
+    }[grp];
+    // E 亮袍 / I 深袍
+    const RM = E ? C.m : C.d; // 袍主面
+    const RL = E ? C.l : C.m; // 亮侧
+    const RD = E ? C.d : C.dd; // 暗侧/袖
+    const skin = '#f2d9bd', skinD = '#e3c19e', hair = '#3a3430', hairL = '#57504a', paper = '#f3ead7', paperD = '#ded2b6';
+    const eyes = E
+        ? `<circle cx="52.5" cy="38" r="2" fill="${hair}"/><circle cx="67.5" cy="38" r="2" fill="${hair}"/>`
+        : `<path d="M49,38 Q52.5,40.6 56,38" stroke="${hair}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M64,38 Q67.5,40.6 71,38" stroke="${hair}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    const smile = F
+        ? (E
+            ? `<path d="M55.5,46 Q60,49.5 64.5,46" stroke="#b8524a" stroke-width="2" fill="none" stroke-linecap="round"/>`
+            : `<path d="M57,46.8 Q60,48.8 63,46.8" stroke="#b8524a" stroke-width="1.8" fill="none" stroke-linecap="round"/>`)
+        : (E
+            ? `<path d="M54,45.5 Q60,50 66,45.5" stroke="${hair}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
+            : `<path d="M56,46.5 Q60,49 64,46.5" stroke="${hair}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
+    // 头饰:SJ=乌纱 | N系 J=进贤方冠 P=逍遥巾飘带 | SP=发髻+背后斗笠
+    // 女版头饰:SJ=高髻金步摇 | N系 J=单髻玉簪 P=双环髻飘带 | SP=高髻红绳+背后斗笠
+    let headwear = '';
+    if (F) {
+        if (grp === 'SJ') {
+            headwear = `<circle cx="60" cy="8" r="5.5" fill="${hair}"/><circle cx="62.5" cy="6" r="2" fill="${hairL}"/>
+        <line x1="60" y1="6.5" x2="72" y2="2" stroke="#c9b96a" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="72" y1="2" x2="73" y2="9" stroke="#c9b96a" stroke-width="1"/>
+        <circle cx="73" cy="10.5" r="1.5" fill="#c9b96a"/><circle cx="73.4" cy="14" r="1.1" fill="#c9b96a"/>`;
+        }
+        else if (N && J) {
+            headwear = `<circle cx="60" cy="8" r="5" fill="${hair}"/><circle cx="62" cy="6.5" r="1.8" fill="${hairL}"/>
+        <line x1="49" y1="7" x2="73" y2="9.5" stroke="#79a88b" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="48" cy="6.8" r="1.7" fill="#79a88b"/>`;
+        }
+        else if (N && !J) {
+            headwear = `<circle cx="52" cy="8" r="4.4" fill="none" stroke="${hair}" stroke-width="3"/>
+        <circle cx="68" cy="8" r="4.4" fill="none" stroke="${hair}" stroke-width="3"/>
+        <polygon points="70,7 88,3 90,8 71,11" fill="${C.acc}" opacity="0.9"/>`;
+        }
+        else {
+            headwear = `<polygon points="60,2 67,9 60,15 53,9" fill="${hair}"/><polygon points="60,2 67,9 60,12" fill="${hairL}"/>
+        <line x1="54.5" y1="11" x2="65.5" y2="11" stroke="#c1432f" stroke-width="1.8" stroke-linecap="round"/>
+        <polygon points="78,26 108,30 92,52 80,44" fill="#c9a86a"/><polygon points="78,26 92,52 84,50 76,36" fill="#b08e50"/>
+        <line x1="82" y1="30" x2="70" y2="60" stroke="#8b6f47" stroke-width="1.6"/>`;
+        }
+    }
+    else if (grp === 'SJ') {
+        headwear = `<polygon points="47,21 73,21 70,9 50,9" fill="${hair}"/><polygon points="60,9 70,9 73,21 60,21" fill="${hairL}"/>
+      <polygon points="43,21 77,21 75,26 45,26" fill="${hair}"/>
+      <polygon points="18,19 42,18 42,24 20,25" fill="${hair}"/><polygon points="78,18 102,19 100,25 78,24" fill="${hairL}"/>`;
+    }
+    else if (N && J) {
+        headwear = `<polygon points="52,14 68,14 66,4 54,4" fill="${C.dd}"/><polygon points="60,4 66,4 68,14 60,14" fill="${C.d}"/>
+      <polygon points="50,14 70,14 69,18 51,18" fill="${C.acc}"/>
+      <line x1="47" y1="16" x2="73" y2="16" stroke="${hairL}" stroke-width="1.2"/>`;
+    }
+    else if (N && !J) {
+        // v3.3.2: 飘带改单条连体(原两截式尾三角悬空似污点),左侧束带锚进发髻不外飘
+        headwear = `<polygon points="60,3 68,10 60,16 52,10" fill="${hair}"/><polygon points="60,3 68,10 60,13" fill="${hairL}"/>
+      <polygon points="66,8 82,5 94,10 90,14 80,10 68,13" fill="${C.acc}"/>
+      <line x1="53" y1="10" x2="61" y2="12" stroke="${C.acc}" stroke-width="2.2" stroke-linecap="round"/>`;
+    }
+    else { // SP:发髻+背后斗笠
+        headwear = `<polygon points="60,3 68,10 60,16 52,10" fill="${hair}"/><polygon points="60,3 68,10 60,13" fill="${hairL}"/>
+      <polygon points="78,26 108,30 92,52 80,44" fill="#c9a86a"/><polygon points="78,26 92,52 84,50 76,36" fill="#b08e50"/>
+      <line x1="82" y1="30" x2="70" y2="60" stroke="#8b6f47" stroke-width="1.6"/>`;
+    }
+    // 腰佩:T=剑柄 / F=玉环流苏
+    const waist = T
+        ? `<g transform="rotate(20 31 106)"><circle cx="31" cy="95" r="2" fill="#c9b96a"/><polygon points="29,96 33,96 32,105 30,105" fill="#6b5b46"/><polygon points="25,104 37,103 36,107 26,108" fill="#c9b96a"/></g>`
+        : `<circle cx="33" cy="112" r="3.8" fill="none" stroke="#79a88b" stroke-width="2.2"/><line x1="33" y1="116" x2="31" y2="126" stroke="#79a88b" stroke-width="1.5"/><line x1="33" y1="116" x2="35" y2="125" stroke="#79a88b" stroke-width="1.5"/><line x1="33" y1="116" x2="33" y2="127" stroke="#c1432f" stroke-width="1.5"/>`;
+    // 披帛(E 独有,亮色绕肩)
+    const sash = E
+        ? `<polygon points="44,68 50,70 43,104 37,102" fill="${C.acc}" opacity="0.85"/><polygon points="76,68 70,70 77,104 83,102" fill="${C.acc}" opacity="0.85"/>`
+        : '';
+    const prop = {
+        NT: `<g transform="rotate(14 92 98)"><polygon points="92,96 82,74 92,70 102,74" fill="#fbf7ee" stroke="${C.d}" stroke-width="1.2"/><polygon points="92,96 92,70 102,74" fill="${paperD}"/><line x1="92" y1="96" x2="92" y2="107" stroke="#8b6f47" stroke-width="2.8" stroke-linecap="round"/></g>`,
+        NF: `<g><polygon points="46,96 74,94 75,103 47,105" fill="${paper}"/><polygon points="60,95 74,94 75,103 60,104" fill="${paperD}"/><polygon points="43,95 48,95 48,106 43,106" fill="#cbbc9c"/><polygon points="72,94 77,94 77,104 72,104" fill="#cbbc9c"/></g>`,
+        SJ: `<g transform="rotate(-6 60 100)"><polygon points="55,91 65,90 67,110 53,111" fill="${paper}"/><polygon points="60,90.5 65,90 67,110 60,110.5" fill="${paperD}"/></g>`,
+        SP: `<g><polygon points="90,86 95,92 90,97 85,92" fill="#b5651d"/><polygon points="90,95 97,102 90,109 83,102" fill="#b5651d"/><polygon points="90,95 97,102 90,109" fill="#9a5518"/><line x1="90" y1="88" x2="82" y2="79" stroke="#c1432f" stroke-width="1.6"/></g>`,
+    };
+    return `<svg viewBox="0 0 120 150" width="118" height="148" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t}·${C.label}">
+  <ellipse cx="60" cy="142" rx="34" ry="5.5" fill="rgba(0,0,0,0.09)"/>
+  <polygon points="12,58 22,50 30,56 40,51 44,59 28,64" fill="${C.acc}" opacity="0.30"/>
+  <polygon points="84,42 94,35 101,41 110,37 112,45 96,49" fill="${C.acc}" opacity="0.22"/>
+  <polygon points="60,62 80,72 86,132 60,140" fill="${RD}"/>
+  <polygon points="60,62 40,72 34,132 60,140" fill="${RM}"/>
+  <polygon points="40,72 34,132 22,127 32,79" fill="${RD}"/>
+  <polygon points="80,72 86,132 98,127 88,79" fill="${RL}"/>
+  ${F ? `<polygon points="34,132 60,140 86,132 91,139 60,147 29,139" fill="${RD}"/><polygon points="60,140 86,132 91,139 60,147" fill="${RM}" opacity="0.55"/>` : ''}
+  ${sash}
+  <polygon points="50,66 60,86 60,72 54,65" fill="${paper}"/>
+  <polygon points="70,66 60,86 60,72 66,65" fill="${paperD}"/>
+  <polygon points="36,78 20,98 33,112 52,103 46,86" fill="${RD}"/>
+  <polygon points="36,78 46,86 52,103 42,100" fill="${RM}"/>
+  <polygon points="84,78 100,98 87,112 68,103 74,86" fill="${RL}"/>
+  <polygon points="84,78 74,86 68,103 78,100" fill="${RM}"/>
+  <polygon points="47,96 73,96 69,109 51,109" fill="${RD}"/>
+  <polygon points="37,106 83,106 85,114 35,114" fill="${C.acc}"/>
+  <polygon points="56,106 64,106 66,114 54,114" fill="${paper}"/>
+  ${waist}
+  ${prop[grp]}
+  <polygon points="60,17 77,28 74,50 60,58" fill="${skinD}"/>
+  <polygon points="60,17 43,28 46,50 60,58" fill="${skin}"/>
+  <polygon points="57,40 60,34 63,40 60,47" fill="${skinD}"/>
+  <polygon points="43,29 60,17 77,29 74,22 60,11 46,22" fill="${hair}"/>
+  <polygon points="60,11 74,22 77,29 60,19" fill="${hairL}"/>
+  ${headwear}
+  ${eyes}
+  ${smile}
+  ${F ? `<polygon points="44,29 47,29 46,44 44,40" fill="${hair}"/><polygon points="76,29 73,29 74,44 76,40" fill="${hair}"/>
+  <line x1="46" y1="50" x2="46" y2="53.5" stroke="#c9b96a" stroke-width="1"/><circle cx="46" cy="54.6" r="1.3" fill="#79a88b"/>
+  <line x1="74" y1="50" x2="74" y2="53.5" stroke="#c9b96a" stroke-width="1"/><circle cx="74" cy="54.6" r="1.3" fill="#79a88b"/>
+  <polygon points="60,22.5 61.6,25 60,27.5 58.4,25" fill="#c1432f" opacity="0.65"/>` : ''}
+  <polygon points="45,43 50,42 49,47" fill="#e8a898" opacity="0.6"/>
+  <polygon points="75,43 70,42 71,47" fill="#e8a898" opacity="0.6"/>
+</svg>`;
+}
+const DM_LABEL = { 甲: '参天大树·甲木人', 乙: '花草藤蔓·乙木人', 丙: '太阳之火·丙火人', 丁: '烛火星光·丁火人', 戊: '高山厚土·戊土人', 己: '田园之土·己土人', 庚: '刀剑之金·庚金人', 辛: '珠玉之金·辛金人', 壬: '江河之水·壬水人', 癸: '雨露之水·癸水人' };
+function chartToFlatMbti(chart, currentYear) {
+    const out = {};
+    const bi = chart.bazi.birthInfo, bz = chart.bazi, en = bz.enrichment || {};
+    const p2 = (n) => String(n).padStart(2, '0');
+    out['meta.solar_date'] = `${bi.year}-${p2(bi.month)}-${p2(bi.day)} ${p2(bi.hour)}:${p2(bi.minute)}`;
+    out['meta.gender'] = bi.gender === 'male' ? '男' : '女';
+    out['meta.name'] = '命主';
+    for (const k of ['year', 'month', 'day', 'hour']) {
+        const gz = bz.siZhu[k];
+        out[`bazi.${k}.gan`] = gz.gan;
+        out[`bazi.${k}.zhi`] = gz.zhi;
+        out[`bazi.${k}.gan_wx`] = GAN_WX[gz.gan] || '-';
+        out[`bazi.${k}.zhi_wx`] = ZHI_WX[gz.zhi] || '-';
+    }
+    const bw = en.八维结构;
+    out['mbti.type'] = bw?.最像类型 || '-';
+    out['mbti.alt'] = bw?.备选类型 || '-';
+    out['mbti.alt2'] = bw?.备选2 || '—';
+    out['mbti.conf'] = bw?.置信 || '-';
+    out['mbti.dom'] = bw?.主导 || '-';
+    out['mbti.aux'] = bw?.辅助 || '-';
+    out['mbti.dm_label'] = DM_LABEL[bz.siZhu.day.gan] || '命主';
+    const top = (bw?.八维 || [])[0];
+    out['mbti.bars_rows_html'] = (bw?.八维 || []).map((x, i) => `<div class="bar-row${i === 0 ? ' top' : ''}"><span class="fn">${x.功能}</span><span class="desc">${x.说明}</span><span class="track"><span class="fill" style="width:${Math.min(100, x.百分比 * 3)}%"></span></span><span class="pct">${x.百分比}%</span></div>`).join('');
+    out['mbti.tagline'] = '-';
+    out['mbti.diff_section_html'] = '';
+    out['mbti.char_svg'] = guFengCharSvg(bw?.最像类型 || 'XXXX', bi.gender);
+    return out;
+}
+function analysisToFlatMbti(a, chart) {
+    const out = {};
+    if (a?.meta?.name)
+        out['meta.name'] = a.meta.name;
+    if (a?.mbti_tagline)
+        out['mbti.tagline'] = a.mbti_tagline;
+    for (const k of ['overview_html', 'sanguan_html', 'friends_html', 'love_html', 'work_html', 'family_html', 'hobbies_html'])
+        out[`m.${k}`] = a?.[k] != null ? a[k] : '-';
+    const tested = (a?.meta?.tested_mbti || '').toUpperCase().trim();
+    const type = chart?.bazi?.enrichment?.八维结构?.最像类型 || '';
+    if (/^[EI][NS][TF][JP]$/.test(tested) && a?.diff_html) {
+        const dv = a?.diff_verdict || '';
+        out['mbti.diff_section_html'] = `<section class="section"><h2><span class="num-box">09</span><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12,3 a4.5,4.5 0 0 0 0,9 a4.5,4.5 0 0 1 0,9"/><circle cx="12" cy="7.5" r="1.2" fill="var(--indigo)" stroke="none"/><circle cx="12" cy="16.5" r="1.2" stroke="none" fill="var(--paper)"/></svg>当实测遇上底盘 <small>（你提供的实测类型 × 盘面结构）</small></h2><div class="diff-hero"><span class="dt num">${tested}</span><span class="dx">×</span><span class="dt dt2 num">${type}</span></div>${dv ? `<div class="diff-verdict">${dv}</div>` : ''}<div class="prose">${a.diff_html}</div></section>`;
+    }
+    return out;
+}
 function renderTemplate(template, data) {
     let html = template;
     // 第一轮: 精确替换
@@ -650,7 +845,7 @@ function renderTemplate(template, data) {
 function main() {
     const args = parseArgs();
     if (!args.chart || !args.template) {
-        console.error('Usage: npx tsx render.ts --chart=chart.json [--analysis=analysis.json] --template=path/to/template.html [--output=out.html] [--mode=zonghe|bazi] [--currentYear=YYYY] [--name=命主姓名]');
+        console.error('Usage: npx tsx render.ts --chart=chart.json [--analysis=analysis.json] --template=path/to/template.html [--output=out.html] [--mode=zonghe|bazi|mbti] [--currentYear=YYYY] [--name=命主姓名] [--testedMBTI=XXXX]');
         process.exit(1);
     }
     const chart = JSON.parse(fs.readFileSync(args.chart, 'utf-8'));
@@ -658,7 +853,15 @@ function main() {
     const template = fs.readFileSync(args.template, 'utf-8');
     const mode = args.mode || 'zonghe';
     let data;
-    if (mode === 'bazi') {
+    if (mode === 'mbti') {
+        data = { ...chartToFlatMbti(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlatMbti(analysis, chart) };
+        if (args.testedMBTI && !data['mbti.diff_section_html'] && analysis?.diff_html) {
+            const t = String(args.testedMBTI).toUpperCase();
+            if (/^[EI][NS][TF][JP]$/.test(t))
+                data['mbti.diff_section_html'] = `<section class="section"><h2><span class="num-box">09</span><svg class="sec-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12,3 a4.5,4.5 0 0 0 0,9 a4.5,4.5 0 0 1 0,9"/><circle cx="12" cy="7.5" r="1.2" fill="var(--indigo)" stroke="none"/><circle cx="12" cy="16.5" r="1.2" stroke="none" fill="var(--paper)"/></svg>当实测遇上底盘</h2><div class="diff-hero"><span class="dt num">${t}</span><span class="dx">×</span><span class="dt dt2 num">${data['mbti.type']}</span></div>${analysis.diff_verdict ? `<div class="diff-verdict">${analysis.diff_verdict}</div>` : ''}<div class="prose">${analysis.diff_html}</div></section>`;
+        }
+    }
+    else if (mode === 'bazi') {
         const chartFlat = chartToFlatBazi(chart, args.currentYear ? +args.currentYear : undefined);
         const analysisFlat = analysisToFlatBazi(analysis);
         // v2.3: 算法已裁决的字段忽略 analysis 同名产出(同盘可复现)

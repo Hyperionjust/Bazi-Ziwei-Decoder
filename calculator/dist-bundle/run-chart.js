@@ -14110,6 +14110,216 @@ function judgeSpouseProfile(siZhu, gender) {
   return { \u5E74\u9F84\u503E\u5411: \u503E\u5411, \u7F6E\u4FE1, \u592B\u59BB\u661F: starLabel, \u661F\u4F4D, \u5BAB\u5750: gongSS || "-", \u4F9D\u636E };
 }
 
+// bazi-enrich/bawei.ts
+var MAP = {
+  \u6BD4\u80A9: ["Fi", "Si"],
+  \u52AB\u8D22: ["Te", "Se"],
+  // 劫财主竞争性资源调度与执行推进(Te),行动冲劲为次象(Se)【用户修订 v3.1.1】
+  \u98DF\u795E: ["Si", "Fi"],
+  \u4F24\u5B98: ["Ne", "Fe"],
+  \u6B63\u8D22: ["Te", "Si"],
+  \u504F\u8D22: ["Se", "Ne"],
+  \u6B63\u5B98: ["Fe", "Te"],
+  \u4E03\u6740: ["Te", "Se"],
+  \u6B63\u5370: ["Si", "Ni"],
+  \u504F\u5370: ["Ni", "Ti"]
+};
+var FN_DESC = {
+  Te: "\u5916\u5411\u601D\u7EF4\xB7\u7EC4\u7EC7\u6267\u884C",
+  Ti: "\u5185\u5411\u601D\u7EF4\xB7\u539F\u7406\u63A8\u6F14",
+  Fe: "\u5916\u5411\u60C5\u611F\xB7\u5173\u7CFB\u548C\u8C10",
+  Fi: "\u5185\u5411\u60C5\u611F\xB7\u4EF7\u503C\u575A\u5B88",
+  Se: "\u5916\u5411\u611F\u89C9\xB7\u5F53\u4E0B\u884C\u52A8",
+  Si: "\u5185\u5411\u611F\u89C9\xB7\u7ECF\u9A8C\u6C89\u6DC0",
+  Ne: "\u5916\u5411\u76F4\u89C9\xB7\u53D1\u6563\u8054\u60F3",
+  Ni: "\u5185\u5411\u76F4\u89C9\xB7\u6536\u655B\u6D1E\u5BDF"
+};
+var EXTRAV = ["Te", "Fe", "Se", "Ne"];
+var PERCEIVING = ["Se", "Si", "Ne", "Ni"];
+var TYPE = {
+  "Ni+Te": "INTJ",
+  "Ni+Fe": "INFJ",
+  "Ne+Ti": "ENTP",
+  "Ne+Fi": "ENFP",
+  "Si+Te": "ISTJ",
+  "Si+Fe": "ISFJ",
+  "Se+Ti": "ESTP",
+  "Se+Fi": "ESFP",
+  "Te+Ni": "ENTJ",
+  "Te+Si": "ESTJ",
+  "Fe+Ni": "ENFJ",
+  "Fe+Si": "ESFJ",
+  "Ti+Ne": "INTP",
+  "Ti+Se": "ISTP",
+  "Fi+Ne": "INFP",
+  "Fi+Se": "ISFP"
+};
+function judgeBaWei(siZhu, gender, opts) {
+  const rubric = opts?.rubric === "v2" ? "v2" : opts?.rubric === "v3" ? "v3" : "v4";
+  const dm = siZhu.\u65E5.gan;
+  const score = { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 };
+  const JI_REDIRECT = { \u6B63\u5B98: ["Fi", "Ni"], \u4E03\u6740: ["Ni", "Fi"] };
+  const jiSet = new Set(opts?.jiShen || []);
+  let r6w = 0;
+  const pairOf = (ss, gan) => {
+    if (rubric === "v4" && JI_REDIRECT[ss] && jiSet.has(GAN_WUXING[gan])) return JI_REDIRECT[ss];
+    return MAP[ss];
+  };
+  const add = (ss, w, gan) => {
+    const pr = pairOf(ss, gan);
+    if (pr !== MAP[ss]) r6w += w;
+    score[pr[0]] += w * 0.7;
+    score[pr[1]] += w * 0.3;
+  };
+  const srcNotes = [];
+  for (const p of ["\u5E74", "\u6708", "\u65F6"]) {
+    const ss = getShiShen2(dm, siZhu[p].gan);
+    add(ss, 2, siZhu[p].gan);
+    srcNotes.push(`${p}\u5E72${ss}`);
+  }
+  for (const p of ["\u5E74", "\u6708", "\u65E5", "\u65F6"]) {
+    const cg = ZHI_CANG_GAN[siZhu[p].zhi];
+    cg.forEach((c, i) => {
+      const ss = getShiShen2(dm, c.gan);
+      const w = p === "\u6708" && i === 0 ? 1.5 : i === 0 ? 1 : i === 1 ? 0.6 : 0.3;
+      add(ss, w, c.gan);
+    });
+  }
+  const isYang = GAN_YINYANG[dm] === "\u9633";
+  for (const f of Object.keys(score)) {
+    if (EXTRAV.includes(f) === isYang) score[f] *= 1.05;
+  }
+  const audit = [];
+  if (rubric === "v4" && r6w > 0) audit.push(`R6\u5FCC\u795E\u6298\u5411:\u5B98\u6740(\u5FCC)\u5171${Math.round(r6w * 100) / 100}\u6743\u91CD\u2192\u627F\u538B\u5185\u5316(\u6B63\u5B98\u2192Fi/Ni,\u4E03\u6740\u2192Ni/Fi)`);
+  if (rubric !== "v2") {
+    const hits = opts?.shenshaHits || [];
+    const hit = (id) => hits.find((h) => h.id === id && !h.needs_review);
+    const SCHED = [0, 0.15, 0.2, 0.3, 0.4];
+    const cnt = (h) => Math.min(Math.max(1, (h.pillars || []).length), 4);
+    const ym = hit("yima");
+    if (ym) {
+      const n = cnt(ym), v = SCHED[n];
+      score.Ne += v;
+      audit.push(`R1\u9A7F\u9A6C\xD7${n} Ne+${v.toFixed(2)}(\u6C42\u53D8\u6C42\u65B0\u4E4B\u8C61\u5F52Ne,\u975ESe\u884C\u52A8\u8C61)`);
+    }
+    const R2_IDS = [["wenchang_guiren", "\u6587\u660C\u8D35\u4EBA"], ["xuetang_ciguan", "\u5B66\u5802\u8BCD\u9986"], ["dexiu_guiren", "\u5FB7\u79C0\u8D35\u4EBA"]];
+    const r2Cap = R2_IDS.some(([id]) => {
+      const h = hit(id);
+      return !!h && cnt(h) === 4;
+    }) ? 0.8 : 0.6;
+    let r2Ne = 0, r2Ni = 0;
+    const r2add = (name, v) => {
+      const dNe = Math.min(v, r2Cap - r2Ne), dNi = Math.min(v, r2Cap - r2Ni);
+      if (dNe > 0) {
+        score.Ne += dNe;
+        r2Ne += dNe;
+      }
+      if (dNi > 0) {
+        score.Ni += dNi;
+        r2Ni += dNi;
+      }
+      audit.push(`R2${name} Ne+${Math.max(dNe, 0).toFixed(2)}/Ni+${Math.max(dNi, 0).toFixed(2)}`);
+    };
+    for (const [id, nm] of R2_IDS) {
+      const h = hit(id);
+      if (h) r2add(`${nm}\xD7${cnt(h)}`, SCHED[cnt(h)]);
+    }
+    const SCHED_HG = [0, 0.3, 0.4, 0.5, 0.6];
+    for (const [id, nm, fn] of [["huagai", "\u534E\u76D6", "Ni"], ["jiangxing", "\u5C06\u661F", "Te"], ["taohua_xianchi", "\u6843\u82B1", "Fe"]]) {
+      const h = hit(id);
+      if (h) {
+        const n = cnt(h), v = id === "huagai" && rubric === "v4" ? SCHED_HG[n] : SCHED[n];
+        score[fn] += v;
+        audit.push(`R4${nm}\xD7${n} ${fn}+${v.toFixed(2)}`);
+      }
+    }
+    if (rubric === "v4") {
+      const tou = new Set(["\u5E74", "\u6708", "\u65F6"].map((pp) => getShiShen2(dm, siZhu[pp].gan)));
+      const hasYin = tou.has("\u6B63\u5370") || tou.has("\u504F\u5370");
+      const combos = [
+        ["\u4F24\u5B98\u4F69\u5370", tou.has("\u4F24\u5B98") && hasYin, { Ni: 0.2, Fi: 0.1 }],
+        ["\u6740\u5370\u76F8\u751F", tou.has("\u4E03\u6740") && hasYin, { Ni: 0.2 }],
+        ["\u98DF\u795E\u5236\u6740", tou.has("\u98DF\u795E") && tou.has("\u4E03\u6740"), { Ti: 0.2 }]
+      ];
+      for (const [nm, on, bonus] of combos) if (on) {
+        const parts = [];
+        for (const [f, v] of Object.entries(bonus)) {
+          score[f] += v;
+          parts.push(`${f}+${v.toFixed(2)}`);
+        }
+        audit.push(`R5${nm}(${parts.join(",")})`);
+      }
+    }
+    if (rubric === "v4" && (opts?.wangShuai || "").includes("\u5F31")) {
+      const k = opts.wangShuai.includes("\u6781\u5F31") ? 0.8 : 0.88;
+      for (const f of EXTRAV) score[f] *= k;
+      audit.push(`R7\u8EAB\u5F31E\u8F74\xD7${k}(${opts.wangShuai})`);
+    }
+    for (const [gz, coef, nm] of [[opts?.taiYuan, 0.25, "\u80CE\u5143"], [opts?.mingGong, 0.3, "\u547D\u5BAB"]]) {
+      if (!gz || gz.length !== 2) continue;
+      const g = gz[0], z = gz[1];
+      if (!GAN_YINYANG[g] || !ZHI_CANG_GAN[z]) continue;
+      const diff = { Te: 0, Ti: 0, Fe: 0, Fi: 0, Se: 0, Si: 0, Ne: 0, Ni: 0 };
+      const addD = (ss, w) => {
+        const [a, b] = MAP[ss];
+        diff[a] += w * 0.7;
+        diff[b] += w * 0.3;
+      };
+      addD(getShiShen2(dm, g), 2);
+      ZHI_CANG_GAN[z].forEach((c, i) => addD(getShiShen2(dm, c.gan), i === 0 ? 1 : i === 1 ? 0.6 : 0.3));
+      const parts = [];
+      for (const f of Object.keys(diff)) if (diff[f] > 0) {
+        score[f] += diff[f] * coef;
+        parts.push(`${f}+${(diff[f] * coef).toFixed(2)}`);
+      }
+      audit.push(`R3${nm}${gz}\xD7${coef}(${parts.join(",")})`);
+    }
+  }
+  const total = Object.values(score).reduce((a, b) => a + b, 0) || 1;
+  const sorted = Object.keys(score).sort((a, b) => score[b] - score[a]);
+  const dom = sorted[0];
+  const auxPool = sorted.filter((f) => EXTRAV.includes(f) !== EXTRAV.includes(dom) && PERCEIVING.includes(f) !== PERCEIVING.includes(dom));
+  const aux = auxPool[0];
+  const type = TYPE[`${dom}+${aux}`] || "XXXX";
+  const aux2 = auxPool[1];
+  const altA = aux2 ? TYPE[`${dom}+${aux2}`] : "";
+  const dom2 = sorted[1];
+  const aux2Pool = sorted.filter((f) => EXTRAV.includes(f) !== EXTRAV.includes(dom2) && PERCEIVING.includes(f) !== PERCEIVING.includes(dom2));
+  const altB = aux2Pool[0] ? TYPE[`${dom2}+${aux2Pool[0]}`] : "";
+  const gapDom = score[dom] - score[dom2];
+  const gapAux = aux2 ? score[aux] - score[aux2] : 99;
+  const \u5907\u9009\u7C7B\u578B = (gapDom < gapAux ? altB : altA) || altA || altB || type;
+  const cand2Pool = [gapDom < gapAux ? altA : altB, auxPool[2] ? TYPE[`${dom}+${auxPool[2]}`] : ""].filter(Boolean);
+  const \u5907\u90092 = cand2Pool.find((x) => x && x !== type && x !== \u5907\u9009\u7C7B\u578B) || "\u2014";
+  const relGap = Math.min(gapDom, gapAux) / (total / 8);
+  const \u7F6E\u4FE1 = relGap >= 0.5 ? "\u9AD8" : relGap >= 0.2 ? "\u4E2D" : "\u4F4E";
+  let \u7F6E\u4FE1F = \u7F6E\u4FE1;
+  let extra = "";
+  if (rubric !== "v2") {
+    const prevR = rubric === "v4" ? "v3" : "v2";
+    const prevRes = judgeBaWei(siZhu, gender, { ...opts || {}, rubric: prevR });
+    if (prevRes.\u6700\u50CF\u7C7B\u578B !== type) {
+      \u7F6E\u4FE1F = \u7F6E\u4FE1 === "\u9AD8" ? "\u4E2D" : "\u4F4E";
+      extra = `;\u26A0${rubric} \u65B0\u589E\u9879\u5BFC\u81F4\u6392\u5E8F\u53D8\u5316(${prevR}=${prevRes.\u6700\u50CF\u7C7B\u578B}\u2192${rubric}=${type}),\u7F6E\u4FE1\u5EA6\u5DF2\u964D\u4E00\u6863,\u6765\u6E90:${audit.join("\u3001") || "\u65E0"}`;
+    }
+  }
+  const baseYiJu = `\u4E3B\u5BFC${dom}(${FN_DESC[dom]})+\u8F85\u52A9${aux}(${FN_DESC[aux]});\u5F3A\u5EA6\u6E90:${srcNotes.join("\u3001")}\u53CA\u5404\u652F\u85CF\u5E72;\u65E5\u4E3B${dm}(${isYang ? "\u9633" : "\u9634"}\u5E72)`;
+  const v3YiJu = rubric !== "v2" && audit.length ? `;${rubric}\u52A0\u5206:${audit.join("\u3001")}` : "";
+  const baseDecl = "\u5148\u5929\u80FD\u91CF\u7ED3\u6784\u5230 MBTI \u8BED\u8A00\u7684\u6620\u5C04\u53C2\u8003,\u975E\u6D4B\u8BC4\u7ED3\u679C;\u5B9E\u6D4B\u7C7B\u578B\u53D7\u73AF\u5883\u5851\u9020\u53EF\u4E0D\u540C,\u5DEE\u5F02\u672C\u8EAB\u53EF\u89E3\u8BFB\u3002\u63AA\u8F9E\u7528\u300C\u6700\u50CF\u300D,\u4E0D\u5F97\u8BF4\u300C\u4F60\u662FX\u578B\u300D\u3002";
+  const v3Decl = rubric === "v4" ? "\u672C\u5206\u6620\u5C04\u91C7\u7528 v4 rubric(\u5FCC\u795E\u6298\u5411/\u683C\u5C40\u590D\u5408/\u8EAB\u5F31E\u8F74/\u8BA1\u6570\u5236\u795E\u715E/\u865A\u67F1),\u4ECD\u4E3A\u53C2\u8003\u975E\u6D4B\u8BC4\u3002" : rubric === "v3" ? "\u672C\u5206\u6620\u5C04\u91C7\u7528 v3 rubric(\u8BA1\u6570\u5236\u795E\u715E\u4FEE\u6B63:\u9A7F\u9A6C\u5F52Ne/\u6587\u6C14/\u534E\u76D6\u5C06\u661F\u6843\u82B1,\u80CE\u5143\u547D\u5BAB\u4F4E\u6743\u91CD\u865A\u67F1),\u4ECD\u4E3A\u53C2\u8003\u975E\u6D4B\u8BC4\u3002" : "";
+  return {
+    \u516B\u7EF4: sorted.map((f) => ({ \u529F\u80FD: f, \u8BF4\u660E: FN_DESC[f], \u5F97\u5206: Math.round(score[f] * 100) / 100, \u767E\u5206\u6BD4: Math.round(score[f] / total * 100) })),
+    \u4E3B\u5BFC: dom,
+    \u8F85\u52A9: aux,
+    \u6700\u50CF\u7C7B\u578B: type,
+    \u5907\u9009\u7C7B\u578B,
+    \u5907\u90092,
+    \u7F6E\u4FE1: rubric !== "v2" ? \u7F6E\u4FE1F : \u7F6E\u4FE1,
+    \u4F9D\u636E: baseYiJu + v3YiJu + extra,
+    \u58F0\u660E: baseDecl + v3Decl
+  };
+}
+
 // run-chart.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
@@ -14263,6 +14473,15 @@ function main() {
       const steps = (ZHI12.indexOf(mgZhi) - 2 + 12) % 12;
       const mgGan = GAN10[(GAN10.indexOf(yinGan) + steps) % 10];
       enr.\u547D\u5BAB = mgGan + mgZhi;
+      enr.\u516B\u7EF4\u7ED3\u6784 = judgeBaWei(siZhuCN, birthInfo.gender, {
+        rubric: args.rubric === "v2" ? "v2" : args.rubric === "v3" ? "v3" : "v4",
+        shenshaHits: fullHits,
+        rare: enr.\u7F55\u8C61 || [],
+        taiYuan: enr.\u80CE\u5143,
+        mingGong: enr.\u547D\u5BAB,
+        jiShen: enr.\u7528\u795E\u5EFA\u8BAE?.\u51FA\u53E3?.\u5FCC\u795E || [],
+        wangShuai: enr.\u65FA\u8870?.verdict || ""
+      });
     } catch (e) {
       console.error("[interactions] \u8BA1\u7B97\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
     }

@@ -40,6 +40,7 @@ const interactions_1 = require("./bazi-enrich/interactions");
 const yunsui_1 = require("./bazi-enrich/yunsui");
 const rare_1 = require("./bazi-enrich/rare");
 const zhengyuan_1 = require("./bazi-enrich/zhengyuan");
+const bawei_1 = require("./bazi-enrich/bawei");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 function parseArgs() {
@@ -220,6 +221,17 @@ function main() {
             const steps = (ZHI12.indexOf(mgZhi) - 2 + 12) % 12; // 从寅数到命宫支
             const mgGan = GAN10[(GAN10.indexOf(yinGan) + steps) % 10];
             enr.命宫 = mgGan + mgZhi;
+            // v2.8/v3.1/v3.3: 荣格八维能量结构 — 「最像类型」照抄不裁量;--rubric=v2|v3|v4(默认v4:
+            //   R1-R4 神煞计数制 + R5格局复合 + R6忌神折向 + R7身弱E轴,忌神/旺衰来自算法层出口)
+            enr.八维结构 = (0, bawei_1.judgeBaWei)(siZhuCN, birthInfo.gender, {
+                rubric: args.rubric === 'v2' ? 'v2' : args.rubric === 'v3' ? 'v3' : 'v4',
+                shenshaHits: fullHits,
+                rare: enr.罕象 || [],
+                taiYuan: enr.胎元,
+                mingGong: enr.命宫,
+                jiShen: enr.用神建议?.出口?.忌神 || [],
+                wangShuai: enr.旺衰?.verdict || '',
+            });
         }
         catch (e) {
             console.error('[interactions] 计算跳过(非致命):', e?.message || e);

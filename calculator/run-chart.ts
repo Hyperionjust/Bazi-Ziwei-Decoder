@@ -16,6 +16,7 @@ import { adjudicateInteractions } from './bazi-enrich/interactions';
 import { analyzeYunSui } from './bazi-enrich/yunsui';
 import { detectRarePatterns } from './bazi-enrich/rare';
 import { judgeSpouseProfile } from './bazi-enrich/zhengyuan';
+import { judgeBaWei } from './bazi-enrich/bawei';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -175,6 +176,7 @@ function main() {
       // v2.6: 正缘倾向判定(年长/年轻/同龄) — 通行断法确定性计算,画像年龄照抄不裁量
       enr.正缘倾向 = judgeSpouseProfile(siZhuCN, birthInfo.gender);
 
+
       // v1.6.2: 胎元(月干进一,月支进三) + 命宫(14/26 减月时支数,五虎遁取干)
       const GAN10 = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
       const ZHI12 = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
@@ -193,6 +195,19 @@ function main() {
       const steps = (ZHI12.indexOf(mgZhi) - 2 + 12) % 12; // 从寅数到命宫支
       const mgGan = GAN10[(GAN10.indexOf(yinGan) + steps) % 10];
       enr.命宫 = mgGan + mgZhi;
+
+      // v2.8/v3.1/v3.3: 荣格八维能量结构 — 「最像类型」照抄不裁量;--rubric=v2|v3|v4(默认v4:
+      //   R1-R4 神煞计数制 + R5格局复合 + R6忌神折向 + R7身弱E轴,忌神/旺衰来自算法层出口)
+      enr.八维结构 = judgeBaWei(siZhuCN, birthInfo.gender, {
+        rubric: args.rubric === 'v2' ? 'v2' : args.rubric === 'v3' ? 'v3' : 'v4',
+        shenshaHits: fullHits as any[],
+        rare: enr.罕象 || [],
+        taiYuan: enr.胎元,
+        mingGong: enr.命宫,
+        jiShen: (enr as any).用神建议?.出口?.忌神 || [],
+        wangShuai: (enr as any).旺衰?.verdict || '',
+      });
+
     } catch (e) {
       console.error('[interactions] 计算跳过(非致命):', (e as Error)?.message || e);
     }
