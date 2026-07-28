@@ -10,9 +10,10 @@
 //
 // 不指定 --output 则打印到 stdout
 
-import { createChart } from './yiqi-core/index';
+import { createChart, resolveSolarClock } from './yiqi-core/index';
 import { getZhiCangGanFull } from './yiqi-core/bazi';
 import { enrichBazi } from './bazi-enrich/enrich';
+import { detectShichenBoundary } from './bazi-enrich/shichen-boundary';
 import { computeShensha } from './shensha';
 import { adjudicateInteractions } from './bazi-enrich/interactions';
 import { analyzeYunSui } from './bazi-enrich/yunsui';
@@ -123,6 +124,18 @@ function main() {
     '时': chart.bazi.siZhu.hour,
   };
   chart.bazi.enrichment = enrichBazi(siZhuForEnrich);
+
+  // Step 2.5: 时辰边界检测(P0-A) — 时辰输入错一格则时柱/紫微命宫/大限全错。
+  //   按归一化后的排盘时刻(农历→公历、时区→东八、经度校正若有)判定距时辰交界的分钟差,
+  //   |Δ|≤20 分钟 → boundary:true,附相邻候选时辰;核盘流程见 SKILL.md 阻断性分支。
+  try {
+    const eff = resolveSolarClock(birthInfo);
+    (chart.bazi.enrichment as any).时辰边界 = detectShichenBoundary(eff.hour, eff.minute, {
+      corrected: birthInfo.longitude != null && Number.isFinite(+birthInfo.longitude),
+    });
+  } catch (e) {
+    console.error('[shichen] 时辰边界检测跳过(非致命):', (e as Error)?.message || e);
+  }
 
   // Step 3: 神煞补层 — 算法层算"全集"(流派中立, 用 open 派 policy), 写进 bazi.enrichment.神煞
   //          流派权重/过滤是"解读层镜片", 仅在传 --lineage 时附加一份过滤视图, 绝不改四柱排盘。

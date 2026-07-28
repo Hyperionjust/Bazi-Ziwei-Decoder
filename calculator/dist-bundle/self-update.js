@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/self-update.ts
+// self-update.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
 var https = __toESM(require("https"));

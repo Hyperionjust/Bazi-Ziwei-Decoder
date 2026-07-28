@@ -26,7 +26,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/check-analysis.ts
+// check-analysis.ts
 var check_analysis_exports = {};
 __export(check_analysis_exports, {
   checkAnalysis: () => checkAnalysis,

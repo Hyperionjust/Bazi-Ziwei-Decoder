@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/render.ts
+// render.ts
 var fs = __toESM(require("fs"));
 function parseArgs() {
   const args = {};

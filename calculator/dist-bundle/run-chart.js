@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/node_modules/lunar-typescript/dist/index.mjs
+// node_modules/lunar-typescript/dist/index.mjs
 var _SolarUtil = class {
   static isLeapYear(year) {
     if (year < 1600) {
@@ -11301,7 +11301,7 @@ var Solar = _Solar;
 Solar.J2000 = 2451545;
 I18n.init();
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/zhangsheng.ts
+// yiqi-core/zhangsheng.ts
 var CHANGSHENG_MAP = {
   "\u7532": {
     "\u4EA5": "\u957F\u751F",
@@ -11456,7 +11456,7 @@ function getSiZhuChangSheng(dayGan, siZhu) {
   };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/nayin.ts
+// yiqi-core/nayin.ts
 var NAYIN_MAP = {
   // 金系
   "\u7532\u5B50": "\u6D77\u4E2D\u91D1",
@@ -11550,7 +11550,7 @@ function getNaYinWuXing(nayin) {
   return "\u91D1";
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/jieqi.ts
+// yiqi-core/jieqi.ts
 function getAccurateMonthGanZhi(solar) {
   const lunar = solar.getLunar();
   const defaultMonthGZ = lunar.getMonthInGanZhi();
@@ -11584,7 +11584,7 @@ function parseGanZhi(gz) {
   };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/bazi.ts
+// yiqi-core/bazi.ts
 var SHISHEN_MAP = {
   "\u7532": { "\u7532": "\u6BD4\u80A9", "\u4E59": "\u52AB\u8D22", "\u4E19": "\u98DF\u795E", "\u4E01": "\u4F24\u5B98", "\u620A": "\u504F\u8D22", "\u5DF1": "\u6B63\u8D22", "\u5E9A": "\u4E03\u6740", "\u8F9B": "\u6B63\u5B98", "\u58EC": "\u504F\u5370", "\u7678": "\u6B63\u5370" },
   "\u4E59": { "\u7532": "\u52AB\u8D22", "\u4E59": "\u6BD4\u80A9", "\u4E19": "\u4F24\u5B98", "\u4E01": "\u98DF\u795E", "\u620A": "\u6B63\u8D22", "\u5DF1": "\u504F\u8D22", "\u5E9A": "\u6B63\u5B98", "\u8F9B": "\u4E03\u6740", "\u58EC": "\u6B63\u5370", "\u7678": "\u504F\u5370" },
@@ -11748,7 +11748,7 @@ function createBaziChart(birthInfo) {
   }
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/sihua.ts
+// yiqi-core/sihua.ts
 var SIHUA_BY_YEAR_GAN = {
   "\u7532": { lu: "\u5EC9\u8D1E", quan: "\u7834\u519B", ke: "\u6B66\u66F2", ji: "\u592A\u9633" },
   "\u4E59": { lu: "\u5929\u673A", quan: "\u5929\u6881", ke: "\u7D2B\u5FAE", ji: "\u592A\u9634" },
@@ -11790,7 +11790,7 @@ function addBenMingSiHua(gongs, yearGan) {
   });
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/daxian.ts
+// yiqi-core/daxian.ts
 function calculateDaXian(mingGongIndex, yinYang, wuXingJuNumber, currentAge = 0) {
   const daXianList = [];
   const isShunShiZhen = yinYang === "\u9633\u7537" || yinYang === "\u9634\u5973";
@@ -11820,7 +11820,7 @@ function calculateXuSui(birthYear, currentYear = (/* @__PURE__ */ new Date()).ge
   return currentYear - birthYear + 1;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/ziwei-standard.ts
+// yiqi-core/ziwei-standard.ts
 var TIANGAN = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
 var DIZHI = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
 var GONG_NAMES = ["\u547D\u5BAB", "\u5144\u5F1F", "\u592B\u59BB", "\u5B50\u5973", "\u8D22\u5E1B", "\u75BE\u5384", "\u8FC1\u79FB", "\u4EA4\u53CB", "\u5B98\u7984", "\u7530\u5B85", "\u798F\u5FB7", "\u7236\u6BCD"];
@@ -12353,7 +12353,7 @@ function installTianYao(lunarMonth) {
   return stars;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/yiqi-core/index.ts
+// yiqi-core/index.ts
 function resolveSolarClock(birthInfo) {
   let { year, month, day, hour, minute } = birthInfo;
   if (birthInfo.isLunar) {
@@ -12403,7 +12403,7 @@ function createChart(birthInfo) {
   }
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/tables.ts
+// bazi-enrich/tables.ts
 var DIZHI2 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
 var GAN_WUXING = {
   \u7532: "\u6728",
@@ -12684,7 +12684,7 @@ function getWuXingMonthStatus(monthZhi) {
   return result;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/zhi-relations.ts
+// bazi-enrich/zhi-relations.ts
 var LIU_CHONG = [
   ["\u5B50", "\u5348"],
   ["\u4E11", "\u672A"],
@@ -12862,7 +12862,7 @@ function detectZhiRelations(zhis) {
   return out;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/gan-relations.ts
+// bazi-enrich/gan-relations.ts
 var GAN_HE_PAIRS = [
   ["\u7532", "\u5DF1", "\u571F"],
   ["\u4E59", "\u5E9A", "\u91D1"],
@@ -12915,7 +12915,7 @@ function judgePillars(siZhu) {
   });
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/wu-xing.ts
+// bazi-enrich/wu-xing.ts
 function countWuXing(siZhu, dayMaster) {
   const allWx = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
   const surface = { \u6728: 0, \u706B: 0, \u571F: 0, \u91D1: 0, \u6C34: 0 };
@@ -12952,7 +12952,7 @@ function wuXingMonthStatus(monthZhi) {
   return getWuXingMonthStatus(monthZhi);
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/wang-shuai.ts
+// bazi-enrich/wang-shuai.ts
 function scoreMonthOrder(dayMaster, monthZhi) {
   const cangGan = ZHI_CANG_GAN[monthZhi];
   const benqi = cangGan[0].gan;
@@ -13092,7 +13092,7 @@ function judgeWangShuai(siZhu) {
   };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/ge-ju.ts
+// bazi-enrich/ge-ju.ts
 var SHI_SHEN_TO_GE = {
   \u6BD4\u80A9: "\u6BD4\u80A9\u683C",
   \u52AB\u8D22: "\u52AB\u8D22\u683C",
@@ -13172,12 +13172,12 @@ function judgeGeJu(siZhu) {
   return { primary, basis, \u900F\u5E72: tougan, confidence, notes };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/tiao-hou.ts
+// bazi-enrich/tiao-hou.ts
 function getTiaoHou(dayMaster, monthZhi) {
   return TIAO_HOU[dayMaster][monthZhi];
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/yongshen.ts
+// bazi-enrich/yongshen.ts
 var SHENG = { \u6728: "\u706B", \u706B: "\u571F", \u571F: "\u91D1", \u91D1: "\u6C34", \u6C34: "\u6728" };
 var KE = { \u6728: "\u571F", \u571F: "\u6C34", \u6C34: "\u706B", \u706B: "\u91D1", \u91D1: "\u6728" };
 var inv = (m) => Object.fromEntries(Object.entries(m).map(([a, b]) => [b, a]));
@@ -13275,7 +13275,7 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
   return { \u6276\u6291: fuYi, \u8C03\u5019: tiaoHou, \u683C\u5C40: gejuLine, \u5171\u8BC6\u7528\u795E: consensus, \u6536\u655B, \u8FB9\u754C\u76D8, \u51FA\u6587\u534F\u8BAE, \u51FA\u53E3 };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/enrich.ts
+// bazi-enrich/enrich.ts
 function enrichBazi(siZhu) {
   const dm = siZhu.\u65E5.gan;
   const monthZhi = siZhu.\u6708.zhi;
@@ -13312,7 +13312,64 @@ function enrichBazi(siZhu) {
   };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/shensha.ts
+// bazi-enrich/shichen-boundary.ts
+var BOUNDARY_THRESHOLD_MIN = 20;
+var ZHI12 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+function zhiRange(zhiIdx) {
+  if (zhiIdx === 0) return "23:00-01:00";
+  const start = zhiIdx * 2 - 1;
+  return `${String(start).padStart(2, "0")}:00-${String(start + 2).padStart(2, "0")}:00`;
+}
+function zhiIdxOfHour(hour) {
+  return Math.floor((hour + 1) / 2) % 12;
+}
+function detectShichenBoundary(hour, minute, opts) {
+  const corrected = !!opts?.corrected;
+  const m = hour * 60 + minute;
+  let best = { delta: Infinity, boundaryHour: -1 };
+  for (let k = 0; k < 12; k++) {
+    const b = (2 * k + 1) * 60;
+    let d = m - b;
+    if (d > 720) d -= 1440;
+    if (d <= -720) d += 1440;
+    if (Math.abs(d) < Math.abs(best.delta)) best = { delta: d, boundaryHour: 2 * k + 1 };
+  }
+  const { delta, boundaryHour } = best;
+  const boundary = Math.abs(delta) <= BOUNDARY_THRESHOLD_MIN;
+  const curIdx = zhiIdxOfHour(hour);
+  const afterIdx = zhiIdxOfHour(boundaryHour);
+  const beforeIdx = (afterIdx + 11) % 12;
+  const curZhi = ZHI12[curIdx];
+  const hhmm = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  const res = {
+    \u8BF4\u660E: `\u65F6\u8FB0\u4EA4\u754C\u4E3A\u5947\u6570\u6574\u70B9;\u8DDD\u4EA4\u754C \u2264 ${BOUNDARY_THRESHOLD_MIN} \u5206\u949F\u5224\u4E34\u754C\u76D8,\u987B\u8D70\u6838\u76D8\u6D41\u7A0B(\u8FFD\u95EE\u51FA\u751F\u5730\u6362\u7B97\u7ECF\u5EA6\u91CD\u6392,\u6216\u53CC\u76D8\u6838\u5BF9\u5927\u4E8B\u5E74\u4EFD)\u540E\u518D\u89E3\u8BFB\u3002`,
+    \u53E3\u5F84: corrected ? "\u771F\u592A\u9633\u65F6(\u7ECF\u5EA6\u6821\u6B63\u540E)" : "\u949F\u8868\u65F6\u95F4(\u672A\u505A\u771F\u592A\u9633\u65F6\u6821\u6B63)",
+    \u6392\u76D8\u65F6\u523B: hhmm,
+    \u5F53\u524D\u65F6\u8FB0: `${curZhi}\u65F6(${zhiRange(curIdx)})`,
+    \u6700\u8FD1\u4EA4\u754C: `${String(boundaryHour).padStart(2, "0")}:00(${ZHI12[beforeIdx]}\u2192${ZHI12[afterIdx]})`,
+    \u8DDD\u4EA4\u754C\u5206\u949F: delta,
+    boundary
+  };
+  if (boundary) {
+    const candIdx = delta >= 0 ? beforeIdx : afterIdx;
+    const candZhi = ZHI12[candIdx];
+    const dir = delta >= 0 ? `\u82E5\u5B9E\u9645\u51FA\u751F\u65E9\u4E8E ${String(boundaryHour).padStart(2, "0")}:00` : `\u82E5\u5B9E\u9645\u51FA\u751F\u665A\u4E8E ${String(boundaryHour).padStart(2, "0")}:00`;
+    const crossZi = boundaryHour === 23;
+    const ziNote = crossZi ? candIdx === 0 ? ",\u4E14\u65E5\u67F1\u5C06\u6309\u665A\u5B50\u65F6\u7EA6\u5B9A\u6362\u4E3A\u6B21\u65E5\u2014\u2014\u65F6\u67F1\u4E0E\u65E5\u67F1\u540C\u65F6\u6539\u53D8,\u5DEE\u5F02\u6781\u5927" : ",\u4E14\u65E5\u67F1\u5C06\u7531\u6B21\u65E5\u9000\u56DE\u5F53\u65E5(\u4E0D\u518D\u6309\u665A\u5B50\u65F6\u6362\u65E5)\u2014\u2014\u65F6\u67F1\u4E0E\u65E5\u67F1\u540C\u65F6\u6539\u53D8,\u5DEE\u5F02\u6781\u5927" : ",\u65F6\u67F1(\u53CA\u7D2B\u5FAE\u547D\u5BAB/\u5927\u9650)\u968F\u4E4B\u6539\u53D8";
+    res.\u5019\u9009\u65F6\u8FB0 = {
+      \u652F: candZhi,
+      \u540D: `${candZhi}\u65F6`,
+      \u533A\u95F4: zhiRange(candIdx),
+      \u8BF4\u660E: `${dir},\u65F6\u8FB0\u5E94\u4E3A${candZhi}\u65F6${ziNote}\u3002`
+    };
+  }
+  if (!corrected) {
+    res.solar_note = "\u672A\u505A\u771F\u592A\u9633\u65F6\u6821\u6B63,\u672C\u8FB9\u754C\u5224\u5B9A\u6309\u300C\u949F\u8868\u65F6\u95F4\u300D\u53E3\u5F84\u3002\u4E2D\u56FD\u5883\u5185\u949F\u8868\u65F6\u95F4(\u4E1C\u516B\u533A)\u4E0E\u5F53\u5730\u771F\u592A\u9633\u65F6\u7684\u504F\u5DEE\u6309\u7ECF\u5EA6\u7EA6\u5728 -3 \u5C0F\u65F6(\u897F\u90E8,\u5982\u5580\u4EC0)~ +30 \u5206\u949F(\u4E1C\u90E8,\u5982\u629A\u8FDC)\u91CF\u7EA7,\u53E6\u6709\u5747\u65F6\u5DEE \xB116 \u5206\u949F;\u4E34\u754C\u76D8\u5EFA\u8BAE\u8FFD\u95EE\u51FA\u751F\u5730(\u57CE\u5E02\u5373\u53EF)\u6362\u7B97\u7ECF\u5EA6\u540E\u52A0 --longitude \u91CD\u6392\u3002";
+  }
+  return res;
+}
+
+// shensha.ts
 var ZHI = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
 var PILLAR_CN = { year: "\u5E74", month: "\u6708", day: "\u65E5", hour: "\u65F6" };
 var YANG_GAN = /* @__PURE__ */ new Set(["\u7532", "\u4E19", "\u620A", "\u5E9A", "\u58EC"]);
@@ -13649,7 +13706,7 @@ function computeShensha(chart, defs, policy) {
   return out;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/interactions.ts
+// bazi-enrich/interactions.ts
 var PILLAR_IDX = { \u5E74: 0, \u6708: 1, \u65E5: 2, \u65F6: 3 };
 var HE_HUA = { \u7532\u5DF1: "\u571F", \u4E59\u5E9A: "\u91D1", \u4E19\u8F9B: "\u6C34", \u4E01\u58EC: "\u6728", \u620A\u7678: "\u706B" };
 var KU_CHONG = /* @__PURE__ */ new Set(["\u8FB0\u620C", "\u4E11\u672A", "\u620C\u8FB0", "\u672A\u4E11"]);
@@ -13923,7 +13980,7 @@ function adjudicateInteractions(siZhu, policy, zhiRels, ganRels) {
   return { policy_note: policy.note || "", items: out };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/yunsui.ts
+// bazi-enrich/yunsui.ts
 var LIU_CHONG2 = { \u5B50: "\u5348", \u5348: "\u5B50", \u4E11: "\u672A", \u672A: "\u4E11", \u5BC5: "\u7533", \u7533: "\u5BC5", \u536F: "\u9149", \u9149: "\u536F", \u8FB0: "\u620C", \u620C: "\u8FB0", \u5DF3: "\u4EA5", \u4EA5: "\u5DF3" };
 var LIU_HE2 = { \u5B50: "\u4E11", \u4E11: "\u5B50", \u5BC5: "\u4EA5", \u4EA5: "\u5BC5", \u536F: "\u620C", \u620C: "\u536F", \u8FB0: "\u9149", \u9149: "\u8FB0", \u5DF3: "\u7533", \u7533: "\u5DF3", \u5348: "\u672A", \u672A: "\u5348" };
 var LIU_HAI2 = { \u5B50: "\u672A", \u672A: "\u5B50", \u4E11: "\u5348", \u5348: "\u4E11", \u5BC5: "\u5DF3", \u5DF3: "\u5BC5", \u536F: "\u8FB0", \u8FB0: "\u536F", \u7533: "\u4EA5", \u4EA5: "\u7533", \u9149: "\u620C", \u620C: "\u9149" };
@@ -14060,7 +14117,7 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
   return res;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/rare.ts
+// bazi-enrich/rare.ts
 var GAN_HE3 = { \u7532: "\u5DF1", \u5DF1: "\u7532", \u4E59: "\u5E9A", \u5E9A: "\u4E59", \u4E19: "\u8F9B", \u8F9B: "\u4E19", \u4E01: "\u58EC", \u58EC: "\u4E01", \u620A: "\u7678", \u7678: "\u620A" };
 var LIU_CHONG3 = { \u5B50: "\u5348", \u5348: "\u5B50", \u4E11: "\u672A", \u672A: "\u4E11", \u5BC5: "\u7533", \u7533: "\u5BC5", \u536F: "\u9149", \u9149: "\u536F", \u8FB0: "\u620C", \u620C: "\u8FB0", \u5DF3: "\u4EA5", \u4EA5: "\u5DF3" };
 var RANK = { \u6781\u7F55: 0, \u7F55\u89C1: 1, \u5C11\u89C1: 2 };
@@ -14121,7 +14178,7 @@ function detectRarePatterns(siZhu, shenshaHits, zhiRels, ganRels) {
   return out;
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/zhengyuan.ts
+// bazi-enrich/zhengyuan.ts
 function judgeSpouseProfile(siZhu, gender) {
   const dm = siZhu.\u65E5.gan;
   const primary = gender === "male" ? ["\u6B63\u8D22", "\u504F\u8D22"] : ["\u6B63\u5B98", "\u4E03\u6740"];
@@ -14167,7 +14224,7 @@ function judgeSpouseProfile(siZhu, gender) {
   return { \u5E74\u9F84\u503E\u5411: \u503E\u5411, \u7F6E\u4FE1, \u592B\u59BB\u661F: starLabel, \u661F\u4F4D, \u5BAB\u5750: gongSS || "-", \u4F9D\u636E };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/bazi-enrich/bawei.ts
+// bazi-enrich/bawei.ts
 var MAP = {
   \u6BD4\u80A9: ["Fi", "Si"],
   \u52AB\u8D22: ["Te", "Se"],
@@ -14378,7 +14435,7 @@ function judgeBaWei(siZhu, gender, opts) {
   };
 }
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/run-chart.ts
+// run-chart.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
 function parseArgs() {
@@ -14472,6 +14529,14 @@ function main() {
   };
   chart.bazi.enrichment = enrichBazi(siZhuForEnrich);
   try {
+    const eff = resolveSolarClock(birthInfo);
+    chart.bazi.enrichment.\u65F6\u8FB0\u8FB9\u754C = detectShichenBoundary(eff.hour, eff.minute, {
+      corrected: birthInfo.longitude != null && Number.isFinite(+birthInfo.longitude)
+    });
+  } catch (e) {
+    console.error("[shichen] \u65F6\u8FB0\u8FB9\u754C\u68C0\u6D4B\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
+  }
+  try {
     const defs = JSON.parse(fs.readFileSync(resolveData("shensha.json"), "utf-8"));
     const lin = JSON.parse(fs.readFileSync(resolveData("lineages.json"), "utf-8"));
     const shenChart = { siZhu: chart.bazi.siZhu, gender: birthInfo.gender };
@@ -14534,18 +14599,18 @@ function main() {
       enr.\u7F55\u8C61 = detectRarePatterns(siZhuCN, fullHits, enr.\u5730\u652F\u5173\u7CFB || [], enr.\u5929\u5E72\u5173\u7CFB || []);
       enr.\u6B63\u7F18\u503E\u5411 = judgeSpouseProfile(siZhuCN, birthInfo.gender);
       const GAN10 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
-      const ZHI12 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+      const ZHI122 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
       const mGan = chart.bazi.siZhu.month.gan, mZhi = chart.bazi.siZhu.month.zhi, hZhi = chart.bazi.siZhu.hour.zhi;
       const taiGan = GAN10[(GAN10.indexOf(mGan) + 1) % 10];
-      const taiZhi = ZHI12[(ZHI12.indexOf(mZhi) + 3) % 12];
+      const taiZhi = ZHI122[(ZHI122.indexOf(mZhi) + 3) % 12];
       enr.\u80CE\u5143 = taiGan + taiZhi;
-      const numOf = (z2) => (ZHI12.indexOf(z2) - 2 + 12) % 12 + 1;
+      const numOf = (z2) => (ZHI122.indexOf(z2) - 2 + 12) % 12 + 1;
       const sum = numOf(mZhi) + numOf(hZhi);
       const n = (sum < 14 ? 14 : 26) - sum;
-      const mgZhi = ZHI12[(n - 1 + 2) % 12];
+      const mgZhi = ZHI122[(n - 1 + 2) % 12];
       const WUHU = { \u7532: "\u4E19", \u5DF1: "\u4E19", \u4E59: "\u620A", \u5E9A: "\u620A", \u4E19: "\u5E9A", \u8F9B: "\u5E9A", \u4E01: "\u58EC", \u58EC: "\u58EC", \u620A: "\u7532", \u7678: "\u7532" };
       const yinGan = WUHU[chart.bazi.siZhu.year.gan];
-      const steps = (ZHI12.indexOf(mgZhi) - 2 + 12) % 12;
+      const steps = (ZHI122.indexOf(mgZhi) - 2 + 12) % 12;
       const mgGan = GAN10[(GAN10.indexOf(yinGan) + steps) % 10];
       enr.\u547D\u5BAB = mgGan + mgZhi;
       enr.\u516B\u7EF4\u7ED3\u6784 = judgeBaWei(siZhuCN, birthInfo.gender, {

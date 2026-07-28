@@ -21,6 +21,23 @@ function padRight(s: string, n: number): string {
   return s + ' '.repeat(Math.max(0, n - w));
 }
 
+// ⚠ 时辰临界提示块(P0-A) — boundary:true 时置于文本盘最顶部(给 LLM 的幕后施工图)
+function dumpShichenBoundary(b: any): string[] {
+  const sb = b?.enrichment?.时辰边界;
+  if (!sb || !sb.boundary) return [];
+  const lines: string[] = [];
+  const dir = sb.距交界分钟 >= 0 ? `交界后 ${sb.距交界分钟} 分钟` : `交界前 ${-sb.距交界分钟} 分钟`;
+  lines.push('⚠ 时辰临界〔幕后施工图:未核盘前不进入解读——按 SKILL.md「时辰临界核盘」分支处理〕');
+  lines.push(`│ ├排盘时刻 ${sb.排盘时刻} 距时辰交界 ${sb.最近交界} 仅 ${Math.abs(sb.距交界分钟)} 分钟(${dir})`);
+  lines.push(`│ ├候选时辰A(当前盘) : ${sb.当前时辰}`);
+  if (sb.候选时辰) lines.push(`│ ├候选时辰B : ${sb.候选时辰.名}(${sb.候选时辰.区间}) — ${sb.候选时辰.说明}`);
+  lines.push(`│ ├判定口径 : ${sb.口径}`);
+  if (sb.solar_note) lines.push(`│ ├solar_note : ${sb.solar_note}`);
+  lines.push('│ └处理 : ①追问出生地(城市即可)换算经度重排;或②按两个候选时辰各排一盘,请用户报 2~3 个过往大事年份,用运岁引动对照选盘。用户明确坚持当前时间则继续,置信度按低档处理。');
+  lines.push('');
+  return lines;
+}
+
 function dumpZiwei(z: any, bi: any): string[] {
   const lines: string[] = [];
   lines.push('紫微斗数命盘');
@@ -337,6 +354,7 @@ function main() {
   const bi = chart.bazi.birthInfo || chart.ziwei.birthInfo;
 
   const lines: string[] = [];
+  lines.push(...dumpShichenBoundary(chart.bazi));
   lines.push(...dumpZiwei(chart.ziwei, bi));
   lines.push(...dumpBazi(chart.bazi, bi));
 

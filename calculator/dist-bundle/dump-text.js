@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// D:/Project Hyperion/Projects_Claude Code/Project No.3/Bazi-Ziwei-Decoder/calculator/dump-text.ts
+// dump-text.ts
 var fs = __toESM(require("fs"));
 function parseArgs() {
   const args = {};
@@ -30,6 +30,21 @@ function parseArgs() {
     if (m) args[m[1]] = m[2];
   }
   return args;
+}
+function dumpShichenBoundary(b) {
+  const sb = b?.enrichment?.\u65F6\u8FB0\u8FB9\u754C;
+  if (!sb || !sb.boundary) return [];
+  const lines = [];
+  const dir = sb.\u8DDD\u4EA4\u754C\u5206\u949F >= 0 ? `\u4EA4\u754C\u540E ${sb.\u8DDD\u4EA4\u754C\u5206\u949F} \u5206\u949F` : `\u4EA4\u754C\u524D ${-sb.\u8DDD\u4EA4\u754C\u5206\u949F} \u5206\u949F`;
+  lines.push("\u26A0 \u65F6\u8FB0\u4E34\u754C\u3014\u5E55\u540E\u65BD\u5DE5\u56FE:\u672A\u6838\u76D8\u524D\u4E0D\u8FDB\u5165\u89E3\u8BFB\u2014\u2014\u6309 SKILL.md\u300C\u65F6\u8FB0\u4E34\u754C\u6838\u76D8\u300D\u5206\u652F\u5904\u7406\u3015");
+  lines.push(`\u2502 \u251C\u6392\u76D8\u65F6\u523B ${sb.\u6392\u76D8\u65F6\u523B} \u8DDD\u65F6\u8FB0\u4EA4\u754C ${sb.\u6700\u8FD1\u4EA4\u754C} \u4EC5 ${Math.abs(sb.\u8DDD\u4EA4\u754C\u5206\u949F)} \u5206\u949F(${dir})`);
+  lines.push(`\u2502 \u251C\u5019\u9009\u65F6\u8FB0A(\u5F53\u524D\u76D8) : ${sb.\u5F53\u524D\u65F6\u8FB0}`);
+  if (sb.\u5019\u9009\u65F6\u8FB0) lines.push(`\u2502 \u251C\u5019\u9009\u65F6\u8FB0B : ${sb.\u5019\u9009\u65F6\u8FB0.\u540D}(${sb.\u5019\u9009\u65F6\u8FB0.\u533A\u95F4}) \u2014 ${sb.\u5019\u9009\u65F6\u8FB0.\u8BF4\u660E}`);
+  lines.push(`\u2502 \u251C\u5224\u5B9A\u53E3\u5F84 : ${sb.\u53E3\u5F84}`);
+  if (sb.solar_note) lines.push(`\u2502 \u251Csolar_note : ${sb.solar_note}`);
+  lines.push("\u2502 \u2514\u5904\u7406 : \u2460\u8FFD\u95EE\u51FA\u751F\u5730(\u57CE\u5E02\u5373\u53EF)\u6362\u7B97\u7ECF\u5EA6\u91CD\u6392;\u6216\u2461\u6309\u4E24\u4E2A\u5019\u9009\u65F6\u8FB0\u5404\u6392\u4E00\u76D8,\u8BF7\u7528\u6237\u62A5 2~3 \u4E2A\u8FC7\u5F80\u5927\u4E8B\u5E74\u4EFD,\u7528\u8FD0\u5C81\u5F15\u52A8\u5BF9\u7167\u9009\u76D8\u3002\u7528\u6237\u660E\u786E\u575A\u6301\u5F53\u524D\u65F6\u95F4\u5219\u7EE7\u7EED,\u7F6E\u4FE1\u5EA6\u6309\u4F4E\u6863\u5904\u7406\u3002");
+  lines.push("");
+  return lines;
 }
 function dumpZiwei(z, bi) {
   const lines = [];
@@ -319,6 +334,7 @@ function main() {
   const chart = JSON.parse(fs.readFileSync(args.input, "utf-8"));
   const bi = chart.bazi.birthInfo || chart.ziwei.birthInfo;
   const lines = [];
+  lines.push(...dumpShichenBoundary(chart.bazi));
   lines.push(...dumpZiwei(chart.ziwei, bi));
   lines.push(...dumpBazi(chart.bazi, bi));
   const text = lines.join("\n");
