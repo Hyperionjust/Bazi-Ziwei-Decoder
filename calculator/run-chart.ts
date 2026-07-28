@@ -14,6 +14,7 @@ import { createChart, resolveSolarClock } from './yiqi-core/index';
 import { getZhiCangGanFull } from './yiqi-core/bazi';
 import { enrichBazi } from './bazi-enrich/enrich';
 import { detectShichenBoundary, zishiConventionNote } from './bazi-enrich/shichen-boundary';
+import { aggregateConfidenceTier } from './bazi-enrich/confidence';
 import { computeShensha } from './shensha';
 import { adjudicateInteractions } from './bazi-enrich/interactions';
 import { analyzeYunSui } from './bazi-enrich/yunsui';
@@ -250,6 +251,15 @@ function main() {
     }
   } catch (e) {
     console.error('[shensha] 计算跳过(非致命):', (e as Error)?.message || e);
+  }
+
+  // Step 4: 全局置信度聚合(P0-C) — 收敛/边界盘/时辰临界 → confidence_tier(high/medium/low),
+  //   聚合规则见 bazi-enrich/confidence.ts 头注;low 档措辞约束由 bazi-prompt「置信度传播」+
+  //   check-analysis longform 红线共同执行。
+  try {
+    (chart.bazi.enrichment as any).confidence_tier = aggregateConfidenceTier(chart.bazi.enrichment);
+  } catch (e) {
+    console.error('[confidence] 置信度聚合跳过(非致命):', (e as Error)?.message || e);
   }
 
   const json = JSON.stringify(chart, null, 2);

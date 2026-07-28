@@ -29,6 +29,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // check-analysis.ts
 var check_analysis_exports = {};
 __export(check_analysis_exports, {
+  HIGH_CERTAINTY_WORDS: () => HIGH_CERTAINTY_WORDS,
   checkAnalysis: () => checkAnalysis,
   checkLongform: () => checkLongform,
   checkMbti: () => checkMbti,
@@ -392,6 +393,15 @@ function checkZiwei(a, _chart) {
   }
   return R;
 }
+var HIGH_CERTAINTY_WORDS = ["\u5FC5\u7136", "\u4E00\u5B9A\u4F1A", "\u80AF\u5B9A\u4F1A", "\u94C1\u5B9A", "\u5FC5\u5B9A", "\u6CE8\u5B9A"];
+var SINGLE_YEAR_RE = /(19|20)\d{2}\s*年/;
+var YEAR_ASSERT_RE = /(19|20)\d{2}\s*年[^,，;；]{0,14}(你会|将会|就会|会有|会出现|会发生)/;
+var HEDGE_RE = /(如果|若|倘|一旦|可能|或许|大概|预计|倾向|概率|机会|窗口|留意|注意|风险|参考|宜|前后|左右|上下|区间|之间|到20|[-–~至])/;
+function isBoundaryChart(chart) {
+  const en = chart?.bazi?.enrichment;
+  if (en?.confidence_tier?.tier) return en.confidence_tier.tier === "low";
+  return en?.\u7528\u795E\u5EFA\u8BAE?.\u8FB9\u754C\u76D8 === true || en?.\u65F6\u8FB0\u8FB9\u754C?.boundary === true;
+}
 function checkLongform(text, chart, currentYear) {
   const R = {};
   const push = (k, reasons, warn = false) => {
@@ -406,6 +416,20 @@ function checkLongform(text, chart, currentYear) {
   push("_\u7EDD\u5BF9\u51F6\u8BED", scan(/(大凶|灾年|凶年|凶星|血光|横死)/).map((s) => `\u7EDD\u5BF9\u65AD\u8BED:\u300C${s}\u300D(\u5E94\u6539\u987A\u98CE/\u5E73\u8DEF/\u9006\u98CE)`));
   push("_\u884C\u4E3A\u9891\u7387\u65AD\u8A00", scan(/(多半是你|你总是|你每次|你从不|你一定会|第一个想到你)/).map((s) => `\u9891\u7387\u65AD\u8A00:\u300C${s}\u300D(\u6539\u5199\u4E3A\u80FD\u529B/\u7279\u8D28/\u6F5C\u529B)`));
   push("_\u7AE5\u5E74\u884C\u4E3A\u65AD\u8A00", childhoodViolations(text).map((c) => `\u300C${c}\u2026\u300D(\u4ECE\u5C0F\u53EA\u80FD\u63A5\u6C14\u8D28\u3001\u4E0D\u63A5\u53EF\u8BC1\u4F2A\u884C\u4E3A)`));
+  {
+    const bad = [];
+    if (isBoundaryChart(chart)) {
+      for (const s of segs) {
+        for (const w of HIGH_CERTAINTY_WORDS) if (s.includes(w)) {
+          bad.push(`\u8FB9\u754C\u76D8\u9AD8\u786E\u5B9A\u65AD\u8BED:\u300C${s.slice(0, 40)}\u300D(\u542B\u300C${w}\u300D;low \u6863\u987B\u6761\u4EF6\u53E5+\u533A\u95F4\u5E94\u671F)`);
+          break;
+        }
+        if (SINGLE_YEAR_RE.test(s) && YEAR_ASSERT_RE.test(s) && !HEDGE_RE.test(s))
+          bad.push(`\u8FB9\u754C\u76D8\u5355\u5E74\u5B9A\u65AD:\u300C${s.slice(0, 40)}\u300D(\u5E94\u671F\u987B\u7ED9\u533A\u95F4\u6216\u52A0\u6761\u4EF6\u8BCD,\u4E0D\u7ED9\u5355\u5E74\u65AD\u4E8B)`);
+      }
+    }
+    push("_\u8FB9\u754C\u76D8\u9AD8\u786E\u5B9A\u65AD\u8BED", bad);
+  }
   {
     const zy = chart?.bazi?.enrichment?.\u6B63\u7F18\u503E\u5411;
     const bad = [];
@@ -463,6 +487,7 @@ function main() {
 if (require.main === module) main();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  HIGH_CERTAINTY_WORDS,
   checkAnalysis,
   checkLongform,
   checkMbti,

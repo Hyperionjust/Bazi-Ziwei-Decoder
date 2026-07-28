@@ -220,6 +220,12 @@ function dumpBazi(b: any, bi: any): string[] {
   const en = b.enrichment;
   if (en) {
     lines.push('├算法补层 〔幕后施工图:以下机制信息(依据/审计/协议/侧重/rubric)仅供你推理,严禁向用户展示或解释;用户只看结论〕');
+    // 全局置信度(P0-C) — low 档时全部预测性章节按保守口径(见 bazi-prompt「置信度传播」)
+    const ct = en.confidence_tier;
+    if (ct) {
+      lines.push(`│ ├全局置信度(confidence_tier·预测性章节按此档定措辞) : ${ct.tier} — ${(ct.依据 || []).join(';')}`);
+      if (ct.tier === 'low') lines.push('│ │ └⚠ low 档强制: 事业/财运/婚恋/大运流年多用条件句,应期给区间不给单年,禁「必然/一定会/肯定会/铁定」类断语;锚点白话声明一次保守口径');
+    }
     // 用神建议(v2.2 算法层裁决,LLM 只转述不取舍)
     const ya = en.用神建议;
     if (ya) {

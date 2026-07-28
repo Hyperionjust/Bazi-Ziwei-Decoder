@@ -13377,6 +13377,38 @@ function zishiConventionNote(hour) {
   };
 }
 
+// bazi-enrich/confidence.ts
+function aggregateConfidenceTier(enrichment) {
+  const ya = enrichment?.\u7528\u795E\u5EFA\u8BAE;
+  const sb = enrichment?.\u65F6\u8FB0\u8FB9\u754C;
+  const ws = enrichment?.\u65FA\u8870;
+  const gj = enrichment?.\u683C\u5C40;
+  const reasons = [];
+  if (sb?.boundary === true) reasons.push(`\u65F6\u8FB0\u4E34\u754C(\u8DDD\u4EA4\u754C${Math.abs(sb.\u8DDD\u4EA4\u754C\u5206\u949F ?? 0)}\u5206\u949F,\u65F6\u67F1\u5B58\u7591)`);
+  if (ya?.\u8FB9\u754C\u76D8 === true) {
+    const sub = [];
+    if (ya?.\u6276\u6291?.\u4E34\u754C) sub.push("\u65FA\u8870\u4E34\u754C");
+    if (ws && ws.confidence !== "\u9AD8") sub.push(`\u65FA\u8870\u7F6E\u4FE1${ws.confidence}`);
+    if (gj && gj.confidence === "\u4F4E") sub.push("\u683C\u5C40\u7F6E\u4FE1\u4F4E");
+    if (/从强|从弱/.test(ws?.verdict || "")) sub.push("\u4ECE\u683C\u5206\u6B67");
+    reasons.push(`\u8FB9\u754C\u76D8(${sub.join("/") || "\u7528\u795E\u4E09\u7EBF\u5224\u5B9A\u4E34\u754C"})`);
+  }
+  let tier;
+  if (reasons.length) tier = "low";
+  else if (ya?.\u6536\u655B === true) {
+    tier = "high";
+    reasons.push("\u4E09\u7EBF\u7528\u795E\u6536\u655B\u4E14\u5404\u5224\u5B9A\u7F6E\u4FE1\u8DB3");
+  } else {
+    tier = "medium";
+    reasons.push("\u975E\u8FB9\u754C\u76D8\u4F46\u7528\u795E\u4E09\u7EBF\u4E0D\u6536\u655B");
+  }
+  return {
+    tier,
+    \u4F9D\u636E: reasons,
+    \u8BF4\u660E: "low \u6863\u65F6\u5168\u90E8\u9884\u6D4B\u6027\u7AE0\u8282(\u4E8B\u4E1A/\u8D22\u8FD0/\u5A5A\u604B/\u5927\u8FD0\u6D41\u5E74)\u987B\u591A\u7528\u6761\u4EF6\u53E5\u3001\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74\u3001\u7981\u7528\u9AD8\u786E\u5B9A\u63AA\u8F9E,\u5E76\u5728\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4FDD\u5B88\u53E3\u5F84(\u89C1 bazi-prompt\u300C\u7F6E\u4FE1\u5EA6\u4F20\u64AD\u300D);\u6B64\u673A\u5236\u5B57\u6BB5\u4E0D\u5F97\u5411\u7528\u6237\u5C55\u793A\u3002"
+  };
+}
+
 // shensha.ts
 var ZHI = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
 var PILLAR_CN = { year: "\u5E74", month: "\u6708", day: "\u65E5", hour: "\u65F6" };
@@ -14639,6 +14671,11 @@ function main() {
     }
   } catch (e) {
     console.error("[shensha] \u8BA1\u7B97\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
+  }
+  try {
+    chart.bazi.enrichment.confidence_tier = aggregateConfidenceTier(chart.bazi.enrichment);
+  } catch (e) {
+    console.error("[confidence] \u7F6E\u4FE1\u5EA6\u805A\u5408\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
   }
   const json = JSON.stringify(chart, null, 2);
   if (args.output) {

@@ -75,6 +75,24 @@ ok(Object.values(rc).every((r: any) => r.status !== 'FAIL'), '长文:合规样�
 const rAge = checkLongform('你温厚踏实。你的正缘更可能比你年轻活泼。', lfChart, 2026);
 ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与算法判定矛盾被抓');
 
+// ---- P0-C 置信度传播: 边界盘高确定断语红线(正/反样例) ----
+{
+  const bChart = { bazi: { enrichment: { confidence_tier: { tier: 'low' } } } };
+  const hChart = { bazi: { enrichment: { confidence_tier: { tier: 'high' } } } };
+  const certainTxt = '你的事业必然在近年起飞。2029年你会升职加薪。';
+  const hedgedTxt = '如果你近年在体制内,2028-2030 这个窗口整体偏顺,适合主动争取;应期只是参考,决定权在你。';
+  const rB1 = checkLongform(certainTxt, bChart, 2026);
+  ok(rB1['_边界盘高确定断语'].status === 'FAIL', '边界盘+「必然/单年断事」→ FAIL(正样例): ' + JSON.stringify(rB1['_边界盘高确定断语'].reasons.length));
+  ok(rB1['_边界盘高确定断语'].reasons.some(r => r.includes('必然')) && rB1['_边界盘高确定断语'].reasons.some(r => r.includes('单年')), '两种模式(高确定词/单年定断)各自命中');
+  const rB2 = checkLongform(hedgedTxt, bChart, 2026);
+  ok(rB2['_边界盘高确定断语'].status !== 'FAIL', '边界盘+条件句区间应期 → PASS(反样例): ' + JSON.stringify(rB2['_边界盘高确定断语'].reasons));
+  const rB3 = checkLongform(certainTxt, hChart, 2026);
+  ok(rB3['_边界盘高确定断语'].status !== 'FAIL', '非边界盘(high 档)不触发本红线(规则限边界盘)');
+  // 旧 chart 无 confidence_tier: 回退 用神边界盘/时辰临界 判定
+  const legacy = { bazi: { enrichment: { 用神建议: { 边界盘: true } } } };
+  ok(checkLongform(certainTxt, legacy, 2026)['_边界盘高确定断语'].status === 'FAIL', '旧 chart 回退边界盘字段仍拦截');
+}
+
 // ---- v3.8 综合海报体检(--mode=zonghe):随包样例即 golden ----
 {
   const sample = JSON.parse(fs.readFileSync(path.join(__dirname, '../../examples/sample-analysis.json'), 'utf-8'));

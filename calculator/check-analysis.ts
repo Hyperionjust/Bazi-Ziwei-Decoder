@@ -349,8 +349,22 @@ export function checkZiwei(a: any, _chart: any): Record<string, Rep> {
 
 // ---- 长文(Markdown)后置体检(--mode=longform) ----
 // 长文语义质量由评审遍把关;本模式只兜「机器可判的形态红线」:幕后机制泄漏 / 版本号史 /
-// 第三人称播报腔 / 绝对凶语(顺逆措辞) / 行为频率断言 / 童年行为断言 / 正缘年龄与算法判定一致性。
+// 第三人称播报腔 / 绝对凶语(顺逆措辞) / 行为频率断言 / 童年行为断言 / 正缘年龄与算法判定一致性 /
+// 边界盘高确定断语(P0-C 置信度传播)。
 // 刻意避开会误伤的词:「置信度」允许对用户显示(边界盘须标低);紫微「命主星/身主星」为星名不拦。
+
+// P0-C 边界盘高确定断语模式(常量;chart 为边界盘/低置信时命中即 FAIL)
+export const HIGH_CERTAINTY_WORDS = ['必然', '一定会', '肯定会', '铁定', '必定', '注定'] as const;
+// 「无条件词伴随的具体单年断事」启发式: 句中含具体年份 + 定断句式(会/将) 且无任何条件/留余地词
+const SINGLE_YEAR_RE = /(19|20)\d{2}\s*年/;
+const YEAR_ASSERT_RE = /(19|20)\d{2}\s*年[^,，;；]{0,14}(你会|将会|就会|会有|会出现|会发生)/;
+const HEDGE_RE = /(如果|若|倘|一旦|可能|或许|大概|预计|倾向|概率|机会|窗口|留意|注意|风险|参考|宜|前后|左右|上下|区间|之间|到20|[-–~至])/;
+// 边界盘判定: 全局置信度 low(P0-C) 优先;旧 chart 无该字段时回退 用神边界盘/时辰临界
+function isBoundaryChart(chart: any): boolean {
+  const en = chart?.bazi?.enrichment;
+  if (en?.confidence_tier?.tier) return en.confidence_tier.tier === 'low';
+  return en?.用神建议?.边界盘 === true || en?.时辰边界?.boundary === true;
+}
 export function checkLongform(text: string, chart: any, currentYear: number): Record<string, Rep> {
   const R: Record<string, Rep> = {};
   const push = (k: string, reasons: string[], warn = false) => {
@@ -373,6 +387,18 @@ export function checkLongform(text: string, chart: any, currentYear: number): Re
   push('_行为频率断言', scan(/(多半是你|你总是|你每次|你从不|你一定会|第一个想到你)/).map(s => `频率断言:「${s}」(改写为能力/特质/潜力)`));
   // 4) 童年行为断言(v3.2.3)
   push('_童年行为断言', childhoodViolations(text).map(c => `「${c}…」(从小只能接气质、不接可证伪行为)`));
+  // 4.5) P0-C 置信度传播: chart 为边界盘时,高确定断语与"无条件词的具体单年断事"必拦
+  {
+    const bad: string[] = [];
+    if (isBoundaryChart(chart)) {
+      for (const s of segs) {
+        for (const w of HIGH_CERTAINTY_WORDS) if (s.includes(w)) { bad.push(`边界盘高确定断语:「${s.slice(0, 40)}」(含「${w}」;low 档须条件句+区间应期)`); break; }
+        if (SINGLE_YEAR_RE.test(s) && YEAR_ASSERT_RE.test(s) && !HEDGE_RE.test(s))
+          bad.push(`边界盘单年定断:「${s.slice(0, 40)}」(应期须给区间或加条件词,不给单年断事)`);
+      }
+    }
+    push('_边界盘高确定断语', bad);
+  }
   // 5) 正缘年龄一致性(v2.6):仅在「婚配/正缘」语境句里比对年龄词
   {
     const zy = chart?.bazi?.enrichment?.正缘倾向;
