@@ -112,6 +112,14 @@ function dumpBazi(b: any, bi: any): string[] {
   lines.push('八字命盘');
   lines.push('│');
 
+  // 晚子时约定提示(P0-B) — 出生 23:00-24:00 时渲染;解读层须向用户白话披露(不出字段名)
+  const zc = b.zishi_convention;
+  if (zc) {
+    lines.push(`├⚠晚子时约定〔须向用户白话披露〕: 出生于 ${zc.window},本盘按【${zc.约定}】排盘`);
+    lines.push(`│ └${zc.说明}`);
+    lines.push('│');
+  }
+
   // 四柱表
   const sz = b.siZhu;
   const ss = b.shiShen;

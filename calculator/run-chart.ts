@@ -13,7 +13,7 @@
 import { createChart, resolveSolarClock } from './yiqi-core/index';
 import { getZhiCangGanFull } from './yiqi-core/bazi';
 import { enrichBazi } from './bazi-enrich/enrich';
-import { detectShichenBoundary } from './bazi-enrich/shichen-boundary';
+import { detectShichenBoundary, zishiConventionNote } from './bazi-enrich/shichen-boundary';
 import { computeShensha } from './shensha';
 import { adjudicateInteractions } from './bazi-enrich/interactions';
 import { analyzeYunSui } from './bazi-enrich/yunsui';
@@ -133,6 +133,9 @@ function main() {
     (chart.bazi.enrichment as any).时辰边界 = detectShichenBoundary(eff.hour, eff.minute, {
       corrected: birthInfo.longitude != null && Number.isFinite(+birthInfo.longitude),
     });
+    // P0-B: 晚子时约定显式披露(仅出生时刻 ∈ [23:00,24:00) 时输出;实测确认引擎为换日约定)
+    const zc = zishiConventionNote(eff.hour);
+    if (zc) chart.bazi.zishi_convention = zc;
   } catch (e) {
     console.error('[shichen] 时辰边界检测跳过(非致命):', (e as Error)?.message || e);
   }

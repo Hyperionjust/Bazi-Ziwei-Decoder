@@ -113,6 +113,12 @@ function dumpBazi(b, bi) {
   lines.push("");
   lines.push("\u516B\u5B57\u547D\u76D8");
   lines.push("\u2502");
+  const zc = b.zishi_convention;
+  if (zc) {
+    lines.push(`\u251C\u26A0\u665A\u5B50\u65F6\u7EA6\u5B9A\u3014\u987B\u5411\u7528\u6237\u767D\u8BDD\u62AB\u9732\u3015: \u51FA\u751F\u4E8E ${zc.window},\u672C\u76D8\u6309\u3010${zc.\u7EA6\u5B9A}\u3011\u6392\u76D8`);
+    lines.push(`\u2502 \u2514${zc.\u8BF4\u660E}`);
+    lines.push("\u2502");
+  }
   const sz = b.siZhu;
   const ss = b.shiShen;
   const zs = b.zhangSheng || {};

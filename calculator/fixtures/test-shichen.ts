@@ -1,7 +1,7 @@
 // test-shichen.ts — 时辰边界检测回归(P0-A)
 // 用法: npx tsx test-shichen.ts (或 esbuild 打包后 node 直跑);全过 exit 0
-import { detectShichenBoundary, BOUNDARY_THRESHOLD_MIN } from '../bazi-enrich/shichen-boundary';
-import { resolveSolarClock } from '../yiqi-core/index';
+import { detectShichenBoundary, BOUNDARY_THRESHOLD_MIN, zishiConventionNote } from '../bazi-enrich/shichen-boundary';
+import { createChart, resolveSolarClock } from '../yiqi-core/index';
 
 let failed = 0;
 function ok(cond: boolean, msg: string) { if (cond) console.log('✓', msg); else { console.log('✗', msg); failed++; } }
@@ -56,6 +56,17 @@ const r7 = detectShichenBoundary(eff.hour, eff.minute, { corrected: true });
 ok(r7.boundary === true, `lon=116.4 校正后 ${eff.hour}:${eff.minute} → boundary:true`);
 ok(r7.口径.includes('真太阳时'), '校正后口径=真太阳时');
 ok(r7.solar_note === undefined, '已校正 → 不附 solar_note');
+
+// ── 8) P0-B 晚子时约定披露: 仅 [23:00,24:00) 输出;约定与引擎实测行为一致(换日) ──
+const z1 = zishiConventionNote(23);
+ok(z1 !== null && z1!.约定.includes('换日'), '23 时 → 输出约定块(换日/归次日)');
+ok((z1?.说明 || '').includes('不一致'), '约定说明含「与其他软件不一致」差异提示');
+ok(zishiConventionNote(22) === null && zishiConventionNote(0) === null, '22 时 / 0 时 → 不输出约定块');
+// 约定必须与引擎真实行为一致: 23:30 盘 ≡ 次日 00:30 盘(日柱换日)
+const zc1 = createChart({ year: 2000, month: 1, day: 1, hour: 23, minute: 30, gender: 'male', isLunar: false, timeZone: 8 } as any);
+const zc2 = createChart({ year: 2000, month: 1, day: 2, hour: 0, minute: 30, gender: 'male', isLunar: false, timeZone: 8 } as any);
+const dgz = (c: any) => c.bazi.siZhu.day.gan + c.bazi.siZhu.day.zhi;
+ok(dgz(zc1) === dgz(zc2) && dgz(zc1) === '己未', `实测: 23:30 日柱=${dgz(zc1)} ≡ 次日早子时(换日约定成立)`);
 
 if (failed === 0) { console.log('\n✅ 全部通过 (时辰边界)'); process.exit(0); }
 else { console.log(`\n❌ ${failed} 项失败`); process.exit(1); }

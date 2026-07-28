@@ -13368,6 +13368,14 @@ function detectShichenBoundary(hour, minute, opts) {
   }
   return res;
 }
+function zishiConventionNote(hour) {
+  if (hour !== 23) return null;
+  return {
+    window: "23:00-24:00(\u665A\u5B50\u65F6)",
+    \u7EA6\u5B9A: "\u6362\u65E5(\u65E5\u67F1\u5F52\u6B21\u65E5)",
+    \u8BF4\u660E: "\u672C\u76D8\u5BF9 23:00-24:00 \u51FA\u751F\u91C7\u7528\u300C\u665A\u5B50\u65F6\u65E5\u67F1\u6309\u6B21\u65E5\u63A8\u300D\u7EA6\u5B9A,\u6574\u76D8(\u542B\u7D2B\u5FAE\u519C\u5386\u65E5)\u6309\u6B21\u65E5\u53E3\u5F84\u3002\u53E6\u4E00\u5E38\u89C1\u7EA6\u5B9A(\u591C\u5B50\u65F6\u4E0D\u6362\u65E5: \u65E5\u67F1\u4ECD\u7528\u5F53\u65E5\u3001\u4EC5\u65F6\u67F1\u4F5C\u5B50\u65F6)\u4E0B\u65E5\u67F1\u4F1A\u662F\u524D\u4E00\u5929\u7684\u5E72\u652F\u2014\u2014\u5982\u4E0E\u5176\u4ED6\u6392\u76D8\u8F6F\u4EF6\u7ED3\u679C\u4E0D\u4E00\u81F4,\u591A\u534A\u6E90\u4E8E\u6B64\u3002\u89E3\u8BFB\u65F6\u5FC5\u987B\u5411\u7528\u6237\u767D\u8BDD\u62AB\u9732\u672C\u7EA6\u5B9A(\u89C1\u63D0\u793A\u8BCD\u5F3A\u5236\u89C4\u5219),\u4E0D\u6539\u6392\u76D8\u3002"
+  };
+}
 
 // shensha.ts
 var ZHI = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
@@ -14533,6 +14541,8 @@ function main() {
     chart.bazi.enrichment.\u65F6\u8FB0\u8FB9\u754C = detectShichenBoundary(eff.hour, eff.minute, {
       corrected: birthInfo.longitude != null && Number.isFinite(+birthInfo.longitude)
     });
+    const zc = zishiConventionNote(eff.hour);
+    if (zc) chart.bazi.zishi_convention = zc;
   } catch (e) {
     console.error("[shichen] \u65F6\u8FB0\u8FB9\u754C\u68C0\u6D4B\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
   }
