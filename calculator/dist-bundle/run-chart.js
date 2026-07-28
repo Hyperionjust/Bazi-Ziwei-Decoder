@@ -14079,22 +14079,23 @@ function gzVsChart(gz, siZhu, label) {
   }
   return hits;
 }
-function suiVsYun(liuNian, daYun) {
+function suiVsYun(liuNian, daYun, label = "\u6D41\u5E74") {
   const hits = [];
+  const bingLin = label === "\u6D41\u5E74" ? "\u5C81\u8FD0\u5E76\u4E34(\u8BE5\u5E74\u4E4B\u8C61\u52A0\u500D,\u5409\u51F6\u7686\u91CD)" : `${label}\u4E0E\u5927\u8FD0\u5E72\u652F\u5168\u540C,\u5E76\u4E34\u4E4B\u8C61\u52A0\u91CD`;
   if (liuNian.gan === daYun.gan && liuNian.zhi === daYun.zhi)
-    hits.push({ vs: "\u5927\u8FD0", type: "\u5C81\u8FD0\u5E76\u4E34", desc: `\u6D41\u5E74${liuNian.gan}${liuNian.zhi}\u4E0E\u5927\u8FD0\u5E72\u652F\u5168\u540C,\u5C81\u8FD0\u5E76\u4E34(\u8BE5\u5E74\u4E4B\u8C61\u52A0\u500D,\u5409\u51F6\u7686\u91CD)` });
+    hits.push({ vs: "\u5927\u8FD0", type: "\u5C81\u8FD0\u5E76\u4E34", desc: `${label}${liuNian.gan}${liuNian.zhi}\u4E0E\u5927\u8FD0\u5E72\u652F\u5168\u540C,${bingLin}` });
   const ganKe = shengKe(GAN_WUXING[liuNian.gan], GAN_WUXING[daYun.gan]) === "\u514B" || shengKe(GAN_WUXING[daYun.gan], GAN_WUXING[liuNian.gan]) === "\u514B";
   if (ganKe && LIU_CHONG2[liuNian.zhi] === daYun.zhi)
-    hits.push({ vs: "\u5927\u8FD0", type: "\u5929\u514B\u5730\u51B2", desc: `\u6D41\u5E74\u4E0E\u5927\u8FD0\u5929\u514B\u5730\u51B2,\u5C81\u8FD0\u4EA4\u6218,\u52A8\u8361\u4E4B\u5E74` });
+    hits.push({ vs: "\u5927\u8FD0", type: "\u5929\u514B\u5730\u51B2", desc: `${label}\u4E0E\u5927\u8FD0\u5929\u514B\u5730\u51B2,\u4EA4\u6218\u52A8\u8361` });
   else if (LIU_CHONG2[liuNian.zhi] === daYun.zhi)
-    hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u51B2", desc: `\u6D41\u5E74\u652F${liuNian.zhi}\u51B2\u5927\u8FD0\u652F${daYun.zhi}` });
-  if (GAN_HE2[liuNian.gan] === daYun.gan) hits.push({ vs: "\u5927\u8FD0", type: "\u5E72\u5408", desc: `\u6D41\u5E74\u5E72${liuNian.gan}\u5408\u5927\u8FD0\u5E72${daYun.gan}` });
-  if (LIU_HE2[liuNian.zhi] === daYun.zhi) hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u5408", desc: `\u6D41\u5E74\u652F${liuNian.zhi}\u5408\u5927\u8FD0\u652F${daYun.zhi}` });
-  if (LIU_HAI2[liuNian.zhi] === daYun.zhi) hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u5BB3(\u7A7F)", desc: `\u6D41\u5E74\u652F${liuNian.zhi}\u5BB3(\u7A7F)\u5927\u8FD0\u652F${daYun.zhi}` });
+    hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u51B2", desc: `${label}\u652F${liuNian.zhi}\u51B2\u5927\u8FD0\u652F${daYun.zhi}` });
+  if (GAN_HE2[liuNian.gan] === daYun.gan) hits.push({ vs: "\u5927\u8FD0", type: "\u5E72\u5408", desc: `${label}\u5E72${liuNian.gan}\u5408\u5927\u8FD0\u5E72${daYun.gan}` });
+  if (LIU_HE2[liuNian.zhi] === daYun.zhi) hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u5408", desc: `${label}\u652F${liuNian.zhi}\u5408\u5927\u8FD0\u652F${daYun.zhi}` });
+  if (LIU_HAI2[liuNian.zhi] === daYun.zhi) hits.push({ vs: "\u5927\u8FD0", type: "\u652F\u5BB3(\u7A7F)", desc: `${label}\u652F${liuNian.zhi}\u5BB3(\u7A7F)\u5927\u8FD0\u652F${daYun.zhi}` });
   if (liuNian.zhi === daYun.zhi && ZI_XING2.has(liuNian.zhi))
-    hits.push({ vs: "\u5927\u8FD0", type: "\u81EA\u5211", desc: `\u6D41\u5E74\u652F${liuNian.zhi}\u4E0E\u5927\u8FD0\u652F${daYun.zhi}\u81EA\u5211` });
+    hits.push({ vs: "\u5927\u8FD0", type: "\u81EA\u5211", desc: `${label}\u652F${liuNian.zhi}\u4E0E\u5927\u8FD0\u652F${daYun.zhi}\u81EA\u5211` });
   if (liuNian.zhi === "\u5B50" && daYun.zhi === "\u536F" || liuNian.zhi === "\u536F" && daYun.zhi === "\u5B50")
-    hits.push({ vs: "\u5927\u8FD0", type: "\u76F8\u5211", desc: `\u6D41\u5E74\u652F${liuNian.zhi}\u5211\u5927\u8FD0\u652F${daYun.zhi}(\u65E0\u793C\u4E4B\u5211)` });
+    hits.push({ vs: "\u5927\u8FD0", type: "\u76F8\u5211", desc: `${label}\u652F${liuNian.zhi}\u5211\u5927\u8FD0\u652F${daYun.zhi}(\u65E0\u793C\u4E4B\u5211)` });
   return hits;
 }
 function hitWeight(h) {
@@ -14155,6 +14156,54 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
   }
   res.\u5EFA\u8BAE\u8282\u70B9.sort((a, b) => a.\u5E74 - b.\u5E74);
   return res;
+}
+
+// bazi-enrich/liuyue.ts
+var GAN10 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+var ZHI122 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+var WUHU = { \u7532: "\u4E19", \u5DF1: "\u4E19", \u4E59: "\u620A", \u5E9A: "\u620A", \u4E19: "\u5E9A", \u8F9B: "\u5E9A", \u4E01: "\u58EC", \u58EC: "\u58EC", \u620A: "\u7532", \u7678: "\u7532" };
+var MONTH_ZHI = ["\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5", "\u5B50", "\u4E11"];
+var MONTH_JIEQI = ["\u7ACB\u6625", "\u60CA\u86F0", "\u6E05\u660E", "\u7ACB\u590F", "\u8292\u79CD", "\u5C0F\u6691", "\u7ACB\u79CB", "\u767D\u9732", "\u5BD2\u9732", "\u7ACB\u51AC", "\u5927\u96EA", "\u5C0F\u5BD2"];
+var MONTH_NONGLI = ["\u6B63\u6708", "\u4E8C\u6708", "\u4E09\u6708", "\u56DB\u6708", "\u4E94\u6708", "\u516D\u6708", "\u4E03\u6708", "\u516B\u6708", "\u4E5D\u6708", "\u5341\u6708", "\u51AC\u6708", "\u814A\u6708"];
+var fmtDate = (s) => `${s.getYear()}-${String(s.getMonth()).padStart(2, "0")}-${String(s.getDay()).padStart(2, "0")}`;
+function analyzeLiuYue(siZhu, dayun, year) {
+  const yGan = GAN10[(year - 4) % 10];
+  const yZhi = ZHI122[(year - 4) % 12];
+  const table = Solar.fromYmd(year, 6, 1).getLunar().getJieQiTable();
+  const PINYIN = { \u5C0F\u5BD2: "XIAO_HAN", \u7ACB\u6625: "LI_CHUN" };
+  const jieqiSolar = (name, nextCycle) => {
+    const key = nextCycle ? PINYIN[name] || name : name;
+    return table[key];
+  };
+  const cur = (dayun || []).find((d) => year >= d.startYear && year <= d.endYear);
+  const dGZ = cur ? { gan: cur.ganZhi.gan, zhi: cur.ganZhi.zhi } : null;
+  const yinGan = WUHU[yGan];
+  const months = [];
+  for (let i = 0; i < 12; i++) {
+    const zhi = MONTH_ZHI[i];
+    const gan = GAN10[(GAN10.indexOf(yinGan) + i) % 10];
+    const gz = { gan, zhi };
+    const start = jieqiSolar(MONTH_JIEQI[i], MONTH_JIEQI[i] === "\u5C0F\u5BD2");
+    const end = i < 11 ? jieqiSolar(MONTH_JIEQI[i + 1], MONTH_JIEQI[i + 1] === "\u5C0F\u5BD2") : jieqiSolar("\u7ACB\u6625", true);
+    months.push({
+      \u5E8F: i + 1,
+      \u652F: zhi,
+      \u5E72\u652F: gan + zhi,
+      \u8282\u6C14: MONTH_JIEQI[i],
+      \u516C\u5386\u8D77: start ? fmtDate(start) : "-",
+      \u516C\u5386\u6B62: end ? fmtDate(end) : "-",
+      \u7EA6\u519C\u5386\u6708: MONTH_NONGLI[i],
+      vs\u539F\u5C40: gzVsChart(gz, siZhu, "\u6D41\u6708"),
+      vs\u5927\u8FD0: dGZ ? suiVsYun(gz, dGZ, "\u6D41\u6708") : []
+    });
+  }
+  return {
+    \u8BF4\u660E: "\u6D41\u6708\u5F15\u52A8=\u8BE5\u6D41\u5E74 12 \u4E2A\u8282\u6C14\u6708(\u6708\u5E72\u4E94\u864E\u9041\u8D77)\u4E0E\u539F\u5C40/\u8BE5\u5E74\u5927\u8FD0\u7684\u5408\u51B2\u5211\u5BB3\u68C0\u6D4B,\u590D\u7528\u8FD0\u5C81\u5F15\u52A8\u540C\u4E00\u5957\u68C0\u6D4B\u5668\u3001\u7C92\u5EA6\u964D\u5230\u6708\u3002\u4F9B\u6708\u7EA7\u7A97\u53E3\u9009\u62E9(\u300C\u51E0\u6708\u9002\u5408\u2026\u300D);\u5409\u51F6\u968F\u559C\u5FCC\u5B9A,\u6708\u4EE4\u529B\u91CF\u8F7B\u4E8E\u5927\u8FD0\u6D41\u5E74,\u53EA\u4F5C\u7A97\u53E3\u5FAE\u8C03\u4E0D\u6539\u5168\u5E74\u5B9A\u8C03\u3002",
+    \u5E74: year,
+    \u5E74\u5E72\u652F: yGan + yZhi,
+    \u5927\u8FD0: cur ? `${cur.ganZhi.gan}${cur.ganZhi.zhi}(${cur.startYear}-${cur.endYear})` : "\u672A\u8D77\u8FD0",
+    \u6708: months
+  };
 }
 
 // bazi-enrich/rare.ts
@@ -14638,22 +14687,29 @@ function main() {
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : (/* @__PURE__ */ new Date()).getFullYear();
       enr.\u8FD0\u5C81\u5F15\u52A8 = analyzeYunSui(siZhuCN, chart.bazi.dayun || [], curYear);
+      if (args.currentYear) {
+        try {
+          enr.\u6D41\u6708\u5F15\u52A8 = analyzeLiuYue(siZhuCN, chart.bazi.dayun || [], curYear);
+        } catch (e) {
+          console.error("[liuyue] \u6D41\u6708\u5F15\u52A8\u8BA1\u7B97\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
+        }
+      }
       enr.\u7F55\u8C61 = detectRarePatterns(siZhuCN, fullHits, enr.\u5730\u652F\u5173\u7CFB || [], enr.\u5929\u5E72\u5173\u7CFB || []);
       enr.\u6B63\u7F18\u503E\u5411 = judgeSpouseProfile(siZhuCN, birthInfo.gender);
-      const GAN10 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
-      const ZHI122 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+      const GAN102 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+      const ZHI123 = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
       const mGan = chart.bazi.siZhu.month.gan, mZhi = chart.bazi.siZhu.month.zhi, hZhi = chart.bazi.siZhu.hour.zhi;
-      const taiGan = GAN10[(GAN10.indexOf(mGan) + 1) % 10];
-      const taiZhi = ZHI122[(ZHI122.indexOf(mZhi) + 3) % 12];
+      const taiGan = GAN102[(GAN102.indexOf(mGan) + 1) % 10];
+      const taiZhi = ZHI123[(ZHI123.indexOf(mZhi) + 3) % 12];
       enr.\u80CE\u5143 = taiGan + taiZhi;
-      const numOf = (z2) => (ZHI122.indexOf(z2) - 2 + 12) % 12 + 1;
+      const numOf = (z2) => (ZHI123.indexOf(z2) - 2 + 12) % 12 + 1;
       const sum = numOf(mZhi) + numOf(hZhi);
       const n = (sum < 14 ? 14 : 26) - sum;
-      const mgZhi = ZHI122[(n - 1 + 2) % 12];
-      const WUHU = { \u7532: "\u4E19", \u5DF1: "\u4E19", \u4E59: "\u620A", \u5E9A: "\u620A", \u4E19: "\u5E9A", \u8F9B: "\u5E9A", \u4E01: "\u58EC", \u58EC: "\u58EC", \u620A: "\u7532", \u7678: "\u7532" };
-      const yinGan = WUHU[chart.bazi.siZhu.year.gan];
-      const steps = (ZHI122.indexOf(mgZhi) - 2 + 12) % 12;
-      const mgGan = GAN10[(GAN10.indexOf(yinGan) + steps) % 10];
+      const mgZhi = ZHI123[(n - 1 + 2) % 12];
+      const WUHU2 = { \u7532: "\u4E19", \u5DF1: "\u4E19", \u4E59: "\u620A", \u5E9A: "\u620A", \u4E19: "\u5E9A", \u8F9B: "\u5E9A", \u4E01: "\u58EC", \u58EC: "\u58EC", \u620A: "\u7532", \u7678: "\u7532" };
+      const yinGan = WUHU2[chart.bazi.siZhu.year.gan];
+      const steps = (ZHI123.indexOf(mgZhi) - 2 + 12) % 12;
+      const mgGan = GAN102[(GAN102.indexOf(yinGan) + steps) % 10];
       enr.\u547D\u5BAB = mgGan + mgZhi;
       enr.\u516B\u7EF4\u7ED3\u6784 = judgeBaWei(siZhuCN, birthInfo.gender, {
         rubric: args.rubric === "v2" ? "v2" : args.rubric === "v3" ? "v3" : "v4",

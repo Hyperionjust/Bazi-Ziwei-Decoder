@@ -18,6 +18,7 @@ import { aggregateConfidenceTier } from './bazi-enrich/confidence';
 import { computeShensha } from './shensha';
 import { adjudicateInteractions } from './bazi-enrich/interactions';
 import { analyzeYunSui } from './bazi-enrich/yunsui';
+import { analyzeLiuYue } from './bazi-enrich/liuyue';
 import { detectRarePatterns } from './bazi-enrich/rare';
 import { judgeSpouseProfile } from './bazi-enrich/zhengyuan';
 import { judgeBaWei } from './bazi-enrich/bawei';
@@ -205,6 +206,15 @@ function main() {
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : new Date().getFullYear();
       enr.运岁引动 = analyzeYunSui(siZhuCN, chart.bazi.dayun || [], curYear);
+
+      // P1-A: 流月引动 — 仅显式传 --currentYear 时输出(流年问答月级粒度;复用运岁检测器)
+      if (args.currentYear) {
+        try {
+          enr.流月引动 = analyzeLiuYue(siZhuCN, chart.bazi.dayun || [], curYear);
+        } catch (e) {
+          console.error('[liuyue] 流月引动计算跳过(非致命):', (e as Error)?.message || e);
+        }
+      }
 
       // v2.5: 罕象检测(四库全/德秀满盘/三德会聚等) — 罕见度由算法定义,解读层优先讲解
       enr.罕象 = detectRarePatterns(siZhuCN, fullHits as any[], enr.地支关系 || [], enr.天干关系 || []);

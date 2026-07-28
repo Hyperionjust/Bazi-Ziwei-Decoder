@@ -331,6 +331,17 @@ function dumpBazi(b, bi) {
         });
       }
     }
+    const ly = en.\u6D41\u6708\u5F15\u52A8;
+    if (ly && Array.isArray(ly.\u6708)) {
+      lines.push(`\u251C\u6D41\u6708\u5F15\u52A8 (${ly.\u5E74} ${ly.\u5E74\u5E72\u652F}\u5E74 \xB7 \u6309\u8282\u6C14\u5206\u6708 \xB7 \u8BE5\u5E74\u5927\u8FD0 ${ly.\u5927\u8FD0})`);
+      lines.push(`\u2502 \u251C\u8BF4\u660E : ${ly.\u8BF4\u660E}`);
+      ly.\u6708.forEach((m, i) => {
+        const last = i === ly.\u6708.length - 1;
+        const all = [...m.vs\u539F\u5C40 || [], ...m.vs\u5927\u8FD0 || []];
+        const hitStr = all.length ? all.map((h) => `[${h.type}]${h.desc.replace(/^流月/, "")}`).join(" ; ") : "\u65E0\u663E\u8457\u5F15\u52A8";
+        lines.push(`\u2502 ${last ? "\u2514" : "\u251C"}${String(m.\u5E8F).padStart(2, "0")} ${m.\u5E72\u652F}\u6708(${m.\u8282\u6C14}\u8D77 ${m.\u516C\u5386\u8D77}~${m.\u516C\u5386\u6B62} \u7EA6${m.\u7EA6\u519C\u5386\u6708}) : ${hitStr}`);
+      });
+    }
   }
   lines.push("");
   lines.push("\u2514[\u5907\u6CE8: \u672C\u76D8\u7531 bazi-ziwei skill \u7B97\u6CD5\u5C42\u751F\u6210 \u2014 Yiqi core + enrichBazi \u8865\u5C42]");

@@ -351,6 +351,19 @@ function dumpBazi(b: any, bi: any): string[] {
         });
       }
     }
+
+    // 流月引动(P1-A) — 仅 --currentYear 时存在;月级窗口选择依据
+    const ly = en.流月引动;
+    if (ly && Array.isArray(ly.月)) {
+      lines.push(`├流月引动 (${ly.年} ${ly.年干支}年 · 按节气分月 · 该年大运 ${ly.大运})`);
+      lines.push(`│ ├说明 : ${ly.说明}`);
+      ly.月.forEach((m: any, i: number) => {
+        const last = i === ly.月.length - 1;
+        const all = [...(m.vs原局 || []), ...(m.vs大运 || [])];
+        const hitStr = all.length ? all.map((h: any) => `[${h.type}]${h.desc.replace(/^流月/, '')}`).join(' ; ') : '无显著引动';
+        lines.push(`│ ${last ? '└' : '├'}${String(m.序).padStart(2, '0')} ${m.干支}月(${m.节气}起 ${m.公历起}~${m.公历止} 约${m.约农历月}) : ${hitStr}`);
+      });
+    }
   }
   lines.push('');
   lines.push('└[备注: 本盘由 bazi-ziwei skill 算法层生成 — Yiqi core + enrichBazi 补层]');

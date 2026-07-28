@@ -79,24 +79,25 @@ export function gzVsChart(gz: GZ, siZhu: SiZhuMap, label: string): YunSuiHit[] {
   return hits;
 }
 
-// 流年 vs 大运
-export function suiVsYun(liuNian: GZ, daYun: GZ): YunSuiHit[] {
+// 流年 vs 大运(P1-A: label 可换「流月」以复用检测器,粒度降到月;缺省行为不变)
+export function suiVsYun(liuNian: GZ, daYun: GZ, label = '流年'): YunSuiHit[] {
   const hits: YunSuiHit[] = [];
+  const bingLin = label === '流年' ? '岁运并临(该年之象加倍,吉凶皆重)' : `${label}与大运干支全同,并临之象加重`;
   if (liuNian.gan === daYun.gan && liuNian.zhi === daYun.zhi)
-    hits.push({ vs: '大运', type: '岁运并临', desc: `流年${liuNian.gan}${liuNian.zhi}与大运干支全同,岁运并临(该年之象加倍,吉凶皆重)` });
+    hits.push({ vs: '大运', type: '岁运并临', desc: `${label}${liuNian.gan}${liuNian.zhi}与大运干支全同,${bingLin}` });
   const ganKe = shengKe(GAN_WUXING[liuNian.gan], GAN_WUXING[daYun.gan]) === '克' || shengKe(GAN_WUXING[daYun.gan], GAN_WUXING[liuNian.gan]) === '克';
   if (ganKe && LIU_CHONG[liuNian.zhi] === daYun.zhi)
-    hits.push({ vs: '大运', type: '天克地冲', desc: `流年与大运天克地冲,岁运交战,动荡之年` });
+    hits.push({ vs: '大运', type: '天克地冲', desc: `${label}与大运天克地冲,交战动荡` });
   else if (LIU_CHONG[liuNian.zhi] === daYun.zhi)
-    hits.push({ vs: '大运', type: '支冲', desc: `流年支${liuNian.zhi}冲大运支${daYun.zhi}` });
-  if (GAN_HE[liuNian.gan] === daYun.gan) hits.push({ vs: '大运', type: '干合', desc: `流年干${liuNian.gan}合大运干${daYun.gan}` });
-  if (LIU_HE[liuNian.zhi] === daYun.zhi) hits.push({ vs: '大运', type: '支合', desc: `流年支${liuNian.zhi}合大运支${daYun.zhi}` });
-  if (LIU_HAI[liuNian.zhi] === daYun.zhi) hits.push({ vs: '大运', type: '支害(穿)', desc: `流年支${liuNian.zhi}害(穿)大运支${daYun.zhi}` });
+    hits.push({ vs: '大运', type: '支冲', desc: `${label}支${liuNian.zhi}冲大运支${daYun.zhi}` });
+  if (GAN_HE[liuNian.gan] === daYun.gan) hits.push({ vs: '大运', type: '干合', desc: `${label}干${liuNian.gan}合大运干${daYun.gan}` });
+  if (LIU_HE[liuNian.zhi] === daYun.zhi) hits.push({ vs: '大运', type: '支合', desc: `${label}支${liuNian.zhi}合大运支${daYun.zhi}` });
+  if (LIU_HAI[liuNian.zhi] === daYun.zhi) hits.push({ vs: '大运', type: '支害(穿)', desc: `${label}支${liuNian.zhi}害(穿)大运支${daYun.zhi}` });
   // v3.5 补检:岁运相刑/自刑(此前漏报)
   if (liuNian.zhi === daYun.zhi && ZI_XING.has(liuNian.zhi))
-    hits.push({ vs: '大运', type: '自刑', desc: `流年支${liuNian.zhi}与大运支${daYun.zhi}自刑` });
+    hits.push({ vs: '大运', type: '自刑', desc: `${label}支${liuNian.zhi}与大运支${daYun.zhi}自刑` });
   if ((liuNian.zhi === '子' && daYun.zhi === '卯') || (liuNian.zhi === '卯' && daYun.zhi === '子'))
-    hits.push({ vs: '大运', type: '相刑', desc: `流年支${liuNian.zhi}刑大运支${daYun.zhi}(无礼之刑)` });
+    hits.push({ vs: '大运', type: '相刑', desc: `${label}支${liuNian.zhi}刑大运支${daYun.zhi}(无礼之刑)` });
   return hits;
 }
 
