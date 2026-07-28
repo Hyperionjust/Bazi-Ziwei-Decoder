@@ -126,7 +126,8 @@ export function analyzeYunSui(siZhu: SiZhuMap, dayun: any[], currentYear: number
     const d = dayun[i];
     const gz: GZ = { gan: d.ganZhi.gan, zhi: d.ganZhi.zhi };
     const hits = gzVsChart(gz, siZhu, '大运');
-    if (hits.length) res.大运引动.push({ 步: i + 1, 干支: gz.gan + gz.zhi, 年龄: `${d.startAge}-${d.endAge}岁(${d.startYear}-${d.endYear})`, hits });
+    // P1-C: 年份为主、年龄为辅(该字段会注入海报运岁引动行,属面向用户文字)
+    if (hits.length) res.大运引动.push({ 步: i + 1, 干支: gz.gan + gz.zhi, 年龄: `${d.startYear}-${d.endYear}年(约${d.startAge}-${d.endAge}岁)`, hits });
   }
   const cur = (dayun || []).find(d => currentYear >= d.startYear && currentYear <= d.endYear);
   if (cur) {

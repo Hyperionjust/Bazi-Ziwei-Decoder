@@ -163,7 +163,8 @@ function chartToFlat(chart: any, currentYear?: number): Record<string, any> {
       continue;
     }
     out[`dayun.${i}.gz`] = d.ganZhi.gan + d.ganZhi.zhi;
-    out[`dayun.${i}.age_range`] = `${d.startAge}-${d.endAge}`;
+    // P1-C: 年份为主、年龄为辅(约)
+    out[`dayun.${i}.age_range`] = `${d.startYear || '-'}-${d.endYear || '-'}<br>约${d.startAge}-${d.endAge}岁`;
     const sg = (d.ganShiShen || '').slice(0,1);
     const sz = (d.zhiShiShen || '').slice(0,1);
     out[`dayun.${i}.shishen`] = sg + sz;
@@ -179,7 +180,8 @@ function chartToFlat(chart: any, currentYear?: number): Record<string, any> {
       ['range','gz','shishen','current_class'].forEach(f => out[`section_02.bazi.${i}.${f}`] = '-');
       continue;
     }
-    out[`section_02.bazi.${i}.range`] = `${d.startAge}-${d.endAge}`;
+    // P1-C: 八字大运段年份为主、年龄为辅(紫微大限行保持虚岁口径,行首有各自标签)
+    out[`section_02.bazi.${i}.range`] = `${d.startYear || '-'}-${d.endYear || '-'}<br>约${d.startAge}-${d.endAge}岁`;
     out[`section_02.bazi.${i}.gz`] = d.ganZhi.gan + d.ganZhi.zhi;
     const sg = (d.ganShiShen || '').slice(0,1);
     const sz = (d.zhiShiShen || '').slice(0,1);
@@ -206,7 +208,8 @@ function chartToFlat(chart: any, currentYear?: number): Record<string, any> {
 
   // ============ LIUNIAN 10 (current dayun) ============
   if (currentDayun) {
-    out['liunian_dayun_label'] = `${currentDayun.ganZhi.gan}${currentDayun.ganZhi.zhi} ${currentDayun.startAge}-${currentDayun.endAge}`;
+    // P1-C: 年份为主、年龄为辅(约)
+    out['liunian_dayun_label'] = `${currentDayun.ganZhi.gan}${currentDayun.ganZhi.zhi} ${currentDayun.startYear || '-'}-${currentDayun.endYear || '-'}年(约${currentDayun.startAge}-${currentDayun.endAge}岁)`;
   } else {
     out['liunian_dayun_label'] = '-';
   }
@@ -449,8 +452,11 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   const dyArr=(bz.dayun||[]).slice(0,10);
   let curDy:any=null; for (const d of dyArr) if (d.startAge<=virtualAge&&virtualAge<=d.endAge) curDy=d;
   for (let i=0;i<10;i++){ const d=dyArr[i];
-    if(!d){ ['gz','age_range','shishen','start_year'].forEach(f=>out[`dayun.${i}.${f}`]='-'); out[`dayun.${i}.current_class`]=''; out[`dayun.${i}.luck_class`]='luck-ping'; continue; }
+    if(!d){ ['gz','age_range','shishen','start_year','year_range','age_note'].forEach(f=>out[`dayun.${i}.${f}`]='-'); out[`dayun.${i}.current_class`]=''; out[`dayun.${i}.luck_class`]='luck-ping'; continue; }
     out[`dayun.${i}.gz`]=d.ganZhi.gan+d.ganZhi.zhi;
+    // P1-C: 大运边界年份为主、年龄为辅(冠"约"避虚岁/周岁歧义);旧键保留兼容旧模板
+    out[`dayun.${i}.year_range`]=`${d.startYear||'-'}-${d.endYear||'-'}`;
+    out[`dayun.${i}.age_note`]=`约${d.startAge}-${d.endAge}岁`;
     out[`dayun.${i}.age_range`]=`${d.startAge}-${d.endAge}`;
     out[`dayun.${i}.start_year`]=String(d.startYear||'-');
     out[`dayun.${i}.shishen`]=((d.ganShiShen||'').slice(0,1))+((d.zhiShiShen||'').slice(0,1));

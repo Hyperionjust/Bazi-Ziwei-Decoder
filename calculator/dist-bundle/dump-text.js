@@ -150,12 +150,12 @@ function dumpBazi(b, bi) {
   }
   lines.push("\u2502");
   if (b.dayun && b.dayun.length > 0) {
-    lines.push(`\u251C\u5927\u8FD0 (\u8D77\u8FD0 ${b.dayunStart}\u5C81)`);
+    lines.push(`\u251C\u5927\u8FD0 (\u8D77\u8FD0 ${b.dayunStart}\u5C81 \xB7 \u9762\u5411\u7528\u6237\u63D0\u53CA\u5927\u8FD0\u8FB9\u754C\u65F6\u7167\u6284\u4E0B\u884C\u300C\u8D77\u5E74-\u6B62\u5E74 \u5E74(\u7EA6X-X\u5C81)\u300D\u5E74\u4EFD\u4E3A\u4E3B\u683C\u5F0F)`);
     b.dayun.slice(0, 10).forEach((d, i) => {
       const isLast = i === Math.min(9, b.dayun.length - 1);
       const pre = isLast ? "\u2502 \u2514" : "\u2502 \u251C";
       const dxTag = `${d.ganShiShen || ""}/${d.zhiShiShen || ""}`;
-      lines.push(`${pre}${d.startYear}-${d.endYear}  ${d.ganZhi.gan}${d.ganZhi.zhi}  (${dxTag})`);
+      lines.push(`${pre}${d.startYear}-${d.endYear} \u5E74(\u7EA6${d.startAge}-${d.endAge}\u5C81)  ${d.ganZhi.gan}${d.ganZhi.zhi}  (${dxTag})`);
     });
     lines.push("\u2502");
   }

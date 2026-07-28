@@ -139,7 +139,7 @@ function chartToFlat(chart, currentYear) {
       continue;
     }
     out[`dayun.${i}.gz`] = d.ganZhi.gan + d.ganZhi.zhi;
-    out[`dayun.${i}.age_range`] = `${d.startAge}-${d.endAge}`;
+    out[`dayun.${i}.age_range`] = `${d.startYear || "-"}-${d.endYear || "-"}<br>\u7EA6${d.startAge}-${d.endAge}\u5C81`;
     const sg = (d.ganShiShen || "").slice(0, 1);
     const sz = (d.zhiShiShen || "").slice(0, 1);
     out[`dayun.${i}.shishen`] = sg + sz;
@@ -152,7 +152,7 @@ function chartToFlat(chart, currentYear) {
       ["range", "gz", "shishen", "current_class"].forEach((f) => out[`section_02.bazi.${i}.${f}`] = "-");
       continue;
     }
-    out[`section_02.bazi.${i}.range`] = `${d.startAge}-${d.endAge}`;
+    out[`section_02.bazi.${i}.range`] = `${d.startYear || "-"}-${d.endYear || "-"}<br>\u7EA6${d.startAge}-${d.endAge}\u5C81`;
     out[`section_02.bazi.${i}.gz`] = d.ganZhi.gan + d.ganZhi.zhi;
     const sg = (d.ganShiShen || "").slice(0, 1);
     const sz = (d.zhiShiShen || "").slice(0, 1);
@@ -170,7 +170,7 @@ function chartToFlat(chart, currentYear) {
     out[`section_02.ziwei.${i}.current_class`] = d.isCurrent ?? (d.startAge <= virtualAge && virtualAge <= d.endAge) ? "current" : "";
   }
   if (currentDayun) {
-    out["liunian_dayun_label"] = `${currentDayun.ganZhi.gan}${currentDayun.ganZhi.zhi} ${currentDayun.startAge}-${currentDayun.endAge}`;
+    out["liunian_dayun_label"] = `${currentDayun.ganZhi.gan}${currentDayun.ganZhi.zhi} ${currentDayun.startYear || "-"}-${currentDayun.endYear || "-"}\u5E74(\u7EA6${currentDayun.startAge}-${currentDayun.endAge}\u5C81)`;
   } else {
     out["liunian_dayun_label"] = "-";
   }
@@ -425,12 +425,14 @@ function chartToFlatBazi(chart, currentYear) {
   for (let i = 0; i < 10; i++) {
     const d = dyArr[i];
     if (!d) {
-      ["gz", "age_range", "shishen", "start_year"].forEach((f) => out[`dayun.${i}.${f}`] = "-");
+      ["gz", "age_range", "shishen", "start_year", "year_range", "age_note"].forEach((f) => out[`dayun.${i}.${f}`] = "-");
       out[`dayun.${i}.current_class`] = "";
       out[`dayun.${i}.luck_class`] = "luck-ping";
       continue;
     }
     out[`dayun.${i}.gz`] = d.ganZhi.gan + d.ganZhi.zhi;
+    out[`dayun.${i}.year_range`] = `${d.startYear || "-"}-${d.endYear || "-"}`;
+    out[`dayun.${i}.age_note`] = `\u7EA6${d.startAge}-${d.endAge}\u5C81`;
     out[`dayun.${i}.age_range`] = `${d.startAge}-${d.endAge}`;
     out[`dayun.${i}.start_year`] = String(d.startYear || "-");
     out[`dayun.${i}.shishen`] = (d.ganShiShen || "").slice(0, 1) + (d.zhiShiShen || "").slice(0, 1);

@@ -14116,7 +14116,7 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
     const d = dayun[i];
     const gz = { gan: d.ganZhi.gan, zhi: d.ganZhi.zhi };
     const hits = gzVsChart(gz, siZhu, "\u5927\u8FD0");
-    if (hits.length) res.\u5927\u8FD0\u5F15\u52A8.push({ \u6B65: i + 1, \u5E72\u652F: gz.gan + gz.zhi, \u5E74\u9F84: `${d.startAge}-${d.endAge}\u5C81(${d.startYear}-${d.endYear})`, hits });
+    if (hits.length) res.\u5927\u8FD0\u5F15\u52A8.push({ \u6B65: i + 1, \u5E72\u652F: gz.gan + gz.zhi, \u5E74\u9F84: `${d.startYear}-${d.endYear}\u5E74(\u7EA6${d.startAge}-${d.endAge}\u5C81)`, hits });
   }
   const cur = (dayun || []).find((d) => currentYear >= d.startYear && currentYear <= d.endYear);
   if (cur) {

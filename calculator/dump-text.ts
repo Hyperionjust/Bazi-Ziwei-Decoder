@@ -155,12 +155,12 @@ function dumpBazi(b: any, bi: any): string[] {
 
   // 大运
   if (b.dayun && b.dayun.length > 0) {
-    lines.push(`├大运 (起运 ${b.dayunStart}岁)`);
+    lines.push(`├大运 (起运 ${b.dayunStart}岁 · 面向用户提及大运边界时照抄下行「起年-止年 年(约X-X岁)」年份为主格式)`);
     b.dayun.slice(0, 10).forEach((d: any, i: number) => {
       const isLast = i === Math.min(9, b.dayun.length - 1);
       const pre = isLast ? '│ └' : '│ ├';
       const dxTag = `${d.ganShiShen||''}/${d.zhiShiShen||''}`;
-      lines.push(`${pre}${d.startYear}-${d.endYear}  ${d.ganZhi.gan}${d.ganZhi.zhi}  (${dxTag})`);
+      lines.push(`${pre}${d.startYear}-${d.endYear} 年(约${d.startAge}-${d.endAge}岁)  ${d.ganZhi.gan}${d.ganZhi.zhi}  (${dxTag})`);
     });
     lines.push('│');
   }
