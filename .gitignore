@@ -17,6 +17,10 @@ report.html
 *-report.html
 *-zonghe.html
 
+# 校准命例与对照表（含真实生辰，勿入库；脚手架见 calculator/fixtures/calibration/）
+*.case.json
+calibration-report.md
+
 # 但仓库自带的合成示例必须入库（白名单放行）
 !examples/sample-chart.json
 !examples/sample-analysis.json

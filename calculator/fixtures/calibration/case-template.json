@@ -1,0 +1,24 @@
+{
+  "$comment": "空白命例模板: 复制为 <代号>.case.json 后填写(该文件名模式已被 .gitignore 排除, 不会入库)。schema 见 case-schema.json。",
+  "id": "",
+  "birth": {
+    "year": 0,
+    "month": 0,
+    "day": 0,
+    "hour": 0,
+    "minute": 0,
+    "gender": "male",
+    "isLunar": false,
+    "timeZone": 8,
+    "time_source": "本人确认"
+  },
+  "events": [
+    { "year": 0, "type": "换工作", "note": "" }
+  ],
+  "facts": {
+    "yongshen": "",
+    "marriage": { "spouse_age_diff": "", "spouse_traits": "", "married_year": 0 },
+    "career": ""
+  },
+  "scoring": { "用神": null, "大运应期": null, "婚恋画像": null, "职业方向": null, "notes": "" }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "十神结构 → 现代职业映射库 (空占位)",
+  "description": "P2 仅放 schema 骨架, 内容编写另行立项(见任务书「明确不做」)。填充后供职业方向校准模块与财路判定规则引用。",
+  "type": "object",
+  "properties": {
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "modern_careers"],
+        "properties": {
+          "pattern": { "type": "string", "description": "十神结构键, 如 '食伤生财' '官杀配印' (与 bazi-poster 财路判定规则同口径)" },
+          "modern_careers": { "type": "array", "items": { "type": "string" }, "description": "现代职业方向列表" },
+          "evidence": { "type": "string", "description": "文献/统计依据" },
+          "confidence": { "enum": ["高", "中", "低"] }
+        }
+      }
+    }
+  },
+  "mappings": []
+}

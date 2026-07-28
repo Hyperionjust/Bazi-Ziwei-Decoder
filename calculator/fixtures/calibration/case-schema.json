@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "校准命例 (calibration case)",
+  "description": "一个已证实生平的命例。生辰为敏感数据: 命例文件(*.case.json)不入库。",
+  "type": "object",
+  "required": ["id", "birth", "events"],
+  "properties": {
+    "id": { "type": "string", "description": "命例代号(勿用真名)" },
+    "birth": {
+      "type": "object",
+      "required": ["year", "month", "day", "hour", "minute", "gender"],
+      "properties": {
+        "year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
+        "month": { "type": "integer" },
+        "day": { "type": "integer" },
+        "hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+        "minute": { "type": "integer", "minimum": 0, "maximum": 59 },
+        "gender": { "enum": ["male", "female"] },
+        "isLunar": { "type": "boolean", "default": false },
+        "timeZone": { "type": "number", "default": 8 },
+        "longitude": { "type": "number", "description": "东经度数(可选, 真太阳时校正)" },
+        "time_source": { "enum": ["证件/记录", "本人确认", "家人回忆", "推测"], "description": "时辰可靠度来源(家人回忆/推测的命例其应期评分只作弱参考)" }
+      }
+    },
+    "events": {
+      "type": "array",
+      "description": "已证实生平事件年表(只填当事人确认过的)",
+      "items": {
+        "type": "object",
+        "required": ["year", "type"],
+        "properties": {
+          "year": { "type": "integer" },
+          "type": { "enum": ["换工作", "升迁", "创业", "搬家/迁移", "结婚", "恋爱变动", "离异", "生育", "大病/手术", "破财", "进财/置业", "学业节点", "亲属变故", "其他"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "facts": {
+      "type": "object",
+      "description": "四个校准模块对应的已证实事实(缺哪项该模块跳过)",
+      "properties": {
+        "yongshen": { "type": "string", "description": "用神线索: 当事人自述何种方向/环境明显有效或无效" },
+        "marriage": {
+          "type": "object",
+          "properties": {
+            "spouse_age_diff": { "type": "string", "description": "配偶年龄关系: 年长/年轻/同龄 + 差几岁" },
+            "spouse_traits": { "type": "string", "description": "配偶性格特质(当事人描述)" },
+            "married_year": { "type": "integer" }
+          }
+        },
+        "career": { "type": "string", "description": "实际职业与路径(体制/技艺/经营/合伙等)" }
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "description": "人工评分维度(runner 输出对照表后由人工填, 文件里可留空)",
+      "properties": {
+        "用神": { "type": ["number", "null"], "description": "0/0.5/1" },
+        "大运应期": { "type": ["number", "null"] },
+        "婚恋画像": { "type": ["number", "null"] },
+        "职业方向": { "type": ["number", "null"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
