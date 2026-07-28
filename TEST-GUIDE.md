@@ -30,6 +30,40 @@ node -e "const j=require('./smoke.json'); console.log('日柱:', j.bazi.siZhu.da
 
 > 注意：Agent 装好 Skill 后**不会主动**跑此自检（SKILL.md 明确要求装好不自检，避免浪费 token）。Smoke Test 由你手动执行。
 
+### 0.1 回归 fixtures（人工，改代码后必跑）
+
+```bash
+cd calculator
+npx tsx fixtures/test-shensha.ts      # 神煞引擎 13 例
+npx tsx fixtures/test-relations.ts    # 关系/运岁/正缘
+npx tsx fixtures/test-boundary.ts     # v3.5 边界回归(阴阳年干/农历/时区/晚子时/调候/格局)
+npx tsx fixtures/test-check.ts        # 体检器(含 v3.9 边界盘高确定断语红线)
+npx tsx fixtures/test-shichen.ts      # v3.9 时辰边界检测 + 晚子时约定
+npx tsx fixtures/test-liuyue.ts       # v3.9 流月引动(12 节气月干支/公历对照/逐月命中)
+npx tsx fixtures/test-compare.ts      # v3.9 多年对比(逐年引动/喜忌评分/可复现)
+npx tsx fixtures/check-template.ts    # 海报模板完整性
+npx tsx schema-check.ts               # shensha/lineages 配置一致性
+```
+
+全部 exit 0 才算过。改任何 `.ts` 后须重建 dist-bundle：`npm run bundle`。
+
+### 0.2 v3.9 新链路冒烟（人工，可选）
+
+```bash
+# 时辰临界(12:55 距午未交界 5 分钟): chart.txt 顶部应出「⚠ 时辰临界」块,enrichment.confidence_tier=low
+node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=55 --gender=male --output=b1.json && node dist-bundle/dump-text.js --input=b1.json | head -12
+```
+
+```bash
+# 晚子时(23:10): 应同时出现「⚠ 时辰临界」与「⚠晚子时约定」提示;日柱=次日己未
+node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=23 --minute=10 --gender=male --output=b2.json && node dist-bundle/dump-text.js --input=b2.json | grep -A1 晚子时
+```
+
+```bash
+# 流月(--currentYear)与多年对比(--compareYears): 文本盘应含「流月引动」12 行 /「多年对比」逐年行
+node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0 --gender=male --currentYear=2026 --compareYears=2026,2027,2028 --output=b3.json && node dist-bundle/dump-text.js --input=b3.json | grep -E "流月引动|多年对比"
+```
+
 ---
 
 ## 5 种用户路径速查

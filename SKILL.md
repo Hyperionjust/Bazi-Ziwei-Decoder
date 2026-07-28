@@ -130,6 +130,9 @@ node <skill-root>/calculator/dist-bundle/run-chart.js --year=YYYY --month=MM --d
 - `bazi.enrichment.神煞`：神煞命中（`hits`＝中立全集；传 `--lineage` 时附 `lineage.hits`＝该派镜片过滤子集，带 tier / 权重 / `needs_review`）
 - `bazi.enrichment.作用关系`：合冲刑害**裁决**（v1.5）——每条带状态(生效/被解/被绊/合而化…)与依据；默认 open 通则+`divergence` 分歧标注，传 `--lineage` 时附该派规则集视图（`lineage.items`）
 - `bazi.enrichment.运岁引动`：大运/流年×原局+岁运互动（冲提纲/凑局凑刑/岁运并临/天克地冲/伏吟反吟；中立检测，`--currentYear` 定当前大运，缺省=系统年）
+- `bazi.enrichment.时辰边界`：距时辰交界分钟差与 `boundary` 判定（≤20 分钟临界 → 走 Step 1.5 核盘分支）；`bazi.zishi_convention`：晚子时（23:00–24:00 出生）约定披露
+- `bazi.enrichment.confidence_tier`：全局置信度档（high/medium/low，low 档解读按保守口径，见 bazi-prompt「置信度传播」）
+- `bazi.enrichment.流月引动`（传 `--currentYear` 时）/ `bazi.enrichment.多年对比`（传 `--compareYears` 时）：流年问答的月级窗口与比较型问答依据
 - `ziwei`：十二宫 / 生年四化 / 大限 / 阴阳 / 五行局 / 命主身主
 
 > **关键约束**：纯 LLM 排盘会错排日柱 → 日主 → 格局 → 用神，全链失真。Case B 测试证明 DeepSeek/Gemini 自行排盘均出错。算法层不可绕过。
@@ -267,10 +270,10 @@ rm -f package-lock.json && npm install   # 锁文件源不可达时删除后再�
 │   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
 │   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
 │   ├── check-analysis.ts             ← 解读体检器（海报 JSON/长文硬红线检查，--mode=bazi|zonghe|ziwei|mbti|longform）
-│   ├── fixtures/                     ← 回归测试（神煞 13 例 + 关系/运岁 test-relations.ts 67 项 + 边界 test-boundary.ts 32 项 + 体检 test-check.ts 28 项 + 模板校验 check-template.ts）
+│   ├── fixtures/                     ← 回归测试（神煞 test-shensha 13 例 / 关系运岁 test-relations / 边界 test-boundary / 体检 test-check / 时辰边界 test-shichen / 流月 test-liuyue / 多年对比 test-compare / 模板校验 check-template；calibration/ 校准回测脚手架）
 │   ├── package.json                  ← 算法层依赖声明
 │   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
-│   └── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱）
+│   └── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱/时辰边界/置信度/流月/多年对比）
 ├── prompts/
 │   ├── disclaimer-preamble.md        ← ⭐ 成长心态前置声明（八字/紫微/综合三线开头必出）
 │   ├── output-mode-B.md              ← ⭐ 总领速览 + 按需下钻 输出模式规则
