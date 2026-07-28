@@ -117,6 +117,7 @@ node <skill-root>/calculator/dist-bundle/self-update.js --root=<skill-root> --wo
 node <skill-root>/calculator/dist-bundle/run-chart.js --year=YYYY --month=MM --day=DD --hour=HH --minute=MM --gender=male \
   --lineage=<ziping|ditian|shenfeng|mangpai|open> --output=<工作目录>/chart.json
 # 可选: --longitude=<东经度数> 真太阳时校正(默认关;经度差+均时差,如北京116.4/乌鲁木齐87.6);--timeZone=<时区> 非东八区出生;--isLunar=true 农历(闰月用负月份)
+# 可选: --currentYear=<YYYY> 指定当前年(流年问答;同时输出该年12流月引动);--compareYears=Y1,Y2,Y3 多年对比(≤5个,比较型流年问答)
 # (开发环境可写、已装依赖时,亦可 npx tsx run-chart.ts ... / node dist/run-chart.js ...;
 #  shensha.json/lineages.json 自动从 dist-bundle 上层目录解析,只读也没问题)
 ```

@@ -17,7 +17,7 @@ import { detectShichenBoundary, zishiConventionNote } from './bazi-enrich/shiche
 import { aggregateConfidenceTier } from './bazi-enrich/confidence';
 import { computeShensha } from './shensha';
 import { adjudicateInteractions } from './bazi-enrich/interactions';
-import { analyzeYunSui } from './bazi-enrich/yunsui';
+import { analyzeYunSui, analyzeCompareYears } from './bazi-enrich/yunsui';
 import { analyzeLiuYue } from './bazi-enrich/liuyue';
 import { detectRarePatterns } from './bazi-enrich/rare';
 import { judgeSpouseProfile } from './bazi-enrich/zhengyuan';
@@ -81,6 +81,14 @@ function main() {
   if (args.longitude !== undefined) {
     if (Number.isNaN(+args.longitude) || +args.longitude < -180 || +args.longitude > 180) fail(`longitude 无效(-180 ~ 180, 东经为正): ${args.longitude}`);
     console.error(`[input] 真太阳时校正开启: 经度 ${+args.longitude}°(经度差+均时差, 口径见 CHANGELOG)`);
+  }
+  // P1-B: --compareYears=Y1,Y2,…(≤5) 输入校验
+  let compareYears: number[] = [];
+  if (args.compareYears !== undefined) {
+    compareYears = String(args.compareYears).split(',').map(s => parseInt(s.trim(), 10));
+    if (!compareYears.length || compareYears.some(y => !Number.isInteger(y) || y < 1900 || y > 2150))
+      fail(`compareYears 无效(逗号分隔的年份, 1900-2150): ${args.compareYears}`);
+    if (compareYears.length > 5) fail(`compareYears 最多 5 个年份, 得到 ${compareYears.length} 个`);
   }
   if (!Number.isInteger(bi.day) || bi.day < 1) fail(`day 无效: ${args.day}`);
   if (!bi.isLunar) {
@@ -213,6 +221,15 @@ function main() {
           enr.流月引动 = analyzeLiuYue(siZhuCN, chart.bazi.dayun || [], curYear);
         } catch (e) {
           console.error('[liuyue] 流月引动计算跳过(非致命):', (e as Error)?.message || e);
+        }
+      }
+
+      // P1-B: 多年对比 — --compareYears=Y1,Y2,…(≤5) 时输出(比较型流年问答依据)
+      if (compareYears.length) {
+        try {
+          enr.多年对比 = analyzeCompareYears(siZhuCN, chart.bazi.dayun || [], compareYears, (enr as any).用神建议?.出口);
+        } catch (e) {
+          console.error('[compare] 多年对比计算跳过(非致命):', (e as Error)?.message || e);
         }
       }
 

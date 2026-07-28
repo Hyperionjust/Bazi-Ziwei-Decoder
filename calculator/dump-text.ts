@@ -364,6 +364,20 @@ function dumpBazi(b: any, bi: any): string[] {
         lines.push(`│ ${last ? '└' : '├'}${String(m.序).padStart(2, '0')} ${m.干支}月(${m.节气}起 ${m.公历起}~${m.公历止} 约${m.约农历月}) : ${hitStr}`);
       });
     }
+
+    // 多年对比(P1-B) — 仅 --compareYears 时存在;比较型流年问答依据
+    const cy = en.多年对比;
+    if (cy && Array.isArray(cy.年)) {
+      lines.push(`├多年对比 (${cy.年.map((e: any) => e.年).join('/')} · 引动+喜忌评分)`);
+      lines.push(`│ ├说明 : ${cy.说明}`);
+      cy.年.forEach((e: any, i: number) => {
+        const last = i === cy.年.length - 1;
+        const all = [...(e.vs原局 || []), ...(e.vs大运 || [])];
+        const hitStr = all.length ? all.map((h: any) => `[${h.type}]${h.desc.replace(/^流年/, '')}`).join(' ; ') : '无显著引动';
+        const heavy = (e.重级引动 || []).length ? `  ⚠重级:${e.重级引动.join('+')}` : '';
+        lines.push(`│ ${last ? '└' : '├'}${e.年} ${e.干支} 大运${e.大运} 喜忌[干${e.喜忌对照.干} 支${e.喜忌对照.支} 评分${e.喜忌对照.评分 >= 0 ? '+' : ''}${e.喜忌对照.评分}]${heavy} : ${hitStr}`);
+      });
+    }
   }
   lines.push('');
   lines.push('└[备注: 本盘由 bazi-ziwei skill 算法层生成 — Yiqi core + enrichBazi 补层]');

@@ -109,7 +109,7 @@ export interface YunSuiResult {
 }
 
 // 引动权重:重=天克地冲/伏吟/岁运并临/冲提纲; 中=支冲/自刑/凑局凑刑; 轻=其余
-function hitWeight(h: YunSuiHit): '重'|'中'|'轻' {
+export function hitWeight(h: YunSuiHit): '重'|'中'|'轻' {
   if (h.type === '天克地冲' || h.type === '伏吟' || h.type === '岁运并临') return '重';
   if (h.type === '支冲' && h.desc.includes('冲提纲')) return '重';
   if (h.type === '支冲' || h.type === '自刑' || h.type === '凑全三刑' || h.type === '凑成三合' || h.type === '相刑') return '中';
@@ -163,4 +163,54 @@ export function analyzeYunSui(siZhu: SiZhuMap, dayun: any[], currentYear: number
   }
   res.建议节点.sort((a, b) => a.年 - b.年);
   return res;
+}
+
+// ---------------------------------------------------------------------------
+// 多年对比(P1-B) — --compareYears=Y1,Y2,…(≤5): 每年跑与原局/该年大运的引动检测,
+// 并按用神出口喜忌给干支五行对照评分(口径与海报顺逆配色一致: 喜/开运 +1, 忌 -1)。
+// 供 liunian-qa 比较型问法(「未来三年哪年最适合 X」)按单一领域出 顺风/平路/逆风 梯度。
+// ---------------------------------------------------------------------------
+export interface CompareYearEntry {
+  年: number;
+  干支: string;
+  大运: string;
+  vs原局: YunSuiHit[];
+  vs大运: YunSuiHit[];
+  喜忌对照: { 干: string; 支: string; 评分: number };
+  重级引动: string[];
+}
+export interface CompareYearsResult { 说明: string; 年: CompareYearEntry[]; }
+
+const GAN10_CY = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const ZHI12_CY = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+export function analyzeCompareYears(
+  siZhu: SiZhuMap, dayun: any[], years: number[],
+  chuKou?: { 开运用神?: string[]; 喜神?: string[]; 忌神?: string[] },
+): CompareYearsResult {
+  const likes = new Set([...(chuKou?.开运用神 || []), ...(chuKou?.喜神 || [])]);
+  const dislikes = new Set(chuKou?.忌神 || []);
+  const entries: CompareYearEntry[] = years.map(y => {
+    const gan = GAN10_CY[(y - 4) % 10] as Tiangan;
+    const zhi = ZHI12_CY[(y - 4) % 12] as Dizhi;
+    const gz = { gan, zhi };
+    const cur = (dayun || []).find(d => y >= d.startYear && y <= d.endYear);
+    const vsChart = gzVsChart(gz, siZhu, '流年');
+    const vsYun = cur ? suiVsYun(gz, { gan: cur.ganZhi.gan, zhi: cur.ganZhi.zhi }) : [];
+    const mark = (wx: string) => likes.has(wx) ? `${wx}·喜` : dislikes.has(wx) ? `${wx}·忌` : `${wx}·平`;
+    let score = 0;
+    for (const wx of [GAN_WUXING[gan], ZHI_WUXING[zhi]]) { if (likes.has(wx)) score++; else if (dislikes.has(wx)) score--; }
+    const heavy = [...vsChart, ...vsYun].filter(h => hitWeight(h) === '重').map(h => h.type + (h.desc.includes('冲提纲') ? '(冲提纲)' : ''));
+    return {
+      年: y, 干支: gan + zhi,
+      大运: cur ? `${cur.ganZhi.gan}${cur.ganZhi.zhi}(${cur.startYear}-${cur.endYear})` : '未起运/超出大运表',
+      vs原局: vsChart, vs大运: vsYun,
+      喜忌对照: { 干: mark(GAN_WUXING[gan]), 支: mark(ZHI_WUXING[zhi]), 评分: score },
+      重级引动: heavy,
+    };
+  });
+  return {
+    说明: '多年对比=各候选年流年干支×原局/该年大运的引动检测 + 用神出口喜忌评分(+喜/-忌,与海报顺逆配色同口径)。解读按用户问的单一领域给各年 顺风/平路/逆风 梯度小结,最后给相对排序;给信号不给指令,重级引动年份如实提示但措辞留余地。',
+    年: entries,
+  };
 }

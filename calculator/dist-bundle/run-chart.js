@@ -14157,6 +14157,40 @@ function analyzeYunSui(siZhu, dayun, currentYear) {
   res.\u5EFA\u8BAE\u8282\u70B9.sort((a, b) => a.\u5E74 - b.\u5E74);
   return res;
 }
+var GAN10_CY = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+var ZHI12_CY = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+function analyzeCompareYears(siZhu, dayun, years, chuKou) {
+  const likes = /* @__PURE__ */ new Set([...chuKou?.\u5F00\u8FD0\u7528\u795E || [], ...chuKou?.\u559C\u795E || []]);
+  const dislikes = new Set(chuKou?.\u5FCC\u795E || []);
+  const entries = years.map((y) => {
+    const gan = GAN10_CY[(y - 4) % 10];
+    const zhi = ZHI12_CY[(y - 4) % 12];
+    const gz = { gan, zhi };
+    const cur = (dayun || []).find((d) => y >= d.startYear && y <= d.endYear);
+    const vsChart = gzVsChart(gz, siZhu, "\u6D41\u5E74");
+    const vsYun = cur ? suiVsYun(gz, { gan: cur.ganZhi.gan, zhi: cur.ganZhi.zhi }) : [];
+    const mark = (wx) => likes.has(wx) ? `${wx}\xB7\u559C` : dislikes.has(wx) ? `${wx}\xB7\u5FCC` : `${wx}\xB7\u5E73`;
+    let score = 0;
+    for (const wx of [GAN_WUXING[gan], ZHI_WUXING[zhi]]) {
+      if (likes.has(wx)) score++;
+      else if (dislikes.has(wx)) score--;
+    }
+    const heavy = [...vsChart, ...vsYun].filter((h) => hitWeight(h) === "\u91CD").map((h) => h.type + (h.desc.includes("\u51B2\u63D0\u7EB2") ? "(\u51B2\u63D0\u7EB2)" : ""));
+    return {
+      \u5E74: y,
+      \u5E72\u652F: gan + zhi,
+      \u5927\u8FD0: cur ? `${cur.ganZhi.gan}${cur.ganZhi.zhi}(${cur.startYear}-${cur.endYear})` : "\u672A\u8D77\u8FD0/\u8D85\u51FA\u5927\u8FD0\u8868",
+      vs\u539F\u5C40: vsChart,
+      vs\u5927\u8FD0: vsYun,
+      \u559C\u5FCC\u5BF9\u7167: { \u5E72: mark(GAN_WUXING[gan]), \u652F: mark(ZHI_WUXING[zhi]), \u8BC4\u5206: score },
+      \u91CD\u7EA7\u5F15\u52A8: heavy
+    };
+  });
+  return {
+    \u8BF4\u660E: "\u591A\u5E74\u5BF9\u6BD4=\u5404\u5019\u9009\u5E74\u6D41\u5E74\u5E72\u652F\xD7\u539F\u5C40/\u8BE5\u5E74\u5927\u8FD0\u7684\u5F15\u52A8\u68C0\u6D4B + \u7528\u795E\u51FA\u53E3\u559C\u5FCC\u8BC4\u5206(+\u559C/-\u5FCC,\u4E0E\u6D77\u62A5\u987A\u9006\u914D\u8272\u540C\u53E3\u5F84)\u3002\u89E3\u8BFB\u6309\u7528\u6237\u95EE\u7684\u5355\u4E00\u9886\u57DF\u7ED9\u5404\u5E74 \u987A\u98CE/\u5E73\u8DEF/\u9006\u98CE \u68AF\u5EA6\u5C0F\u7ED3,\u6700\u540E\u7ED9\u76F8\u5BF9\u6392\u5E8F;\u7ED9\u4FE1\u53F7\u4E0D\u7ED9\u6307\u4EE4,\u91CD\u7EA7\u5F15\u52A8\u5E74\u4EFD\u5982\u5B9E\u63D0\u793A\u4F46\u63AA\u8F9E\u7559\u4F59\u5730\u3002",
+    \u5E74: entries
+  };
+}
 
 // bazi-enrich/liuyue.ts
 var GAN10 = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
@@ -14580,6 +14614,13 @@ function main() {
     if (Number.isNaN(+args.longitude) || +args.longitude < -180 || +args.longitude > 180) fail(`longitude \u65E0\u6548(-180 ~ 180, \u4E1C\u7ECF\u4E3A\u6B63): ${args.longitude}`);
     console.error(`[input] \u771F\u592A\u9633\u65F6\u6821\u6B63\u5F00\u542F: \u7ECF\u5EA6 ${+args.longitude}\xB0(\u7ECF\u5EA6\u5DEE+\u5747\u65F6\u5DEE, \u53E3\u5F84\u89C1 CHANGELOG)`);
   }
+  let compareYears = [];
+  if (args.compareYears !== void 0) {
+    compareYears = String(args.compareYears).split(",").map((s) => parseInt(s.trim(), 10));
+    if (!compareYears.length || compareYears.some((y) => !Number.isInteger(y) || y < 1900 || y > 2150))
+      fail(`compareYears \u65E0\u6548(\u9017\u53F7\u5206\u9694\u7684\u5E74\u4EFD, 1900-2150): ${args.compareYears}`);
+    if (compareYears.length > 5) fail(`compareYears \u6700\u591A 5 \u4E2A\u5E74\u4EFD, \u5F97\u5230 ${compareYears.length} \u4E2A`);
+  }
   if (!Number.isInteger(bi.day) || bi.day < 1) fail(`day \u65E0\u6548: ${args.day}`);
   if (!bi.isLunar) {
     const daysInMonth = new Date(bi.year, bi.month, 0).getDate();
@@ -14692,6 +14733,13 @@ function main() {
           enr.\u6D41\u6708\u5F15\u52A8 = analyzeLiuYue(siZhuCN, chart.bazi.dayun || [], curYear);
         } catch (e) {
           console.error("[liuyue] \u6D41\u6708\u5F15\u52A8\u8BA1\u7B97\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
+        }
+      }
+      if (compareYears.length) {
+        try {
+          enr.\u591A\u5E74\u5BF9\u6BD4 = analyzeCompareYears(siZhuCN, chart.bazi.dayun || [], compareYears, enr.\u7528\u795E\u5EFA\u8BAE?.\u51FA\u53E3);
+        } catch (e) {
+          console.error("[compare] \u591A\u5E74\u5BF9\u6BD4\u8BA1\u7B97\u8DF3\u8FC7(\u975E\u81F4\u547D):", e?.message || e);
         }
       }
       enr.\u7F55\u8C61 = detectRarePatterns(siZhuCN, fullHits, enr.\u5730\u652F\u5173\u7CFB || [], enr.\u5929\u5E72\u5173\u7CFB || []);
