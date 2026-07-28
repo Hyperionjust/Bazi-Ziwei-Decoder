@@ -6,18 +6,33 @@
 // 输出: 逐字段报告(stdout JSON);任一 FAIL → exit 1(FAIL 字段应送回评审遍重生)。
 // ---------------------------------------------------------------------------
 import * as fs from 'fs';
+// v3.9.1: 所有形态规格(句数/字数/白名单/禁词/判词规格)统一从 spec.json 取,
+//         不再在本文件与提示词里各写一遍。改规格只改 spec.json,
+//         提示词里的同款数字由 fixtures/test-spec-sync.ts 逐条比对。
+import SPEC from './spec.json';
 
 type Rep = { status: 'PASS'|'FAIL'|'WARN'; reasons: string[] };
 const strip = (s: string) => String(s || '').replace(/<[^>]+>/g, '');
 const sentences = (s: string) => strip(s).split(/[。！？!?]/).map(x => x.trim()).filter(Boolean);
+const alt = (arr: readonly string[]) => arr.join('|');
+
+const SEC = SPEC.sections;
+const ARCH = SPEC.archetype;
 
 // v3.7.1 两句类第二句连接词白名单(治「所以你」×4 节拍器式同质化;同海报鼓励错开)
-const CONNECTOR_RE = /^(所以你|意味着你|这让你|落到你身上|这股劲让你|放到生活里)/;
-const CONNECTOR_DESC = '所以你/意味着你/这让你/落到你身上/这股劲让你/放到生活里';
+const CONNECTOR_RE = new RegExp(`^(${alt(SPEC.connectors.allow)})`);
+const CONNECTOR_DESC = SPEC.connectors.allow.join('/');
+
+// 判词规格:N 字整句 或 M+M 对仗(分隔符见 spec.archetype.couplet_separators)
+const ARCHETYPE_OK = (t: string) =>
+  new RegExp(`^[一-龥]{${ARCH.single_len}}$`).test(t) ||
+  new RegExp(`^[一-龥]{${ARCH.couplet_len}}[${ARCH.couplet_separators.join('')}][一-龥]{${ARCH.couplet_len}}$`).test(t);
+const ARCHETYPE_DESC = `判词须${ARCH.single_len}字或${ARCH.couplet_len}+${ARCH.couplet_len}对仗`;
+const ARCHETYPE_FORBID_RE = new RegExp(ARCH.forbid_pattern);
 
 // v3.2.3(用户定) 童年断言细则:「从小」只能接气质不能接行为——童年限定词与可证伪动作词同句即违规
-const CHILD_MARK = /(从小|小时候|打小|孩提|学生时代|少年时|童年)/;
-const CHILD_ACT = /(习惯|牵头|攒局|张罗|带头|组织|分工|派活|主持|带队|发起|当班长|当过|干过|做过|拉着|老是|总能把|就爱管)/;
+const CHILD_MARK = new RegExp(`(${alt(SPEC.childhood.marks)})`);
+const CHILD_ACT = new RegExp(`(${alt(SPEC.childhood.acts)})`);
 function childhoodViolations(text: string): string[] {
   const out: string[] = [];
   for (const sent of String(text).replace(/<[^>]+>/g, '').split(/[。！？!?\n]/)) {
@@ -36,17 +51,17 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
   {
     const bad: string[] = [];
     const t = strip(a?.meta?.archetype_name || '');
-    if (!/^[一-龥]{7}$/.test(t) && !/^[一-龥]{4}[·•・][一-龥]{4}$/.test(t))
-      bad.push(`判词须7字或4+4对仗,得到「${t}」`);
-    if (/[格局]{2}|身弱|身强|七杀格|正官格|偏财格/.test(t)) bad.push('判词堆格局术语');
+    if (!ARCHETYPE_OK(t)) bad.push(`${ARCHETYPE_DESC},得到「${t}」`);
+    if (ARCHETYPE_FORBID_RE.test(t)) bad.push(ARCH.forbid_desc);
     put('meta.archetype_name', bad);
   }
 
-  // ---- 全局禁词(所有解读字段) ----
-  const FORBID_ALL = ['tier', 'needs_review', 'lineage_weights', '命主', '起法待核'];
-const FORBID_FREQ = ['多半是你', '你总是', '你每次', '你从不', '你一定会', '第一个想到你'];
-const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3加分', 'v4加分', '忌神折向', 'R1驿马', 'R2文', 'R3胎元', '评审遍', '体检器', '派系侧重', 'lineage'];
-  const FORBID_SHUNNI = ['大凶', '灾年', '凶年', '凶星']; // 精读/时间轴措辞
+  // ---- 全局禁词(所有解读字段;分层定义见 spec.json forbid) ----
+  const FORBID_ALL = SPEC.forbid.all;
+  const FORBID_FREQ = SPEC.forbid.freq;
+  const FORBID_MECH = SPEC.forbid.mech;
+  const FORBID_SHUNNI = SPEC.forbid.shunni; // 精读/时间轴措辞
+  const SHUNNI_PATH_RE = new RegExp(SPEC.forbid.shunni_path_prefix);
   const walk = (obj: any, path: string, fn: (p: string, v: string) => void) => {
     if (typeof obj === 'string') fn(path, obj);
     else if (Array.isArray(obj)) obj.forEach((v, i) => walk(v, `${path}[${i}]`, fn));
@@ -56,7 +71,7 @@ const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3�
     const bad: string[] = [];
     walk(a, '', (p, v) => {
       for (const w of FORBID_ALL) if (v.includes(w)) bad.push(`${p} 含内部字段/播报腔「${w}」`);
-      if (/^(hechong|yunsui|shensha|timeline)/.test(p)) for (const w of FORBID_SHUNNI) if (v.includes(w)) bad.push(`${p} 含绝对断语「${w}」(应用顺风/逆风)`);
+      if (SHUNNI_PATH_RE.test(p)) for (const w of FORBID_SHUNNI) if (v.includes(w)) bad.push(`${p} 含绝对断语「${w}」(应用顺风/逆风)`);
       for (const w of FORBID_FREQ) if (v.includes(w)) bad.push(`${p} 含行为频率断言「${w}」(能力而非事迹:改写为能力/特质/潜力句式)`);
       for (const w of FORBID_MECH) if (v.includes(w)) bad.push(`${p} 泄漏幕后机制词「${w}」(幕后台前分离:用户只看结论)`);
       for (const c of childhoodViolations(v)) bad.push(`${p} 童年行为断言「${c}…」(细则:从小只能接气质不能接行为,动作可证伪)`);
@@ -69,9 +84,10 @@ const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3�
   {
     const bad1: string[] = []; const bad2: string[] = [];
     const m = a?.tg?.mech_html, p = a?.tg?.plain_html;
-    if (m == null) bad1.push('缺字段'); else if (sentences(m).length !== 1) bad1.push(`上句应恰一句,实际${sentences(m).length}句`);
+    const TG_N = SEC.tg_block.exact_sentences;
+    if (m == null) bad1.push('缺字段'); else if (sentences(m).length !== TG_N) bad1.push(`上句应恰${TG_N}句,实际${sentences(m).length}句`);
     if (p == null) bad2.push('缺字段'); else {
-      if (sentences(p).length !== 1) bad2.push(`下句应恰一句,实际${sentences(p).length}句`);
+      if (sentences(p).length !== TG_N) bad2.push(`下句应恰${TG_N}句,实际${sentences(p).length}句`);
       if (!CONNECTOR_RE.test(strip(p).trim())) bad2.push(`下句须以连接词开头(${CONNECTOR_DESC})`);
     }
     put('tg.mech_html', bad1); put('tg.plain_html', bad2);
@@ -85,7 +101,7 @@ const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3�
       const t = strip(path);
       for (const m of ['特性是', '意味着你', '最强的能力', '但']) if (!t.includes(m)) bad.push(`日主固定句式缺「${m}」`);
     } else {
-      if (ss.length !== 2) bad.push(`应恰两句,实际 ${ss.length} 句`);
+      if (ss.length !== SEC.two_sentence_block.exact_sentences) bad.push(`应恰${SEC.two_sentence_block.exact_sentences}句,实际 ${ss.length} 句`);
       if (ss[1] && !CONNECTOR_RE.test(ss[1])) bad.push(`第二句须以连接词开头(${CONNECTOR_DESC})`);
     }
     put(k, bad);
@@ -106,19 +122,15 @@ const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3�
     if (v == null) { put(`interp.${k}`, ['缺字段']); continue; }
     const bad: string[] = [];
     const ss = sentences(v); const len = strip(v).length;
-    if (ss.length < 6 || len < 160) bad.push(`详写不足(句数${ss.length}/字数${len},要求≥6句≥160字)`);
+    const MI = SEC.major_interp;
+    if (ss.length < MI.min_sentences || len < MI.min_chars) bad.push(`详写不足(句数${ss.length}/字数${len},要求≥${MI.min_sentences}句≥${MI.min_chars}字)`);
     const g = (v.match(/hl-good/g) || []).length, r = (v.match(/class="hl"/g) || []).length;
-    if (g + r < 2) bad.push(`着色不足(绿${g}红${r},特质短语应成段着色)`);
+    if (g + r < MI.min_highlights) bad.push(`着色不足(绿${g}红${r},特质短语应成段着色)`);
     put(`interp.${k}`, bad);
   }
   // 婚恋画像句式(v3.7.1 四型分型:按 正缘倾向.宫坐 确定性选锚头,治全盘一刀切同质化;同盘分型可复现)
   {
-    const ANCHOR_BY_GONGZUO: Record<string, string> = {
-      正印: '你适合的另一半', 偏印: '你适合的另一半',
-      正官: '能接住你的', 七杀: '能接住你的',
-      正财: '让你眼睛一亮又留得住的', 偏财: '让你眼睛一亮又留得住的',
-      食神: '与你最同频的', 伤官: '与你最同频的', 比肩: '与你最同频的', 劫财: '与你最同频的',
-    };
+    const ANCHOR_BY_GONGZUO: Record<string, string> = SPEC.marriage_anchor.by_gongzuo;
     const v = a?.interp?.marriage_html || '';
     const bad: string[] = [];
     const mt = strip(v).match(/(你适合的另一半|能接住你的|让你眼睛一亮又留得住的|与你最同频的)[^。！？]{0,12}更可能是一个([^。！？]{4,40})的(男生|女生)/);
@@ -139,7 +151,7 @@ const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3�
     if (v == null) { put(k, ['缺字段']); continue; }
     const bad: string[] = []; const warn: string[] = [];
     const n = sentences(v).length;
-    if (n < 3 || n > 7) bad.push(`精读段应3~7句,实际${n}句`);
+    if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`精读段应${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}句,实际${n}句`);
     if (k === 'yunsui.reading_html') {
       const yrs = (strip(v).match(/(19|20)\d{2}/g) || []).map(Number);
       for (const y of yrs) if (y < currentYear - 1 || y > currentYear + 5) warn.push(`提及年份${y}超出今年起5年窗口`);
@@ -183,7 +195,7 @@ const FORBID_MECH = ['rubric', '算法层', '映射矩阵', '出文协议', 'v3�
     const bad: string[] = [];
     const tl = a?.timeline;
     const wl = new Set(((chart?.bazi?.enrichment?.运岁引动?.建议节点) || []).map((n: any) => n.年));
-    if (!Array.isArray(tl) || tl.length !== 5) bad.push(`timeline 应恰5项,实际${Array.isArray(tl) ? tl.length : 0}`);
+    if (!Array.isArray(tl) || tl.length !== SPEC.timeline.exact_items) bad.push(`timeline 应恰${SPEC.timeline.exact_items}项,实际${Array.isArray(tl) ? tl.length : 0}`);
     else if (wl.size) for (const t of tl) if (!wl.has(+t.year)) bad.push(`节点年份${t.year}不在建议节点白名单`);
     put('timeline', bad);
   }
@@ -242,10 +254,15 @@ export function checkMbti(a: any, chart: any): Record<string, Rep> {
     const dv = strip(String(a?.diff_verdict || ''));
     const dvBad: string[] = [];
     if (!dv) dvBad.push('缺 diff_verdict 判词');
-    else { if (!dv.startsWith('你是')) dvBad.push('判词须以「你是」开头'); if (dv.length > 34) dvBad.push(`判词过长(${dv.length}>30字)`); }
+    else {
+      if (!dv.startsWith(SEC.mbti_verdict.prefix)) dvBad.push(`判词须以「${SEC.mbti_verdict.prefix}」开头`);
+      // v3.9.1 修:此处原先按 34 判定却写「>30字」,阈值与提示文本不一致
+      if (dv.length > SEC.mbti_verdict.max_chars) dvBad.push(`判词过长(${dv.length}>${SEC.mbti_verdict.max_chars}字)`);
+    }
     R['diff_verdict'] = { status: dvBad.length ? 'FAIL' : 'PASS', reasons: dvBad };
     const len = strip(String(a?.diff_html || '')).length;
-    R['diff_html'] = { status: (len >= 400 && len <= 650) ? 'PASS' : 'FAIL', reasons: (len >= 400 && len <= 650) ? [] : [`差异版块应450~600字左右(400-650容差),实际${len}`] };
+    const MD = SEC.mbti_diff; const okLen = len >= MD.min_chars && len <= MD.max_chars;
+    R['diff_html'] = { status: okLen ? 'PASS' : 'FAIL', reasons: okLen ? [] : [`差异版块应${MD.min_chars}~${MD.max_chars}字,实际${len}`] };
   }
   // P0 修复:_全局 汇总赋值挪到所有违规 push(含意象嫁接/主导功能块)完成之后,避免提前冻结放行
   R['_全局'] = { status: bad0.length ? 'FAIL' : 'PASS', reasons: bad0 };
@@ -254,14 +271,13 @@ export function checkMbti(a: any, chart: any): Record<string, Rep> {
 
 // ---- v3.8: 综合印证海报体检(--mode=zonghe) ----
 // 此前综合海报字段零脚本校验(QC 评审点名);查机器可判红线:判词规格/禁词/播报腔/段落长度/枚举合法性/条目数
-const ARCHETYPE_OK = (t: string) => /^[一-龥]{7}$/.test(t) || /^[一-龥]{4}[·•・][一-龥]{4}$/.test(t);
 export function checkZonghe(a: any, _chart: any): Record<string, Rep> {
   const R: Record<string, Rep> = {};
   const put = (k: string, bad: string[]) => { R[k] = { status: bad.length ? 'FAIL' : 'PASS', reasons: bad }; };
   {
     const bad: string[] = []; const t = strip(a?.meta?.archetype_name || '');
-    if (!ARCHETYPE_OK(t)) bad.push(`判词须7字或4+4对仗,得到「${t}」`);
-    if (/[格局]{2}|身弱|身强|七杀格|正官格|偏财格/.test(t)) bad.push('判词堆格局术语');
+    if (!ARCHETYPE_OK(t)) bad.push(`${ARCHETYPE_DESC},得到「${t}」`);
+    if (ARCHETYPE_FORBID_RE.test(t)) bad.push(ARCH.forbid_desc);
     put('meta.archetype_name', bad);
   }
   { // 全局禁词 + 顺逆(风险/冲突路径)
@@ -318,7 +334,7 @@ export function checkZiwei(a: any, _chart: any): Record<string, Rep> {
   const put = (k: string, bad: string[]) => { R[k] = { status: bad.length ? 'FAIL' : 'PASS', reasons: bad }; };
   {
     const bad: string[] = []; const t = strip(a?.meta?.archetype_name || '');
-    if (!ARCHETYPE_OK(t)) bad.push(`判词须7字或4+4对仗,得到「${t}」`);
+    if (!ARCHETYPE_OK(t)) bad.push(`${ARCHETYPE_DESC},得到「${t}」`);
     put('meta.archetype_name', bad);
   }
   { // 全局禁词
@@ -354,7 +370,7 @@ export function checkZiwei(a: any, _chart: any): Record<string, Rep> {
 // 刻意避开会误伤的词:「置信度」允许对用户显示(边界盘须标低);紫微「命主星/身主星」为星名不拦。
 
 // P0-C 边界盘高确定断语模式(常量;chart 为边界盘/低置信时命中即 FAIL)
-export const HIGH_CERTAINTY_WORDS = ['必然', '一定会', '肯定会', '铁定', '必定', '注定'] as const;
+export const HIGH_CERTAINTY_WORDS = SPEC.forbid.high_certainty;
 // 「无条件词伴随的具体单年断事」启发式: 句中含具体年份 + 定断句式(会/将) 且无任何条件/留余地词
 const SINGLE_YEAR_RE = /(19|20)\d{2}\s*年/;
 const YEAR_ASSERT_RE = /(19|20)\d{2}\s*年[^,，;；]{0,14}(你会|将会|就会|会有|会出现|会发生)/;

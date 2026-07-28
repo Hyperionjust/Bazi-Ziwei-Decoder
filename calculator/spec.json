@@ -1,0 +1,101 @@
+{
+  "_readme": [
+    "海报/长文的『形态规格』单一事实源。v3.9.1 新增。",
+    "背景:同一条规格此前在 check-analysis.ts + 4 份提示词 + README 各写一遍,",
+    "     v3.7.1 就出过事故——SKILL 说『≥6句不限篇幅』、bazi-poster 说『3~5句』、",
+    "     体检器按 2~6 硬拦,模型写得越满越被打回。",
+    "规则:数值只改这里。check-analysis.ts 直接 import 本文件;提示词里的同款数字",
+    "     由 fixtures/test-spec-sync.ts 逐条比对,对不上直接 FAIL。"
+  ],
+
+  "archetype": {
+    "_desc": "判词规格:7 字整句 或 4+4 对仗(中点分隔)",
+    "single_len": 7,
+    "couplet_len": 4,
+    "couplet_separators": ["·", "•", "・"],
+    "forbid_pattern": "[格局]{2}|身弱|身强|七杀格|正官格|偏财格",
+    "forbid_desc": "判词堆格局术语",
+    "mirrored_in": ["prompts/bazi-poster.md", "prompts/zonghe-poster.md", "prompts/ziwei-poster.md", "prompts/bazi-poster-review.md"]
+  },
+
+  "sections": {
+    "_desc": "各类解读字段的句数/字数下限。上限只对『恰 N 句』类字段存在。",
+    "two_sentence_block": {
+      "exact_sentences": 2,
+      "_desc": "dm/geju/wuxing/yongshen 的 note 类字段:恰两句,第二句以连接词开头"
+    },
+    "tg_block": {
+      "exact_sentences": 1,
+      "_desc": "tg.mech_html 上句报盘面恰一句;tg.plain_html 下句恰一句且以连接词开头"
+    },
+    "major_interp": {
+      "min_sentences": 6,
+      "min_chars": 160,
+      "max_sentences": null,
+      "min_highlights": 2,
+      "_desc": "四大解读段(性格/事业/婚恋/健康):≥6 句 ≥160 字,不设上限;着色短语≥2 处"
+    },
+    "close_read": {
+      "min_sentences": 3,
+      "max_sentences": 7,
+      "_desc": "三个精读段(合冲刑害/运岁/神煞):3~7 句"
+    },
+    "mbti_diff": {
+      "min_chars": 400,
+      "max_chars": 650,
+      "_desc": "MBTI『实测×底盘』差异版块字数容差"
+    },
+    "mbti_verdict": {
+      "prefix": "你是",
+      "max_chars": 34,
+      "_desc": "MBTI diff_verdict 判词:须以『你是』开头,不超过 34 字"
+    },
+    "mirrored_in": ["SKILL.md", "prompts/bazi-poster.md", "prompts/bazi-poster-review.md"]
+  },
+
+  "timeline": {
+    "exact_items": 5,
+    "_desc": "时间轴恰 5 项,年份须落在算法层『运岁引动.建议节点』白名单内",
+    "mirrored_in": ["prompts/bazi-poster.md"]
+  },
+
+  "connectors": {
+    "_desc": "两句块第二句的开头连接词白名单(v3.7.1 反同质化:原先强制『所以你』×4,一张海报连读四遍像节拍器)。同一张海报内各块应错开。",
+    "allow": ["所以你", "意味着你", "这让你", "落到你身上", "这股劲让你", "放到生活里"],
+    "mirrored_in": ["prompts/bazi-poster.md", "prompts/bazi-poster-review.md"]
+  },
+
+  "forbid": {
+    "_desc": "禁词分层。all=所有解读字段;shunni=仅精读/时间轴类字段;mech=幕后台前分离(SKILL 铁律 13)。",
+    "all": ["tier", "needs_review", "lineage_weights", "命主", "起法待核"],
+    "freq": ["多半是你", "你总是", "你每次", "你从不", "你一定会", "第一个想到你"],
+    "mech": ["rubric", "算法层", "映射矩阵", "出文协议", "v3加分", "v4加分", "忌神折向", "R1驿马", "R2文", "R3胎元", "评审遍", "体检器", "派系侧重", "lineage"],
+    "shunni": ["大凶", "灾年", "凶年", "凶星"],
+    "shunni_path_prefix": "^(hechong|yunsui|shensha|timeline)",
+    "high_certainty": ["必然", "一定会", "肯定会", "铁定", "必定", "注定"],
+    "mirrored_in": ["prompts/bazi-poster.md", "prompts/bazi-prompt.md"]
+  },
+
+  "childhood": {
+    "_desc": "v3.2.3 童年断言细则:『从小』只能接气质、不能接可证伪的行为;限定词与动作词同句即违规。",
+    "marks": ["从小", "小时候", "打小", "孩提", "学生时代", "少年时", "童年"],
+    "acts": ["习惯", "牵头", "攒局", "张罗", "带头", "组织", "分工", "派活", "主持", "带队", "发起", "当班长", "当过", "干过", "做过", "拉着", "老是", "总能把", "就爱管"]
+  },
+
+  "marriage_anchor": {
+    "_desc": "v3.7.1 正缘画像四型分型:锚头由算法层『正缘倾向.宫坐』确定,同盘可复现,不得混用。",
+    "by_gongzuo": {
+      "正印": "你适合的另一半",
+      "偏印": "你适合的另一半",
+      "正官": "能接住你的",
+      "七杀": "能接住你的",
+      "正财": "让你眼睛一亮又留得住的",
+      "偏财": "让你眼睛一亮又留得住的",
+      "食神": "与你最同频的",
+      "伤官": "与你最同频的",
+      "比肩": "与你最同频的",
+      "劫财": "与你最同频的"
+    },
+    "mirrored_in": ["prompts/bazi-poster.md", "prompts/bazi-prompt.md"]
+  }
+}

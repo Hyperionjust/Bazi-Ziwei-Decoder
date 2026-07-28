@@ -6,7 +6,7 @@
 
 Deterministic charting (not LLM guesswork) · 3 analysis modes · 4 ink-style HTML poster themes
 
-[![Version](https://img.shields.io/badge/version-3.8.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.9.1-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-c1432f.svg)](#-installation)
 
@@ -118,8 +118,8 @@ node dist-bundle/check-analysis.js --mode=zonghe --analysis=analysis.json --char
 A synthetic sample is bundled (male, 2000-01-01, not a real person):
 - `examples/sample-chart.json` — algorithm chart output
 - `examples/sample-chart.txt` — text chart
-- `examples/sample-analysis.json` — cross-validation analysis (sample)
-- `examples/sample-report.html` / `sample-bazi-report.html` — **finished posters; open in a browser to preview**
+- `examples/sample-analysis-zonghe.json` — cross-validation analysis (sample)
+- `examples/sample-zonghe-report.html` / `sample-bazi-report.html` / `sample-ziwei-report.html` — **finished posters; open in a browser to preview**
 
 ---
 

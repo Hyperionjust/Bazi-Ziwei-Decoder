@@ -1,0 +1,71 @@
+# 文件清单（按需查阅，不必常驻上下文）
+
+> 运行时只用 `calculator/dist-bundle/*.js`（自足单文件，零安装、兼容只读目录）。
+> `.ts` 源码随包只为可读可改，**不是运行入口**；`calculator/dist/`（tsc 中间产物）自 v3.9.1 起不入库、不随包。
+
+```
+bazi-ziwei-decoder/
+├── SKILL.md                          ← 技能主文件（触发条件 / 门禁 / Step 0–3 / 关键约束）
+├── VERSION                           ← 版本号唯一事实源（自动更新比对的就是它）
+├── references/                       ← 按需查阅的参考资料（不常驻上下文）
+│   ├── file-map.md                   ← 本文件
+│   ├── install-and-deps.md           ← 安装后行为、依赖与只读目录须知
+│   ├── troubleshooting.md            ← 失败模式与处理
+│   └── walkthrough.md                ← 一次完整对话的走法示例
+├── scripts/
+│   └── release.sh                    ← 发版唯一入口：写版本号 → 白名单打包 → 校验无垃圾件
+├── calculator/
+│   ├── dist-bundle/                  ← ⭐ 运行时入口（run-chart / dump-text / render / check-analysis / self-update）
+│   ├── run-chart.ts                  ← 源码·入口：生辰 → JSON（stdout 纯 JSON / stderr debug）
+│   ├── dump-text.ts                  ← 源码·JSON → 文墨天机风文本
+│   ├── render.ts                     ← 源码·渲染：chart.json + analysis.json + 模板 → HTML
+│   ├── shensha.ts                    ← 神煞计算引擎（数据驱动，读 shensha.json + 流派 policy）
+│   ├── check-analysis.ts             ← 解读体检器（--mode=bazi|zonghe|ziwei|mbti|longform）
+│   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
+│   ├── spec.json                     ← ⭐ 形态规格单一事实源（判词字数/句数区间/连接词白名单/timeline 项数/禁词分层）
+│   ├── shensha.json                  ← 神煞单一事实源（起法/tier/出处/needs_review）
+│   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
+│   ├── package.json                  ← 依赖声明 + npm test（fixtures 一键跑法）
+│   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
+│   ├── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱/时辰边界/置信度/流月/多年对比）
+│   └── fixtures/                     ← 回归测试
+│       ├── test-shensha.ts           ← 神煞 13 例
+│       ├── test-relations.ts         ← 关系 / 运岁 / 正缘
+│       ├── test-boundary.ts          ← 阴阳年干 / 农历 / 时区 / 晚子时 / 真太阳时
+│       ├── test-check.ts             ← 体检器五模式
+│       ├── test-shichen.ts           ← 时辰边界检测 + 晚子时约定
+│       ├── test-liuyue.ts            ← 流月引动
+│       ├── test-compare.ts           ← 多年对比
+│       ├── test-spec-sync.ts         ← ⭐ 规格漂移哨兵（spec.json ↔ 提示词/SKILL 数字比对）
+│       ├── check-template.ts         ← 海报模板完整性
+│       └── calibration/              ← 校准回测脚手架（schema + runner，命例数据不入库）
+├── prompts/
+│   ├── disclaimer-preamble.md        ← ⭐ 成长心态前置声明（八字/紫微/综合三线开头必出）
+│   ├── output-mode-B.md              ← ⭐ 总领速览 + 按需下钻 输出模式规则
+│   ├── novice-mode.md                ← ⭐ 小白模式（触发式旁路：决策门坍缩/双层锚点/菜单重排/核对点）
+│   ├── bazi-prompt.md                ← 八字独立分析（流派 + 神煞 + disclaimer + 模式B）
+│   ├── ziwei-prompt.md               ← 紫微独立分析（长文）
+│   ├── zonghe-yinzheng-prompt.md     ← ⭐ 综合印证（长文）
+│   ├── zonghe-poster.md              ← ⭐ 综合印证海报（JSON 输出）
+│   ├── bazi-poster.md                ← ⭐ 八字独立海报（JSON 输出·单系统）
+│   ├── bazi-poster-review.md         ← ⭐ 八字海报评审—重生（逐字段挑错，只重写 FAIL 字段）
+│   ├── ziwei-poster.md               ← ⭐ 紫微独立海报（JSON 输出·十二宫盘算法注入）
+│   ├── mbti-poster.md                ← ⭐ 八字 MBTI 海报（荣格八维×十神，JSON 输出）
+│   └── liunian-qa.md                 ← ⭐ 流年问答模式（「我 202X 年适合…吗」直达通道）
+├── templates/
+│   ├── report-zonghe-poster.html     ← 综合印证海报模板（占位符）
+│   ├── report-bazi-poster.html       ← 八字独立海报模板（占位符）
+│   ├── report-ziwei-poster.html      ← 紫微独立海报模板（十二宫盘可视化）
+│   └── report-mbti-poster.html       ← MBTI 海报模板（实测×底盘差异版块）
+├── examples/                         ← 四条海报线各一套金标样例（chart / analysis / 渲染产物）
+└── docs/release-notes/               ← 分批次变更摘要（含测试记录）；版本流水见 CHANGELOG.md
+```
+
+## 四条海报管线对照
+
+| 线别 | 提示词 | 模板 | 渲染 | 体检 |
+|---|---|---|---|---|
+| 综合印证 | `zonghe-poster.md` | `report-zonghe-poster.html` | `render`（缺省模式） | `check-analysis --mode=zonghe` |
+| 八字独立 | `bazi-poster.md` + `bazi-poster-review.md` | `report-bazi-poster.html` | `render --mode=bazi` | `check-analysis`（缺省 bazi） |
+| 紫微独立 | `ziwei-poster.md` | `report-ziwei-poster.html` | `render --mode=ziwei` | `check-analysis --mode=ziwei` |
+| 八字 MBTI | `mbti-poster.md` | `report-mbti-poster.html` | `render --mode=mbti` | `check-analysis --mode=mbti` |

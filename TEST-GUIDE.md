@@ -32,20 +32,31 @@ node -e "const j=require('./smoke.json'); console.log('日柱:', j.bazi.siZhu.da
 
 ### 0.1 回归 fixtures（人工，改代码后必跑）
 
+**一条命令跑全部**（v3.9.1 起）：
+
 ```bash
-cd calculator
+cd calculator && npm test
+```
+
+它按顺序串起下面 11 项，任一非 0 即中断：
+
+```bash
 npx tsx fixtures/test-shensha.ts      # 神煞引擎 13 例
 npx tsx fixtures/test-relations.ts    # 关系/运岁/正缘
-npx tsx fixtures/test-boundary.ts     # v3.5 边界回归(阴阳年干/农历/时区/晚子时/调候/格局)
-npx tsx fixtures/test-check.ts        # 体检器(含 v3.9 边界盘高确定断语红线)
-npx tsx fixtures/test-shichen.ts      # v3.9 时辰边界检测 + 晚子时约定
-npx tsx fixtures/test-liuyue.ts       # v3.9 流月引动(12 节气月干支/公历对照/逐月命中)
-npx tsx fixtures/test-compare.ts      # v3.9 多年对比(逐年引动/喜忌评分/可复现)
+npx tsx fixtures/test-boundary.ts     # 边界回归(阴阳年干/农历/时区/晚子时/真太阳时/调候/格局)
+npx tsx fixtures/test-check.ts        # 体检器五模式(含边界盘高确定断语红线)
+npx tsx fixtures/test-shichen.ts      # 时辰边界检测 + 晚子时约定
+npx tsx fixtures/test-liuyue.ts       # 流月引动(12 节气月干支/公历对照/逐月命中)
+npx tsx fixtures/test-compare.ts      # 多年对比(逐年引动/喜忌评分/可复现)
 npx tsx fixtures/check-template.ts    # 海报模板完整性
+npx tsx fixtures/test-spec-sync.ts    # ⭐ 规格漂移哨兵:spec.json ↔ SKILL/提示词 数字比对
+npx tsx fixtures/test-golden.ts       # ⭐ 四线随包样例即金标:各自过对应 mode 体检 + 渲染无残留占位符
 npx tsx schema-check.ts               # shensha/lineages 配置一致性
 ```
 
 全部 exit 0 才算过。改任何 `.ts` 后须重建 dist-bundle：`npm run bundle`。
+
+> 这些 fixtures 用相对路径定位 `examples/`、`templates/`、`shensha.json`，**请按上面的写法从 `calculator/` 目录用 `npx tsx` 跑源码**；换成先 `tsc` 再 `node dist/…` 会因为多一层目录而 ENOENT。
 
 ### 0.2 v3.9 新链路冒烟（人工，可选）
 

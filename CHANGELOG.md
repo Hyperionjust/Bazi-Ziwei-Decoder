@@ -6,7 +6,7 @@
 
 ---
 
-## [Unreleased] · 路线图（v3.9.0 后重排）
+## [Unreleased] · 路线图（v3.9.1 后重排）
 > 路线图清账：紫微独立海报 ✅v3.7.0、流年问答 ✅v3.7.0；原第一梯队四项 ✅v3.8.0（体检器 `--mode=zonghe`/`--mode=ziwei`、随包样例口吻修正、决策门流派小白化、真太阳时 `--longitude`，详见 [3.8.0]）；晚子时约定显式披露 ✅v3.9.0（显式口径**开关**仍留此处）、命例回测**脚手架** ✅v3.9.0（数据收集与评分标准仍留此处）；`jieqi.ts` 粗近似死代码三函数 ✅v3.5 已删；**合婚双盘 → 用户定不做（2026-07-20），除非另行拍板不再列入**。
 
 **第一梯队（精度与口径）**
@@ -16,12 +16,44 @@
 
 **第二梯队（质量与工程）**
 - **命例回测集**：收录已知名人盘/经典命例，对格局、用神、关键神煞断言做回归（防提示词改动引起解读漂移）。✅v3.9.0 已建 `fixtures/calibration/` 脚手架（schema+runner+人工评分对照表）；数据收集与评分标准仍待做。
-- **金标样例库扩充**：给事业/健康/合冲刑害各字段补 golden example；**四型正缘画像各配一条金标**（v3.7.1 分型后仅印星型有样例）。
+- **金标样例库扩充**：四条海报线的随包样例 ✅v3.9.1 已补齐并进回归（`fixtures/test-golden.ts`）；仍待做——给事业/健康/合冲刑害各字段补字段级 golden example，**四型正缘画像各配一条金标**（现有样例只覆盖印星型）。
+- **输出 JSON 键名中英混用**：204 个键里 114 中文 / 90 英文，`enrichment` 同层就有 `confidence_tier` 与 `五行旺相` 并排。全量改名穿透 render / check-analysis / 五份提示词，属破坏性变更，留待 4.0；当前先靠约定（机制/元数据用英文、命理概念用中文）约束新增字段。
 - **低危代码清理**（QC 评审 #11/#13 遗留）：`index.ts` 身宫下标坐标系注记、虚岁公历年差口径、`shensha.json` 三奇注记/空亡 base 与实现漂移。（`jieqi.ts` 粗近似死代码三函数 ✅v3.5 已删，见顶部清账。）
-- **README.en 同步**：英文版停在早期版本，与 v3.7.1 差距已很大。
+- **README.en 同步**：版本徽章与样例文件名 ✅v3.9.1 已同步；正文功能描述仍停在早期版本，与 v3.9 差距较大。
 
 **第三梯队（传播·可选）**
 - **一屏分享卡模式**：页脚分享提示已做（v3.7.0）；进一步做「判词 + 小人 + 三句核心」的朋友圈比例分享卡（render 加 `--mode=card` 或各海报附带一屏卡区块）。
+
+## [3.9.1] · 2026-07-29 · 工程卫生:发布单一事实源 + 规格收敛 + 四线样例对齐
+> 本版不动排盘算法与解读口径,只修「同一件事写在多处、发版靠手记」造成的结构性隐患。
+> 触发点:审计发现 GitHub 上 VERSION 停在 2.7.0 而内容已到 3.4——网页上传时漏传了 VERSION 这一个文件;
+> 同一个根因还产出了「v3.8 的 .skill 里混进 33 个陈旧 dist 文件」和「仓库里躺着 _sync_probe_bash.txt」。
+
+### Added 新增
+- **`scripts/release.sh` 发布唯一入口**:`./scripts/release.sh 3.9.1` 一次改齐 VERSION / calculator/package.json / README.md 徽章 / README.en.md 徽章,重建 dist-bundle,按**白名单**打包,并在压包前校验包内无 `dist/` / `_probe*` / `*.case.json` / `node_modules`。版本号不再有第二个手改点。
+- **`calculator/spec.json` 形态规格单一事实源**:判词字数(7字/4+4)、各类段落句数与字数下限、连接词白名单、timeline 项数、禁词四层分层、童年断言词表、正缘四型锚头,全部收进一份 JSON;`check-analysis.ts` 直接 import,不再在代码里散落字面量。
+- **`fixtures/test-spec-sync.ts` 规格漂移哨兵**:逐条比对 spec.json 的数值与 SKILL.md / 四份提示词里的复述,对不上直接 FAIL。v3.7.1 那种「SKILL 说≥6句、提示词说3~5句、体检器按2~6拦」的三处打架,从此在测试阶段就暴露。
+- **`fixtures/test-golden.ts` 金标样例回归**:四条海报线的随包 analysis 各自过对应 mode 体检,四份渲染产物不得残留 `{{占位符}}`。
+- **补齐缺失的随包样例**:`examples/sample-analysis-bazi.json`(八字线此前只有渲染产物、没有 analysis)与 `sample-analysis-mbti.json` + `sample-mbti-report.html`(MBTI 线此前两样都没有);均已过体检 ALL PASS,`sample-bazi-report.html` 按新金标重新渲染以保持自洽。
+- **`references/` 参考层**:`file-map.md` / `install-and-deps.md` / `troubleshooting.md` / `walkthrough.md`,按需读取。
+- **`npm test`**:11 项 fixtures 一条命令串起,不再靠 TEST-GUIDE 手抄。
+
+### Changed 变更
+- **SKILL.md 重排与瘦身**(330 行 15972 字 → 267 行 12953 字,-19%):删掉 5 处内联版本号(v2.7/v1.5/v2.4/v3.1.5/v3.7——铁律 13 自己就说版本号史属幕后);`#### Step 3 — 长文版/海报版` 改 `3a/3b`,不再三层重复 "Step 3";**八字海报的 `render --mode=bazi` 命令归位**(原先被隔在紫微、MBTI 两节之后,顺读会误以为属于 MBTI),并入三段流水线成为第 4 步;三条例外(放弃选择/小白模式/流年直达)统一收在 Step 0 顶部,门禁段不再重复;文件清单/工作示例/失败模式表移入 `references/`,正文只留一张「需要时再读」指引表。
+- **`examples/` 四线命名对齐**:`sample-analysis.json` → `sample-analysis-zonghe.json`、`sample-report.html` → `sample-zonghe-report.html`(此前只有综合线没有线别后缀);`test-check.ts` 与 `README.en.md` 引用同步。
+- **`package.json`**:`version` 由 `0.1.0` 改为跟随 VERSION;`chart`/`dump`/`render` 三个 script 由指向 `dist/` 改为指向 `dist-bundle/`(消除「跑到陈旧编译产物」的入口)。
+- **TEST-GUIDE**:补 `npm test` 一键跑法与新增两项 fixtures,并注明 fixtures 必须用 `npx tsx` 从 `calculator/` 跑源码。
+
+### Fixed 修复
+- **`calculator/dist/` 退出版本库**:它曾入库并随包分发,且停在 v3.8——缺 `confidence.js`/`liuyue.js`/`shichen-boundary.js` 三个 v3.9 模块,而 SKILL.md 与 package.json 都把 `node dist/run-chart.js` 写成可选路径,一旦走这条会**静默跑出旧逻辑且不报错**。现加入 .gitignore、不入库、不随包;误入库的 `dist/_probe.txt` 一并删除。
+- **`.gitignore` 白名单误伤**:`*-report.html` 规则实际命中 `examples/sample-bazi-report.html` 与 `sample-ziwei-report.html`(`git check-ignore` 实测),而白名单只放行了三个具体文件名;改为整目录放行 `!examples/` + `!examples/**`,新增样例不会再被静默吞掉。
+- **两个 README 版本徽章停在 3.8.0**:v3.9.0 的收尾提交动了 7 个文件却漏掉它们;现由 release.sh 统一改写。
+- **MBTI 判词阈值与提示文本不一致**:`check-analysis` 按 34 字判定却在报错里写「>30字」,统一从 spec.json 取值。
+
+### 未做(有数据支撑的主动放弃)
+- **不合并 `render.ts` 的 `chartToFlat` / `chartToFlatBazi`**:实测两者 186 / 178 有效行里逐行完全相同的只有 11 行(6%),最长连续相同块 3 行,且全是 `return out;` `} else {` 一类样板。它们服务两套不同的模板变量集,是**平行而非重复**,强行合并只会制造耦合。
+- **不抽取模板公共 CSS**:zonghe↔ziwei 逐字相同的规则有 37 条(3506 字节,占 ziwei 模板 18.7%),但 bazi↔zonghe 只有 10 条、mbti 与谁都是 0 条。且 `render.ts` 是纯占位符替换、没有 include 机制,为这点重复引入模板包含功能不划算,留待有第五条海报线时一并考虑。
+- **不统一输出 JSON 的中英文键名**:204 个键里 114 中文 / 90 英文(`enrichment` 同层就有 `confidence_tier` 与 `五行旺相` 并排)。全量改名会穿透 render / check-analysis / 五份提示词,属破坏性变更,不进 patch 版。
 
 ## [3.9.0] · 2026-07-28 · 准确性三连(时辰边界/晚子时/置信度传播) + 小白模式 + 流月与多年对比
 > 主线:全链准确性此前只防了「LLM 排盘错」,没防「输入错」——本版把时辰输入可信度纳入管辖;并新增触发式小白模式(深度模式一行未降级)。

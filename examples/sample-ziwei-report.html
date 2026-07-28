@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>命主 · 紫垣拱禄定鼎人 · 紫微斗数命盘详批</title>
+<!-- 字体源：国内可达镜像(loli.net)；失败时退化到系统中文衬线 -->
+<link rel="preconnect" href="https://fonts.loli.net">
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
+<link href="https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f1e8; --paper-deep: #ebe5d5; --paper-card: #faf6ec;
+    --ink: #2b2825; --ink-soft: #6b6660; --ink-faint: #a8a298;
+    --vermillion: #c1432f; --vermillion-deep: #8e2f20;
+    --azure: #2e6da4; --jade: #4a7c4e; --jade-soft: #6f9971;
+    --obsidian: #1a1a1a;
+    --line: #8b8378; --line-soft: #c4bdb0; --line-faint: #e0d9c8;
+    --warn: #c97c3a; --warn-bg: #faf1e2;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--paper-deep); color: var(--ink);
+    font-family: "Noto Serif SC", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", "SimSun", serif;
+    font-size: 13px; line-height: 1.75;
+  }
+  .num { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .report { max-width: 860px; margin: 0 auto; background: var(--paper); padding: 34px 38px 26px; }
+
+  /* ============ HEADER ============ */
+  .header {
+    display: grid; grid-template-columns: auto auto 1fr auto; gap: 16px;
+    align-items: start; padding-bottom: 18px;
+    border-bottom: 1px solid var(--line-soft); margin-bottom: 20px;
+  }
+  .seal {
+    width: 46px; height: 46px; border: 1.5px solid var(--vermillion); color: var(--vermillion);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 13px; letter-spacing: 2px; line-height: 1.15; transform: rotate(-3deg); font-weight: 600;
+  }
+  .h-char { width: 78px; align-self: center; }
+  .h-char svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 3px rgba(0,0,0,.08)); }
+  .h-char:empty { display: none; }
+  .title-block .kicker { font-size: 11px; letter-spacing: 4px; color: var(--ink-soft); margin-bottom: 4px; }
+  .title-block .mingzhu { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; font-size: 13px; color: var(--ink-soft); }
+  .title-block h1 { margin: 0; font-size: 30px; letter-spacing: 3px; font-weight: 900; color: var(--vermillion-deep); }
+  .title-block .subtitle { margin-top: 6px; font-size: 12px; color: var(--ink-soft); }
+  .header-right { text-align: right; font-size: 11px; color: var(--ink-soft); }
+  .header-right .badge {
+    display: inline-block; border: 1px solid var(--vermillion); color: var(--vermillion);
+    padding: 1px 8px; border-radius: 3px; margin-top: 6px; font-size: 12px; letter-spacing: 2px;
+  }
+  .header-right .meta-row { margin-top: 4px; }
+
+  /* ============ INFO BAR ============ */
+  .info-bar {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px;
+    background: var(--line-soft); border: 1px solid var(--line-soft); margin-bottom: 22px;
+  }
+  .info-cell { background: var(--paper-card); padding: 7px 10px; }
+  .info-cell .k { font-size: 10px; color: var(--ink-faint); letter-spacing: 1px; }
+  .info-cell .v { font-size: 12px; margin-top: 1px; }
+
+  /* ============ 十二宫盘（结构与综合海报同源） ============ */
+  .ziwei-pan h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: 2px; }
+  .ziwei-pan h3 small { font-size: 10px; color: var(--ink-soft); margin-left: 8px; }
+  .ziwei-pan h3 .sh-禄 { color: var(--vermillion); }
+  .ziwei-pan h3 .sh-权 { color: var(--azure); }
+  .ziwei-pan h3 .sh-科 { color: var(--jade); }
+  .ziwei-pan h3 .sh-忌 { color: var(--obsidian); }
+  .ziwei-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    height: 540px;
+    background: var(--line-soft);
+    gap: 1px;
+  }
+  .palace {
+    background: var(--paper);
+    padding: 4px 6px;
+    font-size: 10px;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .palace.ming { box-shadow: inset 0 0 0 2px var(--vermillion); }
+  .palace.ming .p-gong { color: var(--vermillion); }
+  /* 身宫: 宫名后的内联小徽标, 不绝对定位, 不遮挡内容 */
+  .shen-badge {
+    display: inline-block; margin-left: 3px;
+    color: var(--vermillion); border: 1px solid var(--vermillion);
+    border-radius: 2px; font-size: 8px; line-height: 1.2;
+    padding: 0 2px; vertical-align: middle; font-weight: normal;
+  }
+  .palace .p-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px dashed var(--line-soft);
+    padding-bottom: 2px; margin-bottom: 3px;
+  }
+  .palace .p-head .p-gong-wrap { display: flex; align-items: center; }
+  .palace .p-dizhi { color: var(--ink-soft); }
+  .palace .p-gong { font-weight: bold; }
+  .palace .p-ganzhi { font-size: 9px; color: var(--ink-faint); }
+  .palace .main-star {
+    font-size: 12px; font-weight: bold; line-height: 1.4;
+  }
+  .palace .main-star .state {
+    font-size: 9px; color: var(--ink-soft); margin-left: 1px;
+  }
+  .palace .aux-star { color: var(--ink-soft); font-size: 10px; line-height: 1.4; }
+  .palace .small-star { color: var(--ink-faint); font-size: 9px; line-height: 1.3; }
+  .palace .daxian {
+    margin-top: auto; padding-top: 4px;
+    border-top: 1px dashed var(--line-soft);
+    font-size: 9px; color: var(--ink-soft);
+  }
+  .palace.current-daxian .daxian { color: var(--vermillion); font-weight: bold; }
+  .sihua-禄 { color: var(--vermillion); }
+  .sihua-权 { color: var(--azure); }
+  .sihua-科 { color: var(--jade); }
+  .sihua-忌 { color: var(--obsidian); text-decoration: underline; text-decoration-thickness: 1.5px; }
+  .sihua-tag {
+    display: inline-block; padding: 0 3px;
+    border: 1px solid currentColor; border-radius: 2px;
+    font-size: 8px; margin-left: 1px;
+  }
+
+  /* center palace */
+  .center-palace {
+    grid-column: 2 / 4; grid-row: 2 / 4;
+    padding: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--paper);
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  .center-palace h4 { margin: 0 0 8px; font-size: 13px; letter-spacing: 4px; }
+  .center-palace .info-line { font-size: 11px; color: var(--ink-soft); margin: 2px 0; }
+  .center-palace .pillars {
+    display: flex; gap: 8px; margin-top: 12px;
+  }
+  .center-palace .pillar {
+    background: var(--paper-deep);
+    border: 1px solid var(--line-soft);
+    padding: 4px 8px;
+    text-align: center;
+  }
+  .center-palace .pillar .pname { font-size: 9px; color: var(--ink-faint); letter-spacing: 1px; }
+  .center-palace .pillar .pgan { font-size: 14px; font-weight: bold; }
+  .center-palace .pillar .pzhi { font-size: 13px; color: var(--ink-soft); }
+
+  /* ============ SECTIONS ============ */
+  .section { margin-top: 26px; }
+  .section h2 {
+    font-size: 15px; letter-spacing: 2px; margin: 0 0 10px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--line-faint); padding-bottom: 6px;
+  }
+  .num-box {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border: 1px solid var(--vermillion); color: var(--vermillion);
+    font-size: 12px; font-family: "JetBrains Mono", monospace;
+  }
+  .prose { font-size: 12.5px; }
+  .prose p { margin: 6px 0; }
+  .hl-good { color: var(--jade); font-weight: 600; }
+  .hl { color: var(--vermillion); font-weight: 600; }
+  .lead { color: var(--ink); }
+
+  /* ============ FOOTER ============ */
+  .footer-disclaim {
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--line-soft);
+    font-size: 10px; color: var(--ink-faint);
+  }
+  .footer-seal {
+    flex: 0 0 auto; width: 34px; height: 34px; border: 1.5px solid var(--vermillion); color: var(--vermillion);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 9px; line-height: 1.2; letter-spacing: 1px; transform: rotate(-3deg);
+  }
+  @media print { html, body { background: var(--paper); } .report { max-width: none; } }
+</style>
+</head>
+<body>
+<div class="report">
+
+  <header class="header">
+    <div class="seal">紫微<br>命盘</div>
+    <div class="h-char"><svg viewBox="0 0 120 150" width="118" height="148" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ESTJ·朝官">
+  <ellipse cx="60" cy="142" rx="34" ry="5.5" fill="rgba(0,0,0,0.09)"/>
+  <polygon points="12,58 22,50 30,56 40,51 44,59 28,64" fill="#9db6d4" opacity="0.30"/>
+  <polygon points="84,42 94,35 101,41 110,37 112,45 96,49" fill="#9db6d4" opacity="0.22"/>
+  <polygon points="60,62 80,72 86,132 60,140" fill="#1f3a5c"/>
+  <polygon points="60,62 40,72 34,132 60,140" fill="#2a4a72"/>
+  <polygon points="40,72 34,132 22,127 32,79" fill="#1f3a5c"/>
+  <polygon points="80,72 86,132 98,127 88,79" fill="#476a94"/>
+  
+  <polygon points="44,68 50,70 43,104 37,102" fill="#9db6d4" opacity="0.85"/><polygon points="76,68 70,70 77,104 83,102" fill="#9db6d4" opacity="0.85"/>
+  <polygon points="50,66 60,86 60,72 54,65" fill="#f3ead7"/>
+  <polygon points="70,66 60,86 60,72 66,65" fill="#ded2b6"/>
+  <polygon points="36,78 20,98 33,112 52,103 46,86" fill="#1f3a5c"/>
+  <polygon points="36,78 46,86 52,103 42,100" fill="#2a4a72"/>
+  <polygon points="84,78 100,98 87,112 68,103 74,86" fill="#476a94"/>
+  <polygon points="84,78 74,86 68,103 78,100" fill="#2a4a72"/>
+  <polygon points="47,96 73,96 69,109 51,109" fill="#1f3a5c"/>
+  <polygon points="37,106 83,106 85,114 35,114" fill="#9db6d4"/>
+  <polygon points="56,106 64,106 66,114 54,114" fill="#f3ead7"/>
+  <g transform="rotate(20 31 106)"><circle cx="31" cy="95" r="2" fill="#c9b96a"/><polygon points="29,96 33,96 32,105 30,105" fill="#6b5b46"/><polygon points="25,104 37,103 36,107 26,108" fill="#c9b96a"/></g>
+  <g transform="rotate(-6 60 100)"><polygon points="55,91 65,90 67,110 53,111" fill="#f3ead7"/><polygon points="60,90.5 65,90 67,110 60,110.5" fill="#ded2b6"/></g>
+  <polygon points="60,17 77,28 74,50 60,58" fill="#e3c19e"/>
+  <polygon points="60,17 43,28 46,50 60,58" fill="#f2d9bd"/>
+  <polygon points="57,40 60,34 63,40 60,47" fill="#e3c19e"/>
+  <polygon points="43,29 60,17 77,29 74,22 60,11 46,22" fill="#3a3430"/>
+  <polygon points="60,11 74,22 77,29 60,19" fill="#57504a"/>
+  <polygon points="47,21 73,21 70,9 50,9" fill="#3a3430"/><polygon points="60,9 70,9 73,21 60,21" fill="#57504a"/>
+      <polygon points="43,21 77,21 75,26 45,26" fill="#3a3430"/>
+      <polygon points="18,19 42,18 42,24 20,25" fill="#3a3430"/><polygon points="78,18 102,19 100,25 78,24" fill="#57504a"/>
+  <circle cx="52.5" cy="38" r="2" fill="#3a3430"/><circle cx="67.5" cy="38" r="2" fill="#3a3430"/>
+  <path d="M54,45.5 Q60,50 66,45.5" stroke="#3a3430" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  
+  <polygon points="45,43 50,42 49,47" fill="#e8a898" opacity="0.6"/>
+  <polygon points="75,43 70,42 71,47" fill="#e8a898" opacity="0.6"/>
+</svg></div>
+    <div class="title-block">
+      <div class="kicker">紫微斗数 · 命盘详批</div>
+      <div class="mingzhu">命主</div>
+      <h1>紫垣拱禄定鼎人</h1>
+      <div class="subtitle">紫微坐午身命同宫，武曲化禄生财，一生稳中求成</div>
+    </div>
+    <div class="header-right">
+      <div>生成于 2026-07-20 19:30</div>
+      <div class="badge">阴男 · 土五局</div>
+      <div class="meta-row">命主 破军 · 身主 天同</div>
+    </div>
+  </header>
+
+  <div class="info-bar">
+    <div class="info-cell"><div class="k">阳历</div><div class="v num">2000-01-01 12:00</div></div>
+    <div class="info-cell"><div class="k">农历</div><div class="v">1999年 冬月廿五</div></div>
+    <div class="info-cell"><div class="k">性别</div><div class="v">男（阴男）</div></div>
+    <div class="info-cell"><div class="k">虚岁</div><div class="v num">27</div></div>
+    <div class="info-cell"><div class="k">五行局</div><div class="v">土五局</div></div>
+    <div class="info-cell"><div class="k">流年</div><div class="v num">2026</div></div>
+  </div>
+
+  <!-- ============ 十二宫盘（算法注入，命宫朱框 / 身宫徽标 / 当前大限高亮） ============ -->
+  <div class="ziwei-pan">
+    <h3>紫微斗数 · 十二宫盘 <small>生年四化：<span class="sh-禄">禄朱砂</span> / <span class="sh-权">权青蓝</span> / <span class="sh-科">科翠绿</span> / <span class="sh-忌">忌玄黑</span></small></h3>
+      <div class="ziwei-grid">
+        <!-- 巳 兄弟 -->
+        <div class="palace " data-zhi="巳">
+          <div class="p-head"><span class="p-dizhi">巳</span><span class="p-gong">兄弟宫</span><span class="p-ganzhi">己巳</span></div>
+          <div class="main-star">天机</div>
+          <div class="aux-star">天马·陀罗·地空·地劫</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 15-24</div>
+        </div>
+        <!-- 午宫区块：宫位名、干支、星曜与大限均由 gongs.午 数据驱动；命宫等特殊标记由算法按命盘动态注入，并非模板固定内容 -->
+        <div class="palace ming shen" data-zhi="午">
+          <div class="p-head"><span class="p-dizhi">午</span><span class="p-gong">命宫</span><span class="shen-badge">身</span><span class="p-ganzhi">庚午</span></div>
+          <div class="main-star">紫微</div>
+          <div class="aux-star">禄存·天喜</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 5-14</div>
+        </div>
+        <!-- 未 父母 -->
+        <div class="palace " data-zhi="未">
+          <div class="p-head"><span class="p-dizhi">未</span><span class="p-gong">父母宫</span><span class="p-ganzhi">辛未</span></div>
+          <div class="main-star"><span style="color:var(--ink-faint)">无主星</span></div>
+          <div class="aux-star">擎羊·天刑</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 115-124</div>
+        </div>
+        <!-- 申 福德 -->
+        <div class="palace " data-zhi="申">
+          <div class="p-head"><span class="p-dizhi">申</span><span class="p-gong">福德宫</span><span class="p-ganzhi">壬申</span></div>
+          <div class="main-star">破军</div>
+          <div class="aux-star">天钺</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 105-114</div>
+        </div>
+        <!-- 辰宫区块：结构同其他宫位，由 gongs.辰 数据驱动；身宫徽标由数据中的徽标字段渲染，并非模板固定标注 -->
+        <div class="palace current-daxian" data-zhi="辰">
+          <div class="p-head"><span class="p-dizhi">辰</span><span class="p-gong">夫妻宫</span><span class="p-ganzhi">戊辰</span></div>
+          <div class="main-star">七杀</div>
+          <div class="aux-star">文昌·铃星</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 25-34</div>
+        </div>
+        <!-- center palace 2x2 -->
+        <div class="center-palace">
+          <h4>中宫 · 命盘信息</h4>
+          <div class="info-line">阴男 土五局</div>
+          <div class="info-line">命主：破军　身主：天同</div>
+          <div class="pillars">
+            <div class="pillar"><div class="pname">年</div><div class="pgan">己</div><div class="pzhi">卯</div></div>
+            <div class="pillar"><div class="pname">月</div><div class="pgan">丙</div><div class="pzhi">子</div></div>
+            <div class="pillar"><div class="pname">日</div><div class="pgan">戊</div><div class="pzhi">午</div></div>
+            <div class="pillar"><div class="pname">时</div><div class="pgan">戊</div><div class="pzhi">午</div></div>
+          </div>
+        </div>
+        <!-- 酉 田宅 -->
+        <div class="palace " data-zhi="酉">
+          <div class="p-head"><span class="p-dizhi">酉</span><span class="p-gong">田宅宫</span><span class="p-ganzhi">癸酉</span></div>
+          <div class="main-star"><span style="color:var(--ink-faint)">无主星</span></div>
+          <div class="aux-star">—</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 95-104</div>
+        </div>
+        <!-- 卯宫区块：结构同其他宫位，由 gongs.卯 数据驱动；来因宫等标注由算法按命盘注入，并非模板固定标注 -->
+        <div class="palace " data-zhi="卯">
+          <div class="p-head"><span class="p-dizhi">卯</span><span class="p-gong">子女宫</span><span class="p-ganzhi">丁卯</span></div>
+          <div class="main-star">太阳·<span class="sihua-科">天梁<span class="sihua-tag">科</span></span></div>
+          <div class="aux-star">火星</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 35-44</div>
+        </div>
+        <!-- 戌 官禄 -->
+        <div class="palace " data-zhi="戌">
+          <div class="p-head"><span class="p-dizhi">戌</span><span class="p-gong">官禄宫</span><span class="p-ganzhi">甲戌</span></div>
+          <div class="main-star">廉贞·天府</div>
+          <div class="aux-star"><span class="sihua-忌">文曲<span class="sihua-tag">忌</span></span></div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 85-94</div>
+        </div>
+        <!-- 寅 财帛 -->
+        <div class="palace " data-zhi="寅">
+          <div class="p-head"><span class="p-dizhi">寅</span><span class="p-gong">财帛宫</span><span class="p-ganzhi">丙寅</span></div>
+          <div class="main-star"><span class="sihua-禄">武曲<span class="sihua-tag">禄</span></span>·天相</div>
+          <div class="aux-star">左辅</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 45-54</div>
+        </div>
+        <!-- 丑 疾厄 -->
+        <div class="palace " data-zhi="丑">
+          <div class="p-head"><span class="p-dizhi">丑</span><span class="p-gong">疾厄宫</span><span class="p-ganzhi">丁丑</span></div>
+          <div class="main-star">天同·巨门</div>
+          <div class="aux-star">—</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 55-64</div>
+        </div>
+        <!-- 子 迁移 -->
+        <div class="palace " data-zhi="子">
+          <div class="p-head"><span class="p-dizhi">子</span><span class="p-gong">迁移宫</span><span class="p-ganzhi">丙子</span></div>
+          <div class="main-star"><span class="sihua-权">贪狼<span class="sihua-tag">权</span></span></div>
+          <div class="aux-star">右弼·天魁·红鸾</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 65-74</div>
+        </div>
+        <!-- 亥 交友 -->
+        <div class="palace " data-zhi="亥">
+          <div class="p-head"><span class="p-dizhi">亥</span><span class="p-gong">交友宫</span><span class="p-ganzhi">乙亥</span></div>
+          <div class="main-star">太阴</div>
+          <div class="aux-star">天姚</div>
+          <div class="small-star"></div>
+          <div class="daxian">大限 75-84</div>
+        </div>
+      </div>
+  </div>
+
+  <section class="section">
+    <h2><span class="num-box">01</span>命格主轴</h2>
+    <div class="prose lead">你的命宫落在午宫，紫微独坐，这颗星像坐镇中军的主帅，天生带着一份沉稳与威仪。身宫与命宫同宫，意味着你这一生不必到中年才改换跑道——你早年认定的方向，往往就是一直走下去的方向，越早立定目标的人越占便宜。生年四化里，武曲化禄落在财帛宫，化禄就是能量被点亮的意思，你的财路天生偏向<span class="hl-good">正业生财、一分耕耘一分收获</span>。贪狼化权落在迁移宫，你走出舒适圈、向外拓展时，反而更容易拿到话语权。天梁化科落在子女宫，主名声清贵、得人扶持。需要留意的是文曲化忌落在官禄宫，化忌是能量打了结，你的事业路上<span class="hl">文书、合同、数据类事务容易出纰漏</span>。综合来看，你这盘的主轴非常清晰：以沉稳立身处世，以正业积累财富，以外拓赢得舞台，唯一要反复修炼的是细致。这不是一条暴发的路，而是一条越走越宽、越走越稳的路。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">02</span>命身格局 · 三方四正</h2>
+    <div class="prose">命宫的三方四正——也就是财帛、官禄、迁移三个互相呼应的宫位——构成了你的基本盘。对宫迁移有贪狼化权，又有右弼、天魁两颗贵人星，你出门在外<span class="hl-good">容易遇到愿意拉你一把的人</span>，尤其是前辈型的贵人。财帛宫武曲、天相同坐还带左辅，官禄宫廉贞、天府镇守，这构成传统上说的「府相朝垣」之象，白话讲就是财星与库星分列两旁朝拱命宫，你天生适合<span class="hl-good">在体制健全的平台里做管钱、管事、管资产的角色</span>。命宫自带禄存，像随身带着一座小粮仓，你<span class="hl-good">守成与积蓄的天赋比开拓更强</span>。兄弟宫天机与地空、地劫、陀罗同宫，同辈合作容易多想多变、聚聚散散，合伙分钱的事要格外明算账。田宅宫没有主星，借用对宫子女宫的太阳、天梁来看，置业不宜贪快，<span class="hl">不动产决策宁可慢一步、看清楚再出手</span>。身命同宫再加上紫微的定力，你的性格底色是稳：不是不动，而是每一步都要踩在实处。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">03</span>事业官禄</h2>
+    <div class="prose">官禄宫廉贞、天府同坐，廉贞主执行与开拓，天府主库藏与管理，两颗星在一起，你适合的路是<span class="hl-good">先在大平台里打磨专业，再逐步走向管理或资产运营的位置</span>。天府是「库」，你管账、管项目、管团队，都比同龄人更有耐心。要注意的是同宫的文曲化忌：文曲主文书、表达、数据，化忌之后，<span class="hl">合同条款、报表数字、重要邮件这类细节最容易在你手上出岔子</span>——不是能力不够，而是这类事务天然是你的盲区，复核一遍再发出去，能避开大多数麻烦。从事业线看，你现在正走二十五到三十四岁这步大限，大限命宫落在原盘夫妻宫的七杀，这是一步开创之限：机会与压力同时加大，<span class="hl">换赛道、独立扛项目的念头会反复出现</span>，适合小步试错，不宜一次压上全部。三十岁前整体算平路偏顺，三十五岁后大限走进太阳、天梁化科的宫位，名声与贵人同步抬升，那才是你事业的主升段。你的优势在稳，凡是需要「快、险、赌」的机会，天然与你这盘的气场不合，让给别人也无妨。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">04</span>财帛田宅</h2>
+    <div class="prose">财帛宫武曲化禄配天相，又有左辅相助，这是很典型的正财结构：武曲是财星之首，化禄之后力量更足，天相讲究规则与体面，左辅代表帮手。你的财路性质是<span class="hl-good">靠专业与信用换来的稳定收入</span>，工资、项目酬劳、资产管理这类「看得见来路」的钱最旺你；横财、快钱、杠杆钱则不是你的主场，<span class="hl">高杠杆与短炒类的诱惑值得你主动远离</span>。命宫禄存贴身，你的禀赋属于<span class="hl-good">能量内收、擅长积谷防饥</span>的类型，对积蓄天然不排斥，关键是给存款找到清晰的用途。田宅宫无主星，借对宫太阳、天梁化科来论：置业这件事宜晚不宜急，三十五岁后太阳、天梁的力量被大限点亮，那时再做大额资产配置，胜率高得多。化科主名也主保障，房产对你而言更像「安定感的容器」而非增值筹码，抱着这个心态去买，你就不容易被市场情绪带着走。如果你已经有定投或储蓄计划，务必保持；如果还没有，从收入的固定比例开始，是最贴合你命盘的做法。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">05</span>婚恋情感</h2>
+    <div class="prose">夫妻宫七杀坐守，文昌同宫，旁边还有一颗铃星。七杀是将星，落在感情位，你容易被<span class="hl-good">能力出众、性格果断、有主见的人</span>吸引——对方往往不是温顺型，而是能与你并肩作战的那种。文昌带来文雅气，意味着精神层面的聊得来对你很重要；铃星则是暗火，<span class="hl">相处中容易因小事急起来、话赶话</span>，磨合的关键是双方都慢半拍再开口。红鸾在迁移、天喜在命宫，你的良缘气息偏「动中生情」：走出去的场合、工作相关的圈子，比宅在家里更容易遇到对的人——这是倾向，不是断言。你现在走的这步大限，大限命宫恰好落在原盘夫妻宫，二十五到三十四岁这十年，感情本来就是你人生的主题之一，大限与宫位重叠，<span class="hl-good">认真经营的关系在这个阶段容易走向确定</span>。七杀坐夫妻宫的人，感情里最怕争高下，把「赢了道理、输了关系」这句话放在心里，你的亲密关系会顺很多。至于婚期早晚，盘上只有节奏提示、没有定数，选择权始终在你手里。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">06</span>健康提示</h2>
+    <div class="prose">疾厄宫天同、巨门同坐，天同是颗福星也带着慵懒之气，巨门主口与暗昧。你的体质偏向<span class="hl">能量内收型，代谢与消化系统是需要长期养护的重点</span>——这不是说你有什么问题，而是这类系统在你身上「用进废退」的特性最明显。巨门主口，饮食节律对你的影响比常人大：<span class="hl-good">规律三餐、清淡少腻，对你的回报比常人更大</span>。你的能量禀赋偏静，规律的有氧运动——快走、游泳、骑行任选其一——是你性价比最高的健康投资。父疾一线带着擎羊、天刑，这两颗星主金铁与意外，<span class="hl">运动前的热身、用刀用火用电的留神，值得变成肌肉记忆</span>。巨门也关联情绪出口，如果心里有事不说的习惯存在，找一个固定的倾诉或记录渠道，对你的睡眠与消化都有直接好处。如果你已有稳定作息，请继续保持；如果还在熬夜与补觉的循环里，先把入睡时间固定下来，是回报最快的一步。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">07</span>大限走向</h2>
+    <div class="prose">你五岁起限，每一步大限管十年。回顾十五到二十四岁那步限，大限走在天机、天马同宫又带地空地劫的宫位，那十年的主题是流动与试错：方向的调整、居住地的变动、存不住钱的体验，都是这步限的典型剧情。你现在所在的二十五到三十四岁，大限命宫落在辰宫七杀——这是一步<span class="hl">开创与压力并行之限</span>：七杀主破旧立新，你会明显感到原有的舒适模式不够用，逼着你长出自己的獠牙；好在文昌同宫，<span class="hl-good">这十年学到的硬本领，会成为你后半生的本钱</span>。整体节奏是平路开局、越走越顺，三十岁后上坡的体感会更明显。三十五到四十四岁，大限走进太阳、天梁化科的宫位，太阳主发散与名望，天梁主荫庇与贵人，化科再点一把火——那是你全盘<span class="hl-good">最顺风的十年，名声、职位、资源同步抬升</span>。再往后四十五到五十四岁走武曲化禄的财帛大限，财富积累进入收获期。把眼光放长，你的命盘是典型的「前段蓄力、中后段发力」，年轻时不必急。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">08</span>重点流年</h2>
+    <div class="prose">🔴 重大节点三年，逐个讲。2026 丙午年，流年命宫走回你的本命宫，紫微再度值年，这是<span class="hl-good">十年一轮的定调之年</span>——这一年立下的目标、开始的布局，影响力会延续整个流年循环，适合主动开局。2030 庚戌年流年走进官禄宫，引动同宫的文曲化忌，那是<span class="hl">文书、合约、评审类事务的大考之年</span>，签字之前多一道复核，就能把这年的逆风化成虚惊。2034 甲寅年前后是你转入下一步大限的转限年，转限年前后运势交替，重大决定宜等气场落定再拍板。🟡 一般年各有主题：2027 丁未年流年入父母宫，宫带擎羊、天刑，与长辈相处、房产手续、证件文书多留一份心；2032 壬子年流年入迁移宫，贪狼化权被引动，那是<span class="hl-good">外派、出差、异地机会的顺风年</span>，值得主动争取。⚪ 平稳年如 2028、2029、2031，盘面没有强烈信号，按自己的节奏推进即可，不必刻意求变。流年给的是天气，路怎么走，方向盘一直在你手里。</div>
+  </section>
+  <section class="section">
+    <h2><span class="num-box">09</span>针对性建议</h2>
+    <div class="prose">给你五条能落地的行动。第一，把「复核」做成流程：凡是合同、报价、报表、重要邮件，发出去之前强制自己隔天再看一遍或请同事过一眼——这是冲着官禄宫文曲化忌去的，<span class="hl">你的盲区在文书细节</span>，流程比自觉可靠。第二，收入的固定比例先存后花，三十五岁后再考虑大额置业：财帛武曲化禄配命宫禄存，<span class="hl-good">你的财富靠滚雪球而非押大小</span>，雪球要趁早开始滚。第三，每年至少安排两次「走出去」的动作——行业会议、异地项目、跨界社群都算：迁移宫贪狼化权带双贵人，<span class="hl-good">你的机会与人脉都在舒适圈之外</span>。第四，选一项能出汗的运动固定下来，每周三次起步，运动前认真热身：疾厄天同巨门加父疾线羊刑，你的身体吃「规律」这味药，回报比别人大。第五，感情里遇到分歧时，约定一个「冷静十分钟再谈」的规则：夫妻宫七杀带铃星，你的良缘是能人型，<span class="hl">输赢心一上头容易话赶话</span>，规则能替你们保住感情。这五条都不复杂，难在坚持——好在紫微坐命的人，最不缺的就是定力。</div>
+  </section>
+
+  <div class="footer-disclaim">
+    <span>① 命理分析仅供参考，不构成任何决策依据。人生的方向掌握在自己手中。　📱 长按或截图保存，即可分享　　🎴 bazi-ziwei-decoder　·　✉ hyperionjust@gmail.com</span>
+    <span class="footer-seal">承运<br>承业</span>
+  </div>
+
+</div>
+</body>
+</html>

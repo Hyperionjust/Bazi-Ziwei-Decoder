@@ -1,5 +1,8 @@
 # 紫微独立海报版提示词（JSON 输出）
 
+<!-- 规格数值(判词字数/句数区间/timeline项数/连接词白名单)的单一事实源 = calculator/spec.json;
+     本文件里的同款数字只是复述,改规格请改 spec.json 并同步这里,fixtures/test-spec-sync.ts 会逐条比对。 -->
+
 > 用途：用户在 Step 0 选「紫微独立 + 海报」。你只产**严格 JSON**（解读数据），不产 HTML；十二宫盘、中宫信息、命主身主、大限高亮全部由算法层注入模板，**你不用也不得复述宫格盘面数据本身**——你的职责是解读。
 > 渲染：`render --mode=ziwei` + `templates/report-ziwei-poster.html`。
 

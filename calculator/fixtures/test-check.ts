@@ -95,7 +95,7 @@ ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与�
 
 // ---- v3.8 综合海报体检(--mode=zonghe):随包样例即 golden ----
 {
-  const sample = JSON.parse(fs.readFileSync(path.join(__dirname, '../../examples/sample-analysis.json'), 'utf-8'));
+  const sample = JSON.parse(fs.readFileSync(path.join(__dirname, '../../examples/sample-analysis-zonghe.json'), 'utf-8'));
   const rz = checkZonghe(sample, {});
   ok(Object.values(rz).every((r: any) => r.status !== 'FAIL'), 'zonghe:随包样例 ALL PASS: ' + JSON.stringify(Object.entries(rz).filter(([, r]: any) => r.status === 'FAIL').map(([k, r]: any) => [k, r.reasons])));
   const bz = JSON.parse(JSON.stringify(sample));

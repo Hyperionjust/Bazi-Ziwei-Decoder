@@ -29,7 +29,7 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 
 ---
 
-## 🔄 启动版本检查（v2.7·自动更新，决策门之前静默执行一次）
+## 🔄 启动版本检查（自动更新·决策门之前静默执行一次）
 
 用户首次进入本 skill 工作流程时（问决策门问题**之前**），静默执行**一次**：
 ```bash
@@ -51,16 +51,17 @@ node <skill-root>/calculator/dist-bundle/self-update.js --root=<skill-root> --wo
 
 - **用户给了生辰 ≠ 三项都选了。**消息里隐含某项（如"算个八字"=类型①已定）则该项不再重复问，但**其余缺项必须补问**——这是最常被跳过的情形，严禁默认代选。
 - 缺几项就**一条消息问齐**，不挤牙膏式连环追问。
-- 例外一：用户明确表示"都听你的 / 默认就行"→ 按默认（八字独立 + 不限流派 + 长文）开工，并在开头声明所用默认项。
-- 例外二：**小白模式**（识别到新手信号，见 Step 0 顶部旁路）→ 三项门禁按 `prompts/novice-mode.md` 坍缩为一个问题，其余按默认并一句白话声明；流派概念对小白全程隐形。
+- 三条例外全部写在 Step 0 顶部（放弃选择 / 小白模式 / 流年直达），不在此处重复。
 
 ## 执行流程
 
 ### Step 0 — 决策门（开场必做） ⭐
 
-> **🐣 小白模式旁路（先于三项门禁判断，触发式）**：用户消息含「不懂 / 没接触过 / 第一次 / 随便看看 / 帮我算算就行」类新手信号，或对下方菜单表现出困惑时 → **加载 `prompts/novice-mode.md`** 并按其规则走：三项门禁坍缩为一个问题（"想全面了解自己,还是有具体想问的事?"），其余全按默认（八字独立 + 不限流派 + 长文）并一句白话声明；速览用双层锚点（人话版先出、技术版收起）与重排后的章节菜单，末尾加核对点环节。拿不准时轻量反问一句「你平时了解八字吗?」。**识别不到新手信号 → 完全忽略本条**，按下方现有流程原样执行（深度模式一行不降级）。
+> **🙌 例外·放弃选择**：用户明确表示"都听你的 / 默认就行" → 按默认（八字独立 + 不限流派 + 长文）直接开工，并在开头声明所用默认项。
 
-> **⚡ 直达通道·流年问答（优先于决策门判断）**：用户若**直接问某一年的具体问题**（「我 2027 年适合跳槽吗」「明年运势如何」「今年买房好吗」），**跳过下方菜单**，按 `prompts/liunian-qa.md` 走轻量单问单答（用 `--currentYear=<问的年>` 重跑排盘取该年运岁引动作答，答完即停）。**本通道是上方「开工前置门禁」的显式例外**：直达单问单答即视为形态已定（轻量问答），生辰齐全即可直接重跑排盘，无需先集齐决策门三项；用户想看全盘时再回到本决策门（届时三项照常确认）。
+> **🐣 例外·小白模式旁路（先于三项门禁判断，触发式）**：用户消息含「不懂 / 没接触过 / 第一次 / 随便看看 / 帮我算算就行」类新手信号，或对下方菜单表现出困惑时 → **加载 `prompts/novice-mode.md`** 并按其规则走：三项门禁坍缩为一个问题（"想全面了解自己,还是有具体想问的事?"），其余全按默认（八字独立 + 不限流派 + 长文）并一句白话声明；速览用双层锚点（人话版先出、技术版收起）与重排后的章节菜单，末尾加核对点环节。拿不准时轻量反问一句「你平时了解八字吗?」。**识别不到新手信号 → 完全忽略本条**，按下方现有流程原样执行（深度模式一行不降级）。
+
+> **⚡ 例外·直达通道 / 流年问答（优先于决策门判断）**：用户若**直接问某一年的具体问题**（「我 2027 年适合跳槽吗」「明年运势如何」「今年买房好吗」），**跳过下方菜单**，按 `prompts/liunian-qa.md` 走轻量单问单答（用 `--currentYear=<问的年>` 重跑排盘取该年运岁引动作答，答完即停）。**本通道是上方「开工前置门禁」的显式例外**：直达单问单答即视为形态已定（轻量问答），生辰齐全即可直接重跑排盘，无需先集齐决策门三项；用户想看全盘时再回到本决策门（届时三项照常确认）。
 
 **问题 1：要看哪种命理？**
 > "我可以做三种分析：
@@ -128,7 +129,7 @@ node <skill-root>/calculator/dist-bundle/run-chart.js --year=YYYY --month=MM --d
 - `bazi`：四柱 / 十神 / 星运 / 自坐 / 纳音 / 藏干 / 大运（含 startAge/endAge/startYear/endYear）
 - `bazi.enrichment`：格局 / 旺衰 / 调候 / 五行旺相 / 五行统计 / 天干关系 / 地支关系 / 整柱判定
 - `bazi.enrichment.神煞`：神煞命中（`hits`＝中立全集；传 `--lineage` 时附 `lineage.hits`＝该派镜片过滤子集，带 tier / 权重 / `needs_review`）
-- `bazi.enrichment.作用关系`：合冲刑害**裁决**（v1.5）——每条带状态(生效/被解/被绊/合而化…)与依据；默认 open 通则+`divergence` 分歧标注，传 `--lineage` 时附该派规则集视图（`lineage.items`）
+- `bazi.enrichment.作用关系`：合冲刑害**裁决**——每条带状态(生效/被解/被绊/合而化…)与依据；默认 open 通则+`divergence` 分歧标注，传 `--lineage` 时附该派规则集视图（`lineage.items`）
 - `bazi.enrichment.运岁引动`：大运/流年×原局+岁运互动（冲提纲/凑局凑刑/岁运并临/天克地冲/伏吟反吟；中立检测，`--currentYear` 定当前大运，缺省=系统年）
 - `bazi.enrichment.时辰边界`：距时辰交界分钟差与 `boundary` 判定（≤20 分钟临界 → 走 Step 1.5 核盘分支）；`bazi.zishi_convention`：晚子时（23:00–24:00 出生）约定披露
 - `bazi.enrichment.confidence_tier`：全局置信度档（high/medium/low，low 档解读按保守口径，见 bazi-prompt「置信度传播」）
@@ -169,7 +170,7 @@ node <skill-root>/calculator/dist-bundle/dump-text.js --input=<工作目录>/cha
 
 ### Step 3 — 分析（按 Step 0 用户选择执行对应分支）
 
-#### Step 3 — 长文版（用户选 1 / 2 / 3+A / 3+C）
+#### 3a · 长文版（用户选 1 / 2 / 3+A / 3+C）
 读取对应长文提示词（`bazi-prompt.md` / `ziwei-prompt.md` / `zonghe-yinzheng-prompt.md`），喂入 `chart.txt`，输出 Markdown 长文。
 
 > **长文后置体检（自检，推荐 · 三线通用）**：长文草稿存为 `<工作目录>/report.md` 后跑
@@ -181,11 +182,12 @@ node <skill-root>/calculator/dist-bundle/dump-text.js --input=<工作目录>/cha
 > 综合印证（3+A）的前置条件：先跑八字 + 紫微独立分析拿到中间报告，再喂给 `zonghe-yinzheng-prompt.md`。
 > 如输出被截断，分段输出。
 
-#### Step 3 — 海报版（3+B/3+C 综合印证海报 · 1+B/1+C 八字独立海报 · 2+B/2+C 紫微独立海报）
+#### 3b · 海报版（3+B/3+C 综合印证 · 1+B/1+C 八字独立 · 2+B/2+C 紫微独立 · 1+D MBTI）
 
 **通用**：对应提示词让 LLM **输出严格 JSON**（非 Markdown，末尾要求"直接以 `{` 开头"）→ 存为 `analysis.json` → 渲染。**LLM 只产数据不产 HTML**；若输出含 ```json 包装，渲染前剥掉。生成后把 HTML 路径告诉用户用浏览器打开。
 
-> **海报文字规则【用户定】**：标签/表格/条目类字段守字数上限保版式；**四大解读段（〔段落〕：性格/事业/婚恋/健康类）不限篇幅，每个至少 6~10 句（约 200 字起），2~3 句不合格；精读段（合冲刑害/运岁/神煞）3~7 句讲透重点**；海报为长图、不限一页高度，宁详勿略。**口吻一律第二人称对话式（「你是…」「你会…」），不用「命主」播报腔**。八字海报含「作用关系·合冲刑害」「运岁引动」两个新区块（盘面行由算法注入，解读段由 LLM 产出）。
+> **海报文字规则【用户定】**：标签/表格/条目类字段守字数上限保版式；**四大解读段（〔段落〕：性格/事业/婚恋/健康类）不限篇幅，每个至少 6~10 句（约 200 字起），2~3 句不合格；精读段（合冲刑害/运岁/神煞）3~7 句讲透重点**；海报为长图、不限一页高度，宁详勿略。**口吻一律第二人称对话式（「你是…」「你会…」），不用「命主」播报腔**。八字海报含「作用关系·合冲刑害」「运岁引动」两个区块（盘面行由算法注入，解读段由 LLM 产出）。
+> 上述句数/字数以及判词字数、timeline 项数、连接词白名单的**唯一事实源是 `calculator/spec.json`**；体检器直接读它，`fixtures/test-spec-sync.ts` 负责比对本文件与各提示词是否复述一致。改规格只改 spec.json，别在各处分别手改。
 
 **综合印证海报（3+B/3+C）** — 提示词 `prompts/zonghe-poster.md`。渲染前先过脚本体检（FAIL 字段修完再渲染）：
 ```bash
@@ -194,10 +196,15 @@ node <skill-root>/calculator/dist-bundle/render.js --chart=<工作目录>/chart.
   --template=<skill-root>/templates/report-zonghe-poster.html --output=<工作目录>/<name>-zonghe.html --currentYear=<YYYY>
 ```
 
-**八字独立海报（1+B/1+C）** — 三段流水线【v2.4】：
+**八字独立海报（1+B/1+C）** — 三段流水线：
 1. **首遍出稿**：按 `prompts/bazi-poster.md` 产 analysis.json（可略求生动）；
 2. **评审—重生**：按 `prompts/bazi-poster-review.md` 对首遍逐字段评审，只重写 FAIL 字段（挑错任务,求保守一致）,输出完整 analysis.json;
 3. **脚本体检**：`node <skill-root>/calculator/dist-bundle/check-analysis.js --analysis=<工作目录>/analysis.json --chart=<工作目录>/chart.json --currentYear=<YYYY>`——FAIL 字段送回第 2 步再修一轮(最多一轮),ALL PASS 才渲染。
+4. **渲染**，**必带 `--mode=bazi`**（单系统；盘面数据由算法层注入，LLM 只产解读性字段）：
+```bash
+node <skill-root>/calculator/dist-bundle/render.js --mode=bazi --chart=<工作目录>/chart.json --analysis=<工作目录>/analysis.json \
+  --template=<skill-root>/templates/report-bazi-poster.html --output=<工作目录>/<name>-bazi.html --currentYear=<YYYY>
+```
 
 **紫微独立海报（2+B/2+C）** — 提示词 `prompts/ziwei-poster.md`（十二宫盘/中宫/命主身主/大限高亮全算法注入模板，LLM 只产解读 JSON）。渲染前先过脚本体检（FAIL 字段修完再渲染）：
 ```bash
@@ -213,27 +220,15 @@ node <skill-root>/calculator/dist-bundle/render.js --mode=mbti --chart=<工作�
   --template=<skill-root>/templates/report-mbti-poster.html --output=<工作目录>/<name>-mbti.html --currentYear=<YYYY> [--testedMBTI=ENFP]
 ```
 
-渲染命令，**必带 `--mode=bazi`**（单系统；盘面数据由算法层注入，LLM 只产解读性字段）：
-```bash
-node <skill-root>/calculator/dist-bundle/render.js --mode=bazi --chart=<工作目录>/chart.json --analysis=<工作目录>/analysis.json \
-  --template=<skill-root>/templates/report-bazi-poster.html --output=<工作目录>/<name>-bazi.html --currentYear=<YYYY>
-```
-
 ---
 
 ## 安装后行为（重要）
 
 **装好 Skill 后不要主动跑任何验证 / 自检命令。** 不要试 Smoke Test、不要排示例盘、不要分析示例命主。装好就是装好，等用户来给生辰再开始工作。
 
-> 自检命令在 `TEST-GUIDE.md` 中由人工按需运行，不在 Agent 的职责范围内。Agent 主动跑会浪费 token + 触发上下文压缩。
+**运行时只用 `calculator/dist-bundle/*.js`**（自足单文件，`node` 直跑，零安装、兼容只读安装目录）。技能目录只读：不要 `cd` 进去写文件、不要在里面 `npm install`、`--output` 一律指向会话工作目录。
 
-依赖说明：**首选 `calculator/dist-bundle/*.js`（自足单文件，依赖已打入，`node` 直跑，零安装、兼容只读目录）**。
-仅当 bundle 缺失或需要改源码重编译时才需要依赖，且**必须把 `calculator/` 复制到可写工作目录再装**（技能目录只读）：
-```bash
-cp -r <skill-root>/calculator <工作目录>/calculator && cd <工作目录>/calculator
-rm -f package-lock.json && npm install   # 锁文件源不可达时删除后再装
-```
-也就是说，依赖问题**报错时再修**，不要装好就主动检查。
+> 依赖怎么装、只读目录细则、发版流程 → 需要时读 `references/install-and-deps.md`。依赖问题**报错时再修**。
 
 ---
 
@@ -251,78 +246,21 @@ rm -f package-lock.json && npm install   # 锁文件源不可达时删除后再�
 10. **流派只改解读不改排盘**：选流派只换解读镜片（用神视角 / 神煞展开多少），四柱·十神·大运·神煞命中一律以算法层为准，不得因流派重排
 11. **神煞铁律**：神煞只增色、不定大局；与五行/十神/格局/用神核心冲突，一律以核心为准，不得由神煞反推翻核心
 12. **不编造神煞/起法**：只解算法层「神煞」块已命中项；`needs_review`（起法待核）项照标、不当确定值；无文献依据者不补全
-13. **幕后台前分离(v3.1.5·全局最高优先级之一)**:chart.txt 里的一切机制信息——rubric 版本与规则变化、v2/v3、加分审计(R1/R2/R3)、出文协议、派系侧重原始数据、置信度推导过程、字段名、体检/评审流程、skill 版本更新——都是给你的**幕后施工图,仅供推理,一律不得向用户展示、解释或提及**。用户只需要看到「你是什么」的结论与解读。禁止在任何面向用户的文字(对话回复、海报字段、开场白)中出现:rubric/算法层/映射矩阵/出文协议/加分/审计/评审遍/体检器/引擎/字段/v2/v3 等机制词汇;禁止解释"为什么这次结果和规则有关"。机制只体现为结论,不体现为叙述。
+13. **幕后台前分离(全局最高优先级之一)**:chart.txt 里的一切机制信息——rubric 版本与规则变化、v2/v3、加分审计(R1/R2/R3)、出文协议、派系侧重原始数据、置信度推导过程、字段名、体检/评审流程、skill 版本更新——都是给你的**幕后施工图,仅供推理,一律不得向用户展示、解释或提及**。用户只需要看到「你是什么」的结论与解读。禁止在任何面向用户的文字(对话回复、海报字段、开场白)中出现:rubric/算法层/映射矩阵/出文协议/加分/审计/评审遍/体检器/引擎/字段/版本号 等机制词汇;禁止解释"为什么这次结果和规则有关"。机制只体现为结论,不体现为叙述。
 14. **成长心态置顶**：八字 / 紫微 / 综合印证三线每次开头都必出 `disclaimer-preamble.md` 两段（为什么"越算越不好" + 成长心态），不可省
 
 ---
 
-## 文件清单
+## 需要时再读（不常驻上下文）
 
-```
+| 想知道 | 去读 |
+|---|---|
+| 某个文件是干什么的 / 四条海报线怎么对应 | `references/file-map.md` |
+| 装依赖、只读目录、发版 | `references/install-and-deps.md` |
+| 脚本报错、结果和别的软件对不上、渲染出占位符、晚子时差异 | `references/troubleshooting.md` |
+| 一次完整对话该怎么走、常见岔路 | `references/walkthrough.md` |
 
-├── SKILL.md                          ← 本文件
-├── calculator/
-│   ├── run-chart.ts                  ← 入口：生辰 → JSON（stdout 纯 JSON / stderr debug）
-│   ├── dump-text.ts                  ← JSON → 文墨天机风文本
-│   ├── render.ts                     ← 渲染脚本：chart.json + analysis.json + 模板 → HTML
-│   ├── shensha.ts                    ← 神煞计算引擎（数据驱动，读 shensha.json + 流派 policy）
-│   ├── shensha.json                  ← 神煞单一事实源（起法/tier/出处/needs_review）
-│   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
-│   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
-│   ├── check-analysis.ts             ← 解读体检器（海报 JSON/长文硬红线检查，--mode=bazi|zonghe|ziwei|mbti|longform）
-│   ├── fixtures/                     ← 回归测试（神煞 test-shensha 13 例 / 关系运岁 test-relations / 边界 test-boundary / 体检 test-check / 时辰边界 test-shichen / 流月 test-liuyue / 多年对比 test-compare / 模板校验 check-template；calibration/ 校准回测脚手架）
-│   ├── package.json                  ← 算法层依赖声明
-│   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
-│   └── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱/时辰边界/置信度/流月/多年对比）
-├── prompts/
-│   ├── disclaimer-preamble.md        ← ⭐ 成长心态前置声明（八字/紫微/综合三线开头必出）
-│   ├── output-mode-B.md              ← ⭐ 总领速览 + 按需下钻 输出模式规则
-│   ├── novice-mode.md                ← ⭐ 小白模式（触发式旁路：决策门坍缩/双层锚点/菜单重排/核对点）
-│   ├── bazi-prompt.md                ← 八字独立分析（v2：流派+神煞+disclaimer+模式B）
-│   ├── ziwei-prompt.md               ← 紫微独立分析（长文）
-│   ├── zonghe-yinzheng-prompt.md     ← ⭐ 综合印证（长文）
-│   ├── zonghe-poster.md              ← ⭐ 综合印证海报（JSON 输出）
-│   ├── bazi-poster.md                ← ⭐ 八字独立海报（JSON 输出·单系统）
-│   ├── bazi-poster-review.md         ← ⭐ 八字海报评审—重生（逐字段挑错，只重写 FAIL 字段）
-│   ├── ziwei-poster.md               ← ⭐ 紫微独立海报（JSON 输出·十二宫盘算法注入）
-│   ├── mbti-poster.md                ← ⭐ 八字 MBTI 海报（荣格八维×十神，JSON 输出）
-│   └── liunian-qa.md                 ← ⭐ 流年问答模式（「我202X年适合…吗」直达通道）
-└── templates/
-    ├── report-zonghe-poster.html     ← 综合印证海报模板（占位符）
-    ├── report-bazi-poster.html       ← 八字独立海报模板（占位符）
-    ├── report-ziwei-poster.html      ← 紫微独立海报模板（十二宫盘可视化）
-    └── report-mbti-poster.html       ← 八字 MBTI 海报模板（实测×底盘差异版块）
-```
-
-**注**：HTML 海报现支持四种管线：**综合印证（`render` 默认模式）**、**八字独立（`render --mode=bazi`）**、**紫微独立（`render --mode=ziwei`，提示词 `ziwei-poster.md` + check-analysis `--mode=ziwei` 体检，v3.7 上线）**与**八字 MBTI（`render --mode=mbti`）**。
-
----
-
-## 工作示例
-
-**用户**：我是 2000 年 1 月 1 日 12:00 出生的男生，帮我看下命盘。
-
-**Skill 应该走**：
-1. 信息确认（日期/时辰/性别 ✅）
-2. **决策门**："想要八字分析 / 紫微分析 / 综合印证？"
-3. 用户回 "八字"：
-   - Step 1：跑 `run-chart.ts` 产出 `chart.json`
-   - Step 2：跑 `dump-text.ts` 产出 `chart.txt`
-   - Step 3a：加载 `prompts/bazi-prompt.md` + 喂入 `chart.txt` → 输出八字分析
-4. 提醒"若要紫微 / 综合印证可随时追问"
-
----
-
-## 失败模式与处理
-
-| 现象 | 原因 | 处理 |
-|---|---|---|
-| 排盘脚本报错 | 日期超 1900-2100 / 时辰格式错 | 询问用户校正 |
-| AI 想"凭记忆排盘" | 偷懒走捷径 | **拒绝**。算法层是不可绕过的硬约束 |
-| 输出被截断 | 三段一锅出超 token 上限 | 回到决策门，拆分输出 |
-| 算法层和用户其他软件结果不一致 | 命名流派差异（建禄格 vs 比肩格） | 按算法层 `notes` 解释，不偷换说法 |
-| 出生 23:00–24:00，日柱/紫微命宫与其他软件不一致 | 晚子时两派约定不同（本盘＝日柱归次日，整盘按次日口径） | 按 chart.txt「⚠晚子时约定」提示向用户白话披露本盘约定与差异来源（见 bazi-prompt「晚子时披露」强制规则），不改排盘 |
-| Windows + 中文路径 + PowerShell 编码错乱 | 平台特性 | 在 cmd / git bash / WSL 下运行，避免 PowerShell |
+> 这几份是参考资料，**遇到对应情形再读**，不要开场就全部加载。
 
 ---
 

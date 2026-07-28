@@ -1,6 +1,6 @@
 # Bazi-Ziwei-Decoder · 八字紫微命理基板
 
-> `v3.8.0` ｜ 43 神煞 + 五派镜片 + 作用裁决 + 八字MBTI ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
+> `v3.9.1` ｜ 43 神煞 + 五派镜片 + 作用裁决 + 八字MBTI ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
 
 基于 [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill) 超级魔改，排盘内核源自 [Yiqi](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)。
 
@@ -26,6 +26,8 @@
 - ✨ **意象嫁接固定风格**——「实测 × 底盘」差异版块把日主意象与 MBTI 特质写成一幅融合画面，先天底盘与后天类型讲成扩展而非矛盾，每张海报都围绕命主自己的日主意象展开。
 - 🛡️ **三道防翻车护栏**——只讲「你是什么」不讲算法机制；「从小」只能接气质不能接行为（每个动作都可能被当场证伪）；测试盘全部换成无真实出生对应的假想盘。
 - 🧭 **v3.6–3.8 持续加码**——紫微独立海报（`render --mode=ziwei`）与流年问答直达通道上线；check-analysis 体检器补齐 zonghe/ziwei/longform 模式、三条海报线门禁对齐；`--longitude` 可选真太阳时校正（默认关）；综合海报判词统一为 7 字/4+4 规格，海报字体换国内可达镜像。
+- 🎯 **v3.9 准确性三连**——时辰边界检测（距交界 ≤20 分钟自动进核盘分支）、晚子时约定显式披露、全局置信度传播（low 档全部预测性章节改条件句、应期给区间）；流年问答加流月粒度与多年对比；新增触发式小白模式（识别不到新手信号则零打扰，深度模式一行未降级）。
+- 🧱 **v3.9.1 工程卫生**——`scripts/release.sh` 成为发版唯一入口（版本号不再有第二个手改点）；形态规格收进 `calculator/spec.json` 单一事实源，`fixtures/test-spec-sync.ts` 哨兵盯着提示词与它对不对得上；四条海报线随包样例补齐并进回归（`test-golden.ts`）。
 
 ---
 

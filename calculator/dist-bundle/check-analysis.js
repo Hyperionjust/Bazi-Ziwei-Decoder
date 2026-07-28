@@ -38,12 +38,116 @@ __export(check_analysis_exports, {
 });
 module.exports = __toCommonJS(check_analysis_exports);
 var fs = __toESM(require("fs"));
+
+// spec.json
+var spec_default = {
+  _readme: [
+    "\u6D77\u62A5/\u957F\u6587\u7684\u300E\u5F62\u6001\u89C4\u683C\u300F\u5355\u4E00\u4E8B\u5B9E\u6E90\u3002v3.9.1 \u65B0\u589E\u3002",
+    "\u80CC\u666F:\u540C\u4E00\u6761\u89C4\u683C\u6B64\u524D\u5728 check-analysis.ts + 4 \u4EFD\u63D0\u793A\u8BCD + README \u5404\u5199\u4E00\u904D,",
+    "     v3.7.1 \u5C31\u51FA\u8FC7\u4E8B\u6545\u2014\u2014SKILL \u8BF4\u300E\u22656\u53E5\u4E0D\u9650\u7BC7\u5E45\u300F\u3001bazi-poster \u8BF4\u300E3~5\u53E5\u300F\u3001",
+    "     \u4F53\u68C0\u5668\u6309 2~6 \u786C\u62E6,\u6A21\u578B\u5199\u5F97\u8D8A\u6EE1\u8D8A\u88AB\u6253\u56DE\u3002",
+    "\u89C4\u5219:\u6570\u503C\u53EA\u6539\u8FD9\u91CC\u3002check-analysis.ts \u76F4\u63A5 import \u672C\u6587\u4EF6;\u63D0\u793A\u8BCD\u91CC\u7684\u540C\u6B3E\u6570\u5B57",
+    "     \u7531 fixtures/test-spec-sync.ts \u9010\u6761\u6BD4\u5BF9,\u5BF9\u4E0D\u4E0A\u76F4\u63A5 FAIL\u3002"
+  ],
+  archetype: {
+    _desc: "\u5224\u8BCD\u89C4\u683C:7 \u5B57\u6574\u53E5 \u6216 4+4 \u5BF9\u4ED7(\u4E2D\u70B9\u5206\u9694)",
+    single_len: 7,
+    couplet_len: 4,
+    couplet_separators: ["\xB7", "\u2022", "\u30FB"],
+    forbid_pattern: "[\u683C\u5C40]{2}|\u8EAB\u5F31|\u8EAB\u5F3A|\u4E03\u6740\u683C|\u6B63\u5B98\u683C|\u504F\u8D22\u683C",
+    forbid_desc: "\u5224\u8BCD\u5806\u683C\u5C40\u672F\u8BED",
+    mirrored_in: ["prompts/bazi-poster.md", "prompts/zonghe-poster.md", "prompts/ziwei-poster.md", "prompts/bazi-poster-review.md"]
+  },
+  sections: {
+    _desc: "\u5404\u7C7B\u89E3\u8BFB\u5B57\u6BB5\u7684\u53E5\u6570/\u5B57\u6570\u4E0B\u9650\u3002\u4E0A\u9650\u53EA\u5BF9\u300E\u6070 N \u53E5\u300F\u7C7B\u5B57\u6BB5\u5B58\u5728\u3002",
+    two_sentence_block: {
+      exact_sentences: 2,
+      _desc: "dm/geju/wuxing/yongshen \u7684 note \u7C7B\u5B57\u6BB5:\u6070\u4E24\u53E5,\u7B2C\u4E8C\u53E5\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934"
+    },
+    tg_block: {
+      exact_sentences: 1,
+      _desc: "tg.mech_html \u4E0A\u53E5\u62A5\u76D8\u9762\u6070\u4E00\u53E5;tg.plain_html \u4E0B\u53E5\u6070\u4E00\u53E5\u4E14\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934"
+    },
+    major_interp: {
+      min_sentences: 6,
+      min_chars: 160,
+      max_sentences: null,
+      min_highlights: 2,
+      _desc: "\u56DB\u5927\u89E3\u8BFB\u6BB5(\u6027\u683C/\u4E8B\u4E1A/\u5A5A\u604B/\u5065\u5EB7):\u22656 \u53E5 \u2265160 \u5B57,\u4E0D\u8BBE\u4E0A\u9650;\u7740\u8272\u77ED\u8BED\u22652 \u5904"
+    },
+    close_read: {
+      min_sentences: 3,
+      max_sentences: 7,
+      _desc: "\u4E09\u4E2A\u7CBE\u8BFB\u6BB5(\u5408\u51B2\u5211\u5BB3/\u8FD0\u5C81/\u795E\u715E):3~7 \u53E5"
+    },
+    mbti_diff: {
+      min_chars: 400,
+      max_chars: 650,
+      _desc: "MBTI\u300E\u5B9E\u6D4B\xD7\u5E95\u76D8\u300F\u5DEE\u5F02\u7248\u5757\u5B57\u6570\u5BB9\u5DEE"
+    },
+    mbti_verdict: {
+      prefix: "\u4F60\u662F",
+      max_chars: 34,
+      _desc: "MBTI diff_verdict \u5224\u8BCD:\u987B\u4EE5\u300E\u4F60\u662F\u300F\u5F00\u5934,\u4E0D\u8D85\u8FC7 34 \u5B57"
+    },
+    mirrored_in: ["SKILL.md", "prompts/bazi-poster.md", "prompts/bazi-poster-review.md"]
+  },
+  timeline: {
+    exact_items: 5,
+    _desc: "\u65F6\u95F4\u8F74\u6070 5 \u9879,\u5E74\u4EFD\u987B\u843D\u5728\u7B97\u6CD5\u5C42\u300E\u8FD0\u5C81\u5F15\u52A8.\u5EFA\u8BAE\u8282\u70B9\u300F\u767D\u540D\u5355\u5185",
+    mirrored_in: ["prompts/bazi-poster.md"]
+  },
+  connectors: {
+    _desc: "\u4E24\u53E5\u5757\u7B2C\u4E8C\u53E5\u7684\u5F00\u5934\u8FDE\u63A5\u8BCD\u767D\u540D\u5355(v3.7.1 \u53CD\u540C\u8D28\u5316:\u539F\u5148\u5F3A\u5236\u300E\u6240\u4EE5\u4F60\u300F\xD74,\u4E00\u5F20\u6D77\u62A5\u8FDE\u8BFB\u56DB\u904D\u50CF\u8282\u62CD\u5668)\u3002\u540C\u4E00\u5F20\u6D77\u62A5\u5185\u5404\u5757\u5E94\u9519\u5F00\u3002",
+    allow: ["\u6240\u4EE5\u4F60", "\u610F\u5473\u7740\u4F60", "\u8FD9\u8BA9\u4F60", "\u843D\u5230\u4F60\u8EAB\u4E0A", "\u8FD9\u80A1\u52B2\u8BA9\u4F60", "\u653E\u5230\u751F\u6D3B\u91CC"],
+    mirrored_in: ["prompts/bazi-poster.md", "prompts/bazi-poster-review.md"]
+  },
+  forbid: {
+    _desc: "\u7981\u8BCD\u5206\u5C42\u3002all=\u6240\u6709\u89E3\u8BFB\u5B57\u6BB5;shunni=\u4EC5\u7CBE\u8BFB/\u65F6\u95F4\u8F74\u7C7B\u5B57\u6BB5;mech=\u5E55\u540E\u53F0\u524D\u5206\u79BB(SKILL \u94C1\u5F8B 13)\u3002",
+    all: ["tier", "needs_review", "lineage_weights", "\u547D\u4E3B", "\u8D77\u6CD5\u5F85\u6838"],
+    freq: ["\u591A\u534A\u662F\u4F60", "\u4F60\u603B\u662F", "\u4F60\u6BCF\u6B21", "\u4F60\u4ECE\u4E0D", "\u4F60\u4E00\u5B9A\u4F1A", "\u7B2C\u4E00\u4E2A\u60F3\u5230\u4F60"],
+    mech: ["rubric", "\u7B97\u6CD5\u5C42", "\u6620\u5C04\u77E9\u9635", "\u51FA\u6587\u534F\u8BAE", "v3\u52A0\u5206", "v4\u52A0\u5206", "\u5FCC\u795E\u6298\u5411", "R1\u9A7F\u9A6C", "R2\u6587", "R3\u80CE\u5143", "\u8BC4\u5BA1\u904D", "\u4F53\u68C0\u5668", "\u6D3E\u7CFB\u4FA7\u91CD", "lineage"],
+    shunni: ["\u5927\u51F6", "\u707E\u5E74", "\u51F6\u5E74", "\u51F6\u661F"],
+    shunni_path_prefix: "^(hechong|yunsui|shensha|timeline)",
+    high_certainty: ["\u5FC5\u7136", "\u4E00\u5B9A\u4F1A", "\u80AF\u5B9A\u4F1A", "\u94C1\u5B9A", "\u5FC5\u5B9A", "\u6CE8\u5B9A"],
+    mirrored_in: ["prompts/bazi-poster.md", "prompts/bazi-prompt.md"]
+  },
+  childhood: {
+    _desc: "v3.2.3 \u7AE5\u5E74\u65AD\u8A00\u7EC6\u5219:\u300E\u4ECE\u5C0F\u300F\u53EA\u80FD\u63A5\u6C14\u8D28\u3001\u4E0D\u80FD\u63A5\u53EF\u8BC1\u4F2A\u7684\u884C\u4E3A;\u9650\u5B9A\u8BCD\u4E0E\u52A8\u4F5C\u8BCD\u540C\u53E5\u5373\u8FDD\u89C4\u3002",
+    marks: ["\u4ECE\u5C0F", "\u5C0F\u65F6\u5019", "\u6253\u5C0F", "\u5B69\u63D0", "\u5B66\u751F\u65F6\u4EE3", "\u5C11\u5E74\u65F6", "\u7AE5\u5E74"],
+    acts: ["\u4E60\u60EF", "\u7275\u5934", "\u6512\u5C40", "\u5F20\u7F57", "\u5E26\u5934", "\u7EC4\u7EC7", "\u5206\u5DE5", "\u6D3E\u6D3B", "\u4E3B\u6301", "\u5E26\u961F", "\u53D1\u8D77", "\u5F53\u73ED\u957F", "\u5F53\u8FC7", "\u5E72\u8FC7", "\u505A\u8FC7", "\u62C9\u7740", "\u8001\u662F", "\u603B\u80FD\u628A", "\u5C31\u7231\u7BA1"]
+  },
+  marriage_anchor: {
+    _desc: "v3.7.1 \u6B63\u7F18\u753B\u50CF\u56DB\u578B\u5206\u578B:\u951A\u5934\u7531\u7B97\u6CD5\u5C42\u300E\u6B63\u7F18\u503E\u5411.\u5BAB\u5750\u300F\u786E\u5B9A,\u540C\u76D8\u53EF\u590D\u73B0,\u4E0D\u5F97\u6DF7\u7528\u3002",
+    by_gongzuo: {
+      \u6B63\u5370: "\u4F60\u9002\u5408\u7684\u53E6\u4E00\u534A",
+      \u504F\u5370: "\u4F60\u9002\u5408\u7684\u53E6\u4E00\u534A",
+      \u6B63\u5B98: "\u80FD\u63A5\u4F4F\u4F60\u7684",
+      \u4E03\u6740: "\u80FD\u63A5\u4F4F\u4F60\u7684",
+      \u6B63\u8D22: "\u8BA9\u4F60\u773C\u775B\u4E00\u4EAE\u53C8\u7559\u5F97\u4F4F\u7684",
+      \u504F\u8D22: "\u8BA9\u4F60\u773C\u775B\u4E00\u4EAE\u53C8\u7559\u5F97\u4F4F\u7684",
+      \u98DF\u795E: "\u4E0E\u4F60\u6700\u540C\u9891\u7684",
+      \u4F24\u5B98: "\u4E0E\u4F60\u6700\u540C\u9891\u7684",
+      \u6BD4\u80A9: "\u4E0E\u4F60\u6700\u540C\u9891\u7684",
+      \u52AB\u8D22: "\u4E0E\u4F60\u6700\u540C\u9891\u7684"
+    },
+    mirrored_in: ["prompts/bazi-poster.md", "prompts/bazi-prompt.md"]
+  }
+};
+
+// check-analysis.ts
 var strip = (s) => String(s || "").replace(/<[^>]+>/g, "");
 var sentences = (s) => strip(s).split(/[。！？!?]/).map((x) => x.trim()).filter(Boolean);
-var CONNECTOR_RE = /^(所以你|意味着你|这让你|落到你身上|这股劲让你|放到生活里)/;
-var CONNECTOR_DESC = "\u6240\u4EE5\u4F60/\u610F\u5473\u7740\u4F60/\u8FD9\u8BA9\u4F60/\u843D\u5230\u4F60\u8EAB\u4E0A/\u8FD9\u80A1\u52B2\u8BA9\u4F60/\u653E\u5230\u751F\u6D3B\u91CC";
-var CHILD_MARK = /(从小|小时候|打小|孩提|学生时代|少年时|童年)/;
-var CHILD_ACT = /(习惯|牵头|攒局|张罗|带头|组织|分工|派活|主持|带队|发起|当班长|当过|干过|做过|拉着|老是|总能把|就爱管)/;
+var alt = (arr) => arr.join("|");
+var SEC = spec_default.sections;
+var ARCH = spec_default.archetype;
+var CONNECTOR_RE = new RegExp(`^(${alt(spec_default.connectors.allow)})`);
+var CONNECTOR_DESC = spec_default.connectors.allow.join("/");
+var ARCHETYPE_OK = (t) => new RegExp(`^[\u4E00-\u9FA5]{${ARCH.single_len}}$`).test(t) || new RegExp(`^[\u4E00-\u9FA5]{${ARCH.couplet_len}}[${ARCH.couplet_separators.join("")}][\u4E00-\u9FA5]{${ARCH.couplet_len}}$`).test(t);
+var ARCHETYPE_DESC = `\u5224\u8BCD\u987B${ARCH.single_len}\u5B57\u6216${ARCH.couplet_len}+${ARCH.couplet_len}\u5BF9\u4ED7`;
+var ARCHETYPE_FORBID_RE = new RegExp(ARCH.forbid_pattern);
+var CHILD_MARK = new RegExp(`(${alt(spec_default.childhood.marks)})`);
+var CHILD_ACT = new RegExp(`(${alt(spec_default.childhood.acts)})`);
 function childhoodViolations(text) {
   const out = [];
   for (const sent of String(text).replace(/<[^>]+>/g, "").split(/[。！？!?\n]/)) {
@@ -59,15 +163,15 @@ function checkAnalysis(a, chart, currentYear) {
   {
     const bad = [];
     const t = strip(a?.meta?.archetype_name || "");
-    if (!/^[一-龥]{7}$/.test(t) && !/^[一-龥]{4}[·•・][一-龥]{4}$/.test(t))
-      bad.push(`\u5224\u8BCD\u987B7\u5B57\u62164+4\u5BF9\u4ED7,\u5F97\u5230\u300C${t}\u300D`);
-    if (/[格局]{2}|身弱|身强|七杀格|正官格|偏财格/.test(t)) bad.push("\u5224\u8BCD\u5806\u683C\u5C40\u672F\u8BED");
+    if (!ARCHETYPE_OK(t)) bad.push(`${ARCHETYPE_DESC},\u5F97\u5230\u300C${t}\u300D`);
+    if (ARCHETYPE_FORBID_RE.test(t)) bad.push(ARCH.forbid_desc);
     put("meta.archetype_name", bad);
   }
-  const FORBID_ALL = ["tier", "needs_review", "lineage_weights", "\u547D\u4E3B", "\u8D77\u6CD5\u5F85\u6838"];
-  const FORBID_FREQ = ["\u591A\u534A\u662F\u4F60", "\u4F60\u603B\u662F", "\u4F60\u6BCF\u6B21", "\u4F60\u4ECE\u4E0D", "\u4F60\u4E00\u5B9A\u4F1A", "\u7B2C\u4E00\u4E2A\u60F3\u5230\u4F60"];
-  const FORBID_MECH = ["rubric", "\u7B97\u6CD5\u5C42", "\u6620\u5C04\u77E9\u9635", "\u51FA\u6587\u534F\u8BAE", "v3\u52A0\u5206", "v4\u52A0\u5206", "\u5FCC\u795E\u6298\u5411", "R1\u9A7F\u9A6C", "R2\u6587", "R3\u80CE\u5143", "\u8BC4\u5BA1\u904D", "\u4F53\u68C0\u5668", "\u6D3E\u7CFB\u4FA7\u91CD", "lineage"];
-  const FORBID_SHUNNI = ["\u5927\u51F6", "\u707E\u5E74", "\u51F6\u5E74", "\u51F6\u661F"];
+  const FORBID_ALL = spec_default.forbid.all;
+  const FORBID_FREQ = spec_default.forbid.freq;
+  const FORBID_MECH = spec_default.forbid.mech;
+  const FORBID_SHUNNI = spec_default.forbid.shunni;
+  const SHUNNI_PATH_RE = new RegExp(spec_default.forbid.shunni_path_prefix);
   const walk = (obj, path, fn) => {
     if (typeof obj === "string") fn(path, obj);
     else if (Array.isArray(obj)) obj.forEach((v, i) => walk(v, `${path}[${i}]`, fn));
@@ -77,7 +181,7 @@ function checkAnalysis(a, chart, currentYear) {
     const bad = [];
     walk(a, "", (p, v) => {
       for (const w of FORBID_ALL) if (v.includes(w)) bad.push(`${p} \u542B\u5185\u90E8\u5B57\u6BB5/\u64AD\u62A5\u8154\u300C${w}\u300D`);
-      if (/^(hechong|yunsui|shensha|timeline)/.test(p)) {
+      if (SHUNNI_PATH_RE.test(p)) {
         for (const w of FORBID_SHUNNI) if (v.includes(w)) bad.push(`${p} \u542B\u7EDD\u5BF9\u65AD\u8BED\u300C${w}\u300D(\u5E94\u7528\u987A\u98CE/\u9006\u98CE)`);
       }
       for (const w of FORBID_FREQ) if (v.includes(w)) bad.push(`${p} \u542B\u884C\u4E3A\u9891\u7387\u65AD\u8A00\u300C${w}\u300D(\u80FD\u529B\u800C\u975E\u4E8B\u8FF9:\u6539\u5199\u4E3A\u80FD\u529B/\u7279\u8D28/\u6F5C\u529B\u53E5\u5F0F)`);
@@ -90,11 +194,12 @@ function checkAnalysis(a, chart, currentYear) {
     const bad1 = [];
     const bad2 = [];
     const m = a?.tg?.mech_html, p = a?.tg?.plain_html;
+    const TG_N = SEC.tg_block.exact_sentences;
     if (m == null) bad1.push("\u7F3A\u5B57\u6BB5");
-    else if (sentences(m).length !== 1) bad1.push(`\u4E0A\u53E5\u5E94\u6070\u4E00\u53E5,\u5B9E\u9645${sentences(m).length}\u53E5`);
+    else if (sentences(m).length !== TG_N) bad1.push(`\u4E0A\u53E5\u5E94\u6070${TG_N}\u53E5,\u5B9E\u9645${sentences(m).length}\u53E5`);
     if (p == null) bad2.push("\u7F3A\u5B57\u6BB5");
     else {
-      if (sentences(p).length !== 1) bad2.push(`\u4E0B\u53E5\u5E94\u6070\u4E00\u53E5,\u5B9E\u9645${sentences(p).length}\u53E5`);
+      if (sentences(p).length !== TG_N) bad2.push(`\u4E0B\u53E5\u5E94\u6070${TG_N}\u53E5,\u5B9E\u9645${sentences(p).length}\u53E5`);
       if (!CONNECTOR_RE.test(strip(p).trim())) bad2.push(`\u4E0B\u53E5\u987B\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934(${CONNECTOR_DESC})`);
     }
     put("tg.mech_html", bad1);
@@ -111,7 +216,7 @@ function checkAnalysis(a, chart, currentYear) {
       const t = strip(path);
       for (const m of ["\u7279\u6027\u662F", "\u610F\u5473\u7740\u4F60", "\u6700\u5F3A\u7684\u80FD\u529B", "\u4F46"]) if (!t.includes(m)) bad.push(`\u65E5\u4E3B\u56FA\u5B9A\u53E5\u5F0F\u7F3A\u300C${m}\u300D`);
     } else {
-      if (ss.length !== 2) bad.push(`\u5E94\u6070\u4E24\u53E5,\u5B9E\u9645 ${ss.length} \u53E5`);
+      if (ss.length !== SEC.two_sentence_block.exact_sentences) bad.push(`\u5E94\u6070${SEC.two_sentence_block.exact_sentences}\u53E5,\u5B9E\u9645 ${ss.length} \u53E5`);
       if (ss[1] && !CONNECTOR_RE.test(ss[1])) bad.push(`\u7B2C\u4E8C\u53E5\u987B\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934(${CONNECTOR_DESC})`);
     }
     put(k, bad);
@@ -133,24 +238,14 @@ function checkAnalysis(a, chart, currentYear) {
     const bad = [];
     const ss = sentences(v);
     const len = strip(v).length;
-    if (ss.length < 6 || len < 160) bad.push(`\u8BE6\u5199\u4E0D\u8DB3(\u53E5\u6570${ss.length}/\u5B57\u6570${len},\u8981\u6C42\u22656\u53E5\u2265160\u5B57)`);
+    const MI = SEC.major_interp;
+    if (ss.length < MI.min_sentences || len < MI.min_chars) bad.push(`\u8BE6\u5199\u4E0D\u8DB3(\u53E5\u6570${ss.length}/\u5B57\u6570${len},\u8981\u6C42\u2265${MI.min_sentences}\u53E5\u2265${MI.min_chars}\u5B57)`);
     const g = (v.match(/hl-good/g) || []).length, r = (v.match(/class="hl"/g) || []).length;
-    if (g + r < 2) bad.push(`\u7740\u8272\u4E0D\u8DB3(\u7EFF${g}\u7EA2${r},\u7279\u8D28\u77ED\u8BED\u5E94\u6210\u6BB5\u7740\u8272)`);
+    if (g + r < MI.min_highlights) bad.push(`\u7740\u8272\u4E0D\u8DB3(\u7EFF${g}\u7EA2${r},\u7279\u8D28\u77ED\u8BED\u5E94\u6210\u6BB5\u7740\u8272)`);
     put(`interp.${k}`, bad);
   }
   {
-    const ANCHOR_BY_GONGZUO = {
-      \u6B63\u5370: "\u4F60\u9002\u5408\u7684\u53E6\u4E00\u534A",
-      \u504F\u5370: "\u4F60\u9002\u5408\u7684\u53E6\u4E00\u534A",
-      \u6B63\u5B98: "\u80FD\u63A5\u4F4F\u4F60\u7684",
-      \u4E03\u6740: "\u80FD\u63A5\u4F4F\u4F60\u7684",
-      \u6B63\u8D22: "\u8BA9\u4F60\u773C\u775B\u4E00\u4EAE\u53C8\u7559\u5F97\u4F4F\u7684",
-      \u504F\u8D22: "\u8BA9\u4F60\u773C\u775B\u4E00\u4EAE\u53C8\u7559\u5F97\u4F4F\u7684",
-      \u98DF\u795E: "\u4E0E\u4F60\u6700\u540C\u9891\u7684",
-      \u4F24\u5B98: "\u4E0E\u4F60\u6700\u540C\u9891\u7684",
-      \u6BD4\u80A9: "\u4E0E\u4F60\u6700\u540C\u9891\u7684",
-      \u52AB\u8D22: "\u4E0E\u4F60\u6700\u540C\u9891\u7684"
-    };
+    const ANCHOR_BY_GONGZUO = spec_default.marriage_anchor.by_gongzuo;
     const v = a?.interp?.marriage_html || "";
     const bad = [];
     const mt = strip(v).match(/(你适合的另一半|能接住你的|让你眼睛一亮又留得住的|与你最同频的)[^。！？]{0,12}更可能是一个([^。！？]{4,40})的(男生|女生)/);
@@ -173,7 +268,7 @@ function checkAnalysis(a, chart, currentYear) {
     const bad = [];
     const warn = [];
     const n = sentences(v).length;
-    if (n < 3 || n > 7) bad.push(`\u7CBE\u8BFB\u6BB5\u5E943~7\u53E5,\u5B9E\u9645${n}\u53E5`);
+    if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`\u7CBE\u8BFB\u6BB5\u5E94${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}\u53E5,\u5B9E\u9645${n}\u53E5`);
     if (k === "yunsui.reading_html") {
       const yrs = (strip(v).match(/(19|20)\d{2}/g) || []).map(Number);
       for (const y of yrs) if (y < currentYear - 1 || y > currentYear + 5) warn.push(`\u63D0\u53CA\u5E74\u4EFD${y}\u8D85\u51FA\u4ECA\u5E74\u8D775\u5E74\u7A97\u53E3`);
@@ -211,7 +306,7 @@ function checkAnalysis(a, chart, currentYear) {
     const bad = [];
     const tl = a?.timeline;
     const wl = new Set((chart?.bazi?.enrichment?.\u8FD0\u5C81\u5F15\u52A8?.\u5EFA\u8BAE\u8282\u70B9 || []).map((n) => n.\u5E74));
-    if (!Array.isArray(tl) || tl.length !== 5) bad.push(`timeline \u5E94\u60705\u9879,\u5B9E\u9645${Array.isArray(tl) ? tl.length : 0}`);
+    if (!Array.isArray(tl) || tl.length !== spec_default.timeline.exact_items) bad.push(`timeline \u5E94\u6070${spec_default.timeline.exact_items}\u9879,\u5B9E\u9645${Array.isArray(tl) ? tl.length : 0}`);
     else if (wl.size) {
       for (const t of tl) if (!wl.has(+t.year)) bad.push(`\u8282\u70B9\u5E74\u4EFD${t.year}\u4E0D\u5728\u5EFA\u8BAE\u8282\u70B9\u767D\u540D\u5355`);
     }
@@ -279,17 +374,18 @@ function checkMbti(a, chart) {
     const dvBad = [];
     if (!dv) dvBad.push("\u7F3A diff_verdict \u5224\u8BCD");
     else {
-      if (!dv.startsWith("\u4F60\u662F")) dvBad.push("\u5224\u8BCD\u987B\u4EE5\u300C\u4F60\u662F\u300D\u5F00\u5934");
-      if (dv.length > 34) dvBad.push(`\u5224\u8BCD\u8FC7\u957F(${dv.length}>30\u5B57)`);
+      if (!dv.startsWith(SEC.mbti_verdict.prefix)) dvBad.push(`\u5224\u8BCD\u987B\u4EE5\u300C${SEC.mbti_verdict.prefix}\u300D\u5F00\u5934`);
+      if (dv.length > SEC.mbti_verdict.max_chars) dvBad.push(`\u5224\u8BCD\u8FC7\u957F(${dv.length}>${SEC.mbti_verdict.max_chars}\u5B57)`);
     }
     R["diff_verdict"] = { status: dvBad.length ? "FAIL" : "PASS", reasons: dvBad };
     const len = strip(String(a?.diff_html || "")).length;
-    R["diff_html"] = { status: len >= 400 && len <= 650 ? "PASS" : "FAIL", reasons: len >= 400 && len <= 650 ? [] : [`\u5DEE\u5F02\u7248\u5757\u5E94450~600\u5B57\u5DE6\u53F3(400-650\u5BB9\u5DEE),\u5B9E\u9645${len}`] };
+    const MD = SEC.mbti_diff;
+    const okLen = len >= MD.min_chars && len <= MD.max_chars;
+    R["diff_html"] = { status: okLen ? "PASS" : "FAIL", reasons: okLen ? [] : [`\u5DEE\u5F02\u7248\u5757\u5E94${MD.min_chars}~${MD.max_chars}\u5B57,\u5B9E\u9645${len}`] };
   }
   R["_\u5168\u5C40"] = { status: bad0.length ? "FAIL" : "PASS", reasons: bad0 };
   return R;
 }
-var ARCHETYPE_OK = (t) => /^[一-龥]{7}$/.test(t) || /^[一-龥]{4}[·•・][一-龥]{4}$/.test(t);
 function checkZonghe(a, _chart) {
   const R = {};
   const put = (k, bad) => {
@@ -298,8 +394,8 @@ function checkZonghe(a, _chart) {
   {
     const bad = [];
     const t = strip(a?.meta?.archetype_name || "");
-    if (!ARCHETYPE_OK(t)) bad.push(`\u5224\u8BCD\u987B7\u5B57\u62164+4\u5BF9\u4ED7,\u5F97\u5230\u300C${t}\u300D`);
-    if (/[格局]{2}|身弱|身强|七杀格|正官格|偏财格/.test(t)) bad.push("\u5224\u8BCD\u5806\u683C\u5C40\u672F\u8BED");
+    if (!ARCHETYPE_OK(t)) bad.push(`${ARCHETYPE_DESC},\u5F97\u5230\u300C${t}\u300D`);
+    if (ARCHETYPE_FORBID_RE.test(t)) bad.push(ARCH.forbid_desc);
     put("meta.archetype_name", bad);
   }
   {
@@ -361,7 +457,7 @@ function checkZiwei(a, _chart) {
   {
     const bad = [];
     const t = strip(a?.meta?.archetype_name || "");
-    if (!ARCHETYPE_OK(t)) bad.push(`\u5224\u8BCD\u987B7\u5B57\u62164+4\u5BF9\u4ED7,\u5F97\u5230\u300C${t}\u300D`);
+    if (!ARCHETYPE_OK(t)) bad.push(`${ARCHETYPE_DESC},\u5F97\u5230\u300C${t}\u300D`);
     put("meta.archetype_name", bad);
   }
   {
@@ -393,7 +489,7 @@ function checkZiwei(a, _chart) {
   }
   return R;
 }
-var HIGH_CERTAINTY_WORDS = ["\u5FC5\u7136", "\u4E00\u5B9A\u4F1A", "\u80AF\u5B9A\u4F1A", "\u94C1\u5B9A", "\u5FC5\u5B9A", "\u6CE8\u5B9A"];
+var HIGH_CERTAINTY_WORDS = spec_default.forbid.high_certainty;
 var SINGLE_YEAR_RE = /(19|20)\d{2}\s*年/;
 var YEAR_ASSERT_RE = /(19|20)\d{2}\s*年[^,，;；]{0,14}(你会|将会|就会|会有|会出现|会发生)/;
 var HEDGE_RE = /(如果|若|倘|一旦|可能|或许|大概|预计|倾向|概率|机会|窗口|留意|注意|风险|参考|宜|前后|左右|上下|区间|之间|到20|[-–~至])/;

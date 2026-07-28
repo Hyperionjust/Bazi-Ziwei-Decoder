@@ -2,6 +2,11 @@
 node_modules/
 calculator/node_modules/
 
+# 编译产物:运行时一律走自足的 calculator/dist-bundle/,tsc 的 dist/ 只是本地开发中间物。
+# v3.9.1 前它曾入库并随包分发,且停留在旧版 → 走 `node dist/run-chart.js` 会静默跑出旧逻辑。
+calculator/dist/
+dist-release/
+
 # build / runtime artifacts
 *.log
 .DS_Store
@@ -21,10 +26,9 @@ report.html
 *.case.json
 calibration-report.md
 
-# 但仓库自带的合成示例必须入库（白名单放行）
-!examples/sample-chart.json
-!examples/sample-analysis.json
-!examples/sample-report.html
+# 但仓库自带的合成示例必须入库（白名单放行·整目录放行，避免 *-report.html 等规则误伤新增样例）
+!examples/
+!examples/**
 
 # editor
 .vscode/

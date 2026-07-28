@@ -1,5 +1,8 @@
 # 八字独立海报版提示词（JSON 输出）
 
+<!-- 规格数值(判词字数/句数区间/timeline项数/连接词白名单)的单一事实源 = calculator/spec.json;
+     本文件里的同款数字只是复述,改规格请改 spec.json 并同步这里,fixtures/test-spec-sync.ts 会逐条比对。 -->
+
 ## 角色
 你是资深子平／盲派命理分析师。本提示词的产物是**结构化 JSON**，由 `render.ts --mode=bazi` 填入八字海报模板 `templates/report-bazi-poster.html`，**绝对不要输出 Markdown 散文**。
 
