@@ -10,7 +10,7 @@
     "dump": "node dist-bundle/dump-text.js",
     "render": "node dist-bundle/render.js",
     "check": "node dist-bundle/check-analysis.js",
-    "test": "npx tsx fixtures/test-shensha.ts && npx tsx fixtures/test-relations.ts && npx tsx fixtures/test-boundary.ts && npx tsx fixtures/test-check.ts && npx tsx fixtures/test-shichen.ts && npx tsx fixtures/test-liuyue.ts && npx tsx fixtures/test-compare.ts && npx tsx fixtures/test-shunni.ts && npx tsx fixtures/check-template.ts && npx tsx fixtures/test-spec-sync.ts && npx tsx fixtures/test-golden.ts && npx tsx schema-check.ts"
+    "test": "npx tsx fixtures/test-shensha.ts && npx tsx fixtures/test-relations.ts && npx tsx fixtures/test-boundary.ts && npx tsx fixtures/test-tiaohou.ts && npx tsx fixtures/test-check.ts && npx tsx fixtures/test-shichen.ts && npx tsx fixtures/test-liuyue.ts && npx tsx fixtures/test-compare.ts && npx tsx fixtures/test-shunni.ts && npx tsx fixtures/check-template.ts && npx tsx fixtures/test-spec-sync.ts && npx tsx fixtures/test-golden.ts && npx tsx schema-check.ts"
   },
   "dependencies": {
     "lunar-typescript": "^1.8.6"

@@ -38,12 +38,13 @@ node -e "const j=require('./smoke.json'); console.log('日柱:', j.bazi.siZhu.da
 cd calculator && npm test
 ```
 
-它按顺序串起下面 11 项，任一非 0 即中断：
+它按顺序串起下面 13 项，任一非 0 即中断：
 
 ```bash
 npx tsx fixtures/test-shensha.ts      # 神煞引擎 13 例
 npx tsx fixtures/test-relations.ts    # 关系/运岁/正缘
 npx tsx fixtures/test-boundary.ts     # 边界回归(阴阳年干/农历/时区/晚子时/真太阳时/调候/格局)
+npx tsx fixtures/test-tiaohou.ts      # ⭐ 调候 120 格:结构 + 快照锁 + 寒暖不变式(不主张取值权威性)
 npx tsx fixtures/test-check.ts        # 体检器五模式(含边界盘高确定断语红线)
 npx tsx fixtures/test-shichen.ts      # 时辰边界检测 + 晚子时约定
 npx tsx fixtures/test-liuyue.ts       # 流月引动(12 节气月干支/公历对照/逐月命中)

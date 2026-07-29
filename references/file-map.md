@@ -11,7 +11,8 @@ bazi-ziwei-decoder/
 │   ├── file-map.md                   ← 本文件
 │   ├── install-and-deps.md           ← 安装后行为、依赖与只读目录须知
 │   ├── troubleshooting.md            ← 失败模式与处理
-│   └── walkthrough.md                ← 一次完整对话的走法示例
+│   ├── walkthrough.md                ← 一次完整对话的走法示例
+│   └── calibration.md                ← ⭐ 三类校准（典籍 / 现实事件 / 对照组）与调候校勘规程
 ├── scripts/
 │   └── release.sh                    ← 发版唯一入口：写版本号 → 白名单打包 → 校验无垃圾件
 ├── calculator/
@@ -23,6 +24,7 @@ bazi-ziwei-decoder/
 │   ├── check-analysis.ts             ← 解读体检器（--mode=bazi|zonghe|ziwei|mbti|longform）
 │   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
 │   ├── spec.json                     ← ⭐ 形态规格单一事实源（判词字数/句数区间/连接词白名单/timeline 项数/禁词分层）
+│   ├── tiaohou.json                  ← ⭐ 调候 120 格（日干×月支）+ 校勘块；⚠ 底本未确证，全表待核
 │   ├── shensha.json                  ← 神煞单一事实源（起法/tier/出处/needs_review）
 │   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
 │   ├── package.json                  ← 依赖声明 + npm test（fixtures 一键跑法）
@@ -37,6 +39,8 @@ bazi-ziwei-decoder/
 │       ├── test-liuyue.ts            ← 流月引动
 │       ├── test-compare.ts           ← 多年对比
 │       ├── test-spec-sync.ts         ← ⭐ 规格漂移哨兵（spec.json ↔ 提示词/SKILL 数字比对）
+│       ├── test-tiaohou.ts           ← ⭐ 调候表结构 + 快照锁 + 寒暖不变式
+│       ├── test-shunni.ts            ← ⭐ 顺逆双轴 + 验收实况点
 │       ├── check-template.ts         ← 海报模板完整性
 │       └── calibration/              ← 校准回测脚手架（schema + runner，命例数据不入库）
 ├── prompts/

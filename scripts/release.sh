@@ -57,7 +57,7 @@ WHITELIST=(
   calculator/dist-bundle calculator/yiqi-core calculator/bazi-enrich calculator/fixtures
   calculator/run-chart.ts calculator/dump-text.ts calculator/render.ts
   calculator/shensha.ts calculator/check-analysis.ts calculator/self-update.ts
-  calculator/schema-check.ts calculator/spec.json calculator/shensha.json
+  calculator/schema-check.ts calculator/spec.json calculator/shensha.json calculator/tiaohou.json
   calculator/lineages.json calculator/package.json calculator/tsconfig.json
   docs/release-notes
 )
