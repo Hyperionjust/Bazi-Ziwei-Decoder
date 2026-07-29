@@ -38,6 +38,17 @@ export const SHUNNI_PARAMS = {
     地支得气: 0.8,                  // 该位地支本气五行与调候用神同五行(只取本气,不计藏干)
     说明: '调候(穷通宝鉴日干×月支定例)命中加权;仅本气,藏干不计',
   },
+  // J2(v3.11.0):护体线第一次有典籍级依据 —— 命中「病/忌」要扣分,不能只加不减。
+  //   实锤点:丁/巳 盘,《穷通宝鉴》明写「癸水一见,泄庚、湿甲、伤丁,故以癸为病」,
+  //   而改动前癸年只要地支带木(甲是第一调候)照样给护体加分——计分与典籍相悖。
+  病忌: {
+    病透干: -1.5,     // 典籍明指之病字透干(锚点对齐「本干透出 +1.5」,一加一减对称)
+    病坐支: -0.8,     // 该位地支【本气恰为该字】(对齐「地支得气 -」)
+    忌档基线: -0.5,   // 原局每命中一条「忌」档条例的常驻扣分
+    忌档下限: -1.5,   // 忌档基线的封顶(免得条例多的格被压垮)
+    说明: '病字按【本字】判不按五行判——书里说癸为病时明说「壬水无碍」(甲/申),' +
+          '拿五行一刀切会把壬也误伤;忌档基线是原局的常驻结构性折损,不随流年变。',
+  },
   体档: { 强: 1.5, 中: 0.7, 说明: '锚点:1.5=第一调候本干透出;0.7=第二调候本干等效' },
   方向: { 顺: 1, 逆: -1, 说明: '发用≥+1 顺 / ≤−1 逆 / 其余 平' },
 } as const;
@@ -61,20 +72,36 @@ export interface ShunNiCtx {
   dislikes: Set<string>;
   tiaoHouGans: Tiangan[];   // 调候取干,按 先/次/再 顺序
   dayMaster: Tiangan;
+  bingGans: Tiangan[];      // J2:本格典籍明指之「病」字(如 丁/巳 的癸)
+  jiBaseline: number;       // J2:原局命中「忌」档条例带来的常驻护体折损(≤0)
+  jiHits: string[];         // J2:命中的忌档条例名,供审计与解读层追溯
 }
 
-/** 从 enrichment.用神建议 构建计分上下文 */
-export function buildCtx(yongShen: any, dayMaster: string): ShunNiCtx | null {
+/** 从 enrichment.用神建议 构建计分上下文;J2 起还要 enrichment.调候条例 */
+export function buildCtx(yongShen: any, dayMaster: string, tiaoLi?: any): ShunNiCtx | null {
   const ck = yongShen?.出口;
   if (!ck) return null;
   const th: Tiangan[] = (yongShen?.调候?.取干 || [])
     .map((s: string) => String(s || '').charAt(0))
     .filter((g: string) => (GAN_WUXING as any)[g]);
+
+  // ── J2:病字与忌档基线 ────────────────────────────────────────────────
+  // 未吸收的格 tiaoLi.有条例=false,两者自然为空 → 计分与 v3.10 完全一致(分批吸收期间无副作用)。
+  const bingGans: Tiangan[] = ((tiaoLi?.病 || []) as any[])
+    .map(b => String(b?.字 || '').charAt(0) as Tiangan)
+    .filter(g => (GAN_WUXING as any)[g]);
+  const jiHits: string[] = ((tiaoLi?.命中 || []) as any[])
+    .filter(h => h?.档 === '忌')
+    .map(h => String(h.名 || h.id));
+  const P = SHUNNI_PARAMS.病忌;
+  const jiBaseline = Math.max(P.忌档下限, jiHits.length * P.忌档基线);
+
   return {
     likes: new Set([...(ck.开运用神 || []), ...(ck.喜神 || [])]),
     dislikes: new Set(ck.忌神 || []),
     tiaoHouGans: th,
     dayMaster: dayMaster as Tiangan,
+    bingGans, jiBaseline, jiHits,
   };
 }
 
@@ -97,6 +124,17 @@ function huTi(gan: Tiangan, zhi: Dizhi, ctx: ShunNiCtx): number {
     else if (GAN_WUXING[gan] === twx) s += w * P.同五行透出;
     if (ZHI_WUXING[zhi] === twx) s += w * P.地支得气;
   });
+  // J2:典籍明指之「病」字来了要扣 —— 只认本字,不认五行。
+  //   书里说癸为病时往往同段明说「壬水无碍」(甲/申「壬水无碍,且能合丁」),
+  //   拿五行一刀切会把壬一并误伤,那就不是典籍的意思了。
+  const B = SHUNNI_PARAMS.病忌;
+  for (const bg of ctx.bingGans) {
+    if (gan === bg) s += B.病透干;
+    const benQi = (ZHI_CANG_GAN[zhi] || []).find(c => c.role === '本气');
+    if (benQi?.gan === bg) s += B.病坐支;
+  }
+  // 忌档基线:原局本身命中的「忌」档条例是常驻结构性折损,不随流年变
+  s += ctx.jiBaseline;
   return Math.round(s * 100) / 100;
 }
 
@@ -136,7 +174,8 @@ export function scoreGZ(ganZhi: string, hits: YunSuiHit[], ctx: ShunNiCtx): Shun
 
 const 说明 =
   '顺逆双轴=发用线(出口喜忌:干支两位各 +喜/−忌)与护体线(调候命中:先1.0/次0.7/再0.5,' +
-  '本干透出×1.5、同五行透干×1.0、地支本气得气×0.8)分开计,不合成标量;' +
+  '本干透出×1.5、同五行透干×1.0、地支本气得气×0.8;J2 起再减典籍病忌:病字透干−1.5/坐支本气−0.8(只认本字)、' +
+  '原局每条忌档条例−0.5 封顶−1.5)分开计,不合成标量;' +
   '方向(顺/平/逆)只由发用线定、振幅(静/动/剧动)只由引动重级定(统一走 hitWeight),' +
   '「事件」为十神标注(如财星透干),不参与方向分值,供解读层作机会/压力信号。' +
   '——本块为幕后施工图,字段名与计分过程一律不得向用户展示。';
@@ -148,7 +187,7 @@ const 说明 =
  * 两者由同一次 scoreGZ 计算,不存在第二套口径。
  */
 export function annotateShunNi(enr: any, dayun: any[], dayMaster: string): void {
-  const ctx = buildCtx(enr?.用神建议, dayMaster);
+  const ctx = buildCtx(enr?.用神建议, dayMaster, enr?.调候条例);
   if (!ctx) return;
   const ys = enr?.运岁引动;
   if (!ys) return;
@@ -188,5 +227,15 @@ export function annotateShunNi(enr: any, dayun: any[], dayMaster: string): void 
     流月.push({ 序: m.序, 干支: m.干支, 公历起: m.公历起, 公历止: m.公历止, ...sn });
   }
 
-  ys.顺逆 = { 说明, 参数: SHUNNI_PARAMS, 大运, 流年, ...(流月.length ? { 流月 } : {}) };
+  // J2 的输入摆到台面上:护体为什么被扣,得能一眼追到是哪个病字、哪几条忌档条例
+  const 典籍病忌 = (ctx.bingGans.length || ctx.jiHits.length)
+    ? {
+        病字: ctx.bingGans,
+        病扣分: `透干${SHUNNI_PARAMS.病忌.病透干} / 坐支本气${SHUNNI_PARAMS.病忌.病坐支}(只认本字不认五行)`,
+        忌档条例: ctx.jiHits,
+        忌档基线: ctx.jiBaseline,
+        依据: '典籍明指之病(tiaohou.json 条例块的 病 字段)与本盘命中的忌档条例;护体线自此有典籍级依据,不再只加不减',
+      }
+    : undefined;
+  ys.顺逆 = { 说明, 参数: SHUNNI_PARAMS, ...(典籍病忌 ? { 典籍病忌 } : {}), 大运, 流年, ...(流月.length ? { 流月 } : {}) };
 }

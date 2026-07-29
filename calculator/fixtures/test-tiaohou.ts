@@ -159,6 +159,12 @@ const 格键 = Object.keys(条例块).filter(k => !k.startsWith('_'));
     const c = 条例块[k];
     for (const f of ['原文', '出处', '级别', '条例']) if (!c[f]) { console.log(`    ${k} 缺字段 ${f}`); 坏++; }
     if (!['底本', '佐证'].includes(c.级别)) { console.log(`    ${k} 级别非法: ${c.级别}`); 坏++; }
+    // 条例块里顺手记的「取干」必须与取干表逐字一致 —— 两处记同一件事就会漂移,
+    // 尤其条例是分批分人写的。不一致说明有人照着别的版本抄了。
+    const [g, z] = k.split('/');
+    if (c.取干 && (c.取干 as string[]).join('') !== (TIAO_HOU as any)[g][z].join('')) {
+      console.log(`    ${k} 条例块的取干 ${(c.取干 as string[]).join('')} ≠ 取干表 ${(TIAO_HOU as any)[g][z].join('')}`); 坏++;
+    }
     条数 += (c.条例 || []).length;
     for (const t of (c.条例 || [])) {
       if (!t.意象) { console.log(`    ${k}/${t.id} 缺「意象」(层3 的概念级素材,必填)`); 坏++; }
@@ -240,9 +246,10 @@ const 格键 = Object.keys(条例块).filter(k => !k.startsWith('_'));
     `甲/子 的「病:癸」如实标注在盘/透藏 (得到 ${JSON.stringify(r子.病)})`);
 
   // 未吸收的行必须静默返回空壳 —— 分批吸收期间不得抛错、不得假装有条例
-  const 乙 = evalTiaoLi(盘('丙寅 庚寅 乙亥 癸未') as any);
-  ok(乙.有条例 === false && 乙.命中.length === 0 && 乙.格 === '乙/寅',
-    '未吸收的格(乙/寅)静默返回空壳,不抛错也不虚构命中');
+  // (随批次推进换一个尚未吸收的日干:M1 用乙,乙行 M2 已吸收,现改用戊——M3 才轮到)
+  const 未吸收 = evalTiaoLi(盘('丙寅 庚寅 戊亥 癸未') as any);
+  ok(未吸收.有条例 === false && 未吸收.命中.length === 0 && 未吸收.格 === '戊/寅',
+    '未吸收的格(戊/寅)静默返回空壳,不抛错也不虚构命中');
 }
 
 // ── ⓕ 可满足性审计:不许有「死条例」 ────────────────────────────────────────
@@ -320,7 +327,7 @@ const 格键 = Object.keys(条例块).filter(k => !k.startsWith('_'));
 
 // ── ⓔ 条例快照锁 ──────────────────────────────────────────────────────────
 // 有意改条例时把新哈希填回来即为「祝福」,改动因此必须显式(与取干表同规格)。
-const EXPECTED_TIAOLI_HASH = 'fc8768f264fb48f6e9c6760fd8593f66';   // v3.11.0 M1 甲木行 12 格 / 110 条
+const EXPECTED_TIAOLI_HASH = 'b4f609ff05713b988224db6b3e60e509';   // v3.11.0 M2 甲乙丙丁 48 格 / 537 条
 {
   const canon = 格键.map(k =>
     k + '::' + (条例块[k].条例 || []).map((t: any) => [t.id, t.名, t.若, t.则, t.档].join('|')).join(';')

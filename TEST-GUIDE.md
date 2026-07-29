@@ -30,7 +30,7 @@ node -e "const j=require('./smoke.json'); console.log('日柱:', j.bazi.siZhu.da
 
 #### 调候条例（v3.11.0 起）
 
-上面这张样例盘是**戊**日主，而条例吸收分批进行（甲行已吸收，乙/丙/丁… 在 M2~M4），
+上面这张样例盘是**戊**日主，而条例吸收分批进行（甲/乙/丙/丁 四行已吸收，戊/己/庚 在 M3、辛/壬/癸 在 M4），
 所以它的 chart.txt 会走「该格尚未吸收」这一支——这是预期行为，不是缺陷。
 要看条例真正命中的样子，用随包的甲日样例盘（合成生辰 **1988-03-10 12:00 男** → 戊辰 乙卯 甲子 庚午）：
 
@@ -41,6 +41,19 @@ grep -A 30 "调候条例" jia.txt
 ```
 **预期**：`调候条例〔甲/卯·佐证〕: 命中 6/18 条  上3 中1 下0 忌2`，逐条列出 `名 / 则 / 若 / 意象素材 / id`。
 产物应与 `examples/sample-chart-jiamu.txt` 一致。
+
+#### J2 典籍病忌（v3.11.0 M2 起）
+
+护体线不再只加不减。丁日主生巳月，书里明写「癸水一见，泄庚、湿甲、伤丁，**故以癸为病**」，
+而该格调候取【甲庚】——改动前癸年只要地支带木照样给护体加分。现在病字会扣分：
+
+```bash
+node dist-bundle/run-chart.js --year=1980 --month=5 --day=14 --hour=12 --minute=0 --gender=male --currentYear=2026 > ding.json
+node dist-bundle/dump-text.js --input=ding.json --output=ding.txt
+grep "流年方向总览" ding.txt
+```
+**预期**：`2022壬寅 …体0.8`、`2023癸卯 …体-0.7` —— **癸被扣、壬分文未动**。
+病按【本字】判不按五行判，因为同段书里明说「壬水无碍」。产物应与 `examples/sample-chart-dinghuo.txt` 一致。
 
 > 注意：Agent 装好 Skill 后**不会主动**跑此自检（SKILL.md 明确要求装好不自检，避免浪费 token）。Smoke Test 由你手动执行。
 

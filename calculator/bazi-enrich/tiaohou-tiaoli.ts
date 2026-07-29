@@ -51,7 +51,10 @@ export const 谓词表: Record<string, { 参数: '天干' | '地支' | '五行' 
 //     该五行的含藏干加权分 ≥ 3.0(天干每字 1;地支本气 1、中气 0.5、余气 0.3,与 countWuXing 同口径)
 //     且至少有一字透干(纯藏不算「一派」——「派」是显势)。
 //   分数随命中一并输出,便于审计与日后调参。改阈值 = 改词表版本。
-export const 成派阈值 = { 加权分: 3.0, 需透干: true };
+//   ★ 排除日干本身(v3.11.0 M2):「一派」说的是日主周围的势,日主自己是被论的那个人,不是「派」的一员。
+//     甲行只用到 成派:庚辛/壬癸/戊己/丙丁,不含日干,无差别;但乙行原文有「或一派甲木」,
+//     若把日干乙也计进去,等于白送 1.0 分进 3.0 的阈值——同一句话在比劫上比在别的十神上更容易成立。
+export const 成派阈值 = { 加权分: 3.0, 需透干: true, 排除日干: true };
 
 // ── 盘面事实层 ──────────────────────────────────────────────────────────────
 export type PanFacts = {
@@ -162,9 +165,11 @@ function 求值原子(pred: string, arg: string, cmp: string | null, num: number
     case '会局': return !!f.会局[arg as WuXing];
     case '成派': {
       // 天干组如「庚辛」——组内各字五行须一致(词表校验已保证)
+      // 「一派」说的是日主【周围】的势,故日干本身不计(见 成派阈值.排除日干)
       const wx = GAN_WUXING[arg[0] as Tiangan];
-      const 透了 = f.天干.some(g => GAN_WUXING[g] === wx && arg.includes(g));
-      return f.五行加权[wx] >= 成派阈值.加权分 && (!成派阈值.需透干 || 透了);
+      const 分 = 成派阈值.排除日干 ? f.五行加权[wx] - (GAN_WUXING[dayMaster] === wx ? 1 : 0) : f.五行加权[wx];
+      const 透了 = f.非日干天干.some(g => GAN_WUXING[g] === wx && arg.includes(g));
+      return 分 >= 成派阈值.加权分 && (!成派阈值.需透干 || 透了);
     }
   }
   throw new Error(`未知谓词: ${pred}`);
@@ -251,8 +256,17 @@ function parse(toks: Tok[]): Node {
   return root;
 }
 
+// 「若」的语法树缓存:同一条条例会被上万张盘反复求值(测试里的死条例/恒真/关系审计尤其),
+// 每次重新分词+建树纯属浪费。字符串→AST 一一对应,缓存安全。
+const AST_CACHE = new Map<string, Node>();
+function 取AST(src: string): Node {
+  let n = AST_CACHE.get(src);
+  if (!n) { n = parse(tokenize(src)); AST_CACHE.set(src, n); }
+  return n;
+}
+
 export function 求值若(src: string, f: PanFacts, dayMaster: Tiangan): boolean {
-  const node = parse(tokenize(src));
+  const node = 取AST(src);
   const go = (n: Node): boolean =>
     n.k === 'atom' ? 求值原子(n.tok.pred, n.tok.arg, n.tok.cmp, n.tok.num, f, dayMaster)
     : n.k === '非' ? !go(n.a)
