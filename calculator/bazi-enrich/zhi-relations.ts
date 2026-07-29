@@ -20,7 +20,9 @@ const LIU_HE: [Dizhi, Dizhi][] = [
 ];
 
 // 三合局 (申子辰水 / 亥卯未木 / 寅午戌火 / 巳酉丑金)
-const SAN_HE: Array<{zhi: [Dizhi, Dizhi, Dizhi], wuxing: string}> = [
+// v3.11.0: 加 export —— 调候条例求值器(tiaohou-tiaoli.ts)的「会局:X」要用同一份表,
+//   不另立第二份三合/三会常量(单一事实源)。仅加导出,判定逻辑与行为一字未动。
+export const SAN_HE: Array<{zhi: [Dizhi, Dizhi, Dizhi], wuxing: string}> = [
   {zhi:['申','子','辰'], wuxing:'水'},
   {zhi:['亥','卯','未'], wuxing:'木'},
   {zhi:['寅','午','戌'], wuxing:'火'},
@@ -28,7 +30,7 @@ const SAN_HE: Array<{zhi: [Dizhi, Dizhi, Dizhi], wuxing: string}> = [
 ];
 
 // 三会方 (寅卯辰东方木 / 巳午未南方火 / 申酉戌西方金 / 亥子丑北方水)
-const SAN_HUI: Array<{zhi: [Dizhi, Dizhi, Dizhi], wuxing: string}> = [
+export const SAN_HUI: Array<{zhi: [Dizhi, Dizhi, Dizhi], wuxing: string}> = [
   {zhi:['寅','卯','辰'], wuxing:'木'},
   {zhi:['巳','午','未'], wuxing:'火'},
   {zhi:['申','酉','戌'], wuxing:'金'},

@@ -28,6 +28,20 @@ node -e "const j=require('./smoke.json'); console.log('日柱:', j.bazi.siZhu.da
 
 跑通即装配正确。`smoke.json` 内容应与 `examples/sample-chart.json` 完全一致。
 
+#### 调候条例（v3.11.0 起）
+
+上面这张样例盘是**戊**日主，而条例吸收分批进行（甲行已吸收，乙/丙/丁… 在 M2~M4），
+所以它的 chart.txt 会走「该格尚未吸收」这一支——这是预期行为，不是缺陷。
+要看条例真正命中的样子，用随包的甲日样例盘（合成生辰 **1988-03-10 12:00 男** → 戊辰 乙卯 甲子 庚午）：
+
+```bash
+node dist-bundle/run-chart.js --year=1988 --month=3 --day=10 --hour=12 --minute=0 --gender=male > jia.json
+node dist-bundle/dump-text.js --input=jia.json --output=jia.txt
+grep -A 30 "调候条例" jia.txt
+```
+**预期**：`调候条例〔甲/卯·佐证〕: 命中 6/18 条  上3 中1 下0 忌2`，逐条列出 `名 / 则 / 若 / 意象素材 / id`。
+产物应与 `examples/sample-chart-jiamu.txt` 一致。
+
 > 注意：Agent 装好 Skill 后**不会主动**跑此自检（SKILL.md 明确要求装好不自检，避免浪费 token）。Smoke Test 由你手动执行。
 
 ### 0.1 回归 fixtures（人工，改代码后必跑）

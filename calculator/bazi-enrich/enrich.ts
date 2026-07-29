@@ -7,6 +7,7 @@ import { countWuXing, wuXingMonthStatus } from './wu-xing';
 import { judgeWangShuai } from './wang-shuai';
 import { judgeGeJu } from './ge-ju';
 import { getTiaoHou } from './tiao-hou';
+import { evalTiaoLi, TiaoLiResult } from './tiaohou-tiaoli';
 import { adviseYongShen, YongShenAdvice } from './yongshen';
 
 type Pillar = '年'|'月'|'日'|'时';
@@ -17,6 +18,10 @@ export type BaziEnrichment = {
   五行旺相: Record<string, '旺'|'相'|'休'|'囚'|'死'>;
   五行统计: ReturnType<typeof countWuXing>;
   调候用神: string[];
+  // J1(v3.11.0):调候条例命中清单。典籍每格是条件树,不止「取干」两个字——
+  //   丙透没透、癸藏没藏、是不是一派庚辛,全是查盘面就能判的确定性事实。
+  //   尚未吸收的格返回 有条例:false 的空壳(分批吸收期间不报错)。
+  调候条例: TiaoLiResult;
   格局: ReturnType<typeof judgeGeJu>;
   旺衰: ReturnType<typeof judgeWangShuai>;
   用神建议: YongShenAdvice;
@@ -46,6 +51,7 @@ export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
     五行旺相: wuXingMonthStatus(monthZhi),
     五行统计: wxCount,
     调候用神: tiaoHou,
+    调候条例: evalTiaoLi(siZhu, dm),
     格局: geJu,
     旺衰: wangShuai,
     用神建议: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs),
