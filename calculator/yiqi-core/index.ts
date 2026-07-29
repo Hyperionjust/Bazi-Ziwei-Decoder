@@ -73,8 +73,8 @@ export function validateBirthInfo(birthInfo: BirthInfo): { valid: boolean; error
   const errors: string[] = [];
   
   // 验证年份
-  if (birthInfo.year < 1900 || birthInfo.year > 2100) {
-    errors.push('年份应在1900-2100之间');
+  if (birthInfo.year < 1800 || birthInfo.year > 2100) {
+    errors.push('年份应在1800-2100之间');
   }
   
   // 验证月份

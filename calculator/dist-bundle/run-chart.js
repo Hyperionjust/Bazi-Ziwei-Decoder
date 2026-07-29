@@ -14724,7 +14724,7 @@ function main() {
     process.exit(1);
   };
   const bi = birthInfo;
-  if (!Number.isInteger(bi.year) || bi.year < 1900 || bi.year > 2100) fail(`year \u65E0\u6548\u6216\u8D85\u8303\u56F4(1900-2100): ${args.year}`);
+  if (!Number.isInteger(bi.year) || bi.year < 1800 || bi.year > 2100) fail(`year \u65E0\u6548\u6216\u8D85\u8303\u56F4(1800-2100): ${args.year}`);
   if (!Number.isInteger(bi.month) || bi.month === 0 || bi.month < -12 || bi.month > 12) fail(`month \u65E0\u6548: ${args.month}`);
   if (!bi.isLunar && (bi.month < 1 || bi.month > 12)) fail(`month \u65E0\u6548(\u516C\u5386 1-12): ${args.month}`);
   if (bi.isLunar && bi.month < 0) console.error(`[input] \u519C\u5386\u95F0\u6708\u8F93\u5165: \u6309\u95F0${-bi.month}\u6708\u5904\u7406`);
@@ -14739,8 +14739,8 @@ function main() {
   let compareYears = [];
   if (args.compareYears !== void 0) {
     compareYears = String(args.compareYears).split(",").map((s) => parseInt(s.trim(), 10));
-    if (!compareYears.length || compareYears.some((y) => !Number.isInteger(y) || y < 1900 || y > 2150))
-      fail(`compareYears \u65E0\u6548(\u9017\u53F7\u5206\u9694\u7684\u5E74\u4EFD, 1900-2150): ${args.compareYears}`);
+    if (!compareYears.length || compareYears.some((y) => !Number.isInteger(y) || y < 1800 || y > 2150))
+      fail(`compareYears \u65E0\u6548(\u9017\u53F7\u5206\u9694\u7684\u5E74\u4EFD, 1800-2150): ${args.compareYears}`);
     if (compareYears.length > 5) fail(`compareYears \u6700\u591A 5 \u4E2A\u5E74\u4EFD, \u5F97\u5230 ${compareYears.length} \u4E2A`);
   }
   if (!Number.isInteger(bi.day) || bi.day < 1) fail(`day \u65E0\u6548: ${args.day}`);

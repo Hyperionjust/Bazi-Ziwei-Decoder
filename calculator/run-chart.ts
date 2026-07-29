@@ -70,7 +70,11 @@ function main() {
   // v2.0.1: 输入校验 — 防 2/30 之类无效日期被 JS Date 静默滚动成合法盘(一步错满盘垮)
   const fail = (msg: string) => { console.error(`[input] ${msg}`); process.exit(1); };
   const bi = birthInfo;
-  if (!Number.isInteger(bi.year) || bi.year < 1900 || bi.year > 2100) fail(`year 无效或超范围(1900-2100): ${args.year}`);
+  // v3.10.0: 下限 1900->1800。原限制是防御性输入校验,不是算法约束——日柱/节气/农历全部
+  //   来自 lunar-typescript(寿星天文历),1800 年前后均可用;ganzhi.ts 里那个以 1900-01-01
+  //   为锚的 getDayGanZhi 是死代码、无人调用。放开的直接动机:名人命例回测(路线图第二梯队)
+  //   所用经典命例大多在 1900 年前,此前连排盘都被拒,回测无从做起。
+  if (!Number.isInteger(bi.year) || bi.year < 1800 || bi.year > 2100) fail(`year 无效或超范围(1800-2100): ${args.year}`);
   // v3.5: 农历允许负月(闰月, 如 --month=-2 表示闰二月); 公历必须 1-12
   if (!Number.isInteger(bi.month) || bi.month === 0 || bi.month < -12 || bi.month > 12) fail(`month 无效: ${args.month}`);
   if (!bi.isLunar && (bi.month < 1 || bi.month > 12)) fail(`month 无效(公历 1-12): ${args.month}`);
@@ -87,8 +91,8 @@ function main() {
   let compareYears: number[] = [];
   if (args.compareYears !== undefined) {
     compareYears = String(args.compareYears).split(',').map(s => parseInt(s.trim(), 10));
-    if (!compareYears.length || compareYears.some(y => !Number.isInteger(y) || y < 1900 || y > 2150))
-      fail(`compareYears 无效(逗号分隔的年份, 1900-2150): ${args.compareYears}`);
+    if (!compareYears.length || compareYears.some(y => !Number.isInteger(y) || y < 1800 || y > 2150))
+      fail(`compareYears 无效(逗号分隔的年份, 1800-2150): ${args.compareYears}`);
     if (compareYears.length > 5) fail(`compareYears 最多 5 个年份, 得到 ${compareYears.length} 个`);
   }
   if (!Number.isInteger(bi.day) || bi.day < 1) fail(`day 无效: ${args.day}`);
