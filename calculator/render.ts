@@ -481,35 +481,28 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
     out[`liunian.${i}.luck_class`]='luck-ping';
   }
   if(!synth) out['liunian.head_note']='';
-  // v2.3: 大运/流年顺逆配色算法化 — 干支五行对照出口喜忌打分,重级引动降档
-  if (yaX?.出口) {
-    const likes = new Set([...(yaX.出口.开运用神 || []), ...(yaX.出口.喜神 || [])]);
-    const dislikes = new Set(yaX.出口.忌神 || []);
-    const gzScore = (gan: string, zhi: string) => {
-      let sc = 0;
-      for (const wx of [GAN_WX[gan], ZHI_WX[zhi]]) { if (likes.has(wx)) sc++; else if (dislikes.has(wx)) sc--; }
-      return sc;
-    };
-    const downgrade = (cls: string) => cls === 'luck-ji' ? 'luck-ping' : 'luck-xiong';
-    const heavyByStep: Record<number, boolean> = {};
-    for (const st of (en.运岁引动?.大运引动 || []))
-      heavyByStep[st.步 - 1] = (st.hits || []).some((h: any) => h.type === '天克地冲' || h.type === '伏吟');
+  // v3.10.0 P0: 顺逆配色改读补层的双轴结果(enrichment.运岁引动.顺逆),渲染层不再自己算分。
+  //   ① 原本地计分只认 出口.开运用神∪喜神,调候线整条丢失 → 调候当头透干的年份被判「平」;
+  //   ② 原重级降级把「方向」和「振幅」揉进一个色阶,表达不了「大动且有利」;
+  //   ③ 原降级类型表两处硬编、都没复用 hitWeight(),大运漏岁运并临/冲提纲、流年漏冲提纲。
+  //   现在色阶只承载【方向】,振幅另出 amp_label(模板未用则自然忽略),两轴不再混淆。
+  const snX = en.运岁引动?.顺逆;
+  if (snX) {
+    const clsOf = (d: string) => d === '顺' ? 'luck-ji' : d === '逆' ? 'luck-xiong' : 'luck-ping';
+    const byStep: Record<number, any> = {};
+    for (const x of (snX.大运 || [])) byStep[x.步 - 1] = x;
     for (let i = 0; i < 10; i++) {
-      const d = dyArr[i]; if (!d) continue;
-      let cls = (() => { const sc = gzScore(d.ganZhi.gan, d.ganZhi.zhi); return sc >= 1 ? 'luck-ji' : sc <= -1 ? 'luck-xiong' : 'luck-ping'; })();
-      if (heavyByStep[i]) cls = downgrade(cls);
-      out[`dayun.${i}.luck_class`] = cls;
+      const s = byStep[i]; if (!s) continue;
+      out[`dayun.${i}.luck_class`] = clsOf(s.方向);
+      out[`dayun.${i}.amp_label`] = s.振幅 === '静' ? '' : s.振幅;
     }
-    const heavyYear: Record<number, boolean> = {};
-    for (const y of (en.运岁引动?.当前大运流年?.流年 || [])) {
-      const all = [...(y.vs原局 || []), ...(y.vs大运 || [])];
-      heavyYear[y.年] = all.some((h: any) => h.type === '天克地冲' || h.type === '伏吟' || h.type === '岁运并临');
-    }
+    const byYear: Record<number, any> = {};
+    for (const x of (snX.流年 || [])) byYear[x.年] = x;
     for (let i = 0; i < 10; i++) {
       const ln = lnArr[i]; if (!ln) continue;
-      let cls = (() => { const sc = gzScore(ln.ganZhi.gan, ln.ganZhi.zhi); return sc >= 1 ? 'luck-ji' : sc <= -1 ? 'luck-xiong' : 'luck-ping'; })();
-      if (heavyYear[ln.year]) cls = downgrade(cls);
-      out[`liunian.${i}.luck_class`] = cls;
+      const s = byYear[ln.year]; if (!s) continue;
+      out[`liunian.${i}.luck_class`] = clsOf(s.方向);
+      out[`liunian.${i}.amp_label`] = s.振幅 === '静' ? '' : s.振幅;
     }
     out['__algo_luck'] = '1';
   }

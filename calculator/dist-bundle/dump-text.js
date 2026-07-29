@@ -311,11 +311,20 @@ function dumpBazi(b, bi) {
     const ys = en.\u8FD0\u5C81\u5F15\u52A8;
     if (ys) {
       lines.push("\u2502 \u2514\u8FD0\u5C81\u5F15\u52A8(\u5927\u8FD0/\u6D41\u5E74\xD7\u539F\u5C40+\u5C81\u8FD0\u4E92\u52A8\xB7\u4E2D\u7ACB\u68C0\u6D4B)");
+      const sn = ys.\u987A\u9006;
+      const tag = (o) => o ? `[${o.\u65B9\u5411}/${o.\u632F\u5E45}\xB7${o.\u5408\u6210}${o.\u4E8B\u4EF6?.length ? "\xB7" + o.\u4E8B\u4EF6.join("/") : ""}]` : "";
+      if (sn) {
+        lines.push(`\u2502   \u251C\u987A\u9006\u53CC\u8F74\u3014\u5E55\u540E\u65BD\u5DE5\u56FE\u3015: ${sn.\u8BF4\u660E}`);
+        if (Array.isArray(sn.\u5927\u8FD0) && sn.\u5927\u8FD0.length)
+          lines.push(`\u2502   \u251C\u5927\u8FD0\u65B9\u5411\u603B\u89C8: ${sn.\u5927\u8FD0.map((x) => `${x.\u8D77\u6B62\u5E74} ${x.\u5E72\u652F} ${x.\u65B9\u5411}/${x.\u632F\u5E45}(\u7528${x.\u53D1\u7528 > 0 ? "+" : ""}${x.\u53D1\u7528}/\u4F53${x.\u62A4\u4F53})`).join(" | ")}`);
+        if (Array.isArray(sn.\u6D41\u5E74) && sn.\u6D41\u5E74.length)
+          lines.push(`\u2502   \u251C\u6D41\u5E74\u65B9\u5411\u603B\u89C8: ${sn.\u6D41\u5E74.map((x) => `${x.\u5E74}${x.\u5E72\u652F} ${x.\u65B9\u5411}/${x.\u632F\u5E45}(\u7528${x.\u53D1\u7528 > 0 ? "+" : ""}${x.\u53D1\u7528}/\u4F53${x.\u62A4\u4F53})`).join(" | ")}`);
+      }
       if (Array.isArray(ys.\u5EFA\u8BAE\u8282\u70B9) && ys.\u5EFA\u8BAE\u8282\u70B9.length) {
         lines.push(`\u2502   \u251C\u5EFA\u8BAE\u8282\u70B9(timeline \u9009\u70B9\u767D\u540D\u5355\xB7\u91CD\u7EA7\u5FC5\u9009): ${ys.\u5EFA\u8BAE\u8282\u70B9.map((n) => `${n.\u5E74}(${n.\u5C81}\u5C81)${n.\u8F7D\u4F53}\xB7${n.\u6807\u8BB0}[${n.\u6743\u91CD}]`).join(" / ")}`);
       }
       (ys.\u5927\u8FD0\u5F15\u52A8 || []).forEach((d) => {
-        lines.push(`\u2502   \u251C\u5927\u8FD0${d.\u6B65} ${d.\u5E72\u652F} ${d.\u5E74\u9F84}`);
+        lines.push(`\u2502   \u251C\u5927\u8FD0${d.\u6B65} ${d.\u5E72\u652F} ${d.\u5E74\u9F84} ${tag(d.\u987A\u9006)}`);
         d.hits.forEach((h, i) => {
           const last = i === d.hits.length - 1;
           lines.push(`\u2502   \u2502 ${last ? "\u2514" : "\u251C"}[${h.type}] ${h.desc}`);
@@ -327,7 +336,7 @@ function dumpBazi(b, bi) {
         cd.\u6D41\u5E74.forEach((y, yi) => {
           const lastY = yi === cd.\u6D41\u5E74.length - 1;
           const all = [...y.vs\u539F\u5C40 || [], ...y.vs\u5927\u8FD0 || []];
-          lines.push(`\u2502     ${lastY ? "\u2514" : "\u251C"}${y.\u5E74} ${y.\u5E72\u652F} : ${all.map((h) => `[${h.type}]${h.desc.replace(/^流年/, "")}`).join(" ; ")}`);
+          lines.push(`\u2502     ${lastY ? "\u2514" : "\u251C"}${y.\u5E74} ${y.\u5E72\u652F} ${tag(y.\u987A\u9006)} : ${all.map((h) => `[${h.type}]${h.desc.replace(/^流年/, "")}`).join(" ; ")}`);
         });
       }
     }
@@ -339,7 +348,9 @@ function dumpBazi(b, bi) {
         const last = i === ly.\u6708.length - 1;
         const all = [...m.vs\u539F\u5C40 || [], ...m.vs\u5927\u8FD0 || []];
         const hitStr = all.length ? all.map((h) => `[${h.type}]${h.desc.replace(/^流月/, "")}`).join(" ; ") : "\u65E0\u663E\u8457\u5F15\u52A8";
-        lines.push(`\u2502 ${last ? "\u2514" : "\u251C"}${String(m.\u5E8F).padStart(2, "0")} ${m.\u5E72\u652F}\u6708(${m.\u8282\u6C14}\u8D77 ${m.\u516C\u5386\u8D77}~${m.\u516C\u5386\u6B62} \u7EA6${m.\u7EA6\u519C\u5386\u6708}) : ${hitStr}`);
+        const sn = m.\u987A\u9006;
+        const snStr = sn ? ` [${sn.\u65B9\u5411}/${sn.\u632F\u5E45}\xB7${sn.\u5408\u6210}${sn.\u4E8B\u4EF6?.length ? "\xB7" + sn.\u4E8B\u4EF6.join("/") : ""}]` : "";
+        lines.push(`\u2502 ${last ? "\u2514" : "\u251C"}${String(m.\u5E8F).padStart(2, "0")} ${m.\u5E72\u652F}\u6708(${m.\u8282\u6C14}\u8D77 ${m.\u516C\u5386\u8D77}~${m.\u516C\u5386\u6B62} \u7EA6${m.\u7EA6\u519C\u5386\u6708})${snStr} : ${hitStr}`);
       });
     }
     const cy = en.\u591A\u5E74\u5BF9\u6BD4;

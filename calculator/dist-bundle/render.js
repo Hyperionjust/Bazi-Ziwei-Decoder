@@ -465,45 +465,26 @@ function chartToFlatBazi(chart, currentYear) {
     out[`liunian.${i}.luck_class`] = "luck-ping";
   }
   if (!synth) out["liunian.head_note"] = "";
-  if (yaX?.\u51FA\u53E3) {
-    const likes = /* @__PURE__ */ new Set([...yaX.\u51FA\u53E3.\u5F00\u8FD0\u7528\u795E || [], ...yaX.\u51FA\u53E3.\u559C\u795E || []]);
-    const dislikes = new Set(yaX.\u51FA\u53E3.\u5FCC\u795E || []);
-    const gzScore = (gan, zhi) => {
-      let sc2 = 0;
-      for (const wx2 of [GAN_WX[gan], ZHI_WX[zhi]]) {
-        if (likes.has(wx2)) sc2++;
-        else if (dislikes.has(wx2)) sc2--;
-      }
-      return sc2;
-    };
-    const downgrade = (cls) => cls === "luck-ji" ? "luck-ping" : "luck-xiong";
-    const heavyByStep = {};
-    for (const st of en.\u8FD0\u5C81\u5F15\u52A8?.\u5927\u8FD0\u5F15\u52A8 || [])
-      heavyByStep[st.\u6B65 - 1] = (st.hits || []).some((h) => h.type === "\u5929\u514B\u5730\u51B2" || h.type === "\u4F0F\u541F");
+  const snX = en.\u8FD0\u5C81\u5F15\u52A8?.\u987A\u9006;
+  if (snX) {
+    const clsOf = (d) => d === "\u987A" ? "luck-ji" : d === "\u9006" ? "luck-xiong" : "luck-ping";
+    const byStep = {};
+    for (const x of snX.\u5927\u8FD0 || []) byStep[x.\u6B65 - 1] = x;
     for (let i = 0; i < 10; i++) {
-      const d = dyArr[i];
-      if (!d) continue;
-      let cls = (() => {
-        const sc2 = gzScore(d.ganZhi.gan, d.ganZhi.zhi);
-        return sc2 >= 1 ? "luck-ji" : sc2 <= -1 ? "luck-xiong" : "luck-ping";
-      })();
-      if (heavyByStep[i]) cls = downgrade(cls);
-      out[`dayun.${i}.luck_class`] = cls;
+      const s = byStep[i];
+      if (!s) continue;
+      out[`dayun.${i}.luck_class`] = clsOf(s.\u65B9\u5411);
+      out[`dayun.${i}.amp_label`] = s.\u632F\u5E45 === "\u9759" ? "" : s.\u632F\u5E45;
     }
-    const heavyYear = {};
-    for (const y of en.\u8FD0\u5C81\u5F15\u52A8?.\u5F53\u524D\u5927\u8FD0\u6D41\u5E74?.\u6D41\u5E74 || []) {
-      const all = [...y.vs\u539F\u5C40 || [], ...y.vs\u5927\u8FD0 || []];
-      heavyYear[y.\u5E74] = all.some((h) => h.type === "\u5929\u514B\u5730\u51B2" || h.type === "\u4F0F\u541F" || h.type === "\u5C81\u8FD0\u5E76\u4E34");
-    }
+    const byYear = {};
+    for (const x of snX.\u6D41\u5E74 || []) byYear[x.\u5E74] = x;
     for (let i = 0; i < 10; i++) {
       const ln = lnArr[i];
       if (!ln) continue;
-      let cls = (() => {
-        const sc2 = gzScore(ln.ganZhi.gan, ln.ganZhi.zhi);
-        return sc2 >= 1 ? "luck-ji" : sc2 <= -1 ? "luck-xiong" : "luck-ping";
-      })();
-      if (heavyYear[ln.year]) cls = downgrade(cls);
-      out[`liunian.${i}.luck_class`] = cls;
+      const s = byYear[ln.year];
+      if (!s) continue;
+      out[`liunian.${i}.luck_class`] = clsOf(s.\u65B9\u5411);
+      out[`liunian.${i}.amp_label`] = s.\u632F\u5E45 === "\u9759" ? "" : s.\u632F\u5E45;
     }
     out["__algo_luck"] = "1";
   }

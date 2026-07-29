@@ -19,6 +19,7 @@ import { computeShensha } from './shensha';
 import { adjudicateInteractions } from './bazi-enrich/interactions';
 import { analyzeYunSui, analyzeCompareYears } from './bazi-enrich/yunsui';
 import { analyzeLiuYue } from './bazi-enrich/liuyue';
+import { annotateShunNi } from './bazi-enrich/shunni';
 import { detectRarePatterns } from './bazi-enrich/rare';
 import { judgeSpouseProfile } from './bazi-enrich/zhengyuan';
 import { judgeBaWei } from './bazi-enrich/bawei';
@@ -231,6 +232,16 @@ function main() {
         } catch (e) {
           console.error('[compare] 多年对比计算跳过(非致命):', (e as Error)?.message || e);
         }
+      }
+
+      // v3.10.0 P0: 顺逆双轴下沉到补层 — 必须在 运岁引动/流月引动 都就位之后跑。
+      //   此前顺逆只存在于 render 的渲染路径,chart.txt 只有引动类型与轻/中/重,没有方向,
+      //   长文分析者面对一串「破/自刑/冲/害」天然读成坏消息(系统性悲观偏置)。
+      //   现在海报与长文共用 enrichment.运岁引动.顺逆 这一个事实源。
+      try {
+        annotateShunNi(enr, chart.bazi.dayun || [], chart.bazi.dayMaster);
+      } catch (e) {
+        console.error('[shunni] 顺逆计分跳过(非致命):', (e as Error)?.message || e);
       }
 
       // v2.5: 罕象检测(四库全/德秀满盘/三德会聚等) — 罕见度由算法定义,解读层优先讲解

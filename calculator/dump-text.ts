@@ -331,11 +331,22 @@ function dumpBazi(b: any, bi: any): string[] {
     const ys = en.运岁引动;
     if (ys) {
       lines.push('│ └运岁引动(大运/流年×原局+岁运互动·中立检测)');
+      // v3.10.0 P0: 顺逆双轴 — 此前方向只存在于海报渲染路径,chart.txt 只有引动类型与轻/中/重,
+      //   一串「破/自刑/冲/害」天然读成坏消息。现在方向与振幅在这里就给出,海报与长文同源。
+      const sn = ys.顺逆;
+      const tag = (o: any) => o ? `[${o.方向}/${o.振幅}·${o.合成}${o.事件?.length ? '·' + o.事件.join('/') : ''}]` : '';
+      if (sn) {
+        lines.push(`│   ├顺逆双轴〔幕后施工图〕: ${sn.说明}`);
+        if (Array.isArray(sn.大运) && sn.大运.length)
+          lines.push(`│   ├大运方向总览: ${sn.大运.map((x: any) => `${x.起止年} ${x.干支} ${x.方向}/${x.振幅}(用${x.发用 > 0 ? '+' : ''}${x.发用}/体${x.护体})`).join(' | ')}`);
+        if (Array.isArray(sn.流年) && sn.流年.length)
+          lines.push(`│   ├流年方向总览: ${sn.流年.map((x: any) => `${x.年}${x.干支} ${x.方向}/${x.振幅}(用${x.发用 > 0 ? '+' : ''}${x.发用}/体${x.护体})`).join(' | ')}`);
+      }
       if (Array.isArray(ys.建议节点) && ys.建议节点.length) {
         lines.push(`│   ├建议节点(timeline 选点白名单·重级必选): ${ys.建议节点.map((n: any) => `${n.年}(${n.岁}岁)${n.载体}·${n.标记}[${n.权重}]`).join(' / ')}`);
       }
       (ys.大运引动 || []).forEach((d: any) => {
-        lines.push(`│   ├大运${d.步} ${d.干支} ${d.年龄}`);
+        lines.push(`│   ├大运${d.步} ${d.干支} ${d.年龄} ${tag(d.顺逆)}`);
         d.hits.forEach((h: any, i: number) => {
           const last = i === d.hits.length - 1;
           lines.push(`│   │ ${last ? '└' : '├'}[${h.type}] ${h.desc}`);
@@ -347,7 +358,7 @@ function dumpBazi(b: any, bi: any): string[] {
         cd.流年.forEach((y: any, yi: number) => {
           const lastY = yi === cd.流年.length - 1;
           const all = [...(y.vs原局 || []), ...(y.vs大运 || [])];
-          lines.push(`│     ${lastY ? '└' : '├'}${y.年} ${y.干支} : ${all.map((h: any) => `[${h.type}]${h.desc.replace(/^流年/, '')}`).join(' ; ')}`);
+          lines.push(`│     ${lastY ? '└' : '├'}${y.年} ${y.干支} ${tag(y.顺逆)} : ${all.map((h: any) => `[${h.type}]${h.desc.replace(/^流年/, '')}`).join(' ; ')}`);
         });
       }
     }
@@ -361,7 +372,9 @@ function dumpBazi(b: any, bi: any): string[] {
         const last = i === ly.月.length - 1;
         const all = [...(m.vs原局 || []), ...(m.vs大运 || [])];
         const hitStr = all.length ? all.map((h: any) => `[${h.type}]${h.desc.replace(/^流月/, '')}`).join(' ; ') : '无显著引动';
-        lines.push(`│ ${last ? '└' : '├'}${String(m.序).padStart(2, '0')} ${m.干支}月(${m.节气}起 ${m.公历起}~${m.公历止} 约${m.约农历月}) : ${hitStr}`);
+        const sn = m.顺逆;
+        const snStr = sn ? ` [${sn.方向}/${sn.振幅}·${sn.合成}${sn.事件?.length ? '·' + sn.事件.join('/') : ''}]` : '';
+        lines.push(`│ ${last ? '└' : '├'}${String(m.序).padStart(2, '0')} ${m.干支}月(${m.节气}起 ${m.公历起}~${m.公历止} 约${m.约农历月})${snStr} : ${hitStr}`);
       });
     }
 
