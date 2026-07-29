@@ -103,8 +103,9 @@ var spec_default = {
     mirrored_in: ["prompts/bazi-poster.md", "prompts/bazi-poster-review.md"]
   },
   forbid: {
-    _desc: "\u7981\u8BCD\u5206\u5C42\u3002all=\u6240\u6709\u89E3\u8BFB\u5B57\u6BB5;shunni=\u4EC5\u7CBE\u8BFB/\u65F6\u95F4\u8F74\u7C7B\u5B57\u6BB5;mech=\u5E55\u540E\u53F0\u524D\u5206\u79BB(SKILL \u94C1\u5F8B 13)\u3002",
+    _desc: "\u7981\u8BCD\u5206\u5C42\u3002all=\u6240\u6709\u89E3\u8BFB\u5B57\u6BB5;shunni=\u4EC5\u7CBE\u8BFB/\u65F6\u95F4\u8F74\u7C7B\u5B57\u6BB5;mech=\u5E55\u540E\u53F0\u524D\u5206\u79BB(SKILL \u94C1\u5F8B 13)\u3002all_exempt_paths=\u8C41\u514D\u8DEF\u5F84:\u90A3\u91CC\u7684\u300C\u547D\u4E3B\u300D\u4E0D\u662F\u64AD\u62A5\u8154\u800C\u662F\u59D3\u540D\u5360\u4F4D\u2014\u2014\u63D0\u793A\u8BCD\u660E\u5199\u300C\u6CA1\u63D0\u4F9B\u5C31\u586B\u300E\u547D\u4E3B\u300F\u300D,\u4E0D\u8C41\u514D\u5C31\u81EA\u76F8\u77DB\u76FE(\u62794 \u4FEE)\u3002",
     all: ["tier", "needs_review", "lineage_weights", "\u547D\u4E3B", "\u8D77\u6CD5\u5F85\u6838"],
+    all_exempt_paths: ["^meta\\.name$"],
     freq: ["\u591A\u534A\u662F\u4F60", "\u4F60\u603B\u662F", "\u4F60\u6BCF\u6B21", "\u4F60\u4ECE\u4E0D", "\u4F60\u4E00\u5B9A\u4F1A", "\u7B2C\u4E00\u4E2A\u60F3\u5230\u4F60"],
     mech: ["rubric", "\u7B97\u6CD5\u5C42", "\u6620\u5C04\u77E9\u9635", "\u51FA\u6587\u534F\u8BAE", "v3\u52A0\u5206", "v4\u52A0\u5206", "\u5FCC\u795E\u6298\u5411", "R1\u9A7F\u9A6C", "R2\u6587", "R3\u80CE\u5143", "\u8BC4\u5BA1\u904D", "\u4F53\u68C0\u5668", "\u6D3E\u7CFB\u4FA7\u91CD", "lineage"],
     shunni: ["\u5927\u51F6", "\u707E\u5E74", "\u51F6\u5E74", "\u51F6\u661F"],
@@ -168,6 +169,7 @@ function checkAnalysis(a, chart, currentYear) {
     put("meta.archetype_name", bad);
   }
   const FORBID_ALL = spec_default.forbid.all;
+  const FORBID_EXEMPT = (spec_default.forbid.all_exempt_paths || []).map((r) => new RegExp(r));
   const FORBID_FREQ = spec_default.forbid.freq;
   const FORBID_MECH = spec_default.forbid.mech;
   const FORBID_SHUNNI = spec_default.forbid.shunni;
@@ -180,7 +182,9 @@ function checkAnalysis(a, chart, currentYear) {
   {
     const bad = [];
     walk(a, "", (p, v) => {
-      for (const w of FORBID_ALL) if (v.includes(w)) bad.push(`${p} \u542B\u5185\u90E8\u5B57\u6BB5/\u64AD\u62A5\u8154\u300C${w}\u300D`);
+      if (!FORBID_EXEMPT.some((re) => re.test(p))) {
+        for (const w of FORBID_ALL) if (v.includes(w)) bad.push(`${p} \u542B\u5185\u90E8\u5B57\u6BB5/\u64AD\u62A5\u8154\u300C${w}\u300D`);
+      }
       if (SHUNNI_PATH_RE.test(p)) {
         for (const w of FORBID_SHUNNI) if (v.includes(w)) bad.push(`${p} \u542B\u7EDD\u5BF9\u65AD\u8BED\u300C${w}\u300D(\u5E94\u7528\u987A\u98CE/\u9006\u98CE)`);
       }
@@ -270,8 +274,16 @@ function checkAnalysis(a, chart, currentYear) {
     const n = sentences(v).length;
     if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`\u7CBE\u8BFB\u6BB5\u5E94${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}\u53E5,\u5B9E\u9645${n}\u53E5`);
     if (k === "yunsui.reading_html") {
+      const \u5927\u8FD0\u5E74 = /* @__PURE__ */ new Set();
+      for (const d of chart?.bazi?.dayun || []) {
+        \u5927\u8FD0\u5E74.add(+d.startYear);
+        \u5927\u8FD0\u5E74.add(+d.endYear);
+      }
+      for (const n2 of chart?.bazi?.enrichment?.\u8FD0\u5C81\u5F15\u52A8?.\u5EFA\u8BAE\u8282\u70B9 || []) \u5927\u8FD0\u5E74.add(+n2.\u5E74);
       const yrs = (strip(v).match(/(19|20)\d{2}/g) || []).map(Number);
-      for (const y of yrs) if (y < currentYear - 1 || y > currentYear + 5) warn.push(`\u63D0\u53CA\u5E74\u4EFD${y}\u8D85\u51FA\u4ECA\u5E74\u8D775\u5E74\u7A97\u53E3`);
+      for (const y of yrs)
+        if ((y < currentYear - 1 || y > currentYear + 5) && !\u5927\u8FD0\u5E74.has(y))
+          warn.push(`\u63D0\u53CA\u5E74\u4EFD${y}\u8D85\u51FA\u4ECA\u5E74\u8D775\u5E74\u7A97\u53E3,\u4E14\u4E0D\u5728\u5927\u8FD0\u8D77\u6B62\u5E74/\u5EFA\u8BAE\u8282\u70B9\u767D\u540D\u5355\u5185`);
     }
     put(k, bad, warn);
   }
@@ -294,7 +306,12 @@ function checkAnalysis(a, chart, currentYear) {
     if (rare.length) {
       const names = rare.map((r) => String(r.\u540D || "").replace(/[(（].*$/, ""));
       const text = strip(String(a?.shensha?.reading_html || "")) + strip(String(a?.hechong?.reading_html || ""));
-      const mentioned = names.some((n) => n && text.includes(n.slice(0, 3)));
+      const \u5339\u914D\u8BCD = (r) => {
+        const \u5168 = String(r.\u540D || "").replace(/[(（].*$/, "");
+        const alias = Array.isArray(r.\u5339\u914D\u8BCD) ? r.\u5339\u914D\u8BCD : [];
+        return [\u5168, \u5168.replace(/^原局/, ""), ...alias].filter((x) => x && x.length >= 2);
+      };
+      const mentioned = rare.some((r) => \u5339\u914D\u8BCD(r).some((w) => text.includes(w)));
       if (!mentioned) {
         for (const k of ["shensha.reading_html", "hechong.reading_html"]) {
           R[k] = { status: "FAIL", reasons: [...R[k]?.reasons || [], `\u76D8\u6709\u7F55\u8C61(${names.join("/")})\u4F46\u7CBE\u8BFB\u6BB5\u672A\u63D0\u53CA`] };

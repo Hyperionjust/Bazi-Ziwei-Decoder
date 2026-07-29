@@ -58,6 +58,10 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
 
   // ---- 全局禁词(所有解读字段;分层定义见 spec.json forbid) ----
   const FORBID_ALL = SPEC.forbid.all;
+  // 批4 修:`命主` 是全局禁词(播报腔),但 bazi-poster.md 又明写「name:没提供填『命主』」——
+  //   姓名槽位里的「命主」是占位符不是播报腔,不豁免就是提示词与体检器自相矛盾,
+  //   模型照提示词写必被打回,照体检器写又违反提示词。豁免路径写在 spec.json 里(单一事实源)。
+  const FORBID_EXEMPT: RegExp[] = ((SPEC.forbid as any).all_exempt_paths || []).map((r: string) => new RegExp(r));
   const FORBID_FREQ = SPEC.forbid.freq;
   const FORBID_MECH = SPEC.forbid.mech;
   const FORBID_SHUNNI = SPEC.forbid.shunni; // 精读/时间轴措辞
@@ -70,7 +74,8 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
   {
     const bad: string[] = [];
     walk(a, '', (p, v) => {
-      for (const w of FORBID_ALL) if (v.includes(w)) bad.push(`${p} 含内部字段/播报腔「${w}」`);
+      if (!FORBID_EXEMPT.some(re => re.test(p)))
+        for (const w of FORBID_ALL) if (v.includes(w)) bad.push(`${p} 含内部字段/播报腔「${w}」`);
       if (SHUNNI_PATH_RE.test(p)) for (const w of FORBID_SHUNNI) if (v.includes(w)) bad.push(`${p} 含绝对断语「${w}」(应用顺风/逆风)`);
       for (const w of FORBID_FREQ) if (v.includes(w)) bad.push(`${p} 含行为频率断言「${w}」(能力而非事迹:改写为能力/特质/潜力句式)`);
       for (const w of FORBID_MECH) if (v.includes(w)) bad.push(`${p} 泄漏幕后机制词「${w}」(幕后台前分离:用户只看结论)`);
@@ -153,8 +158,16 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     const n = sentences(v).length;
     if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`精读段应${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}句,实际${n}句`);
     if (k === 'yunsui.reading_html') {
+      // 批4 修:运岁段本来就要讲大运,而一步大运横跨十年——「1997-2006 癸未」这种年份
+      //   必然落在「今年起 5 年窗口」之外,却是算法自己给的事实,警它没有道理。
+      //   豁免:大运起止年 与 建议节点年(都由算法层产出,不是模型自由发挥的年份)。
+      const 大运年 = new Set<number>();
+      for (const d of (chart?.bazi?.dayun || [])) { 大运年.add(+d.startYear); 大运年.add(+d.endYear); }
+      for (const n of (chart?.bazi?.enrichment?.运岁引动?.建议节点 || [])) 大运年.add(+n.年);
       const yrs = (strip(v).match(/(19|20)\d{2}/g) || []).map(Number);
-      for (const y of yrs) if (y < currentYear - 1 || y > currentYear + 5) warn.push(`提及年份${y}超出今年起5年窗口`);
+      for (const y of yrs)
+        if ((y < currentYear - 1 || y > currentYear + 5) && !大运年.has(y))
+          warn.push(`提及年份${y}超出今年起5年窗口,且不在大运起止年/建议节点白名单内`);
     }
     put(k, bad, warn);
   }
@@ -181,7 +194,16 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     if (rare.length) {
       const names = rare.map(r => String(r.名 || '').replace(/[(（].*$/, ''));
       const text = strip(String(a?.shensha?.reading_html || '')) + strip(String(a?.hechong?.reading_html || ''));
-      const mentioned = names.some(n => n && text.includes(n.slice(0, 3)));
+      // 批4 修:原判据是「名字前 3 字出现在文里」,这个前缀太脆——
+      //   「原局天克地冲」前 3 字是「原局天」,可文里自然写的是「天克地冲」;
+      //   「原局伏吟」前 3 字是「原局伏」。于是模型明明点名了罕象,照样判 FAIL。
+      //   改为按罕象自带的 匹配词(rare.ts 定义处说了算)判,缺省回退到「去括号、去『原局』前缀的全名」。
+      const 匹配词 = (r: any): string[] => {
+        const 全 = String(r.名 || '').replace(/[(（].*$/, '');
+        const alias: string[] = Array.isArray(r.匹配词) ? r.匹配词 : [];
+        return [全, 全.replace(/^原局/, ''), ...alias].filter(x => x && x.length >= 2);
+      };
+      const mentioned = rare.some(r => 匹配词(r).some(w => text.includes(w)));
       if (!mentioned) {
         for (const k of ['shensha.reading_html', 'hechong.reading_html']) {
           R[k] = { status: 'FAIL', reasons: [...(R[k]?.reasons || []), `盘有罕象(${names.join('/')})但精读段未提及`] };

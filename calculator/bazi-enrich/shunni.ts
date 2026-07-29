@@ -51,6 +51,27 @@ export const SHUNNI_PARAMS = {
   },
   体档: { 强: 1.5, 中: 0.7, 说明: '锚点:1.5=第一调候本干透出;0.7=第二调候本干等效' },
   方向: { 顺: 1, 逆: -1, 说明: '发用≥+1 顺 / ≤−1 逆 / 其余 平' },
+  // S1-1(v3.11.0):破型重级要进方向,不能只算振幅。
+  //   毛盘回测的实锤:1976 岁运并临,振幅判「剧动」而方向仍判「顺」——
+  //   把一个明确的破局年判成顺风。v3.10 做两轴正交化时把这一层一并去掉了,
+  //   就这一点而言正交化改差了(CHANGELOG v3.10.0「已知问题」第 2 条)。
+  //   区分:【破型】天克地冲/伏吟/岁运并临——结构性破,进发用线 −1;
+  //         【中性型】冲提纲/大运交接——只是动得大,方向仍由喜忌定,不进发用。
+  //   只扣一次,不按条数叠加:破了就是破了,两条破型不等于两倍逆。
+  破型: {
+    类型: ['天克地冲', '伏吟', '岁运并临'] as string[],
+    发用扣: -1,
+    说明: '破型重级进发用线(封顶扣一次);冲提纲/交接属中性型重级,仍只算振幅',
+  },
+  // S1-4(v3.11.0):振幅分档改累加。
+  //   原口径取最重的一条,于是任一「中」级引动(支冲/自刑/相刑/凑局…)就算「动」——
+  //   57 个流年里「静」只剩 26%,这根轴基本没有区分力,大部分年份看着都在动。
+  //   改累加后:单条中级仍算静,两条中级才算动;单条重级直接剧动(与原口径一致,回归不破)。
+  振幅: {
+    分: { 重: 4, 中: 1, 轻: 0.3 },
+    动: 1.5, 剧动: 4,
+    说明: '命中条数×权重累加分档:<1.5 静 / 1.5~4 动 / ≥4 剧动。单条重级=4 直接剧动',
+  },
 } as const;
 
 export type FangXiang = '顺' | '平' | '逆';
@@ -63,6 +84,7 @@ export interface ShunNi {
   方向: FangXiang;
   振幅: ZhenFu;
   体档: TiDang;
+  破型?: true;       // S1-1:本次引动含破型重级(天克地冲/伏吟/岁运并临),已在发用线扣过一次
   合成: string;      // 二维标签,刻意不给数值(压回标量正是本次要消除的问题)
   事件: string[];    // 十神事件标注,不参与方向分值
 }
@@ -147,26 +169,32 @@ function shiShenEvents(gan: Tiangan, zhi: Dizhi, dm: Tiangan): string[] {
   return out;
 }
 
+/** S1-4:累加分档(原为取最重的一条) */
 function zhenFu(hits: YunSuiHit[]): ZhenFu {
-  let w: '重' | '中' | '轻' = '轻';
-  for (const h of hits || []) {
-    const hw = hitWeight(h);
-    if (hw === '重') { w = '重'; break; }
-    if (hw === '中') w = '中';
-  }
-  return w === '重' ? '剧动' : w === '中' ? '动' : '静';
+  const A = SHUNNI_PARAMS.振幅;
+  let s = 0;
+  for (const h of hits || []) s += A.分[hitWeight(h)];
+  return s >= A.剧动 ? '剧动' : s >= A.动 ? '动' : '静';
+}
+
+/** S1-1:本次引动里有没有【破型】重级(天克地冲/伏吟/岁运并临) —— 中性型重级(冲提纲)不算 */
+function hasPoXing(hits: YunSuiHit[]): boolean {
+  return (hits || []).some(h => (SHUNNI_PARAMS.破型.类型 as readonly string[]).includes(h.type));
 }
 
 /** 单个干支的双轴评分 */
 export function scoreGZ(ganZhi: string, hits: YunSuiHit[], ctx: ShunNiCtx): ShunNi {
   const gan = ganZhi.charAt(0) as Tiangan;
   const zhi = ganZhi.charAt(1) as Dizhi;
-  const fy = faYong(gan, zhi, ctx);
+  const 破 = hasPoXing(hits);
+  // S1-1:破型重级进发用线(只扣一次)。中性型重级(冲提纲/交接)不进,仍只算振幅。
+  const fy = faYong(gan, zhi, ctx) + (破 ? SHUNNI_PARAMS.破型.发用扣 : 0);
   const ht = huTi(gan, zhi, ctx);
   const 方向: FangXiang = fy >= SHUNNI_PARAMS.方向.顺 ? '顺' : fy <= SHUNNI_PARAMS.方向.逆 ? '逆' : '平';
   const 体档: TiDang = ht >= SHUNNI_PARAMS.体档.强 ? '强' : ht >= SHUNNI_PARAMS.体档.中 ? '中' : '弱';
   return {
     发用: fy, 护体: ht, 方向, 振幅: zhenFu(hits), 体档,
+    ...(破 ? { 破型: true as const } : {}),
     合成: `体${体档}用${方向}`,
     事件: shiShenEvents(gan, zhi, ctx.dayMaster),
   };
@@ -176,7 +204,8 @@ const 说明 =
   '顺逆双轴=发用线(出口喜忌:干支两位各 +喜/−忌)与护体线(调候命中:先1.0/次0.7/再0.5,' +
   '本干透出×1.5、同五行透干×1.0、地支本气得气×0.8;J2 起再减典籍病忌:病字透干−1.5/坐支本气−0.8(只认本字)、' +
   '原局每条忌档条例−0.5 封顶−1.5)分开计,不合成标量;' +
-  '方向(顺/平/逆)只由发用线定、振幅(静/动/剧动)只由引动重级定(统一走 hitWeight),' +
+  '方向(顺/平/逆)由发用线定,另 S1-1:破型重级(天克地冲/伏吟/岁运并临)进发用 −1(封顶一次),' +
+  '中性型重级(冲提纲/交接)不进方向只算振幅;振幅(静/动/剧动)由引动按 重4/中1/轻0.3 累加分档(S1-4,原为取最重一条);' +
   '「事件」为十神标注(如财星透干),不参与方向分值,供解读层作机会/压力信号。' +
   '——本块为幕后施工图,字段名与计分过程一律不得向用户展示。';
 

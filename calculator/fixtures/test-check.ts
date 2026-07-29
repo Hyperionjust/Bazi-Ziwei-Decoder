@@ -147,5 +147,53 @@ ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与�
   ok(rImgOk['_全局'].status === 'PASS', 'mbti:日主意象落锚→_全局 PASS: ' + JSON.stringify(rImgOk['_全局']?.reasons));
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 批4(v3.11.0)· 体检器与提示词/算法层的三处内部矛盾
+// ---------------------------------------------------------------------------
+// 这三条都不是「规则太严」,是**体检器和别处对不上**——模型照提示词写必被打回,
+// 照体检器写又违反提示词;或者算法层给的事实被体检器当成模型的错。
+// 每条都正反例各锁一次:修完不能变成放行一切。
+// ═══════════════════════════════════════════════════════════════════════════
+{
+  const 基 = () => JSON.parse(JSON.stringify(good));
+  const F = (a: any, ch: any = chart) => Object.entries(checkAnalysis(a, ch, 2026))
+    .filter(([, v]: any) => v.status === 'FAIL').map(([k, v]: any) => `${k}:${v.reasons.join('|')}`);
+
+  // ── 批4-a:`命主` 是全局禁词(播报腔),但 bazi-poster.md 又明写「name:没提供填『命主』」──
+  //    姓名槽位里的「命主」是占位符不是播报腔。豁免路径写在 spec.json,这里锁正反两面。
+  {
+    const a = 基(); a.meta.name = '命主';
+    ok(!F(a).some(x => x.includes('命主')), `批4-a 正例:meta.name=「命主」不再被禁词误杀(提示词就是这么要求的) ${JSON.stringify(F(a))}`);
+    const b = 基(); b.meta.name = '张三'; b.hechong.reading_html = seg(4) + '命主的运势不错。';
+    ok(F(b).some(x => x.includes('命主')), '批4-a 反例:正文里的播报腔「命主」仍被拦(豁免只给姓名槽位)');
+  }
+
+  // ── 批4-b:运岁段本来就要讲大运,一步大运横跨十年,年份必然落在「今年起 5 年窗口」外 ──
+  //    那是算法层给的事实,不是模型乱写。豁免大运起止年 + 建议节点年。
+  {
+    const ch: any = JSON.parse(JSON.stringify(chart));
+    ch.bazi.dayun = [{ startYear: 2028, endYear: 2037 }];
+    const a = 基(); a.yunsui.reading_html = '2028-2037这步大运是关键窗口。' + seg(2);
+    ok((checkAnalysis(a, ch, 2026) as any)['yunsui.reading_html'].status === 'PASS',
+      '批4-b 正例:引用大运起止年 2028-2037 不再报警(算法层自己给的年份)');
+    const b = 基(); b.yunsui.reading_html = '1949年是个转折点。' + seg(2);
+    const r = (checkAnalysis(b, ch, 2026) as any)['yunsui.reading_html'];
+    ok(r.status === 'WARN' && r.reasons.some((x: string) => x.includes('1949')),
+      '批4-b 反例:白名单外的无关年份 1949 仍报警');
+  }
+
+  // ── 批4-c:罕象提及判据原是「名字前 3 字出现在文里」——
+  //    「原局天克地冲」前 3 字是「原局天」,而文里自然写的是「天克地冲」,于是点名了也 FAIL。
+  {
+    const ch: any = JSON.parse(JSON.stringify(chart));
+    ch.bazi.enrichment.罕象 = [{ 名: '原局天克地冲', 罕见度: '罕见', 涉及: '年-日', 说明: 'x', 匹配词: ['天克地冲'] }];
+    const a = 基(); a.shensha.reading_html = seg(3) + '你这盘还有天克地冲的结构在。';
+    ok(!F(a, ch).some(x => x.startsWith('shensha.reading_html')),
+      '批4-c 正例:文里写「天克地冲」即算点名(不必凑「原局天」这个前缀)');
+    const b = 基();
+    ok(F(b, ch).some(x => x.includes('罕象')), '批4-c 反例:盘有罕象而只字未提,仍 FAIL');
+  }
+}
+
 console.log(failed ? `\n❌ ${failed} 失败` : '\n✅ 全部通过');
 process.exit(failed ? 1 : 0);

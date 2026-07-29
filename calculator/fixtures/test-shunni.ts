@@ -13,7 +13,7 @@
 // ---------------------------------------------------------------------------
 import { createChart } from '../yiqi-core/index';
 import { enrichBazi } from '../bazi-enrich/enrich';
-import { analyzeYunSui, hitWeight, YunSuiHit } from '../bazi-enrich/yunsui';
+import { analyzeYunSui, hitWeight, gzVsChart, suiVsYun, YunSuiHit } from '../bazi-enrich/yunsui';
 import { analyzeLiuYue } from '../bazi-enrich/liuyue';
 import { annotateShunNi, scoreGZ, buildCtx } from '../bazi-enrich/shunni';
 
@@ -73,14 +73,68 @@ ok(m04?.发用 === -1, `2026-04 发用仍为 -1(事件轴不参与方向分值,�
   ok(scoreGZ('庚寅', [bingLin], ctx).振幅 === '剧动', '岁运并临 → 剧动(旧大运路径漏判此类)');
 }
 
-// ── 方向/振幅正交:同一干支换引动只动振幅,不动方向 ────────────────────────
+// ── 方向/振幅正交(S1-1 修订后的口径) ──────────────────────────────────────
+// v3.10 的正交化把「破型重级」一并从方向里拿掉了,毛盘回测暴露:1976 岁运并临
+// 振幅判剧动、方向仍判顺——把明确的破局年说成顺风。所以正交是有边界的:
+//   【中性型】重级(冲提纲/交接)只是动得大 → 仍不动方向,正交成立;
+//   【破型】重级(天克地冲/伏吟/岁运并临)是结构性破 → 进发用线 −1,方向该动。
 {
   const ctx = buildCtx(enr.用神建议, chart.bazi.dayMaster)!;
   const quiet = scoreGZ('庚寅', [], ctx);
-  const loud = scoreGZ('庚寅', [{ vs: '月柱', type: '天克地冲', desc: 'x' }], ctx);
-  ok(quiet.方向 === loud.方向 && quiet.发用 === loud.发用 && quiet.护体 === loud.护体,
-    '方向/两轴分值不随振幅变化(正交)');
-  ok(quiet.振幅 === '静' && loud.振幅 === '剧动', '振幅随引动重级变化');
+  const 中性 = scoreGZ('庚寅', [{ vs: '月柱', type: '支冲', desc: '流月支寅冲月柱(提纲)申——冲提纲' }], ctx);
+  ok(quiet.方向 === 中性.方向 && quiet.发用 === 中性.发用 && quiet.护体 === 中性.护体,
+    '中性型重级(冲提纲)不动方向与两轴分值 —— 正交仍成立');
+  ok(quiet.振幅 === '静' && 中性.振幅 === '剧动', '振幅随引动重级变化');
+}
+
+// ── S1-1:破型重级进方向 ──────────────────────────────────────────────────
+{
+  const ctx = buildCtx(enr.用神建议, chart.bazi.dayMaster)!;
+  const base = scoreGZ('庚寅', [], ctx);
+  for (const t of ['天克地冲', '伏吟', '岁运并临']) {
+    const s = scoreGZ('庚寅', [{ vs: '大运', type: t, desc: t } as any], ctx);
+    ok(s.发用 === base.发用 - 1 && s.破型 === true,
+      `${t}(破型) → 发用 ${base.发用} → ${s.发用},并标记 破型`);
+  }
+  // 只扣一次:两条破型不等于两倍逆
+  const 双破 = scoreGZ('庚寅', [{ vs: '大运', type: '伏吟', desc: 'x' }, { vs: '年柱', type: '天克地冲', desc: 'y' }] as any, ctx);
+  ok(双破.发用 === base.发用 - 1, `两条破型仍只扣一次 (得到 ${双破.发用})`);
+  // 中性型重级不扣
+  const 中性 = scoreGZ('庚寅', [{ vs: '月柱', type: '支冲', desc: '冲提纲' }], ctx);
+  ok(中性.发用 === base.发用 && !中性.破型, '冲提纲是中性型重级,不进发用线');
+
+  // ★ 工单点名的实况点:毛盘 1893-12-26 08:00 男,1976 丙辰 岁运并临
+  //   改动前 振幅=剧动 而 方向=顺(把破局年说成顺风);现在应压到「平」。
+  const mao: any = createChart({ year: 1893, month: 12, day: 26, hour: 8, minute: 0, gender: 'male', isLunar: false, timeZone: 8 } as any);
+  const mz = mao.bazi.siZhu;
+  ok(['year', 'month', 'day', 'hour'].map(k => mz[k].gan + mz[k].zhi).join(' ') === '癸巳 甲子 丁酉 甲辰', '毛盘四柱=癸巳 甲子 丁酉 甲辰');
+  const mEnr: any = enrichBazi({ 年: mz.year, 月: mz.month, 日: mz.day, 时: mz.hour } as any);
+  mEnr.运岁引动 = analyzeYunSui({ 年: mz.year, 月: mz.month, 日: mz.day, 时: mz.hour } as any, mao.bazi.dayun || [], 1976);
+  annotateShunNi(mEnr, mao.bazi.dayun || [], mao.bazi.dayMaster);
+  const mCtx = buildCtx(mEnr.用神建议, mao.bazi.dayMaster, mEnr.调候条例)!;
+  const d76 = (mao.bazi.dayun || []).find((d: any) => 1976 >= d.startYear && 1976 <= d.endYear);
+  const ln76 = (d76?.liuNian || []).find((l: any) => l.year === 1976);
+  const h76 = [...gzVsChart({ gan: ln76.ganZhi.gan, zhi: ln76.ganZhi.zhi }, { 年: mz.year, 月: mz.month, 日: mz.day, 时: mz.hour } as any, '流年'),
+               ...suiVsYun({ gan: ln76.ganZhi.gan, zhi: ln76.ganZhi.zhi }, { gan: d76.ganZhi.gan, zhi: d76.ganZhi.zhi })];
+  const s76 = scoreGZ(ln76.ganZhi.gan + ln76.ganZhi.zhi, h76, mCtx);
+  ok(h76.some((h: any) => h.type === '岁运并临'), `1976 确有岁运并临 (得到 ${h76.map((h: any) => h.type).join('/')})`);
+  ok(s76.破型 === true && s76.方向 === '平' && s76.振幅 === '剧动',
+    `★1976 丙辰:破型进方向 → 方向=平(改动前为「顺」)、振幅=剧动 (得到 ${s76.方向}/${s76.振幅}/发用${s76.发用})`);
+}
+
+// ── S1-4:振幅累加分档 ───────────────────────────────────────────────────
+// 原口径取最重的一条,任一「中」级引动就算「动」——毛盘 90 个流年里「静」只剩 29%,
+// 这根轴基本没有区分力。改累加后毛盘实测 静 29%→38%、动 42%→33%,三档接近均分。
+{
+  const ctx = buildCtx(enr.用神建议, chart.bazi.dayMaster)!;
+  const Z = (hits: any[]) => scoreGZ('庚寅', hits, ctx).振幅;
+  const 中 = { vs: '年柱', type: '支冲', desc: '支冲' };
+  const 轻 = { vs: '年柱', type: '干合', desc: '干合' };
+  ok(Z([]) === '静', '无引动 → 静');
+  ok(Z([中]) === '静', '单条中级 → 静(原口径判「动」,正是钝感的来源)');
+  ok(Z([中, 中]) === '动', '两条中级 → 动');
+  ok(Z([轻, 轻, 轻]) === '静', '三条轻级 → 仍静');
+  ok(Z([{ vs: '大运', type: '天克地冲', desc: 'x' }]) === '剧动', '单条重级 → 剧动(与原口径一致,不回归)');
 }
 
 // ── 全覆盖:大运/流年数组不被「有引动」过滤掉 ─────────────────────────────
