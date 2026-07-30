@@ -767,7 +767,11 @@ function main() {
     if (Array.isArray(analysis.liunian_luck) && analysis.liunian_luck.length !== 10)
       console.error(`[render][warn] liunian_luck \u9879\u6570(${analysis.liunian_luck.length}) \u2260 10,\u591A\u4F59\u9879\u5FFD\u7565/\u7F3A\u9879\u6309 luck-ping`);
   }
-  const html = renderTemplate(template, data);
+  let html = renderTemplate(template, data);
+  html = html.replace(
+    '<span class="mz-label">\u547D\u4E3B</span><span class="mz-name">\u547D\u4E3B</span>',
+    '<span class="mz-label">\u547D\u4E3B</span>'
+  );
   if (args.output) {
     fs.writeFileSync(args.output, html, "utf-8");
     console.error(`Rendered HTML written to ${args.output}`);

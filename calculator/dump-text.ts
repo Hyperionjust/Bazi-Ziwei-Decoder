@@ -95,10 +95,11 @@ function dumpZiwei(z: any, bi: any): string[] {
     }
     if (g.daXian) {
       const dxMark = g.daXian.isCurrent ? '★当前' : '';
-      lines.push(`${childPrefix}├大限 : ${g.daXian.startAge}-${g.daXian.endAge}虚岁 ${dxMark}`);
+      lines.push(`${childPrefix}├大限 : ${g.daXian.startAge}-${g.daXian.endAge}虚岁${dxMark ? ' ' + dxMark : ''}`);
     }
     if (g.liuNian && g.liuNian.length > 0) {
-      lines.push(`${childPrefix}└流年 : ${g.liuNian.join('·')}虚岁`);
+      // v3.12 批E3:流年落宫=大限区间逐年展开,原样列 10 个数字纯噪音(全盘 120 个),压成区间
+      lines.push(`${childPrefix}└流年 : ${g.liuNian[0]}-${g.liuNian[g.liuNian.length - 1]}虚岁逐年落此宫`);
     }
     if (!isLast) lines.push('│ │');
   });
@@ -204,7 +205,8 @@ function dumpBazi(b: any, bi: any): string[] {
           const seg: string[] = [];
           if (zh.length) seg.push(`重用:${zh.join('·')}`);
           if (can.length) seg.push(`参用:${can.join('·')}`);
-          if (no.length) seg.push(`不用:${no.join('·')}`);
+          // v3.12 批E4:「不用」列满四派的长尾(MODERN 层常态)压成一词——原样重复 9 次很占 token
+          if (no.length) seg.push(no.length >= 4 ? '四派均不用' : `不用:${no.join('·')}`);
           lwStr = `  〔派系侧重 ${seg.join(' / ')}〕`;
         }
         lines.push(`${pre}${h.name} [${h.tier}·${polCn[h.polarity]||h.polarity}] @${where}${via}${flag}${lwStr}`);
@@ -317,7 +319,7 @@ function dumpBazi(b: any, bi: any): string[] {
       for (const b of (tl.病 || [])) {
         if (b.在盘) lines.push(`│ │ ├病〔典籍明指〕: ${b.字}${b.透 ? '(透干)' : '(藏支)'} — ${b.依据}`);
       }
-      if (tl.两系分歧?.length) for (const dv of tl.两系分歧) lines.push(`│ │ └⚖本格两系分歧 : ${dv}`);
+      if (tl.两系分歧?.length) for (const dv of tl.两系分歧) lines.push(`│ │ ├⚖本格两系分歧 : ${dv}`); // 批E2:后面恒有档位口径行,不该用 └
       lines.push(`│ │ └档位口径 : 上/中/下/忌是典籍的判断,不是实证;解读须转写为倾向性表述,不得写成宿命断语`);
     } else if (tl) {
       lines.push(`│ ├调候条例〔${tl.格}〕 : 该格尚未吸收(造化元钥吸收工程分批进行,见 docs/工单-v3.11) — 解读层不得凭空引用条例名`);
@@ -330,7 +332,9 @@ function dumpBazi(b: any, bi: any): string[] {
       const s = en.五行统计.surface || en.五行统计;
       const w = en.五行统计.withCangGan;
       if (s) lines.push(`│ ├五行统计(surface) : 木${s.木||0} 火${s.火||0} 土${s.土||0} 金${s.金||0} 水${s.水||0}`);
-      if (w) lines.push(`│ ├五行统计(含藏干) : 木${w.木||0} 火${w.火||0} 土${w.土||0} 金${w.金||0} 水${w.水||0}`);
+      // 批E1:含藏干加权分是浮点累加,原样输出会带 1.9000000000000001 之类的渣,统一一位小数
+      const f1 = (x: any) => +((+x || 0).toFixed(1));
+      if (w) lines.push(`│ ├五行统计(含藏干) : 木${f1(w.木)} 火${f1(w.火)} 土${f1(w.土)} 金${f1(w.金)} 水${f1(w.水)}`);
     }
     // 天干关系
     const gr = en.天干关系;

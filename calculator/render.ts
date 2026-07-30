@@ -787,7 +787,11 @@ function main() {
     if (Array.isArray(analysis.liunian_luck) && analysis.liunian_luck.length !== 10)
       console.error(`[render][warn] liunian_luck 项数(${analysis.liunian_luck.length}) ≠ 10,多余项忽略/缺项按 luck-ping`);
   }
-  const html = renderTemplate(template, data);
+  let html = renderTemplate(template, data);
+  // v3.12 批E5(作者拍板:render 缺省隐藏):meta.name 走「命主」兜底时,八字海报顶栏会渲染成
+  // 「命主·命主」(标签与名字同词重复)。兜底态下只留标签;用户真提供了名字则不命中此替换。
+  html = html.replace('<span class="mz-label">命主</span><span class="mz-name">命主</span>',
+                      '<span class="mz-label">命主</span>');
 
   if (args.output) {
     fs.writeFileSync(args.output, html, 'utf-8');
