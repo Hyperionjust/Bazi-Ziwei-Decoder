@@ -10,6 +10,7 @@ import * as fs from 'fs';
 //         不再在本文件与提示词里各写一遍。改规格只改 spec.json,
 //         提示词里的同款数字由 fixtures/test-spec-sync.ts 逐条比对。
 import SPEC from './spec.json';
+import TIAOHOU from './tiaohou.json';   // J4:条例命中清单的事实源(防编造用)
 
 type Rep = { status: 'PASS'|'FAIL'|'WARN'; reasons: string[] };
 const strip = (s: string) => String(s || '').replace(/<[^>]+>/g, '');
@@ -209,6 +210,36 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
           R[k] = { status: 'FAIL', reasons: [...(R[k]?.reasons || []), `盘有罕象(${names.join('/')})但精读段未提及`] };
         }
       }
+    }
+  }
+
+  // ---- J4(v3.11.0):调候条例引用防编造 ----
+  // 条例名是《穷通宝鉴》/《造化元钥》该格条件树里的名目(寒木向阳/水泛木浮/去浊留清…)。
+  // 引用【命中】的是「解读引真典有名目」;引用【未命中】的就是编造——那条规则在这张盘上根本没成立。
+  // 判据只能是「本格内未命中的名」:同一个名可能在别的格里也叫这个(如「壬癸破火」甲辰甲戌都有),
+  // 拿全表的名去扫会误伤,所以只拿本格的 未命中集 减去 命中集。
+  {
+    const tl = chart?.bazi?.enrichment?.调候条例;
+    if (tl?.有条例) {
+      const 命中名 = new Set<string>((tl.命中 || []).map((h: any) => String(h.名 || h.显示名)));
+      const 条例库: any = (TIAOHOU as any)?.条例 || {};
+      const 本格名: string[] = (条例库[tl.格]?.条例 || []).map((t: any) => String(t.名));
+      // 别格的名也要查:在甲/卯 的盘上引「寒木向阳」(甲/寅 的名目)同样是编造。
+      //   但别格的名限 ≥4 字——2~3 字的名(如「假从」「壬透」)在正常行文里会撞车,
+      //   4 字以上的条例名(寒木向阳/水泛木浮/去浊留清)足够独特,误伤风险低。
+      const 别格名: string[] = Object.entries(条例库)
+        .filter(([k]) => !k.startsWith('_') && k !== tl.格)
+        .flatMap(([, v]: any) => (v.条例 || []).map((t: any) => String(t.名)))
+        .filter(n => n.length >= 4);
+      const 未命中名 = [...new Set([
+        ...本格名.filter(n => n && n.length >= 2),
+        ...别格名,
+      ])].filter(n => !命中名.has(n));
+      const bad: string[] = [];
+      walk(a, '', (p, v) => {
+        for (const n of 未命中名) if (v.includes(n)) bad.push(`${p} 引用了未命中的条例名「${n}」(本盘 ${tl.格} 未命中该条,属编造;命中的是 ${[...命中名].join('、') || '无'})`);
+      });
+      put('_条例引用', bad);
     }
   }
 

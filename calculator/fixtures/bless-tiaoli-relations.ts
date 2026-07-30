@@ -22,7 +22,10 @@ import { evalTiaoLi } from '../bazi-enrich/tiaohou-tiaoli';
 import { Tiangan, Dizhi, TIANGAN, DIZHI } from '../bazi-enrich/tables';
 
 export const SEED = 20260729;
-export const SAMPLES = 40000;
+// M4 全表 120 格后,40000/格 = 480 万次求值,祝福脚本与测试 ⓖ 都跑不动(实测被杀)。
+// 降到 12000:关系判定只需要命中集合的包含关系,期望命中最低的条例在 4000 盘里也有 ~10 次,
+// 12000 盘足够稳;且测试用同一 seed + 同一样本数复验,自洽性不受影响。
+export const SAMPLES = 12000;
 
 /** 固定种子的随机盘命中集合:格 → 条例 id → 命中的盘序号集合 */
 export function 采样命中(格: string, n = SAMPLES, seed0 = SEED): Record<string, Set<number>> {
