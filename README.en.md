@@ -43,8 +43,9 @@ It does three things an LLM alone does poorly:
 - 🕰️ **Optional true-solar-time correction**: `--longitude=<deg>` adds the longitude offset ((lon−120)×4 min, east positive) plus the equation of time on top of the UTC+8 clock time; off by default
 - 🔌 **Cross-agent**: one SKILL.md, works across major agents
 - 🔒 **Privacy-first**: all charting runs locally, no network needed; runtime artifacts are gitignored by default
-- 🧭 **Dual-axis luck reading (v3.10)**: momentum ("does it move") and resilience ("can you take it") are scored and narrated separately for every decade/year/month — divergence between the two is surfaced instead of collapsed into a single "lucky/unlucky" verdict
-- 📖 **Classical canon absorbed (v3.11)**: the full 120-cell seasonal-balance table of the *Qiongtong Baojian* / *Zaohua Yuanyao* is now a machine-evaluable rule base — **1,396 condition-tree clauses** (deterministic, reproducible per chart); "illness/taboo" hits subtract from resilience, the interpreter may only cite clauses actually matched (checker-enforced), plus mentor-god adjudication for strong-day charts (6/7 classical Wei Qianli cases now concur), four-dimension confidence tiers, and deterministic trigger windows for latent branch combinations
+- 🧭 **Dual-axis luck reading**: momentum ("does it move") and resilience ("can you take it") are narrated separately — "opportunity arrives but you can't catch it" is finally sayable
+- 📖 **Classical canon as a rule base**: all 120 cells of the *Qiongtong Baojian* / *Zaohua Yuanyao* live in the algorithm as 1,396 machine-evaluable clauses — citing a clause your chart didn't match gets blocked by the checker
+- ⏰ **Birth-time confidence**: near-boundary birth times trigger verification instead of silent guessing; uncertain conclusions automatically soften their wording (four independent dimensions, no blanket downgrade)
 
 ---
 
