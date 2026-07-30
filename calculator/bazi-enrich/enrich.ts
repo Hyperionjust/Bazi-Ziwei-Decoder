@@ -54,7 +54,7 @@ export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
     调候条例: evalTiaoLi(siZhu, dm),
     格局: geJu,
     旺衰: wangShuai,
-    用神建议: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs),
+    用神建议: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs, siZhu), // S1-3:传四柱供相神裁决判重神透干
     天干关系: detectGanRelations({
       年: siZhu.年.gan, 月: siZhu.月.gan, 日: siZhu.日.gan, 时: siZhu.时.gan
     }),

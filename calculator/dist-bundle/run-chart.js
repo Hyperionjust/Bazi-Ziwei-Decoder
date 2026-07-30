@@ -30799,7 +30799,7 @@ function relToWx(dmWx, rel) {
       return dmWx;
   }
 }
-function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
+function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount, siZhu) {
   const dmWx = GAN_WUXING[dayMaster];
   const xie = SHENG[dmWx], hao = KE[dmWx], zhi = KE_WO[dmWx], yin = SHENG_WO[dmWx];
   const linJie = Math.abs(ws.score) <= 2 || ws.verdict === "\u4E2D\u548C";
@@ -30820,21 +30820,65 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
   const tiaoHou = { \u53D6\u5E72: tiaoHouGans || [], \u53D6: thWx, \u4F9D\u636E: `\u7A77\u901A\u5B9D\u9274120\u683C\u5B9A\u4F8B:${dayMaster}\u65E5\u4E3B\u672C\u6708\u5148${(tiaoHouGans || []).join("\u540E")}` };
   const rule = GEJU_RULE[geju.primary];
   const gjWx = rule ? [...new Set(rule.rel.map((r) => relToWx(dmWx, r)))] : [];
-  const gejuLine = { \u683C: geju.primary, \u53D6: gjWx, \u4F9D\u636E: rule ? rule.why : `${geju.primary}\u65E0\u5B9A\u4F8B\u6620\u5C04,\u4EE5\u683C\u5C40\u6210\u8D25\u6551\u5E94\u8BBA`, \u7F6E\u4FE1\u5EA6: geju.confidence };
-  const sets = [fuYi.\u53D6, thWx, gjWx].filter((a) => a.length > 0);
+  const shenWang = congQiang || ws.verdict === "\u504F\u65FA" || !linJie && ws.score > 0;
+  const LU_REN = /* @__PURE__ */ new Set(["\u6BD4\u80A9\u683C", "\u52AB\u8D22\u683C", "\u5EFA\u7984\u683C", "\u7F8A\u5203\u683C", "\u6708\u5203\u683C"]);
+  let gjEff = gjWx;
+  let gejuWhy = rule ? rule.why : `${geju.primary}\u65E0\u5B9A\u4F8B\u6620\u5C04,\u4EE5\u683C\u5C40\u6210\u8D25\u6551\u5E94\u8BBA`;
+  let caiJue;
+  if (shenWang && LU_REN.has(geju.primary) && siZhu) {
+    const others = [siZhu.\u5E74.gan, siZhu.\u6708.gan, siZhu.\u65F6.gan];
+    const XIE_SS = ["\u98DF\u795E", "\u4F24\u5B98"], KE_SS = ["\u6B63\u5B98", "\u4E03\u6740"];
+    const tou = (cats) => others.filter((g) => cats.includes(getShiShen2(dayMaster, g))).length;
+    const gen = (cats) => (ZHI_CANG_GAN[siZhu.\u6708.zhi] || []).some((c) => cats.includes(getShiShen2(dayMaster, c.gan)));
+    const heavy = (cats) => tou(cats) >= 2 || tou(cats) >= 1 && gen(cats);
+    const kind = heavy(XIE_SS) && heavy(KE_SS) ? tou(XIE_SS) > tou(KE_SS) ? "\u4F24\u98DF" : "\u5B98\u6740" : heavy(XIE_SS) ? "\u4F24\u98DF" : heavy(KE_SS) ? "\u5B98\u6740" : null;
+    if (kind === "\u4F24\u98DF") {
+      gjEff = [yin];
+      caiJue = {
+        \u683C\u5C40\u76F8\u795E: [yin],
+        \u91CD\u795E: `\u4F24\u98DF\u900F${tou(XIE_SS)}\u5E72${gen(XIE_SS) ? "\u4E14\u901A\u6839\u6708\u4EE4" : ""}(${xie})`,
+        \u6539\u6CD5: "\u4F69\u5370\u5236\u4F24(\u4F24\u5B98\u9006\u7528,\u5370\u4E3A\u76F8\u795E;\u8D22\u574F\u5370\u6545\u4E0D\u53D6\u8017)",
+        \u81EA\u6276\u6291\u5FCC\u6551\u56DE: [yin].filter((w) => fuYi.\u5FCC.includes(w)),
+        \u6240\u5236\u4E4B\u795E: { \u4E94\u884C: xie, \u5904\u7F6E: `\u4F24\u98DF\u5DF2\u91CD,\u518D\u89C1\u4E3A\u8FC7\u2014\u2014${xie}\u8F6C\u5165\u5FCC\u795E(\u5178\u7C4D\u5BF9\u7167:\u848B\u4ECB\u77F3\u4F8B\u300C\u8FD0\u559C\u9022\u5370,\u4E0D\u5FC5\u518D\u89C1\u4F24\u98DF\u300D)` },
+        \u4F9D\u636E: `S1-3 \u683C\u5C40\u76F8\u795E\u88C1\u51B3:\u6708\u4EE4${geju.primary}\u800C\u4F24\u98DF\u91CD,\u683C\u5C40\u7EBF\u6539\u6309\u4F24\u5B98\u683C\u5B9A\u4F8B\u53D6\u5370;\u8EAB\u65FA\u6276\u6291\u867D\u5FCC\u5370,\u88C1\u51B3\u6743\u5728\u683C\u5C40\u7EBF(\u97E6\u5343\u91CC\u547D\u4F8B\u5BF9\u7167\u96C6)`,
+        \u51FA\u6587\u8981\u6C42: `\u3010\u76F8\u795E\u4E0E\u6276\u6291\u4E4B\u5FCC\u540C\u4E3A${yin}\u65F6,\u5FC5\u987B\u5199\u6210\u4E00\u4EF6\u4E8B\u3011:${yin}\u5BF9\u672C\u76D8\u662F\u300C\u8EAB\u65FA\u672C\u4E0D\u559C\u5370,\u4F46\u4F24\u98DF\u592A\u91CD\u5FC5\u987B\u4F69\u5370\u300D\u7684\u53D6\u820D\u7ED3\u8BBA,\u884C\u6587\u987B\u70B9\u51FA\u8FD9\u5C42\u7406\u7531;\u4E25\u7981\u518D\u628A${yin}\u5F53\u5FCC\u795E\u5199,\u4E5F\u4E25\u7981\u53EA\u8BF4\u5B9C${yin}\u800C\u4E0D\u8BF4\u4E3A\u4EC0\u4E48\u8EAB\u65FA\u4ECD\u53D6\u5370\u3002`
+      };
+    } else if (kind === "\u5B98\u6740") {
+      gjEff = [xie, yin];
+      caiJue = {
+        \u683C\u5C40\u76F8\u795E: [xie, yin],
+        \u91CD\u795E: `\u5B98\u6740\u900F${tou(KE_SS)}\u5E72${gen(KE_SS) ? "\u4E14\u901A\u6839\u6708\u4EE4" : ""}(${zhi})`,
+        \u6539\u6CD5: "\u98DF\u4F24\u5236\u6740\uFF0B\u5370\u5316\u6740(\u6740\u91CD\u8D35\u4E4E\u5236\u5316,\u5236\u5316\u4E24\u5168)",
+        \u81EA\u6276\u6291\u5FCC\u6551\u56DE: [xie, yin].filter((w) => fuYi.\u5FCC.includes(w)),
+        \u6240\u5236\u4E4B\u795E: { \u4E94\u884C: zhi, \u5904\u7F6E: `\u5B98\u6740\u5DF2\u91CD,\u518D\u89C1\u4E3A\u8FC7\u2014\u2014${zhi}\u8F6C\u5165\u5FCC\u795E(\u5178\u7C4D\u5BF9\u7167:\u5434\u4F69\u5B5A\u4F8B\u300C\u7532\u8FD0\u6700\u5371\u300D)` },
+        \u6BD4\u52AB\u5904\u7F6E: `\u6740\u91CD\u5219\u6BD4\u52AB\u5206\u6740\u4E3A\u8F85,${dmWx}\u4E0D\u4F5C\u5FCC\u8BBA(\u5178\u7C4D\u5BF9\u7167:\u5434\u4F69\u5B5A\u4F8B\u300C\u620C\u8FD0\u6BD4\u80A9\u8F85\u7FFC,\u8517\u5883\u5B89\u5EB7\u300D)`,
+        \u4F9D\u636E: `S1-3 \u683C\u5C40\u76F8\u795E\u88C1\u51B3:\u6708\u4EE4${geju.primary}\u800C\u5B98\u6740\u91CD,\u683C\u5C40\u7EBF\u6539\u6309\u4E03\u6740\u683C\u5B9A\u4F8B\u53D6[${xie}\u3001${yin}];\u8EAB\u65FA\u6276\u6291\u867D\u5FCC\u5370,\u88C1\u51B3\u6743\u5728\u683C\u5C40\u7EBF(\u97E6\u5343\u91CC\u547D\u4F8B\u5BF9\u7167\u96C6)`,
+        \u51FA\u6587\u8981\u6C42: `\u3010\u76F8\u795E\u4E0E\u6276\u6291\u4E4B\u5FCC\u540C\u4E3A${yin}\u65F6,\u5FC5\u987B\u5199\u6210\u4E00\u4EF6\u4E8B\u3011:${yin}\u5BF9\u672C\u76D8\u662F\u300C\u8EAB\u65FA\u672C\u4E0D\u559C\u5370,\u4F46\u6740\u91CD\u5FC5\u987B\u5316\u300D\u7684\u53D6\u820D\u7ED3\u8BBA,\u884C\u6587\u987B\u70B9\u51FA\u8FD9\u5C42\u7406\u7531;\u4E25\u7981\u518D\u628A${yin}\u5F53\u5FCC\u795E\u5199,\u4E5F\u4E25\u7981\u53EA\u8BF4\u5B9C${yin}\u800C\u4E0D\u8BF4\u4E3A\u4EC0\u4E48\u8EAB\u65FA\u4ECD\u53D6\u5370\u3002`
+      };
+    }
+    if (caiJue) gejuWhy += `;S1-3 \u76F8\u795E\u88C1\u51B3:${caiJue.\u91CD\u795E},${caiJue.\u6539\u6CD5}`;
+  }
+  const gejuLine = { \u683C: geju.primary, \u53D6: gjEff, \u4F9D\u636E: gejuWhy, \u7F6E\u4FE1\u5EA6: geju.confidence };
+  const sets = [fuYi.\u53D6, thWx, gjEff].filter((a) => a.length > 0);
   let consensus = sets.length ? [...sets[0]] : [];
   for (const s of sets.slice(1)) consensus = consensus.filter((x) => s.includes(x));
   const \u6536\u655B = sets.length >= 2 && consensus.length > 0;
   const \u8FB9\u754C\u76D8 = linJie || ws.confidence !== "\u9AD8" || geju.confidence === "\u4F4E" || congQiang || congRuo;
-  const \u51FA\u6587\u534F\u8BAE = \u6536\u655B && !\u8FB9\u754C\u76D8 ? `\u4E09\u7EBF\u6536\u655B,\u5171\u8BC6\u7528\u795E=${consensus.join("\u3001")};\u53EF\u5F84\u4EE5\u5171\u8BC6\u7ACB\u8BBA,\u4F9D\u636E\u5408\u5E76\u8F6C\u8FF0\u3002` : `\u8FB9\u754C\u76D8/\u4E09\u7EBF\u4E0D\u6536\u655B\u2014\u2014\u3010\u4F53\u7528\u4E24\u5206,\u7981\u6B62\u5355\u9009\u3011:\u62A4\u4F53\u7EBF=\u8C03\u5019${thWx.join("\u3001")}(${(tiaoHouGans || []).join("")})${fuYi.\u53D6.length ? `\u4E0E\u6276\u6291${fuYi.\u53D6.join("\u3001")}` : ""},\u53D1\u7528\u7EBF=\u683C\u5C40${gjWx.join("\u3001") || "(\u4F9D\u6210\u8D25\u6551\u5E94)"};\u4E24\u7EBF\u5E76\u9648,\u663E\u5F0F\u6807\u6CE8\u300C\u2696\u5404\u6D3E\u5206\u6B67\u300D\u4E0E\u7F6E\u4FE1\u5EA6(\u65FA\u8870:${ws.confidence}/\u683C\u5C40:${geju.confidence}),\u4E0D\u5F97\u53EA\u62A5\u5176\u4E00\u3002`;
-  const pool = [...thWx, ...gjWx];
-  const pick = pool.find((w) => !fuYi.\u5FCC.includes(w));
-  const kaiYun = consensus.length ? consensus : pick ? [pick] : pool.length ? [pool[0]] : [dmWx];
-  const xiShen = gjWx.length ? gjWx : thWx;
+  const \u51FA\u6587\u534F\u8BAE = (\u6536\u655B && !\u8FB9\u754C\u76D8 ? `\u4E09\u7EBF\u6536\u655B,\u5171\u8BC6\u7528\u795E=${consensus.join("\u3001")};\u53EF\u5F84\u4EE5\u5171\u8BC6\u7ACB\u8BBA,\u4F9D\u636E\u5408\u5E76\u8F6C\u8FF0\u3002` : `\u8FB9\u754C\u76D8/\u4E09\u7EBF\u4E0D\u6536\u655B\u2014\u2014\u3010\u4F53\u7528\u4E24\u5206,\u7981\u6B62\u5355\u9009\u3011:\u62A4\u4F53\u7EBF=\u8C03\u5019${thWx.join("\u3001")}(${(tiaoHouGans || []).join("")})${fuYi.\u53D6.length ? `\u4E0E\u6276\u6291${fuYi.\u53D6.join("\u3001")}` : ""},\u53D1\u7528\u7EBF=\u683C\u5C40${gjEff.join("\u3001") || "(\u4F9D\u6210\u8D25\u6551\u5E94)"};\u4E24\u7EBF\u5E76\u9648,\u663E\u5F0F\u6807\u6CE8\u300C\u2696\u5404\u6D3E\u5206\u6B67\u300D\u4E0E\u7F6E\u4FE1\u5EA6(\u65FA\u8870:${ws.confidence}/\u683C\u5C40:${geju.confidence}),\u4E0D\u5F97\u53EA\u62A5\u5176\u4E00\u3002`) + (caiJue ? `;S1-3:\u672C\u76D8\u6709\u300C\u76F8\u795E\u88C1\u51B3\u300D\u5757,${caiJue.\u683C\u5C40\u76F8\u795E.join("\u3001")}\u7684\u53D6\u820D\u5FC5\u987B\u6309\u5176\u51FA\u6587\u8981\u6C42\u5408\u5E76\u53D9\u8FF0\u3002` : "");
+  const pool = [...thWx, ...gjEff];
+  const pickA = pool.find((w) => fuYi.\u53D6.includes(w));
+  const pickB = pool.find((w) => !fuYi.\u5FCC.includes(w));
+  const kaiYun = caiJue ? [...caiJue.\u683C\u5C40\u76F8\u795E] : consensus.length ? consensus : pickA ? [pickA] : !linJie && fuYi.\u53D6.length ? [fuYi.\u53D6[0]] : pickB ? [pickB] : pool.length ? [pool[0]] : [dmWx];
+  const xiShen = gjEff.length ? gjEff : thWx;
   const jiRaw = fuYi.\u5FCC.length ? fuYi.\u5FCC : [dmWx];
-  const jiShen = jiRaw.filter((w) => !kaiYun.includes(w) && !xiShen.includes(w));
+  let jiShen = jiRaw.filter((w) => !kaiYun.includes(w) && !xiShen.includes(w));
+  if (caiJue) {
+    if (caiJue.\u6BD4\u52AB\u5904\u7F6E) jiShen = jiShen.filter((w) => w !== dmWx);
+    const suoZhi = caiJue.\u6240\u5236\u4E4B\u795E.\u4E94\u884C;
+    if (!kaiYun.includes(suoZhi) && !xiShen.includes(suoZhi) && !jiShen.includes(suoZhi)) jiShen.push(suoZhi);
+  }
   const anchors = [.../* @__PURE__ */ new Set([...kaiYun, ...xiShen])].slice(0, 3);
-  const divergence = \u8FB9\u754C\u76D8 || !\u6536\u655B ? `\u2696\u8C03\u5019\u7EBF\u53D6${thWx.join("\u3001") || "-"}/\u683C\u5C40\u7EBF\u53D6${gjWx.join("\u3001") || "-"}\xB7\u65FA\u8870\u7F6E\u4FE1\u5EA6${ws.confidence}` : "";
+  const divergence = (\u8FB9\u754C\u76D8 || !\u6536\u655B ? `\u2696\u8C03\u5019\u7EBF\u53D6${thWx.join("\u3001") || "-"}/\u683C\u5C40\u7EBF\u53D6${gjEff.join("\u3001") || "-"}\xB7\u65FA\u8870\u7F6E\u4FE1\u5EA6${ws.confidence}` : "") + (caiJue ? `${\u8FB9\u754C\u76D8 || !\u6536\u655B ? "\xB7" : "\u2696"}S1-3\u76F8\u795E\u88C1\u51B3(${caiJue.\u6539\u6CD5})` : "");
   let queBu = "";
   if (wuxingCount) {
     const missing = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"].filter((w) => !wuxingCount[w]);
@@ -30846,7 +30890,7 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
     }
     queBu = parts.join(";");
   }
-  const \u51B2\u7A81\u4E94\u884C = [...new Set(thWx)].filter((w) => fuYi.\u5FCC.includes(w));
+  const \u51B2\u7A81\u4E94\u884C = [...new Set(thWx)].filter((w) => fuYi.\u5FCC.includes(w) && !(caiJue?.\u81EA\u6276\u6291\u5FCC\u6551\u56DE || []).includes(w));
   const \u8F74\u51B2\u7A81 = \u51B2\u7A81\u4E94\u884C.length ? {
     \u4E94\u884C: \u51B2\u7A81\u4E94\u884C,
     \u8C03\u5019\u4FA7: `\u8C03\u5019\u53D6${thWx.join("\u3001")}(${(tiaoHouGans || []).join("")})\u2014\u2014${\u51B2\u7A81\u4E94\u884C.join("\u3001")}\u662F\u62A4\u4F53\u6240\u9700`,
@@ -30864,7 +30908,8 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount) {
     \u5409\u6570: anchors.map((w) => WX_SHU[w]),
     divergence,
     \u7F3A\u8865\u8BF4\u660E: queBu,
-    ...\u8F74\u51B2\u7A81 ? { \u8F74\u51B2\u7A81 } : {}
+    ...\u8F74\u51B2\u7A81 ? { \u8F74\u51B2\u7A81 } : {},
+    ...caiJue ? { \u76F8\u795E\u88C1\u51B3: caiJue } : {}
   };
   return { \u6276\u6291: fuYi, \u8C03\u5019: tiaoHou, \u683C\u5C40: gejuLine, \u5171\u8BC6\u7528\u795E: consensus, \u6536\u655B, \u8FB9\u754C\u76D8, \u51FA\u6587\u534F\u8BAE, \u51FA\u53E3 };
 }
@@ -30890,7 +30935,8 @@ function enrichBazi(siZhu) {
     \u8C03\u5019\u6761\u4F8B: evalTiaoLi(siZhu, dm),
     \u683C\u5C40: geJu,
     \u65FA\u8870: wangShuai,
-    \u7528\u795E\u5EFA\u8BAE: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs),
+    \u7528\u795E\u5EFA\u8BAE: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs, siZhu),
+    // S1-3:传四柱供相神裁决判重神透干
     \u5929\u5E72\u5173\u7CFB: detectGanRelations({
       \u5E74: siZhu.\u5E74.gan,
       \u6708: siZhu.\u6708.gan,
