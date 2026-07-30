@@ -27,6 +27,9 @@ export interface YongShenAdvice {
   出口: {
     开运用神: WuXing[]; 喜神: WuXing[]; 忌神: WuXing[]; 调候提示: string;
     吉方: string[]; 吉色: string[]; 吉数: string[]; divergence: string; 缺补说明: string;
+    // S1-2:调候所取 ∩ 扶抑所忌。有交集才有此字段——同一个五行在两条线上唱反调,
+    //      解读层必须合并成一句讲,不许当两件事各说一遍(那会写出自相矛盾的文案)。
+    轴冲突?: { 五行: WuXing[]; 调候侧: string; 扶抑侧: string; 出文要求: string; 说明: string };
   };
 }
 
@@ -126,11 +129,29 @@ export function adviseYongShen(dayMaster: Tiangan, ws: WangShuaiResult, tiaoHouG
     }
     queBu = parts.join(';');
   }
+  // ---- S1-2(v3.11.0):轴冲突显式标记 ----
+  // 毛盘回测暴露:该盘调候取甲庚而扶抑忌金,于是庚金年【调候说该来、扶抑说别来】。
+  //   改动前两轴各说各的、谁也不提对方,解读层只能读成两个独立信号,
+  //   写出来就是「今年宜进取」和「今年宜守」并列出现,自相矛盾还看不出为什么。
+  //   现在把交集算出来摆在明处,并给解读层一条硬约束:这类五行必须【合并成一句】叙述,
+  //   讲清「同一个字在两条线上分别扮演什么」,不许当成两件事各说一遍。
+  const 冲突五行 = [...new Set(thWx)].filter(w => fuYi.忌.includes(w));
+  const 轴冲突 = 冲突五行.length ? {
+    五行: 冲突五行,
+    调候侧: `调候取${thWx.join('、')}(${(tiaoHouGans || []).join('')})——${冲突五行.join('、')}是护体所需`,
+    扶抑侧: `扶抑忌${fuYi.忌.join('、')}——同一个${冲突五行.join('、')}又是发用所忌`,
+    出文要求: `【必须合并叙述,不得两处各说一遍】:${冲突五行.join('、')}在本盘身兼两职——` +
+      `调候上它是解寒/解燥的那味药,扶抑上它又加重日主的负担。写成一句「${冲突五行.join('、')}对你是双面的:…」,` +
+      `讲清什么情境下它帮你、什么情境下它拖你;严禁在同一篇里既写「宜${冲突五行.join('、')}」又写「忌${冲突五行.join('、')}」而不点破二者是同一件事。`,
+    说明: '轴冲突=调候线所取 ∩ 扶抑线所忌。这是确定性事实(两轴各自的结论直接取交集),不是判断。',
+  } : undefined;
+
   const 出口 = {
     开运用神: kaiYun, 喜神: xiShen, 忌神: jiShen,
     调候提示: (tiaoHouGans || []).length ? `先${(tiaoHouGans || []).join('后')}` : '-',
     吉方: anchors.map(w => WX_FANG[w]), 吉色: anchors.map(w => WX_SE[w]), 吉数: anchors.map(w => WX_SHU[w]),
     divergence, 缺补说明: queBu,
+    ...(轴冲突 ? { 轴冲突 } : {}),
   };
 
   return { 扶抑: fuYi, 调候: tiaoHou, 格局: gejuLine, 共识用神: consensus, 收敛, 边界盘, 出文协议, 出口 };

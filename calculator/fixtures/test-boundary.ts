@@ -105,6 +105,31 @@ ok(r10c.hour === 11 && r10c.minute >= 43 && r10c.minute <= 49, `lon=120 2月中�
 const r10d = resolveSolarClock({ year: 2000, month: 6, day: 14, hour: 12, minute: 30, gender: 'male', isLunar: false, timeZone: 8 } as any);
 ok(r10d.hour === 12 && r10d.minute === 30, '缺省 longitude: 完全不校正(默认关,现行为不变)');
 
+// ── S1-2(v3.11.0):调候∩扶抑 轴冲突显式标记 ────────────────────────────────
+// 毛盘回测暴露:该盘调候取甲庚(木金)而扶抑忌金 —— 庚金年【调候说该来、扶抑说别来】。
+// 改动前两轴各说各的、谁也不提对方,解读层只能读成两个独立信号,写出来就是
+// 「宜金」和「忌金」并列出现,自相矛盾还看不出为什么。现在把交集摆到明处 + 给出文硬约束。
+{
+  const enrich = require('../bazi-enrich/enrich').enrichBazi;
+  const of = (y: number, m: number, d: number, h: number) => {
+    const c: any = createChart({ year: y, month: m, day: d, hour: h, minute: 0, gender: 'male', isLunar: false, timeZone: 8 } as any);
+    const sz = c.bazi.siZhu;
+    return { 柱: ['year','month','day','hour'].map(k => sz[k].gan + sz[k].zhi).join(' '),
+             y: enrich({ 年: sz.year, 月: sz.month, 日: sz.day, 时: sz.hour }).用神建议 };
+  };
+  const mao = of(1893, 12, 26, 8);
+  ok(mao.柱 === '癸巳 甲子 丁酉 甲辰', `毛盘四柱 (得到 ${mao.柱})`);
+  const zc = mao.y.出口.轴冲突;
+  ok(!!zc && zc.五行.join('') === '金',
+    `毛盘轴冲突=金(调候取${mao.y.调候.取.join('')} ∩ 扶抑忌${mao.y.扶抑.忌.join('')}) (得到 ${zc ? zc.五行.join('') : '无'})`);
+  ok(!!zc && /合并叙述/.test(zc.出文要求) && /不得两处各说一遍/.test(zc.出文要求),
+    '轴冲突带「合并叙述、不得两处各说一遍」的出文硬约束');
+  // 交集为空的盘不得平白多出这个字段(免得解读层被无谓的告警噪音淹掉)
+  const ok2000 = of(2000, 1, 1, 12);
+  ok(ok2000.y.出口.轴冲突 === undefined,
+    `无交集的盘不出轴冲突字段(样例盘 调候${ok2000.y.调候.取.join('')} / 扶抑忌${ok2000.y.扶抑.忌.join('')||'无'})`);
+}
+
 // ── 汇总 ────────────────────────────────────────────────────────────────────
 if (failed === 0) { console.log('\n✅ 全部通过 (边界回归)'); process.exit(0); }
 else { console.log(`\n❌ ${failed} 项失败`); process.exit(1); }
