@@ -224,7 +224,16 @@ function dumpBazi(b: any, bi: any): string[] {
     const ct = en.confidence_tier;
     if (ct) {
       lines.push(`│ ├全局置信度(confidence_tier·预测性章节按此档定措辞) : ${ct.tier} — ${(ct.依据 || []).join(';')}`);
-      if (ct.tier === 'low') lines.push('│ │ └⚠ low 档强制: 事业/财运/婚恋/大运流年多用条件句,应期给区间不给单年,禁「必然/一定会/肯定会/铁定」类断语;锚点白话声明一次保守口径');
+      // S3 批2: 四维分档 — 论断类型各取各档,不与总档连坐(取维映射见 bazi-prompt「置信度传播」)
+      const dims = ct.维度;
+      if (dims) {
+        const KEYS = ['旺衰', '格局', '调候', '应期'] as const;
+        const dimStr = KEYS.map(k => `${k}:${dims[k]}`).join(' ');
+        const notHigh = KEYS.filter(k => dims[k] !== 'high');
+        const why = notHigh.length ? ` — ${notHigh.map(k => `${k}=${(ct.维度依据 || {})[k] || ''}`).join(';')}` : '';
+        lines.push(`│ │ ${ct.tier === 'low' ? '├' : '└'}分维(按论断类型取档:旺衰→性格强弱/精力,格局→层次/事业结构,调候→季节体感/寒燥调理,应期→年份窗口) : ${dimStr}${why}`);
+      }
+      if (ct.tier === 'low') lines.push('│ │ └⚠ low 档强制: 事业/财运/婚恋/大运流年多用条件句,应期给区间不给单年,禁「必然/一定会/肯定会/铁定」类断语;锚点白话声明一次保守口径;分维为 high 的论断类型可保持正常锐度(锚点声明仍出)');
     }
     // 用神建议(v2.2 算法层裁决,LLM 只转述不取舍)
     const ya = en.用神建议;
@@ -363,7 +372,12 @@ function dumpBazi(b: any, bi: any): string[] {
         const mem = (r.members || []).join('');
         const pil = (r.pillars || []).join('-');
         const divg = r.divergence ? `  ⚖分歧:${r.divergence}` : '';
-        lines.push(`${prefix}${last ? '└' : '├'}${r.type} ${mem}(${pil}柱·${r.distance}) 【${r.status}】 ${r.cause}${divg}`);
+        // S3 批2: 引爆窗口 — 潜伏关系由潜转显的支检索(中立,吉凶随喜忌与裁决定)
+        const tw = r.引爆窗口
+          ? `  ⏳引爆窗口[${r.引爆窗口.方式}·待${(r.引爆窗口.待 || []).join('/')}]:${(r.引爆窗口.应期 || [])
+              .map((a: any) => (a.载体 || '').startsWith('流年') ? `${a.年}${(a.载体 || '').slice(2)}` : a.载体).join('、') || '检索窗口内无应期'}`
+          : '';
+        lines.push(`${prefix}${last ? '└' : '├'}${r.type} ${mem}(${pil}柱·${r.distance}) 【${r.status}】 ${r.cause}${divg}${tw}`);
       });
     };
     if (ix && Array.isArray(ix.items) && ix.items.length > 0) {

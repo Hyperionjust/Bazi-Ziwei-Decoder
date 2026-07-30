@@ -5,6 +5,7 @@
 import { createChart, resolveSolarClock } from '../yiqi-core/index';
 import { getTiaoHou } from '../bazi-enrich/tiao-hou';
 import { judgeGeJu } from '../bazi-enrich/ge-ju';
+import { aggregateConfidenceTier } from '../bazi-enrich/confidence';
 
 let failed = 0;
 function ok(cond: boolean, msg: string) { if (cond) console.log('✓', msg); else { console.log('✗', msg); failed++; } }
@@ -177,6 +178,44 @@ ok(r10d.hour === 12 && r10d.minute === 30, '缺省 longitude: 完全不校正(�
     `阎:身弱杀格零触碰——开运[水]喜[火水]忌[金土]与改前一致 (得到 开运[${yan.y.出口.开运用神}]喜[${yan.y.出口.喜神}]忌[${yan.y.出口.忌神}])`);
   // 反例三(样例盘 2000-01-01·中和临界):扶抑不取不忌,裁决与 R2 都不得启动
   ok(ok2000.y.出口.相神裁决 === undefined, '反例:中和临界盘无相神裁决');
+}
+
+// ── S3 批2) confidence 四维分档:总档规则不动,四维按论断类型独立取档 ─────────
+{
+  const base = { // 收敛正常盘
+    用神建议: { 收敛: true, 边界盘: false, 扶抑: {}, 出口: {} },
+    旺衰: { confidence: '高', verdict: '身旺' }, 格局: { confidence: '高' },
+    调候条例: { 有条例: true },
+  };
+  const A = aggregateConfidenceTier(base);
+  ok(A.tier === 'high' && A.维度.旺衰 === 'high' && A.维度.格局 === 'high' && A.维度.调候 === 'high' && A.维度.应期 === 'high',
+    `四维:收敛正常盘 总档high+四维全high (得到 ${A.tier}/${Object.values(A.维度).join(',')})`);
+  // 时辰临界·非子时界:总档low(=v1不回归);应期low 但 调候/旺衰不连坐——拆维的意义所在
+  const B = aggregateConfidenceTier({ ...base, 时辰边界: { boundary: true, 距交界分钟: 10, 最近交界: '13:00(午→未)' } });
+  ok(B.tier === 'low' && B.维度.应期 === 'low' && B.维度.调候 === 'high' && B.维度.旺衰 === 'high',
+    `四维:午未交界临界→总档low·应期low·调候不连坐(high) (得到 ${B.tier}/应期${B.维度.应期}/调候${B.维度.调候})`);
+  // 时辰临界·23:00 子时界:晚子时约定翻转日柱→日干存疑→调候连坐 low
+  const C = aggregateConfidenceTier({ ...base, 时辰边界: { boundary: true, 距交界分钟: 5, 最近交界: '23:00(亥→子)' } });
+  ok(C.维度.调候 === 'low' && C.维度.应期 === 'low',
+    `四维:23:00交界(日柱随晚子时翻转)→调候low·应期low (得到 调候${C.维度.调候}/应期${C.维度.应期})`);
+  // 边界盘(时辰确定):应期medium(年份窗口可用,吉凶定性存疑)——不再被总档low压成全链保守
+  const D = aggregateConfidenceTier({
+    用神建议: { 收敛: false, 边界盘: true, 扶抑: { 临界: true }, 出口: {} },
+    旺衰: { confidence: '中', verdict: '中和(临界)' }, 格局: { confidence: '中' }, 调候条例: { 有条例: true },
+  });
+  ok(D.tier === 'low' && D.维度.应期 === 'medium' && D.维度.旺衰 === 'medium' && D.维度.格局 === 'medium' && D.维度.调候 === 'high',
+    `四维:边界盘→总档low·应期medium·调候high (得到 ${D.tier}/${Object.values(D.维度).join(',')})`);
+  // 轴冲突→调候medium;从格分歧→旺衰low
+  const E = aggregateConfidenceTier({ ...base, 用神建议: { ...base.用神建议, 出口: { 轴冲突: { 五行: ['金'] } } } });
+  ok(E.维度.调候 === 'medium' && E.tier === 'high', `四维:轴冲突→调候medium(总档不动) (得到 调候${E.维度.调候}/总${E.tier})`);
+  const F = aggregateConfidenceTier({
+    用神建议: { 收敛: false, 边界盘: true, 扶抑: {}, 出口: {} },
+    旺衰: { confidence: '中', verdict: '偏弱(从弱存疑)' }, 格局: { confidence: '高' }, 调候条例: { 有条例: true },
+  });
+  ok(F.维度.旺衰 === 'low', `四维:从格分歧→旺衰low (得到 ${F.维度.旺衰})`);
+  // v1 总档回归:非边界不收敛=medium(聚合规则一字未动)
+  const G = aggregateConfidenceTier({ ...base, 用神建议: { 收敛: false, 边界盘: false, 扶抑: {}, 出口: {} } });
+  ok(G.tier === 'medium', `四维:总档聚合规则零回归(非边界不收敛=medium) (得到 ${G.tier})`);
 }
 
 // ── 汇总 ────────────────────────────────────────────────────────────────────

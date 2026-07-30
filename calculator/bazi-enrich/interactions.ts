@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import { Tiangan, Dizhi, GAN_WUXING, ZHI_WUXING, ZHI_CANG_GAN, shengKe } from './tables';
-import { detectZhiRelations, ZhiRelation } from './zhi-relations';
+import { detectZhiRelations, ZhiRelation, SAN_HE, SAN_HUI } from './zhi-relations';
 import { detectGanRelations, GanRelation } from './gan-relations';
 
 type Pillar = '年'|'月'|'日'|'时';
@@ -33,6 +33,59 @@ export interface AdjudicatedRelation {
   cause: string;           // 判定依据
   divergence?: string;     // 派系分歧(仅 open)
   detail?: string;
+  引爆窗口?: TriggerWindow; // S3 批2:待触发关系的填实/凑全检索(见 computeTriggerWindows)
+}
+
+// ---------------------------------------------------------------------------
+// S3 批2 · 引爆窗口:原局里「差一个字」的潜伏关系(虚拱待填实/半局待补全/三刑缺一
+// 待凑全),检索哪些大运支或流年支正是那个字——支一致即计,确定性可复现。
+// 只回答「何时由潜转显」,吉凶仍随喜忌与作用裁决定,非凶断(与运岁引动同为中立检测)。
+// 成局未得月令的「待运引」不做:引动强弱是力量判断不是布尔判断,无金标不硬造。
+// ---------------------------------------------------------------------------
+
+export interface TriggerWindow {
+  待: string[];                                  // 触发支(缺的那个字)
+  方式: '填实' | '补全成局' | '凑全三刑';
+  应期: Array<{ 年: number; 载体: string }>;      // 载体=流年干支 / 大运干支(起止年)
+}
+
+const GAN10_TW = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const ZHI12_TW = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const SAN_XING_TW: string[][] = [['寅','巳','申'], ['丑','戌','未']];
+
+function missingOfTriple(members: string[], triples: Array<{ zhi: readonly string[] }>): string[] {
+  for (const t of triples) {
+    if (members.every(m => t.zhi.includes(m as any))) return t.zhi.filter(z => !members.includes(z));
+  }
+  return [];
+}
+
+/** 对已裁决关系清单就地附加 引爆窗口(仅虚拱/半局/三刑缺一)。fromYear 起检索 12 个流年(支必各现一次)+全部大运支。 */
+export function computeTriggerWindows(items: AdjudicatedRelation[], dayun: any[], fromYear: number): void {
+  for (const r of items) {
+    if (r.kind !== '地支') continue;
+    let 待: string[] = []; let 方式: TriggerWindow['方式'] | null = null;
+    if (r.status === '虚拱' && (r.type === '拱合' || r.type === '拱会')) {
+      待 = missingOfTriple(r.members, r.type === '拱合' ? SAN_HE : SAN_HUI); 方式 = '填实';
+    } else if (r.status === '半局' && (r.type === '半合' || r.type === '半会')) {
+      待 = missingOfTriple(r.members, r.type === '半合' ? SAN_HE : SAN_HUI); 方式 = '补全成局';
+    } else if (r.type === '相刑' && r.status === '减力' && r.cause.includes('缺一')) {
+      待 = missingOfTriple(r.members, SAN_XING_TW.map(z => ({ zhi: z }))); 方式 = '凑全三刑';
+    }
+    if (!待.length || !方式) continue;
+    const 应期: TriggerWindow['应期'] = [];
+    for (const d of dayun || []) {
+      const z = d?.ganZhi?.zhi;
+      if (z && 待.includes(z) && d.endYear >= fromYear)
+        应期.push({ 年: d.startYear, 载体: `大运${d.ganZhi.gan}${z}(${d.startYear}-${d.endYear})` });
+    }
+    for (let y = fromYear; y < fromYear + 12; y++) {
+      const z = ZHI12_TW[(y - 4) % 12];
+      if (待.includes(z)) 应期.push({ 年: y, 载体: `流年${GAN10_TW[(y - 4) % 10]}${z}` });
+    }
+    应期.sort((a, b) => a.年 - b.年);
+    r.引爆窗口 = { 待, 方式, 应期: 应期.slice(0, 4) };
+  }
 }
 
 const PILLAR_IDX: Record<Pillar, number> = { 年: 0, 月: 1, 日: 2, 时: 3 };

@@ -31043,10 +31043,60 @@ function aggregateConfidenceTier(enrichment) {
     tier = "medium";
     reasons.push("\u975E\u8FB9\u754C\u76D8\u4F46\u7528\u795E\u4E09\u7EBF\u4E0D\u6536\u655B");
   }
+  const congGe = /从强|从弱/.test(ws?.verdict || "");
+  let d\u65FA\u8870, r\u65FA\u8870;
+  if (congGe || ws?.confidence === "\u4F4E") {
+    d\u65FA\u8870 = "low";
+    r\u65FA\u8870 = congGe ? "\u4ECE\u683C\u4E4B\u8FA8(\u6B63\u683C/\u4ECE\u683C\u4E24\u8BFB,\u5F3A\u5F31\u7ED3\u8BBA\u672C\u8EAB\u5B58\u7591)" : "\u65FA\u8870\u5224\u5B9A\u7F6E\u4FE1\u4F4E";
+  } else if (ws?.confidence === "\u4E2D" || ya?.\u6276\u6291?.\u4E34\u754C) {
+    d\u65FA\u8870 = "medium";
+    r\u65FA\u8870 = ya?.\u6276\u6291?.\u4E34\u754C ? "\u65FA\u8870\u8BA1\u5206\u4E34\u754C(\u5F3A\u5F31\u503E\u5411\u53EF\u7528,\u7A0B\u5EA6\u5B58\u7591)" : "\u65FA\u8870\u5224\u5B9A\u7F6E\u4FE1\u4E2D";
+  } else {
+    d\u65FA\u8870 = "high";
+    r\u65FA\u8870 = "\u65FA\u8870\u5224\u5B9A\u7F6E\u4FE1\u8DB3";
+  }
+  let d\u683C\u5C40, r\u683C\u5C40;
+  if (gj?.confidence === "\u4F4E") {
+    d\u683C\u5C40 = "low";
+    r\u683C\u5C40 = "\u683C\u5C40\u5224\u5B9A\u7F6E\u4FE1\u4F4E(\u53D6\u683C\u6A21\u7CCA/\u6742\u6C14\u96BE\u8FA8)";
+  } else if (gj?.confidence === "\u4E2D") {
+    d\u683C\u5C40 = "medium";
+    r\u683C\u5C40 = "\u683C\u5C40\u5224\u5B9A\u7F6E\u4FE1\u4E2D";
+  } else {
+    d\u683C\u5C40 = "high";
+    r\u683C\u5C40 = "\u683C\u5C40\u5224\u5B9A\u7F6E\u4FE1\u8DB3";
+  }
+  const crossZi = sb?.boundary === true && String(sb?.\u6700\u8FD1\u4EA4\u754C || "").startsWith("23:00");
+  const \u8F74\u51B2\u7A81 = ya?.\u51FA\u53E3?.\u8F74\u51B2\u7A81;
+  const \u65E0\u6761\u4F8B = enrichment?.\u8C03\u5019\u6761\u4F8B?.\u6709\u6761\u4F8B === false;
+  let d\u8C03\u5019, r\u8C03\u5019;
+  if (crossZi) {
+    d\u8C03\u5019 = "low";
+    r\u8C03\u5019 = "\u65F6\u8FB0\u4E34\u754C\u5728 23:00 \u4EA4\u754C,\u665A\u5B50\u65F6\u7EA6\u5B9A\u5C06\u7FFB\u8F6C\u65E5\u67F1\u2014\u2014\u65E5\u5E72\u5B58\u7591,\u8C03\u5019\u683C(\u65E5\u5E72\xD7\u6708\u652F)\u968F\u4E4B\u5B58\u7591";
+  } else if (\u8F74\u51B2\u7A81 || \u65E0\u6761\u4F8B) {
+    d\u8C03\u5019 = "medium";
+    r\u8C03\u5019 = \u8F74\u51B2\u7A81 ? "\u8F74\u51B2\u7A81(\u8C03\u5019\u2229\u6276\u6291\u5BF9\u51B2,\u7ED3\u8BBA\u987B\u5408\u5E76\u53D9\u8FF0)" : "\u8BE5\u683C\u5178\u7C4D\u6761\u4F8B\u672A\u5438\u6536,\u4EC5\u6709\u53D6\u5E72\u9AA8\u67B6";
+  } else {
+    d\u8C03\u5019 = "high";
+    r\u8C03\u5019 = "\u65E5\u5E72\u6708\u652F\u786E\u5B9A,\u8C03\u5019\u5B9A\u4F8B\u76F4\u67E5";
+  }
+  let d\u5E94\u671F, r\u5E94\u671F;
+  if (sb?.boundary === true) {
+    d\u5E94\u671F = "low";
+    r\u5E94\u671F = "\u65F6\u8FB0\u4E34\u754C\u2014\u2014\u8D77\u8FD0\u5C81\u6570\u7531\u51FA\u751F\u65F6\u523B\u63A8\u5F97,\u65F6\u67F1\u5B58\u7591\u5219\u5927\u8FD0\u6392\u5E03\u4E0E\u5E94\u671F\u5168\u94FE\u5B58\u7591";
+  } else if (ya?.\u8FB9\u754C\u76D8 === true) {
+    d\u5E94\u671F = "medium";
+    r\u5E94\u671F = "\u8FB9\u754C\u76D8\u2014\u2014\u559C\u5FCC\u65B9\u5411\u6447\u6446,\u5E94\u671F\u5E74\u4EFD\u7A97\u53E3\u53EF\u7528\u4F46\u5409\u51F6\u5B9A\u6027\u5B58\u7591";
+  } else {
+    d\u5E94\u671F = "high";
+    r\u5E94\u671F = "\u65F6\u8FB0\u786E\u5B9A\u4E14\u7528\u795E\u65B9\u5411\u7A33,\u5F15\u52A8\u5E74\u4EFD\u4E0E\u5409\u51F6\u5B9A\u6027\u5747\u53EF\u7528";
+  }
   return {
     tier,
+    \u7EF4\u5EA6: { \u65FA\u8870: d\u65FA\u8870, \u683C\u5C40: d\u683C\u5C40, \u8C03\u5019: d\u8C03\u5019, \u5E94\u671F: d\u5E94\u671F },
+    \u7EF4\u5EA6\u4F9D\u636E: { \u65FA\u8870: r\u65FA\u8870, \u683C\u5C40: r\u683C\u5C40, \u8C03\u5019: r\u8C03\u5019, \u5E94\u671F: r\u5E94\u671F },
     \u4F9D\u636E: reasons,
-    \u8BF4\u660E: "low \u6863\u65F6\u5168\u90E8\u9884\u6D4B\u6027\u7AE0\u8282(\u4E8B\u4E1A/\u8D22\u8FD0/\u5A5A\u604B/\u5927\u8FD0\u6D41\u5E74)\u987B\u591A\u7528\u6761\u4EF6\u53E5\u3001\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74\u3001\u7981\u7528\u9AD8\u786E\u5B9A\u63AA\u8F9E,\u5E76\u5728\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4FDD\u5B88\u53E3\u5F84(\u89C1 bazi-prompt\u300C\u7F6E\u4FE1\u5EA6\u4F20\u64AD\u300D);\u6B64\u673A\u5236\u5B57\u6BB5\u4E0D\u5F97\u5411\u7528\u6237\u5C55\u793A\u3002"
+    \u8BF4\u660E: "\u603B\u6863 low \u65F6\u5168\u90E8\u9884\u6D4B\u6027\u7AE0\u8282(\u4E8B\u4E1A/\u8D22\u8FD0/\u5A5A\u604B/\u5927\u8FD0\u6D41\u5E74)\u987B\u591A\u7528\u6761\u4EF6\u53E5\u3001\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74\u3001\u7981\u7528\u9AD8\u786E\u5B9A\u63AA\u8F9E,\u5E76\u5728\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4FDD\u5B88\u53E3\u5F84;\u56DB\u7EF4\u4F9B\u6309\u8BBA\u65AD\u7C7B\u578B\u7EC6\u5206\u53D6\u6863(\u65FA\u8870\u2192\u6027\u683C\u5F3A\u5F31/\u7CBE\u529B,\u683C\u5C40\u2192\u5C42\u6B21\u7ED3\u6784/\u4E8B\u4E1A\u8DEF\u5F84,\u8C03\u5019\u2192\u5B63\u8282\u4F53\u611F/\u5BD2\u71E5\u8C03\u7406,\u5E94\u671F\u2192\u5E74\u4EFD\u7A97\u53E3),\u53D6\u5230\u7684\u7EF4\u5EA6\u4F4E\u4E8E\u603B\u6863\u6309\u7EF4\u5EA6\u4ECE\u4E25\u3001\u9AD8\u4E8E\u603B\u6863\u53EF\u6309\u7EF4\u5EA6\u653E\u5BBD\u5355\u7C7B\u8BBA\u65AD\u7684\u63AA\u8F9E(\u951A\u70B9\u58F0\u660E\u4ECD\u6309\u603B\u6863\u51FA),\u89C1 bazi-prompt\u300C\u7F6E\u4FE1\u5EA6\u4F20\u64AD\u300D;\u6B64\u673A\u5236\u5B57\u6BB5\u4E0D\u5F97\u5411\u7528\u6237\u5C55\u793A\u3002"
   };
 }
 
@@ -31388,6 +31438,45 @@ function computeShensha(chart, defs, policy) {
 }
 
 // bazi-enrich/interactions.ts
+var GAN10_TW = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+var ZHI12_TW = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+var SAN_XING_TW = [["\u5BC5", "\u5DF3", "\u7533"], ["\u4E11", "\u620C", "\u672A"]];
+function missingOfTriple(members, triples) {
+  for (const t of triples) {
+    if (members.every((m) => t.zhi.includes(m))) return t.zhi.filter((z) => !members.includes(z));
+  }
+  return [];
+}
+function computeTriggerWindows(items, dayun, fromYear) {
+  for (const r of items) {
+    if (r.kind !== "\u5730\u652F") continue;
+    let \u5F85 = [];
+    let \u65B9\u5F0F = null;
+    if (r.status === "\u865A\u62F1" && (r.type === "\u62F1\u5408" || r.type === "\u62F1\u4F1A")) {
+      \u5F85 = missingOfTriple(r.members, r.type === "\u62F1\u5408" ? SAN_HE : SAN_HUI);
+      \u65B9\u5F0F = "\u586B\u5B9E";
+    } else if (r.status === "\u534A\u5C40" && (r.type === "\u534A\u5408" || r.type === "\u534A\u4F1A")) {
+      \u5F85 = missingOfTriple(r.members, r.type === "\u534A\u5408" ? SAN_HE : SAN_HUI);
+      \u65B9\u5F0F = "\u8865\u5168\u6210\u5C40";
+    } else if (r.type === "\u76F8\u5211" && r.status === "\u51CF\u529B" && r.cause.includes("\u7F3A\u4E00")) {
+      \u5F85 = missingOfTriple(r.members, SAN_XING_TW.map((z) => ({ zhi: z })));
+      \u65B9\u5F0F = "\u51D1\u5168\u4E09\u5211";
+    }
+    if (!\u5F85.length || !\u65B9\u5F0F) continue;
+    const \u5E94\u671F = [];
+    for (const d of dayun || []) {
+      const z = d?.ganZhi?.zhi;
+      if (z && \u5F85.includes(z) && d.endYear >= fromYear)
+        \u5E94\u671F.push({ \u5E74: d.startYear, \u8F7D\u4F53: `\u5927\u8FD0${d.ganZhi.gan}${z}(${d.startYear}-${d.endYear})` });
+    }
+    for (let y = fromYear; y < fromYear + 12; y++) {
+      const z = ZHI12_TW[(y - 4) % 12];
+      if (\u5F85.includes(z)) \u5E94\u671F.push({ \u5E74: y, \u8F7D\u4F53: `\u6D41\u5E74${GAN10_TW[(y - 4) % 10]}${z}` });
+    }
+    \u5E94\u671F.sort((a, b) => a.\u5E74 - b.\u5E74);
+    r.\u5F15\u7206\u7A97\u53E3 = { \u5F85, \u65B9\u5F0F, \u5E94\u671F: \u5E94\u671F.slice(0, 4) };
+  }
+}
 var PILLAR_IDX = { \u5E74: 0, \u6708: 1, \u65E5: 2, \u65F6: 3 };
 var HE_HUA = { \u7532\u5DF1: "\u571F", \u4E59\u5E9A: "\u91D1", \u4E19\u8F9B: "\u6C34", \u4E01\u58EC: "\u6728", \u620A\u7678: "\u706B" };
 var KU_CHONG = /* @__PURE__ */ new Set(["\u8FB0\u620C", "\u4E11\u672A", "\u620C\u8FB0", "\u672A\u4E11"]);
@@ -32546,6 +32635,10 @@ function main() {
         }
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : (/* @__PURE__ */ new Date()).getFullYear();
+      if (enr.\u4F5C\u7528\u5173\u7CFB) {
+        computeTriggerWindows(enr.\u4F5C\u7528\u5173\u7CFB.items || [], chart.bazi.dayun || [], curYear);
+        if (enr.\u4F5C\u7528\u5173\u7CFB.lineage) computeTriggerWindows(enr.\u4F5C\u7528\u5173\u7CFB.lineage.items || [], chart.bazi.dayun || [], curYear);
+      }
       enr.\u8FD0\u5C81\u5F15\u52A8 = analyzeYunSui(siZhuCN, chart.bazi.dayun || [], curYear);
       if (args.currentYear) {
         try {

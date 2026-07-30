@@ -16,7 +16,7 @@ import { enrichBazi } from './bazi-enrich/enrich';
 import { detectShichenBoundary, zishiConventionNote } from './bazi-enrich/shichen-boundary';
 import { aggregateConfidenceTier } from './bazi-enrich/confidence';
 import { computeShensha } from './shensha';
-import { adjudicateInteractions } from './bazi-enrich/interactions';
+import { adjudicateInteractions, computeTriggerWindows } from './bazi-enrich/interactions';
 import { analyzeYunSui, analyzeCompareYears } from './bazi-enrich/yunsui';
 import { analyzeLiuYue } from './bazi-enrich/liuyue';
 import { annotateShunNi } from './bazi-enrich/shunni';
@@ -218,6 +218,11 @@ function main() {
         }
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : new Date().getFullYear();
+      // S3 批2: 引爆窗口 — 虚拱/半局/三刑缺一的填实·凑全检索(通则与流派视图各自附加)
+      if (enr.作用关系) {
+        computeTriggerWindows(enr.作用关系.items || [], chart.bazi.dayun || [], curYear);
+        if (enr.作用关系.lineage) computeTriggerWindows(enr.作用关系.lineage.items || [], chart.bazi.dayun || [], curYear);
+      }
       enr.运岁引动 = analyzeYunSui(siZhuCN, chart.bazi.dayun || [], curYear);
 
       // P1-A: 流月引动 — 仅显式传 --currentYear 时输出(流年问答月级粒度;复用运岁检测器)

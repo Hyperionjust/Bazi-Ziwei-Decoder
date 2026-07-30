@@ -212,7 +212,15 @@ function dumpBazi(b, bi) {
     const ct = en.confidence_tier;
     if (ct) {
       lines.push(`\u2502 \u251C\u5168\u5C40\u7F6E\u4FE1\u5EA6(confidence_tier\xB7\u9884\u6D4B\u6027\u7AE0\u8282\u6309\u6B64\u6863\u5B9A\u63AA\u8F9E) : ${ct.tier} \u2014 ${(ct.\u4F9D\u636E || []).join(";")}`);
-      if (ct.tier === "low") lines.push("\u2502 \u2502 \u2514\u26A0 low \u6863\u5F3A\u5236: \u4E8B\u4E1A/\u8D22\u8FD0/\u5A5A\u604B/\u5927\u8FD0\u6D41\u5E74\u591A\u7528\u6761\u4EF6\u53E5,\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74,\u7981\u300C\u5FC5\u7136/\u4E00\u5B9A\u4F1A/\u80AF\u5B9A\u4F1A/\u94C1\u5B9A\u300D\u7C7B\u65AD\u8BED;\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4E00\u6B21\u4FDD\u5B88\u53E3\u5F84");
+      const dims = ct.\u7EF4\u5EA6;
+      if (dims) {
+        const KEYS = ["\u65FA\u8870", "\u683C\u5C40", "\u8C03\u5019", "\u5E94\u671F"];
+        const dimStr = KEYS.map((k) => `${k}:${dims[k]}`).join(" ");
+        const notHigh = KEYS.filter((k) => dims[k] !== "high");
+        const why = notHigh.length ? ` \u2014 ${notHigh.map((k) => `${k}=${(ct.\u7EF4\u5EA6\u4F9D\u636E || {})[k] || ""}`).join(";")}` : "";
+        lines.push(`\u2502 \u2502 ${ct.tier === "low" ? "\u251C" : "\u2514"}\u5206\u7EF4(\u6309\u8BBA\u65AD\u7C7B\u578B\u53D6\u6863:\u65FA\u8870\u2192\u6027\u683C\u5F3A\u5F31/\u7CBE\u529B,\u683C\u5C40\u2192\u5C42\u6B21/\u4E8B\u4E1A\u7ED3\u6784,\u8C03\u5019\u2192\u5B63\u8282\u4F53\u611F/\u5BD2\u71E5\u8C03\u7406,\u5E94\u671F\u2192\u5E74\u4EFD\u7A97\u53E3) : ${dimStr}${why}`);
+      }
+      if (ct.tier === "low") lines.push("\u2502 \u2502 \u2514\u26A0 low \u6863\u5F3A\u5236: \u4E8B\u4E1A/\u8D22\u8FD0/\u5A5A\u604B/\u5927\u8FD0\u6D41\u5E74\u591A\u7528\u6761\u4EF6\u53E5,\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74,\u7981\u300C\u5FC5\u7136/\u4E00\u5B9A\u4F1A/\u80AF\u5B9A\u4F1A/\u94C1\u5B9A\u300D\u7C7B\u65AD\u8BED;\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4E00\u6B21\u4FDD\u5B88\u53E3\u5F84;\u5206\u7EF4\u4E3A high \u7684\u8BBA\u65AD\u7C7B\u578B\u53EF\u4FDD\u6301\u6B63\u5E38\u9510\u5EA6(\u951A\u70B9\u58F0\u660E\u4ECD\u51FA)");
     }
     const ya = en.\u7528\u795E\u5EFA\u8BAE;
     if (ya) {
@@ -335,7 +343,8 @@ function dumpBazi(b, bi) {
         const mem = (r.members || []).join("");
         const pil = (r.pillars || []).join("-");
         const divg = r.divergence ? `  \u2696\u5206\u6B67:${r.divergence}` : "";
-        lines.push(`${prefix}${last ? "\u2514" : "\u251C"}${r.type} ${mem}(${pil}\u67F1\xB7${r.distance}) \u3010${r.status}\u3011 ${r.cause}${divg}`);
+        const tw = r.\u5F15\u7206\u7A97\u53E3 ? `  \u23F3\u5F15\u7206\u7A97\u53E3[${r.\u5F15\u7206\u7A97\u53E3.\u65B9\u5F0F}\xB7\u5F85${(r.\u5F15\u7206\u7A97\u53E3.\u5F85 || []).join("/")}]:${(r.\u5F15\u7206\u7A97\u53E3.\u5E94\u671F || []).map((a) => (a.\u8F7D\u4F53 || "").startsWith("\u6D41\u5E74") ? `${a.\u5E74}${(a.\u8F7D\u4F53 || "").slice(2)}` : a.\u8F7D\u4F53).join("\u3001") || "\u68C0\u7D22\u7A97\u53E3\u5185\u65E0\u5E94\u671F"}` : "";
+        lines.push(`${prefix}${last ? "\u2514" : "\u251C"}${r.type} ${mem}(${pil}\u67F1\xB7${r.distance}) \u3010${r.status}\u3011 ${r.cause}${divg}${tw}`);
       });
     };
     if (ix && Array.isArray(ix.items) && ix.items.length > 0) {

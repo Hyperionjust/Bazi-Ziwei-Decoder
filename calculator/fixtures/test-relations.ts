@@ -2,7 +2,7 @@
 // 用法: npx tsx test-relations.ts ;全过 exit 0
 import { detectZhiRelations } from '../bazi-enrich/zhi-relations';
 import { detectGanRelations } from '../bazi-enrich/gan-relations';
-import { adjudicateInteractions } from '../bazi-enrich/interactions';
+import { adjudicateInteractions, computeTriggerWindows } from '../bazi-enrich/interactions';
 import { analyzeYunSui, gzVsChart, suiVsYun } from '../bazi-enrich/yunsui';
 import { enrichBazi } from '../bazi-enrich/enrich';
 import { detectRarePatterns } from '../bazi-enrich/rare';
@@ -184,6 +184,41 @@ ok(Math.abs(sc(judgeBaWei(RB,'male',{rubric:'v3', shenshaHits:hgHit} as any),'Ni
 // dm甲:丁=伤官+癸=正印 → 伤官佩印;丙=食神+庚=七杀 → 食神制杀
 ok(judgeBaWei({年:{gan:'丁',zhi:'卯'},月:{gan:'癸',zhi:'亥'},日:{gan:'甲',zhi:'子'},时:{gan:'乙',zhi:'丑'}} as any,'male',{rubric:'v4'} as any).依据.includes('R5伤官佩印'), 'R5伤官佩印检出(Ni+0.20,Fi+0.10)');
 ok(judgeBaWei({年:{gan:'丙',zhi:'寅'},月:{gan:'庚',zhi:'午'},日:{gan:'甲',zhi:'申'},时:{gan:'乙',zhi:'亥'}} as any,'male',{rubric:'v4'} as any).依据.includes('R5食神制杀'), 'R5食神制杀检出(Ti+0.20)');
+
+// S3 批2) 引爆窗口:虚拱/半局/三刑缺一 → 填实·凑全的支检索(确定性;吉凶不判)
+{
+  // 正例一:申辰拱子(虚拱) → 待子·填实;大运壬子(2030-2039)与流年2032壬子都该被检索到
+  const gongSZ = {年:{gan:'庚',zhi:'申'},月:{gan:'庚',zhi:'辰'},日:{gan:'乙',zhi:'丑'},时:{gan:'丙',zhi:'戌'}} as any;
+  const gAdj = adjudicateInteractions(gongSZ, IP('open'));
+  const fakeDayun = [{ ganZhi: { gan: '壬', zhi: '子' }, startYear: 2030, endYear: 2039, startAge: 5, endAge: 14 },
+                     { ganZhi: { gan: '癸', zhi: '丑' }, startYear: 2040, endYear: 2049, startAge: 15, endAge: 24 }];
+  computeTriggerWindows(gAdj.items, fakeDayun, 2026);
+  const gong = gAdj.items.find(r => r.type === '拱合' && r.status === '虚拱');
+  ok(!!gong?.引爆窗口 && gong.引爆窗口.待.join('') === '子' && gong.引爆窗口.方式 === '填实',
+    `引爆窗口:申辰虚拱→待子·填实 (得到 ${gong?.引爆窗口 ? gong.引爆窗口.待.join('') + '·' + gong.引爆窗口.方式 : '无'})`);
+  ok(gong!.引爆窗口!.应期[0]?.年 === 2030 && gong!.引爆窗口!.应期[0]?.载体.includes('大运壬子'),
+    `引爆窗口:首应期=2030大运壬子(按年排序) (得到 ${gong!.引爆窗口!.应期[0]?.年}${gong!.引爆窗口!.应期[0]?.载体})`);
+  ok(gong!.引爆窗口!.应期.some(a => a.年 === 2032 && a.载体 === '流年壬子'),
+    '引爆窗口:流年检索命中2032壬子(12年窗口内支必现)');
+  // 正例二:寅巳刑缺申→凑全三刑待申(2028戊申);巳酉半合缺丑→补全成局待丑(2033癸丑)
+  const xingSZ = {年:{gan:'甲',zhi:'寅'},月:{gan:'己',zhi:'巳'},日:{gan:'庚',zhi:'子'},时:{gan:'乙',zhi:'酉'}} as any;
+  const xAdj = adjudicateInteractions(xingSZ, IP('open'));
+  computeTriggerWindows(xAdj.items, [], 2026);
+  const xing = xAdj.items.find(r => r.type === '相刑' && r.status === '减力');
+  ok(!!xing?.引爆窗口 && xing.引爆窗口.待.join('') === '申' && xing.引爆窗口.方式 === '凑全三刑'
+    && xing.引爆窗口.应期.some(a => a.年 === 2028 && a.载体 === '流年戊申'),
+    `引爆窗口:寅巳刑缺一→待申·凑全三刑·2028戊申 (得到 ${xing?.引爆窗口 ? xing.引爆窗口.待.join('') + '@' + (xing.引爆窗口.应期[0]?.年 ?? '-') : '无'})`);
+  const banhe = xAdj.items.find(r => r.type === '半合' && r.status === '半局');
+  ok(!!banhe?.引爆窗口 && banhe.引爆窗口.待.join('') === '丑' && banhe.引爆窗口.方式 === '补全成局'
+    && banhe.引爆窗口.应期.some(a => a.年 === 2033 && a.载体 === '流年癸丑'),
+    `引爆窗口:巳酉半合→待丑·补全成局·2033癸丑 (得到 ${banhe?.引爆窗口 ? banhe.引爆窗口.待.join('') + '@' + (banhe.引爆窗口.应期[0]?.年 ?? '-') : '无'})`);
+  // 反例:生效/被解/成局等非潜伏状态一律不得挂窗口(引爆窗口只管「差一个字」的潜伏关系)
+  ok(xAdj.items.filter(r => !['虚拱', '半局'].includes(r.status) && !(r.type === '相刑' && r.status === '减力'))
+      .every(r => r.引爆窗口 === undefined),
+    '引爆窗口反例:非潜伏状态(生效/被解/成局…)不挂窗口');
+  ok(gAdj.items.filter(r => r.status === '生效').every(r => r.引爆窗口 === undefined),
+    '引爆窗口反例:拱局盘中生效关系同样不挂');
+}
 
 // 留档:既有合成盘 v2→v3 类型变化
 for (const [nm, sz] of [['盘A',{年:{gan:'甲',zhi:'子'},月:{gan:'丙',zhi:'寅'},日:{gan:'戊',zhi:'申'},时:{gan:'癸',zhi:'丑'}}],['盘B',{年:{gan:'丙',zhi:'子'},月:{gan:'甲',zhi:'午'},日:{gan:'己',zhi:'卯'},时:{gan:'乙',zhi:'亥'}}],['盘C',{年:{gan:'庚',zhi:'申'},月:{gan:'乙',zhi:'酉'},日:{gan:'甲',zhi:'申'},时:{gan:'庚',zhi:'午'}}]] as any[]) {
