@@ -12,6 +12,7 @@
 | `case-template.json` | 空白命例模板（复制为 `<名字>.case.json` 后填写） |
 | `run-calibration.ts` | runner 骨架：读命例 → 算法层排盘 → 输出待人工评分的对照表（Markdown） |
 | `career-mapping.schema.json` | 十神→现代职业映射库的**空 schema 占位**（内容另行立项，本轮不填） |
+| `classics/` | **典籍命例库**（`case_type: 典籍判定`，金标=书上判定，无隐私、入库当回归）。首批韦千里 7 例与试点对照表见 `classics/README.md` |
 
 ## 用法
 

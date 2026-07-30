@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "校准命例 (calibration case)",
-  "description": "一个已证实生平的命例。生辰为敏感数据: 命例文件(*.case.json)不入库。",
+  "description": "一个校准命例。现实事件类含真实生辰属敏感数据, 不入库; 典籍判定类(公开出版物中的历史命例, 住 classics/)无隐私, 入库当回归。",
   "type": "object",
   "required": [
     "id",
@@ -19,7 +19,7 @@
     },
     "id": {
       "type": "string",
-      "description": "命例代号(勿用真名)"
+      "description": "命例代号(现实事件类勿用真名; 典籍判定类为公开历史人物, 用「出处·人名」)"
     },
     "birth": {
       "type": "object",
@@ -76,9 +76,42 @@
             "证件/记录",
             "本人确认",
             "家人回忆",
-            "推测"
+            "推测",
+            "典籍反推"
           ],
-          "description": "时辰可靠度来源(家人回忆/推测的命例其应期评分只作弱参考)"
+          "description": "时辰可靠度来源(家人回忆/推测的命例其应期评分只作弱参考; 典籍反推=由书载四柱/生辰行反推的输入, 以复现书中四柱为准)"
+        },
+        "note": {
+          "type": "string",
+          "description": "生辰来源说明(典籍反推类必填: 反推依据与是否与史载生日互证)"
+        }
+      }
+    },
+    "classic": {
+      "type": "object",
+      "description": "典籍判定类专用: 书上的原文与判定(金标)。算法层输出不写进本文件——金标是书, 算法是被校的一方, 对照表见 classics/README.md",
+      "required": [
+        "源",
+        "原文四柱",
+        "断语摘录",
+        "韦氏判定"
+      ],
+      "properties": {
+        "源": {
+          "type": "string",
+          "description": "书名/篇名/素材文件"
+        },
+        "原文四柱": {
+          "type": "string",
+          "description": "书载四柱(空格分隔), run-chart 输出必须与之逐字一致"
+        },
+        "断语摘录": {
+          "type": "string",
+          "description": "断语核心句照录(为节选, 全文见素材)"
+        },
+        "韦氏判定": {
+          "type": "object",
+          "description": "从断语中提炼的结构化金标: 定格/旺衰/用/忌/病/应期要点等, 键名随例"
         }
       }
     },

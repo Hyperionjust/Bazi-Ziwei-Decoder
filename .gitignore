@@ -22,8 +22,11 @@ report.html
 *-report.html
 *-zonghe.html
 
-# 校准命例与对照表（含真实生辰，勿入库；脚手架见 calculator/fixtures/calibration/）
+# 校准命例与对照表——只拦【现实事件类】（含在世者真实生辰与隐私，勿入库）。
+# 典籍判定类命例（case_type: 典籍判定，公开出版物中的历史命例，无隐私）住
+# calculator/fixtures/calibration/classics/，白名单放行、该入库当回归。
 *.case.json
+!calculator/fixtures/calibration/classics/*.case.json
 calibration-report.md
 
 # 但仓库自带的合成示例必须入库（白名单放行·整目录放行，避免 *-report.html 等规则误伤新增样例）
