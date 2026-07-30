@@ -35,7 +35,11 @@ export type GanZhi = { gan: Tiangan; zhi: Dizhi };
 //   (成派/会局),中和盘也会命中「身弱」字样条例(质检报告 P1-2 实锤,1991 质检盘)。
 //   身势取自旺衰计分 verdict(偏旺/极旺→强;偏弱/极弱→弱;中和→中和)——是计分产物不是
 //   盘面字面事实,故只允许用在「前提」过滤,不入「若」的盘面判定层(三层分离不破)。
-export const 词表版本 = 'v1.1';
+// v2(v3.12 批C2):新增柱位谓词 柱透/坐支——参数两字连写(「柱透:年丁」=年柱天干为丁,
+//   「坐支:时辰」=时柱地支为辰),不引入第二个冒号故 ATOM 语法零改动。用于回收 v1 时代
+//   因无柱位谓词被迫放宽的 72 条(「癸透年干」曾放宽为【癸出干】——放宽方向全是更易命中,
+//   假阳性面;实证清单见立项调查)。节气深浅谓词(冬至前後类)本版仍不做,继续按判定备注留痕。
+export const 词表版本 = 'v2';
 
 export const 谓词表: Record<string, { 参数: '天干' | '地支' | '五行' | '天干组' | '十神类'; 说明: string; 可计数: boolean }> = {
   透:     { 参数: '天干',   说明: '该天干出现在四柱天干(含日干——日干本身也在天干上,是字面事实)', 可计数: true },
@@ -50,6 +54,8 @@ export const 谓词表: Record<string, { 参数: '天干' | '地支' | '五行' 
   十神:   { 参数: '十神类', 说明: '四柱(不含日干本身)天干+藏干中存在该十神或十神类(比劫/食伤/财/官杀/印)', 可计数: true },
   十神透: { 参数: '十神类', 说明: '同上但只看天干(不含藏干、不含日干本身)——对应典籍「干透比劫」这类明说透干的写法', 可计数: true },
   身:     { 参数: '身势',   说明: 'v1.1:日主身势(强|弱|中和),取自旺衰计分 verdict——计分产物非盘面字面,仅供条例「前提」过滤用;身势未知(未传)时恒真(不过滤,防孤立调用静默丢条例)', 可计数: false },
+  柱透:   { 参数: '柱位干', 说明: 'v2:某柱天干为X,参数两字连写如「柱透:年丁」(首字∈年月日时,次字天干)——对应典籍「癸透年干」「己出月上」类明说柱位的写法', 可计数: false },
+  坐支:   { 参数: '柱位支', 说明: 'v2:某柱地支为Z,参数两字连写如「坐支:时辰」——对应典籍「或生辰时」「甲申时」类明说柱位地支的写法', 可计数: false },
 };
 
 // 「一派」的操作化定义 —— ⚠ 这是我们的定义,不是典籍原文。
@@ -72,6 +78,7 @@ export type PanFacts = {
   会局: Partial<Record<WuXing, string>>;   // 五行 → 成局说明
   十神集: string[];           // 十神 + 十神类(去重)
   身势?: '强' | '弱' | '中和';  // v1.1:旺衰计分 verdict 映射,由 evalTiaoLi 调用方传入(可缺)
+  柱: Record<Pillar, GanZhi>;  // v2:按柱原始干支(柱透/坐支 谓词用)
 };
 
 const 十神类 = (ss: ShiShen): string =>
@@ -128,7 +135,8 @@ export function buildFacts(siZhu: Record<Pillar, GanZhi>, dayMaster: Tiangan): P
     十神集.add(十神类(ss));
   }
 
-  return { 天干, 非日干天干, 地支, 藏干, 五行加权, 会局, 十神集: [...十神集] };
+  return { 天干, 非日干天干, 地支, 藏干, 五行加权, 会局, 十神集: [...十神集],
+           柱: { 年: siZhu.年, 月: siZhu.月, 日: siZhu.日, 时: siZhu.时 } };
 }
 
 // 计数(用于 X数:A>=N)
@@ -171,6 +179,8 @@ function 求值原子(pred: string, arg: string, cmp: string | null, num: number
     case '制': return 计数('有', arg, f, dayMaster) >= 1;
     case '会局': return !!f.会局[arg as WuXing];
     case '身': return f.身势 === undefined ? true : f.身势 === arg; // 身势未知恒真(见词表说明)
+    case '柱透': return f.柱[arg[0] as Pillar]?.gan === arg[1];      // v2:某柱天干为X
+    case '坐支': return f.柱[arg[0] as Pillar]?.zhi === arg[1];      // v2:某柱地支为Z
     case '成派': {
       // 天干组如「庚辛」——组内各字五行须一致(词表校验已保证)
       // 「一派」说的是日主【周围】的势,故日干本身不计(见 成派阈值.排除日干)
@@ -237,6 +247,14 @@ export function 校验若(src: string): void {
         break;
       }
       case '身势': if (!['强','弱','中和'].includes(a)) throw new Error(`「身:${a}」参数须为 强|弱|中和`); break;
+      case '柱位干':
+        if (a.length !== 2 || !['年','月','日','时'].includes(a[0]) || !TIANGAN.includes(a[1] as Tiangan))
+          throw new Error(`「柱透:${a}」参数须两字连写:柱位(年|月|日|时)+天干`);
+        break;
+      case '柱位支':
+        if (a.length !== 2 || !['年','月','日','时'].includes(a[0]) || !DIZHI.includes(a[1] as Dizhi))
+          throw new Error(`「坐支:${a}」参数须两字连写:柱位(年|月|日|时)+地支`);
+        break;
     }
   }
   // 语法可解析性
