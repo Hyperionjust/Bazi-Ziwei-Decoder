@@ -95,7 +95,7 @@ See [`SKILL.md`](./SKILL.md) for the full flow and [`TEST-GUIDE.md`](./TEST-GUID
 
 ### Charting directly from the CLI (no agent)
 
-Zero-install: `calculator/dist-bundle/` ships **five** self-contained esbuild bundles (`run-chart` / `dump-text` / `render` / `check-analysis` / `self-update`) that run with plain `node` — no `npm install` needed, and read-only skill directories work.
+Zero-install: `calculator/dist-bundle/` ships **five** self-contained esbuild bundles (`run-chart` / `dump-text` / `render` / `check-analysis` / `version-check`) that run with plain `node` — no `npm install` needed, and read-only skill directories work.
 
 ```bash
 cd calculator
@@ -134,7 +134,7 @@ Bazi-Ziwei-Decoder/
 │   ├── dump-text.ts               JSON -> text chart
 │   ├── render.ts                  JSON + analysis + template -> single-file HTML (--mode=zonghe|bazi|mbti|ziwei)
 │   ├── check-analysis.ts          analysis quality gate (posters + long-form)
-│   ├── self-update.ts             one-shot self-update check
+│   ├── version-check.ts             one-shot version check (read-only; no download, no exec)
 │   ├── dist-bundle/               5 zero-install self-contained bundles (run with plain node)
 │   ├── shensha.ts + shensha.json  43 symbolic stars, data-driven with literature sources
 │   ├── lineages.json              five lineage lenses (whitelists + adjudication rules + literature)

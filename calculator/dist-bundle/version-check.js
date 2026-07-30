@@ -21,11 +21,10 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// self-update.ts
+// version-check.ts
 var fs = __toESM(require("fs"));
 var path = __toESM(require("path"));
 var https = __toESM(require("https"));
-var import_child_process = require("child_process");
 function args() {
   const a = {};
   for (const x of process.argv.slice(2)) {
@@ -34,11 +33,15 @@ function args() {
   }
   return a;
 }
-function get2(url, timeout, binary = false) {
+function getText(url, timeout, depth = 0) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { timeout, headers: { "User-Agent": "bazi-ziwei-decoder-selfupdate" } }, (res) => {
+    if (depth > 3) {
+      reject(new Error("\u91CD\u5B9A\u5411\u8FC7\u591A"));
+      return;
+    }
+    const req = https.get(url, { timeout, headers: { "User-Agent": "bazi-ziwei-decoder-versioncheck" } }, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        get2(res.headers.location, timeout, binary).then(resolve, reject);
+        getText(res.headers.location, timeout, depth + 1).then(resolve, reject);
         res.resume();
         return;
       }
@@ -47,9 +50,18 @@ function get2(url, timeout, binary = false) {
         res.resume();
         return;
       }
-      const chunks = [];
-      res.on("data", (c) => chunks.push(c));
-      res.on("end", () => resolve(Buffer.concat(chunks)));
+      let s = "";
+      let n = 0;
+      res.setEncoding("utf-8");
+      res.on("data", (c) => {
+        n += c.length;
+        if (n > 65536) {
+          req.destroy(new Error("\u54CD\u5E94\u8FC7\u5927"));
+          return;
+        }
+        s += c;
+      });
+      res.on("end", () => resolve(s));
     });
     req.on("timeout", () => {
       req.destroy(new Error("timeout"));
@@ -87,29 +99,12 @@ async function main() {
   }
   let remote = "";
   try {
-    remote = (await get2(`https://raw.githubusercontent.com/${repo}/${branch}/VERSION`, timeout)).toString("utf-8").trim();
+    remote = (await getText(`https://raw.githubusercontent.com/${repo}/${branch}/VERSION`, timeout)).trim();
   } catch (e) {
     out({ local, remote: null, update_available: false, skip: `\u7248\u672C\u68C0\u67E5\u5931\u8D25(${e.message}),\u6309\u5F53\u524D\u7248\u672C\u7EE7\u7EED` });
   }
   if (!/^\d+\.\d+\.\d+$/.test(remote)) out({ local, remote, update_available: false, skip: "\u8FDC\u7AEF VERSION \u683C\u5F0F\u5F02\u5E38,\u6309\u5F53\u524D\u7248\u672C\u7EE7\u7EED" });
-  const upd = semverGt(remote, local);
-  if (!upd || A.fetch !== "true") out({ local, remote, update_available: upd });
-  const workdir = A.workdir || process.cwd();
-  try {
-    const zipBuf = await get2(`https://codeload.github.com/${repo}/zip/refs/heads/${branch}`, Math.max(timeout, 15e3), true);
-    const zipPath = path.join(workdir, "bzd-latest.zip");
-    fs.writeFileSync(zipPath, zipBuf);
-    const dest = path.join(workdir, "bzd-latest");
-    fs.rmSync(dest, { recursive: true, force: true });
-    fs.mkdirSync(dest, { recursive: true });
-    (0, import_child_process.execFileSync)("unzip", ["-q", "-o", zipPath, "-d", dest], { stdio: "pipe" });
-    const inner = fs.readdirSync(dest).find((d) => fs.statSync(path.join(dest, d)).isDirectory());
-    const fetched = inner ? path.join(dest, inner) : dest;
-    if (!fs.existsSync(path.join(fetched, "calculator", "dist-bundle", "run-chart.js")) || !fs.existsSync(path.join(fetched, "SKILL.md")))
-      out({ local, remote, update_available: true, skip: "\u65B0\u7248\u5305\u4E0D\u5B8C\u6574(\u7F3A dist-bundle/SKILL.md),\u7EE7\u7EED\u7528\u5F53\u524D\u7248\u672C" });
-    out({ local, remote, update_available: true, fetched_to: fetched });
-  } catch (e) {
-    out({ local, remote, update_available: true, skip: `\u65B0\u7248\u4E0B\u8F7D/\u89E3\u538B\u5931\u8D25(${e.message}),\u7EE7\u7EED\u7528\u5F53\u524D\u7248\u672C` });
-  }
+  if (!semverGt(remote, local)) out({ local, remote, update_available: false });
+  out({ local, remote, update_available: true, notice: `\u6709\u65B0\u7248 v${remote}(\u5F53\u524D v${local});\u672C\u6B21\u4F1A\u8BDD\u4ECD\u7528\u5F53\u524D\u7248\u672C,\u5982\u9700\u66F4\u65B0\u8BF7\u624B\u52A8\u91CD\u88C5 .skill` });
 }
 main();

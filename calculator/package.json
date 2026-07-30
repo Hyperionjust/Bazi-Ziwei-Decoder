@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "bundle": "esbuild run-chart.ts dump-text.ts render.ts check-analysis.ts self-update.ts --bundle --platform=node --format=cjs --target=node18 --outdir=dist-bundle",
+    "bundle": "esbuild run-chart.ts dump-text.ts render.ts check-analysis.ts version-check.ts --bundle --platform=node --format=cjs --target=node18 --outdir=dist-bundle",
     "chart": "node dist-bundle/run-chart.js",
     "dump": "node dist-bundle/dump-text.js",
     "render": "node dist-bundle/render.js",

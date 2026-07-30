@@ -18,7 +18,7 @@
     "render.ts",
     "shensha.ts",
     "check-analysis.ts",
-    "self-update.ts",
+    "version-check.ts",
     "yiqi-core/**/*.ts",
     "bazi-enrich/**/*.ts"
   ],

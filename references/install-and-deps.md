@@ -15,7 +15,7 @@ run-chart.js      生辰 → chart.json
 dump-text.js      chart.json → chart.txt
 render.js         chart.json + analysis.json + 模板 → HTML
 check-analysis.js analysis.json / 长文 → 体检报告
-self-update.js    比对远端 VERSION，会话级影子更新
+version-check.js  比对远端 VERSION（只读；不下载、不执行）
 ```
 
 > `shensha.json` / `lineages.json` / `spec.json` 由脚本从 `dist-bundle` 上层目录自动解析，只读目录下同样成立。

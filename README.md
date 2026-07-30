@@ -45,7 +45,7 @@
 | 5 | 总领速览 + 按需下钻 | 先给全局速览与章号菜单，你说「展开第 6 章」才深写，不灌长文。 |
 | 6 | 文献核验防编造 | 起法查不到就标待核、绝不编；文昌福星做古法交叉校验。 |
 | 7 | 自带回归测试 | schema-check + 神煞 13 例 + 合冲刑害/运岁/用神/八维 20 组 + 边界回归（农历/时区/晚子时/真太阳时）+ 体检器回归（五模式）+ 模板完整性门禁，改完一键验证。 |
-| 8 | 零安装可跑 | `calculator/dist-bundle/` 五个 esbuild 自足单文件（run-chart / dump-text / render / check-analysis / self-update），`node` 直跑、免 `npm install`、兼容技能只读安装目录。 |
+| 8 | 零安装可跑 | `calculator/dist-bundle/` 五个 esbuild 自足单文件（run-chart / dump-text / render / check-analysis / version-check），`node` 直跑、免 `npm install`、兼容技能只读安装目录。 |
 | 9 | 海报长图版 | 八字独立海报：日主固定句式(十干意象定表)、结构块两句制、四大解读详写、合冲刑害/运岁引动区块、吉绿凶红着色、用忌喜调候五行色块、开运宜往宜置宜学；全程第二人称口吻。 |
 | 10 | 八字 MBTI ⭐3.x | 荣格八维×十神映射引擎:八字海报「你最像的是」版块;独立 MBTI 海报——古风人物 16 型×男女 32 变体(军师/文士/朝官/游侠四类群换装)+八维条形图+七大生活版块+中式小图标;「实测×底盘」差异版块(hero 大字+判词+500字积极解读,不臆断经历只讲环境类型);叙事以 MBTI 功能语言为主轴、八字作落锚,日主意象×MBTI 的「意象嫁接」为固定风格;措辞永远「最像」,非测评。 |
 | 11 | 胎元命宫 + 派系侧重 | 胎元/命宫补算入盘;不限流派下每个神煞标注五派「重用/参用/不用」;调候以《穷通宝鉴》120 格为基准文献。 |
@@ -144,7 +144,7 @@ OpenAI Codex CLI 支持 SKILL.md 技能（2025 年底起）并可运行脚本，
 `dump-text.ts`：`--input=chart.json --output=chart.txt`。
 `render.ts`：`--chart --analysis --template --output` + `--mode=zonghe|bazi|mbti|ziwei`（缺省 zonghe；ziwei 为 v3.7 紫微独立海报）、`--currentYear=YYYY`、`--name=命主姓名`、`--testedMBTI=XXXX`（可选，MBTI 实测类型）。
 `check-analysis.ts`：解读体检器——`--analysis --chart`（默认八字海报体检）、`--mode=mbti|zonghe|ziwei` 对应其余海报线、`--mode=longform --text=report.md` 长文形态红线扫描；FAIL 即送回重写，ALL PASS 才渲染。
-> **零安装**：以上入口连同 `self-update` 共五个均有 `dist-bundle/` 自足单文件版本，`node dist-bundle/run-chart.js ...` 直跑，无需安装依赖（只读目录可用）。
+> **零安装**：以上入口连同 `version-check` 共五个均有 `dist-bundle/` 自足单文件版本，`node dist-bundle/run-chart.js ...` 直跑，无需安装依赖（只读目录可用）。
 > 默认用东八区钟表时间（约 1900–2100），真太阳时校正需显式传 `--longitude` 才开启。
 
 ### 三、神煞清单 43
@@ -173,7 +173,7 @@ Bazi-Ziwei-Decoder/
 ├── prompts/            disclaimer · output-mode-B · bazi/ziwei/zonghe 长文提示词 · 海报提示词（bazi + bazi-poster-review / zonghe / mbti / ziwei）· liunian-qa 流年问答
 ├── templates/          海报模板 ×4（综合印证 + 八字独立 + MBTI + 紫微独立，含完整性门禁校验）
 └── calculator/
-    ├── run-chart · dump-text · render · check-analysis · self-update   五入口（dist/ 编译版 · dist-bundle/ 零安装自足版 ×5）
+    ├── run-chart · dump-text · render · check-analysis · version-check   五入口（dist/ 编译版 · dist-bundle/ 零安装自足版 ×5）
     ├── shensha 引擎 + shensha.json         43 神煞 SSOT（T1/T2/T3/COMPOUND/MODERN）
     ├── bazi-enrich/                        格局旺衰调候 · 合冲刑害裁决(interactions) · 运岁引动(yunsui) · 八维(bawei)
     ├── lineages.json                       五派镜片（神煞白名单 + 作用规则集 + 文献）

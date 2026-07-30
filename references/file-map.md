@@ -6,7 +6,7 @@
 ```
 bazi-ziwei-decoder/
 ├── SKILL.md                          ← 技能主文件（触发条件 / 门禁 / Step 0–3 / 关键约束）
-├── VERSION                           ← 版本号唯一事实源（自动更新比对的就是它）
+├── VERSION                           ← 版本号唯一事实源（启动版本检查比对的就是它）
 ├── references/                       ← 按需查阅的参考资料（不常驻上下文）
 │   ├── file-map.md                   ← 本文件
 │   ├── install-and-deps.md           ← 安装后行为、依赖与只读目录须知
@@ -16,7 +16,7 @@ bazi-ziwei-decoder/
 ├── scripts/
 │   └── release.sh                    ← 发版唯一入口：写版本号 → 白名单打包 → 校验无垃圾件
 ├── calculator/
-│   ├── dist-bundle/                  ← ⭐ 运行时入口（run-chart / dump-text / render / check-analysis / self-update）
+│   ├── dist-bundle/                  ← ⭐ 运行时入口（run-chart / dump-text / render / check-analysis / version-check）
 │   ├── run-chart.ts                  ← 源码·入口：生辰 → JSON（stdout 纯 JSON / stderr debug）
 │   ├── dump-text.ts                  ← 源码·JSON → 文墨天机风文本
 │   ├── render.ts                     ← 源码·渲染：chart.json + analysis.json + 模板 → HTML

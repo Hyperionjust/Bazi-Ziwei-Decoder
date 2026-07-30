@@ -29,14 +29,15 @@ description: 八字 + 紫微斗数 AI 排盘与综合分析。当用户提供生
 
 ---
 
-## 🔄 启动版本检查（自动更新·决策门之前静默执行一次）
+## 🔄 启动版本检查（只读比对·决策门之前静默执行一次）
 
 用户首次进入本 skill 工作流程时（问决策门问题**之前**），静默执行**一次**：
 ```bash
-node <skill-root>/calculator/dist-bundle/self-update.js --root=<skill-root> --workdir=<工作目录> --fetch=true
+node <skill-root>/calculator/dist-bundle/version-check.js --root=<skill-root>
 ```
 - 输出 `update_available:false` 或含 `skip` → **什么都不说**，按当前版本继续（无网/404/超时都算 skip，绝不重试、绝不为此打扰用户）。
-- 输出含 `fetched_to` → **本次会话切换到新版**：后续所有命令的 `<skill-root>` 一律改用 `fetched_to` 路径（其下同样有 calculator/dist-bundle、prompts、templates）；并向用户告知一句：「已自动更新至 vX.Y.Z（本次会话生效）；如需永久更新请重装 .skill」。
+- 输出 `update_available:true` → 照 `notice` 提示一句「有新版 vX.Y.Z，如需更新请重装 .skill」，**然后按当前版本照常继续**。
+- **本 skill 不做自动更新**：该脚本只 GET 一个纯文本 VERSION 做比对，不下载代码、不落地任何文件、不起子进程、不改变 `<skill-root>`。更新与否由用户手动决定。
 - 本检查不算「装好后自检」（不排盘不渲染），与下节规则不冲突；每会话最多执行一次。
 
 ## ⛔ 开工前置门禁（最高优先级，先于一切排盘与解读）
@@ -177,7 +178,7 @@ node <skill-root>/calculator/dist-bundle/dump-text.js --input=<工作目录>/cha
 > `node <skill-root>/calculator/dist-bundle/check-analysis.js --mode=longform --text=<工作目录>/report.md --chart=<工作目录>/chart.json`——
 > 机器扫形态红线：幕后机制泄漏 / 版本号史 / 第三人称播报腔 / 绝对凶语（顺逆措辞）/ 行为频率断言 / 童年行为断言 / 正缘年龄与算法判定一致性。任一 FAIL → 自行改写后再交付（语义质量仍由自身把关，此脚本只兜硬红线）。
 
-> **八字独立（选 1）专属**：①**输出最开头必先整段输出 `prompts/disclaimer-preamble.md`**（成长心态两段），再进正文；②按 `prompts/output-mode-B.md` 走【总领速览 + 按需下钻】——默认先出速览（顶部告示 + 定调锚点 + 固定章号菜单），用户回「详细展开第 X 章」再只深写该章并在顶部复述锚点；③正文按 **五行→十神→神煞→大运** 骨架，注入所选流派的 `prompt_inject` / `pillar_emphasis` / `literature`，**严格在该派方法论内、以该派文献为核心分析、不串派**（见 bazi-prompt「流派忠实度」一节；仅『不限/open』才多派并陈），并强制神煞铁律；④除非用户在 Step0 选"完整报告"，否则不一次性下灌全文、不诱导继续。
+> **八字独立（选 1）专属**：①**输出最开头必先整段输出 `prompts/disclaimer-preamble.md`**（成长心态两段），再进正文；②按 `prompts/output-mode-B.md` 走【总领速览 + 按需下钻】——默认先出速览（顶部告示 + 定调锚点 + 固定章号菜单），用户回「详细展开第 X 章」再只深写该章并在顶部复述锚点；③正文按 **五行→十神→神煞→大运** 骨架，注入所选流派的 `pai_panci` / `pillar_emphasis` / `literature`，**严格在该派方法论内、以该派文献为核心分析、不串派**（见 bazi-prompt「流派忠实度」一节；仅『不限/open』才多派并陈），并强制神煞铁律；④除非用户在 Step0 选"完整报告"，否则不一次性下灌全文、不诱导继续。
 
 > 综合印证（3+A）的前置条件：先跑八字 + 紫微独立分析拿到中间报告，再喂给 `zonghe-yinzheng-prompt.md`。
 > 如输出被截断，分段输出。
