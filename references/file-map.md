@@ -24,12 +24,13 @@ bazi-ziwei-decoder/
 │   ├── check-analysis.ts             ← 解读体检器（--mode=bazi|zonghe|ziwei|mbti|longform）
 │   ├── schema-check.ts               ← 配置自检（json↔ts 一致性）
 │   ├── spec.json                     ← ⭐ 形态规格单一事实源（判词字数/句数区间/连接词白名单/timeline 项数/禁词分层）
-│   ├── tiaohou.json                  ← ⭐ 调候 120 格（日干×月支）+ 校勘块；⚠ 底本未确证，全表待核
+│   ├── tiaohou.json                  ← ⭐ 调候 120 格（日干×月支）+ 条例块（v3.11.0 全表吸收：1396 条条件树）+ 校勘块（M5 待核清单已全结案；取值权威性仍未主张，底本级确证须另立）
 │   ├── shensha.json                  ← 神煞单一事实源（起法/tier/出处/needs_review）
 │   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
 │   ├── package.json                  ← 依赖声明 + npm test（fixtures 一键跑法）
 │   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
-│   ├── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱/时辰边界/置信度/流月/多年对比）
+│   ├── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱/时辰边界/置信度四维/流月/多年对比）
+│   │   └── tiaohou-tiaoli.ts         ← ⭐ 调候条例求值器（受控词表 + DSL 解析，对盘面求值每条「若」；v3.11.0 M1 立）
 │   └── fixtures/                     ← 回归测试
 │       ├── test-shensha.ts           ← 神煞 13 例
 │       ├── test-relations.ts         ← 关系 / 运岁 / 正缘
@@ -42,7 +43,9 @@ bazi-ziwei-decoder/
 │       ├── test-tiaohou.ts           ← ⭐ 调候表结构 + 快照锁 + 寒暖不变式
 │       ├── test-shunni.ts            ← ⭐ 顺逆双轴 + 验收实况点
 │       ├── check-template.ts         ← 海报模板完整性
-│       └── calibration/              ← 校准回测脚手架（schema + runner，命例数据不入库）
+│       ├── test-golden.ts            ← ⭐ 随包样例即金标（四线 sample-analysis 过对应 mode 体检）
+│       ├── bless-tiaoli-relations.ts ← 条例「关系/蕴含」生成脚本（重跑会冲掉手工块——跑完须回填 EXPECTED_TIAOLI_HASH）
+│       └── calibration/              ← 校准回测脚手架（schema + runner）；classics/ 典籍命例白名单入库（韦千里 7 例），现实事件类仍不入库
 ├── prompts/
 │   ├── disclaimer-preamble.md        ← ⭐ 成长心态前置声明（八字/紫微/综合三线开头必出）
 │   ├── output-mode-B.md              ← ⭐ 总领速览 + 按需下钻 输出模式规则
@@ -62,7 +65,9 @@ bazi-ziwei-decoder/
 │   ├── report-ziwei-poster.html      ← 紫微独立海报模板（十二宫盘可视化）
 │   └── report-mbti-poster.html       ← MBTI 海报模板（实测×底盘差异版块）
 ├── examples/                         ← 四条海报线各一套金标样例（chart / analysis / 渲染产物）
-└── docs/release-notes/               ← 分批次变更摘要（含测试记录）；版本流水见 CHANGELOG.md
+└── docs/                             ← release-notes/（分批次变更摘要；版本流水见 CHANGELOG.md）
+    ├── 条例撰写规范.md               ← ⭐ 条例怎么写/词表边界/影印本抽查法/每批必踩的坑（M2 立，M3+ 沿用）
+    └── archive/                      ← 已完结工单归档（v3.11 工单发版后移入）
 ```
 
 ## 四条海报管线对照

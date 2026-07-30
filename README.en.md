@@ -6,7 +6,7 @@
 
 Deterministic charting (not LLM guesswork) · 3 analysis modes · 4 ink-style HTML poster themes
 
-[![Version](https://img.shields.io/badge/version-3.9.1-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.11.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-c1432f.svg)](#-installation)
 
@@ -43,6 +43,8 @@ It does three things an LLM alone does poorly:
 - 🕰️ **Optional true-solar-time correction**: `--longitude=<deg>` adds the longitude offset ((lon−120)×4 min, east positive) plus the equation of time on top of the UTC+8 clock time; off by default
 - 🔌 **Cross-agent**: one SKILL.md, works across major agents
 - 🔒 **Privacy-first**: all charting runs locally, no network needed; runtime artifacts are gitignored by default
+- 🧭 **Dual-axis luck reading (v3.10)**: momentum ("does it move") and resilience ("can you take it") are scored and narrated separately for every decade/year/month — divergence between the two is surfaced instead of collapsed into a single "lucky/unlucky" verdict
+- 📖 **Classical canon absorbed (v3.11)**: the full 120-cell seasonal-balance table of the *Qiongtong Baojian* / *Zaohua Yuanyao* is now a machine-evaluable rule base — **1,396 condition-tree clauses** (deterministic, reproducible per chart); "illness/taboo" hits subtract from resilience, the interpreter may only cite clauses actually matched (checker-enforced), plus mentor-god adjudication for strong-day charts (6/7 classical Wei Qianli cases now concur), four-dimension confidence tiers, and deterministic trigger windows for latent branch combinations
 
 ---
 

@@ -12,7 +12,7 @@
 ```bash
 cd calculator
 npm install          # 首次使用需要
-node dist/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0 --gender=male > smoke.json
+node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0 --gender=male > smoke.json
 ```
 
 **预期**：
@@ -54,6 +54,18 @@ grep "流年方向总览" ding.txt
 ```
 **预期**：`2022壬寅 …体0.8`、`2023癸卯 …体-0.7` —— **癸被扣、壬分文未动**。
 病按【本字】判不按五行判，因为同段书里明说「壬水无碍」。产物应与 `examples/sample-chart-dinghuo.txt` 一致。
+
+#### J4 条例引用体检（v3.11.0 M4 起）
+
+解读/海报若引用了**未命中**的条例名即编造，体检器会拦（`_条例引用` 项）。验法——把任一条例名塞进一份
+分析 JSON 的正文字段里（该盘并未命中它），体检应 FAIL：
+
+```bash
+node dist-bundle/check-analysis.js --mode=bazi --analysis=../examples/sample-analysis-bazi.json --chart=../examples/sample-chart.json --currentYear=2026
+```
+**预期**：随包金标样例 `ALL PASS`；若手工把「寒木向阳」等别格条例名插进 `career_html` 再跑，`_条例引用` 应 FAIL
+（两层判据：本格未命中名 ≥2 字、别格名 ≥4 字）。五入口一致性：`dist-bundle/` 下 run-chart / dump-text / render /
+check-analysis / version-check 五个 js 均由 `npm run bundle` 重建，改任何 `.ts` 后必须重跑 bundle。
 
 > 注意：Agent 装好 Skill 后**不会主动**跑此自检（SKILL.md 明确要求装好不自检，避免浪费 token）。Smoke Test 由你手动执行。
 
@@ -192,7 +204,7 @@ node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0
 5. 跑渲染脚本：
    ```bash
    cd calculator
-   node dist/render.js \
+   node dist-bundle/render.js \
      --chart=chart.json \
      --analysis=analysis.json \
      --template=../templates/report-zonghe-poster.html \
@@ -236,7 +248,7 @@ node -e "const j=require('./analysis.json'); console.log('strengths:', j.strengt
 |---|---|---|
 | Agent 找不到 Skill | SKILL.md 不在 Agent 扫描路径 | 把整个仓库放进 Agent 的 skills 目录（如 `~/.claude/skills/bazi-ziwei/`） |
 | 排盘脚本报错 | 时辰格式错 / 日期超 1900-2100 | 校正输入 |
-| `node dist/...` 报找不到模块 | 没装依赖 | `cd calculator && npm install` |
+| `node dist-bundle/...` 报找不到模块 | 没装依赖或没跑 bundle | `cd calculator && npm install && npm run bundle` |
 | 改了 .ts 源码后没生效 | dist 是预编译产物 | 重新编译 `npm run build` |
 | 渲染 HTML 后全是占位符 | analysis.json 解析失败 | 看 analysis.json 第一字符是不是 `{`，不是就剥掉 markdown 包装 |
 | 海报里命主信息错 | LLM 自行排盘没用算法层 | 重跑，强调"必须读 chart.txt 不要自己排" |

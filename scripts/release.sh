@@ -68,8 +68,11 @@ for p in "${WHITELIST[@]}"; do
 done
 
 # ---------- 4. 校验:包内不得有垃圾件 ----------
+# case.json 口径与 .gitignore 一致(S2/v3.11.0):classics/ 典籍命例白名单放行(test-shunni 锚点随包必需),
+# 现实事件类 *.case.json 仍属违禁——两处口径若再改,必须同步改。
 BAD=$(cd "$OUT/$PKG" && find . \
-  \( -name '_probe*' -o -name '_sync_probe*' -o -name '*.case.json' \
+  \( -name '_probe*' -o -name '_sync_probe*' \
+     -o \( -name '*.case.json' ! -path './calculator/fixtures/calibration/classics/*' \) \
      -o -name 'node_modules' -o -name '.DS_Store' -o -name '*.log' \
      -o -path './calculator/dist/*' \) -print)
 if [[ -n "$BAD" ]]; then

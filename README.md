@@ -1,6 +1,6 @@
 # Bazi-Ziwei-Decoder · 八字紫微命理基板
 
-> `v3.9.1` ｜ 43 神煞 + 五派镜片 + 作用裁决 + 八字MBTI ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
+> `v3.11.0` ｜ 43 神煞 + 五派镜片 + 作用裁决 + 八字MBTI ｜ MIT ｜ 📜 [CHANGELOG](./CHANGELOG.md)
 
 基于 [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill) 超级魔改，排盘内核源自 [Yiqi](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei)。
 
@@ -138,6 +138,8 @@ OpenAI Codex CLI 支持 SKILL.md 技能（2025 年底起）并可运行脚本，
 - 🧭 **v3.6–3.8 持续加码**——紫微独立海报（`render --mode=ziwei`）与流年问答直达通道上线；check-analysis 体检器补齐 zonghe/ziwei/longform 模式、三条海报线门禁对齐；`--longitude` 可选真太阳时校正（默认关）；综合海报判词统一为 7 字/4+4 规格，海报字体换国内可达镜像。
 - 🎯 **v3.9 准确性三连**——时辰边界检测（距交界 ≤20 分钟自动进核盘分支）、晚子时约定显式披露、全局置信度传播（low 档全部预测性章节改条件句、应期给区间）；流年问答加流月粒度与多年对比；新增触发式小白模式（识别不到新手信号则零打扰，深度模式一行未降级）。
 - 🧱 **v3.9.1 工程卫生**——`scripts/release.sh` 成为发版唯一入口（版本号不再有第二个手改点）；形态规格收进 `calculator/spec.json` 单一事实源，`fixtures/test-spec-sync.ts` 哨兵盯着提示词与它对不对得上；四条海报线随包样例补齐并进回归（`test-golden.ts`）。
+- 🧭 **v3.10 顺逆双轴**——大运/流年/流月不再只给一串「冲刑破害」的坏消息清单：**发用线**（事情推不推得动）与**护体线**（人的状态接不接得住）分开算分、分开说，背离时两线并陈（「机会来了但身体接不住」比单一吉凶有用得多）；调候表外置 + 快照锁，晚子时/时辰临界照实披露。
+- 📖 **v3.11 造化元钥吸收**——调候层从「每格两个字」进化为**每格一棵条件树**：《穷通宝鉴》/《造化元钥》全表 **120 格 1396 条条例**进算法层，丙透没透、是不是一派庚辛全部机器可判、同盘可复现；命中「病/忌」档护体扣分（典籍病忌第一次进计分）；解读只准引用命中条例（体检器拦编造）、档位转写为倾向性表述、同一条例不同盘禁止同款文案。另：格局相神裁决（身旺重神格不再被「身旺忌印比」一刀切，韦千里七例对照 6✅1◐）、置信度拆四维按论断类型取档、潜伏关系（虚拱/半局/三刑缺一）给出确定性引爆窗口、韦千里典籍命例入回归、移除自动更新远程代码执行链。
 
 ---
 
@@ -193,7 +195,7 @@ Bazi-Ziwei-Decoder/
 ├── prompts/            disclaimer · output-mode-B · bazi/ziwei/zonghe 长文提示词 · 海报提示词（bazi + bazi-poster-review / zonghe / mbti / ziwei）· liunian-qa 流年问答
 ├── templates/          海报模板 ×4（综合印证 + 八字独立 + MBTI + 紫微独立，含完整性门禁校验）
 └── calculator/
-    ├── run-chart · dump-text · render · check-analysis · version-check   五入口（dist/ 编译版 · dist-bundle/ 零安装自足版 ×5）
+    ├── run-chart · dump-text · render · check-analysis · version-check   五入口（dist-bundle/ 零安装自足版 ×5；dist/ 为本地 tsc 产物不入库）
     ├── shensha 引擎 + shensha.json         43 神煞 SSOT（T1/T2/T3/COMPOUND/MODERN）
     ├── bazi-enrich/                        格局旺衰调候 · 合冲刑害裁决(interactions) · 运岁引动(yunsui) · 八维(bawei)
     ├── lineages.json                       五派镜片（神煞白名单 + 作用规则集 + 文献）

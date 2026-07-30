@@ -1,6 +1,6 @@
 {
   "name": "bazi-ziwei-calculator",
-  "version": "3.9.1",
+  "version": "3.11.0",
   "description": "八字+紫微算法层 — Yiqi core (vendored) + enrichBazi 补层。版本号由根目录 VERSION 派生，改版本一律跑 scripts/release.sh，不要手改本字段。",
   "private": true,
   "scripts": {
