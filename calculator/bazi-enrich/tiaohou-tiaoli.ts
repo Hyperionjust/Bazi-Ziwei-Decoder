@@ -29,8 +29,13 @@ type Pillar = '年' | '月' | '日' | '时';
 export type GanZhi = { gan: Tiangan; zhi: Dizhi };
 
 // ── 受控词表 v1 ────────────────────────────────────────────────────────────
-// 谓词一览(参数类型 / 语义)。改这张表 = 改词表版本,必须同步 tiaohou.json._词表。
-export const 词表版本 = 'v1';
+// 谓词一览(参数类型 / 语义)。改这张表 = 改词表版本,必须同步 tiaohou.json.条例._词表。
+// v1.1(v3.12 批B2):新增「身」谓词(参数 强|弱|中和),配套条例「前提」字段——
+//   「财多身弱」类条例(全表 10 条+同段关联 5 条)按书义以身不任财为前提,v1 词表只判财势
+//   (成派/会局),中和盘也会命中「身弱」字样条例(质检报告 P1-2 实锤,1991 质检盘)。
+//   身势取自旺衰计分 verdict(偏旺/极旺→强;偏弱/极弱→弱;中和→中和)——是计分产物不是
+//   盘面字面事实,故只允许用在「前提」过滤,不入「若」的盘面判定层(三层分离不破)。
+export const 词表版本 = 'v1.1';
 
 export const 谓词表: Record<string, { 参数: '天干' | '地支' | '五行' | '天干组' | '十神类'; 说明: string; 可计数: boolean }> = {
   透:     { 参数: '天干',   说明: '该天干出现在四柱天干(含日干——日干本身也在天干上,是字面事实)', 可计数: true },
@@ -44,6 +49,7 @@ export const 谓词表: Record<string, { 参数: '天干' | '地支' | '五行' 
   成派:   { 参数: '天干组', 说明: '「一派X」——该组五行全盘势成(阈值见 成派阈值,属我方操作化定义)', 可计数: false },
   十神:   { 参数: '十神类', 说明: '四柱(不含日干本身)天干+藏干中存在该十神或十神类(比劫/食伤/财/官杀/印)', 可计数: true },
   十神透: { 参数: '十神类', 说明: '同上但只看天干(不含藏干、不含日干本身)——对应典籍「干透比劫」这类明说透干的写法', 可计数: true },
+  身:     { 参数: '身势',   说明: 'v1.1:日主身势(强|弱|中和),取自旺衰计分 verdict——计分产物非盘面字面,仅供条例「前提」过滤用;身势未知(未传)时恒真(不过滤,防孤立调用静默丢条例)', 可计数: false },
 };
 
 // 「一派」的操作化定义 —— ⚠ 这是我们的定义,不是典籍原文。
@@ -65,6 +71,7 @@ export type PanFacts = {
   五行加权: Record<WuXing, number>;
   会局: Partial<Record<WuXing, string>>;   // 五行 → 成局说明
   十神集: string[];           // 十神 + 十神类(去重)
+  身势?: '强' | '弱' | '中和';  // v1.1:旺衰计分 verdict 映射,由 evalTiaoLi 调用方传入(可缺)
 };
 
 const 十神类 = (ss: ShiShen): string =>
@@ -163,6 +170,7 @@ function 求值原子(pred: string, arg: string, cmp: string | null, num: number
     case '无': return 计数('有', arg, f, dayMaster) === 0;
     case '制': return 计数('有', arg, f, dayMaster) >= 1;
     case '会局': return !!f.会局[arg as WuXing];
+    case '身': return f.身势 === undefined ? true : f.身势 === arg; // 身势未知恒真(见词表说明)
     case '成派': {
       // 天干组如「庚辛」——组内各字五行须一致(词表校验已保证)
       // 「一派」说的是日主【周围】的势,故日干本身不计(见 成派阈值.排除日干)
@@ -228,6 +236,7 @@ export function 校验若(src: string): void {
         if (!ok.includes(a)) throw new Error(`「十神:${a}」非合法十神/十神类`);
         break;
       }
+      case '身势': if (!['强','弱','中和'].includes(a)) throw new Error(`「身:${a}」参数须为 强|弱|中和`); break;
     }
   }
   // 语法可解析性
@@ -286,6 +295,11 @@ export type TiaoLi = {
   //   典型场景:典籍说「无丙」,但本格月令藏干里恒有丙(寅藏丙),按全盘口径这条永远不可能命中
   //   ——成了死条例。此时按「天干不透」判并在这里留痕,不许悄悄改了口径当没事。
   判定备注?: string;
+  // 前提(v1.1):在「若」的盘面判定之外追加的过滤条件(同一套词表语法,现仅用「身:X」)。
+  //   「财多身弱」类条例书义以身不任财为前提——「若」保持纯盘面结构判定(三层分离),
+  //   身势这种计分产物走前提层。前提不满足=不命中(与若不满足同效);身势未知时前提恒真。
+  //   与 细化于/蕴含 链上的条例必须同前提(否则子集/蕴含关系被前提切破,test-tiaohou 会拦)。
+  前提?: string;
   // 下面两个由 fixtures/bless-tiaoli-relations.ts 计算回写,不手写:
   关系?: '子集' | '互斥' | '交叠';  // 本条与 细化于 母条的实际关系(子集=会同时命中/互斥=永不同时)
   蕴含?: string[];                  // 未声明 细化于、但命中本条时必同时命中的条例(档位计会重复计入)
@@ -308,11 +322,12 @@ export type TiaoLiResult = {
 
 const 条例库: any = (TIAOHOU_DATA as any).条例 || {};
 
-export function evalTiaoLi(siZhu: Record<Pillar, GanZhi>, dayMaster?: Tiangan): TiaoLiResult {
+export function evalTiaoLi(siZhu: Record<Pillar, GanZhi>, dayMaster?: Tiangan, 身势?: '强' | '弱' | '中和'): TiaoLiResult {
   const dm = dayMaster || siZhu.日.gan;
   const 格 = `${dm}/${siZhu.月.zhi}`;
   const cell = 条例库[格];
   const f = buildFacts(siZhu, dm);
+  if (身势) f.身势 = 身势; // v1.1:旺衰 verdict 映射由调用方传入(enrich.ts);不传则「身:X」前提恒真
   const base: TiaoLiResult = {
     格, 词表版本, 有条例: !!cell, 命中: [], 未命中: 0,
     档位计: { 上: 0, 中: 0, 下: 0, 忌: 0 }, 病: [],
@@ -324,7 +339,7 @@ export function evalTiaoLi(siZhu: Record<Pillar, GanZhi>, dayMaster?: Tiangan): 
   if (cell.两系分歧?.length) base.两系分歧 = cell.两系分歧.map((d: any) => typeof d === 'string' ? d : d.说明);
 
   for (const t of (cell.条例 || []) as TiaoLi[]) {
-    if (求值若(t.若, f, dm)) {
+    if (求值若(t.若, f, dm) && (!t.前提 || 求值若(t.前提, f, dm))) {
       base.命中.push({ ...t, 显示名: t.名 });
       base.档位计[t.档] = (base.档位计[t.档] || 0) + 1;
     } else base.未命中++;
@@ -355,6 +370,13 @@ export function 校验全部条例(): string[] {
       if (!t.则) errs.push(`[${格}/${t.id}] 缺「则」(典籍原判不得为空)`);
       if (!['上', '中', '下', '忌'].includes(t.档)) errs.push(`[${格}/${t.id}] 档非法: ${t.档}`);
       try { 校验若(t.若); } catch (e: any) { errs.push(`[${格}/${t.id}] ${e.message}`); }
+      // v1.1 三层分离守门:「若」=纯盘面判定,不得用「身」谓词(计分产物);「前提」过同一套词表校验,
+      // 且现阶段只允许身势过滤(扩前提用途须改词表版本再拍板)
+      if (/身:/.test(t.若)) errs.push(`[${格}/${t.id}] 「若」不得使用「身:」谓词(计分产物走「前提」,三层分离)`);
+      if (t.前提) {
+        try { 校验若(t.前提); } catch (e: any) { errs.push(`[${格}/${t.id}] 前提: ${e.message}`); }
+        if (!/^身:(强|弱|中和)$/.test(t.前提.trim())) errs.push(`[${格}/${t.id}] 前提现阶段仅允许单一「身:强|弱|中和」,得到「${t.前提}」`);
+      }
     }
     for (const t of (cell.条例 || [])) {
       if (t.细化于 && !ids.has(t.细化于)) errs.push(`[${格}/${t.id}] 细化于 指向不存在的 id: ${t.细化于}`);

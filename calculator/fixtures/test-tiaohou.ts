@@ -353,6 +353,24 @@ const EXPECTED_TIAOLI_HASH = 'a2c05e1a0093978b6bd2f44ade7d60db';   // v3.11.0 M4
     (hash !== EXPECTED_TIAOLI_HASH ? '\n    ↑ 若是有意改条例,把 EXPECTED_TIAOLI_HASH 换成实际值即为祝福' : ''));
 }
 
+// ── ⓗ v1.1(v3.12 批B2) 条例「前提」行为:身势过滤正反例 ──────────────────────
+// 1991 质检盘(辛未 丙申 丁巳 乙巳,丁/申格,金成派):旺衰=中和——书义「财多身弱」以身不任财
+// 为前提,中和盘命中「身弱」字样条例名不副实(质检报告 P1-2)。前提=身:弱 过滤后:
+{
+  const QA = { 年: { gan: '辛', zhi: '未' }, 月: { gan: '丙', zhi: '申' }, 日: { gan: '丁', zhi: '巳' }, 时: { gan: '乙', zhi: '巳' } } as any;
+  const hitIds = (r: any) => r.命中.map((h: any) => h.id);
+  const 中和 = evalTiaoLi(QA, '丁', '中和');
+  ok(!hitIds(中和).includes('丁申-财多身弱') && !hitIds(中和).includes('丁申-庚多无壬'),
+    `前提v1.1:中和盘不再命中财多身弱系(命中=${hitIds(中和).join(',') || '无'})`);
+  const 弱 = evalTiaoLi(QA, '丁', '弱');
+  ok(hitIds(弱).includes('丁申-财多身弱'),
+    '前提v1.1:同盘若身弱则财多身弱照常命中(前提只滤身不弱者)');
+  const 未传 = evalTiaoLi(QA, '丁');
+  ok(hitIds(未传).includes('丁申-财多身弱'),
+    '前提v1.1:身势未传时前提恒真(孤立调用不静默丢条例,兼容旧行为)');
+  ok(中和.词表版本 === 'v1.1', `词表版本已升 v1.1 (得到 ${中和.词表版本})`);
+}
+
 if (failed) { console.log(`\n${failed} 项失败`); process.exit(1); }
 console.log('✅ 全部通过 (调候 120 格:结构 + 快照锁 + 寒暖不变式 + 接线;取值权威性未主张,全表待核)');
 console.log('✅ 条例层通过 (甲木 12 格:受控词表 + 则照录原文 + 求值器行为 + 条例快照锁)');

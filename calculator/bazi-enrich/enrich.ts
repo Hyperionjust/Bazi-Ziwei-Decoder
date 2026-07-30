@@ -51,7 +51,9 @@ export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
     五行旺相: wuXingMonthStatus(monthZhi),
     五行统计: wxCount,
     调候用神: tiaoHou,
-    调候条例: evalTiaoLi(siZhu, dm),
+    // v3.12 批B2:传身势供「前提」过滤(财多身弱类条例不再命中中和/身强盘)
+    调候条例: evalTiaoLi(siZhu, dm,
+      /旺/.test(wangShuai.verdict) ? '强' : /弱/.test(wangShuai.verdict) ? '弱' : '中和'),
     格局: geJu,
     旺衰: wangShuai,
     用神建议: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs, siZhu), // S1-3:传四柱供相神裁决判重神透干

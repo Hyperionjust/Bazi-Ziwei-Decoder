@@ -247,7 +247,7 @@ function dumpBazi(b: any, bi: any): string[] {
       // S1-2:两轴对同一五行唱反调时,必须让解读层看见——否则会写出「宜X」与「忌X」并列的自相矛盾文案
       const zc = ya.出口?.轴冲突;
       if (zc) {
-        lines.push(`│ │ ├⚠轴冲突〔调候∩扶抑忌〕: ${zc.五行.join('、')} — 同一个五行在两条线上唱反调`);
+        lines.push(`│ │ ├⚠轴冲突〔调候∩出口忌〕: ${zc.五行.join('、')} — 同一个五行在两条线上唱反调`);
         lines.push(`│ │ │ ├调候侧 : ${zc.调候侧}`);
         lines.push(`│ │ │ ├扶抑侧 : ${zc.扶抑侧}`);
         lines.push(`│ │ │ └出文要求 : ${zc.出文要求}`);
