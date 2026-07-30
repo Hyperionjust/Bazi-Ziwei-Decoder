@@ -6,7 +6,7 @@
 
 Deterministic charting (not LLM guesswork) · 3 analysis modes · 4 ink-style HTML poster themes
 
-[![Version](https://img.shields.io/badge/version-3.11.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.12.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-c1432f.svg)](#-installation)
 
