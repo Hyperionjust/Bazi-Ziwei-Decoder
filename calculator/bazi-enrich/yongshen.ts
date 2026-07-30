@@ -158,7 +158,10 @@ export function adviseYongShen(dayMaster: Tiangan, ws: WangShuaiResult, tiaoHouG
   let consensus: WuXing[] = sets.length ? [...sets[0]] : [];
   for (const s of sets.slice(1)) consensus = consensus.filter(x => s.includes(x));
   const 收敛 = sets.length >= 2 && consensus.length > 0;
-  const 边界盘 = linJie || ws.confidence !== '高' || geju.confidence === '低' || congQiang || congRuo;
+  // v3.12 批A2:「旺衰置信=中」不再单独触发边界盘——v1 口径下 200 随机盘 80% 进边界盘、
+  // 韦千里明判的 7 张名人盘 6 张被压成保守档(low),矫枉过正实锤(质检报告 P0)。中档置信的
+  // 措辞收敛由 confidence.ts 四维分档承担(旺衰维=medium),不再整盘拉闸。
+  const 边界盘 = linJie || ws.confidence === '低' || geju.confidence === '低' || congQiang || congRuo;
 
   const 出文协议 = (收敛 && !边界盘
     ? `三线收敛,共识用神=${consensus.join('、')};可径以共识立论,依据合并转述。`

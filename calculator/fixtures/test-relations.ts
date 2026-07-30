@@ -66,7 +66,12 @@ ok(ys.大运引动.length>0 && !!ys.当前大运流年, 'analyzeYunSui 大运+�
 const BD = {年:{gan:'乙',zhi:'丑'},月:{gan:'戊',zhi:'寅'},日:{gan:'戊',zhi:'辰'},时:{gan:'丁',zhi:'酉'}} as any;
 const e1 = enrichBazi(BD), e2 = enrichBazi(BD);
 const y1 = (e1 as any).用神建议;
-ok(!!y1 && y1.边界盘 === true && y1.收敛 === false, '边界盘标记:边界=true 收敛=false');
+// v3.12 批A2 重祝福:BD 盘(偏旺4.7·旺衰置信中)旧口径因「置信≠高」被拉成边界盘——正是矫枉过正
+// 的实锤形态;新口径「置信中不拉闸」下 边界盘=false 才是对的(中档置信由 confidence 四维承担)。
+ok(!!y1 && y1.边界盘 === false && y1.收敛 === false, '边界盘v2:旺衰置信中不再触发边界盘(边界=false 收敛=false)');
+// 边界盘标记功能本身用 linJie 盘验(2000 样例盘四柱,中和→临界→边界=true)
+const LJ = enrichBazi({年:{gan:'己',zhi:'卯'},月:{gan:'丙',zhi:'子'},日:{gan:'戊',zhi:'午'},时:{gan:'戊',zhi:'午'}} as any) as any;
+ok(LJ.用神建议.边界盘 === true, '边界盘v2:中和临界盘仍触发边界盘(功能未失)');
 ok(y1.出文协议.includes('体用两分') && y1.出文协议.includes('禁止单选'), '出文协议含体用两分+禁止单选');
 ok(JSON.stringify((e1 as any).用神建议) === JSON.stringify((e2 as any).用神建议), '用神建议两次计算完全一致(可复现)');
 ok(y1.扶抑.取.length>0 && y1.调候.取.length>0 && y1.格局.取.length>0, '三线候选齐备');

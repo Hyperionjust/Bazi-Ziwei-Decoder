@@ -30354,14 +30354,21 @@ function scoreMonthOrder(dayMaster, monthZhi) {
 function scoreChangSheng(dayMaster, monthZhi) {
   const cs = getChangSheng2(dayMaster, monthZhi);
   let s = 0;
+  const hasSelfRoot = ZHI_CANG_GAN[monthZhi].some((c) => GAN_WUXING[c.gan] === GAN_WUXING[dayMaster]);
+  let note = "";
   if (cs === "\u957F\u751F" || cs === "\u5E1D\u65FA") s = 2;
   else if (cs === "\u4E34\u5B98" || cs === "\u51A0\u5E26") s = 1;
   else if (cs === "\u6C90\u6D74" || cs === "\u8870") s = 0;
   else if (cs === "\u75C5" || cs === "\u6B7B") s = -1;
   else if (cs === "\u5893") s = 0;
   else if (cs === "\u7EDD") s = -3;
-  else s = -1;
-  return { score: s, desc: `\u65E5\u4E3B${dayMaster}\u5728\u6708\u652F${monthZhi}\u4E3A${cs} (${s >= 0 ? "+" : ""}${s})` };
+  else {
+    if (hasSelfRoot) {
+      s = 0;
+      note = "\xB7\u5E93\u4E2D\u6709\u6839\u4E0D\u6263(v2)";
+    } else s = -1;
+  }
+  return { score: s, desc: `\u65E5\u4E3B${dayMaster}\u5728\u6708\u652F${monthZhi}\u4E3A${cs} (${s >= 0 ? "+" : ""}${s})${note}` };
 }
 function scoreGround(dayMaster, siZhu) {
   const desc = [];
@@ -30384,9 +30391,11 @@ function scoreGround(dayMaster, siZhu) {
   }
   return { score: total, desc };
 }
+var STEM_ROOT_FACTOR = 1.8;
 function scoreStems(dayMaster, siZhu) {
   const desc = [];
   let total = 0;
+  const zhis = ["\u5E74", "\u6708", "\u65E5", "\u65F6"].map((p) => siZhu[p].zhi);
   for (const p of ["\u5E74", "\u6708", "\u65F6"]) {
     const gan = siZhu[p].gan;
     const ss = getShiShen2(dayMaster, gan);
@@ -30396,8 +30405,39 @@ function scoreStems(dayMaster, siZhu) {
     else if (ss === "\u98DF\u795E" || ss === "\u4F24\u5B98") v = -0.5;
     else if (ss === "\u6B63\u8D22" || ss === "\u504F\u8D22") v = -1;
     else if (ss === "\u6B63\u5B98" || ss === "\u4E03\u6740") v = -1.5;
+    let rootNote = "";
+    if (v > 0) {
+      const rooted = zhis.some((z) => GAN_WUXING[ZHI_CANG_GAN[z][0].gan] === GAN_WUXING[gan]);
+      if (rooted) {
+        v = +(v * STEM_ROOT_FACTOR).toFixed(2);
+        rootNote = `\xB7\u901A\u672C\u6C14\u6839\xD7${STEM_ROOT_FACTOR}`;
+      }
+    }
     total += v;
-    desc.push(`${p}\u5E72${gan}(${ss}) ${v >= 0 ? "+" : ""}${v}`);
+    desc.push(`${p}\u5E72${gan}(${ss}) ${v >= 0 ? "+" : ""}${v}${rootNote}`);
+  }
+  return { score: total, desc };
+}
+var HUJU_HALF = 1.8;
+var HUJU_FULL_MULT = 1.6;
+var SHENG_ME = { \u6728: "\u6C34", \u706B: "\u6728", \u571F: "\u706B", \u91D1: "\u571F", \u6C34: "\u91D1" };
+function scoreHuJu(dayMaster, siZhu) {
+  const desc = [];
+  let total = 0;
+  const dmWx = GAN_WUXING[dayMaster];
+  const yinWx = SHENG_ME[dmWx];
+  const rels = detectZhiRelations({ \u5E74: siZhu.\u5E74.zhi, \u6708: siZhu.\u6708.zhi, \u65E5: siZhu.\u65E5.zhi, \u65F6: siZhu.\u65F6.zhi });
+  for (const r of rels) {
+    if (r.type !== "\u4E09\u5408" && r.type !== "\u4E09\u4F1A" && r.type !== "\u534A\u5408" && r.type !== "\u534A\u4F1A") continue;
+    const m = (r.detail || "").match(/([木火土金水])[局方]/);
+    if (!m) continue;
+    const wx = m[1];
+    if (wx !== dmWx && wx !== yinWx) continue;
+    const w = wx === dmWx ? 1 : 0.7;
+    const full = r.type === "\u4E09\u5408" || r.type === "\u4E09\u4F1A";
+    const v = +(HUJU_HALF * (full ? HUJU_FULL_MULT : 1) * w).toFixed(2);
+    total += v;
+    desc.push(`${r.type}${r.zhi.join("")}(${wx}${wx === dmWx ? "=\u65E5\u4E3B\u540C\u884C" : "=\u5370"}) +${v}`);
   }
   return { score: total, desc };
 }
@@ -30408,19 +30448,15 @@ function judgeWangShuai(siZhu) {
   const cs = scoreChangSheng(dm, monthZhi);
   const ground = scoreGround(dm, siZhu);
   const stems = scoreStems(dm, siZhu);
-  const score = +(month.score + cs.score + ground.score + stems.score).toFixed(2);
+  const huju = scoreHuJu(dm, siZhu);
+  const score = +(month.score + cs.score + ground.score + stems.score + huju.score).toFixed(2);
   let verdict;
-  if (score >= 9.5) verdict = "\u6781\u65FA(\u53EF\u80FD\u4ECE\u5F3A)";
+  if (score >= 12) verdict = "\u6781\u65FA(\u53EF\u80FD\u4ECE\u5F3A)";
   else if (score >= 3) verdict = "\u504F\u65FA";
   else if (score > -2.5) verdict = "\u4E2D\u548C";
   else if (score > -8) verdict = "\u504F\u5F31";
   else verdict = "\u6781\u5F31(\u53EF\u80FD\u4ECE\u5F31)";
-  const dist2 = Math.min(
-    Math.abs(score - 3),
-    Math.abs(score - -2.5),
-    Math.abs(score - 9.5),
-    Math.abs(score - -8)
-  );
+  const dist2 = Math.min(Math.abs(score - 3), Math.abs(score - -2.5));
   let confidence;
   if (dist2 > 2) confidence = "\u9AD8";
   else if (dist2 > 0.8) confidence = "\u4E2D";
@@ -30434,7 +30470,8 @@ function judgeWangShuai(siZhu) {
       \u957F\u751F: cs.score,
       \u5F97\u5730: +ground.score.toFixed(2),
       \u5F97\u52BF: +stems.score.toFixed(2),
-      details: [month.desc, cs.desc, ...ground.desc, ...stems.desc]
+      \u4F1A\u5C40: +huju.score.toFixed(2),
+      details: [month.desc, cs.desc, ...ground.desc, ...stems.desc, ...huju.desc]
     }
   };
 }
@@ -30878,7 +30915,7 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount, siZhu) {
   let consensus = sets.length ? [...sets[0]] : [];
   for (const s of sets.slice(1)) consensus = consensus.filter((x) => s.includes(x));
   const \u6536\u655B = sets.length >= 2 && consensus.length > 0;
-  const \u8FB9\u754C\u76D8 = linJie || ws.confidence !== "\u9AD8" || geju.confidence === "\u4F4E" || congQiang || congRuo;
+  const \u8FB9\u754C\u76D8 = linJie || ws.confidence === "\u4F4E" || geju.confidence === "\u4F4E" || congQiang || congRuo;
   const \u51FA\u6587\u534F\u8BAE = (\u6536\u655B && !\u8FB9\u754C\u76D8 ? `\u4E09\u7EBF\u6536\u655B,\u5171\u8BC6\u7528\u795E=${consensus.join("\u3001")};\u53EF\u5F84\u4EE5\u5171\u8BC6\u7ACB\u8BBA,\u4F9D\u636E\u5408\u5E76\u8F6C\u8FF0\u3002` : `\u8FB9\u754C\u76D8/\u4E09\u7EBF\u4E0D\u6536\u655B\u2014\u2014\u3010\u4F53\u7528\u4E24\u5206,\u7981\u6B62\u5355\u9009\u3011:\u62A4\u4F53\u7EBF=\u8C03\u5019${thWx.join("\u3001")}(${(tiaoHouGans || []).join("")})${fuYi.\u53D6.length ? `\u4E0E\u6276\u6291${fuYi.\u53D6.join("\u3001")}` : ""},\u53D1\u7528\u7EBF=\u683C\u5C40${gjEff.join("\u3001") || "(\u4F9D\u6210\u8D25\u6551\u5E94)"};\u4E24\u7EBF\u5E76\u9648,\u663E\u5F0F\u6807\u6CE8\u300C\u2696\u5404\u6D3E\u5206\u6B67\u300D\u4E0E\u7F6E\u4FE1\u5EA6(\u65FA\u8870:${ws.confidence}/\u683C\u5C40:${geju.confidence}),\u4E0D\u5F97\u53EA\u62A5\u5176\u4E00\u3002`) + (caiJue ? `;S1-3:\u672C\u76D8\u6709\u300C\u76F8\u795E\u88C1\u51B3\u300D\u5757,${caiJue.\u683C\u5C40\u76F8\u795E.join("\u3001")}\u7684\u53D6\u820D\u5FC5\u987B\u6309\u5176\u51FA\u6587\u8981\u6C42\u5408\u5E76\u53D9\u8FF0\u3002` : "");
   const pool = [...thWx, ...gjEff];
   const pickA = pool.find((w) => fuYi.\u53D6.includes(w));
@@ -31034,35 +31071,17 @@ function zishiConventionNote(hour) {
 }
 
 // bazi-enrich/confidence.ts
+var RANK = { low: 0, medium: 1, high: 2 };
 function aggregateConfidenceTier(enrichment) {
   const ya = enrichment?.\u7528\u795E\u5EFA\u8BAE;
   const sb = enrichment?.\u65F6\u8FB0\u8FB9\u754C;
   const ws = enrichment?.\u65FA\u8870;
   const gj = enrichment?.\u683C\u5C40;
-  const reasons = [];
-  if (sb?.boundary === true) reasons.push(`\u65F6\u8FB0\u4E34\u754C(\u8DDD\u4EA4\u754C${Math.abs(sb.\u8DDD\u4EA4\u754C\u5206\u949F ?? 0)}\u5206\u949F,\u65F6\u67F1\u5B58\u7591)`);
-  if (ya?.\u8FB9\u754C\u76D8 === true) {
-    const sub = [];
-    if (ya?.\u6276\u6291?.\u4E34\u754C) sub.push("\u65FA\u8870\u4E34\u754C");
-    if (ws && ws.confidence !== "\u9AD8") sub.push(`\u65FA\u8870\u7F6E\u4FE1${ws.confidence}`);
-    if (gj && gj.confidence === "\u4F4E") sub.push("\u683C\u5C40\u7F6E\u4FE1\u4F4E");
-    if (/从强|从弱/.test(ws?.verdict || "")) sub.push("\u4ECE\u683C\u5206\u6B67");
-    reasons.push(`\u8FB9\u754C\u76D8(${sub.join("/") || "\u7528\u795E\u4E09\u7EBF\u5224\u5B9A\u4E34\u754C"})`);
-  }
-  let tier;
-  if (reasons.length) tier = "low";
-  else if (ya?.\u6536\u655B === true) {
-    tier = "high";
-    reasons.push("\u4E09\u7EBF\u7528\u795E\u6536\u655B\u4E14\u5404\u5224\u5B9A\u7F6E\u4FE1\u8DB3");
-  } else {
-    tier = "medium";
-    reasons.push("\u975E\u8FB9\u754C\u76D8\u4F46\u7528\u795E\u4E09\u7EBF\u4E0D\u6536\u655B");
-  }
   const congGe = /从强|从弱/.test(ws?.verdict || "");
   let d\u65FA\u8870, r\u65FA\u8870;
   if (congGe || ws?.confidence === "\u4F4E") {
     d\u65FA\u8870 = "low";
-    r\u65FA\u8870 = congGe ? "\u4ECE\u683C\u4E4B\u8FA8(\u6B63\u683C/\u4ECE\u683C\u4E24\u8BFB,\u5F3A\u5F31\u7ED3\u8BBA\u672C\u8EAB\u5B58\u7591)" : "\u65FA\u8870\u5224\u5B9A\u7F6E\u4FE1\u4F4E";
+    r\u65FA\u8870 = congGe ? "\u4ECE\u683C\u4E4B\u8FA8(\u6B63\u683C/\u4ECE\u683C\u4E24\u8BFB,\u5F3A\u5F31\u7ED3\u8BBA\u672C\u8EAB\u5B58\u7591)" : "\u65FA\u8870\u5224\u5B9A\u7F6E\u4FE1\u4F4E(\u4E2D\u548C\u5E26\u538B\u7EBF)";
   } else if (ws?.confidence === "\u4E2D" || ya?.\u6276\u6291?.\u4E34\u754C) {
     d\u65FA\u8870 = "medium";
     r\u65FA\u8870 = ya?.\u6276\u6291?.\u4E34\u754C ? "\u65FA\u8870\u8BA1\u5206\u4E34\u754C(\u5F3A\u5F31\u503E\u5411\u53EF\u7528,\u7A0B\u5EA6\u5B58\u7591)" : "\u65FA\u8870\u5224\u5B9A\u7F6E\u4FE1\u4E2D";
@@ -31106,12 +31125,22 @@ function aggregateConfidenceTier(enrichment) {
     d\u5E94\u671F = "high";
     r\u5E94\u671F = "\u65F6\u8FB0\u786E\u5B9A\u4E14\u7528\u795E\u65B9\u5411\u7A33,\u5F15\u52A8\u5E74\u4EFD\u4E0E\u5409\u51F6\u5B9A\u6027\u5747\u53EF\u7528";
   }
+  const \u7EF4\u5EA6 = { \u65FA\u8870: d\u65FA\u8870, \u683C\u5C40: d\u683C\u5C40, \u8C03\u5019: d\u8C03\u5019, \u5E94\u671F: d\u5E94\u671F };
+  const \u7EF4\u5EA6\u4F9D\u636E = { \u65FA\u8870: r\u65FA\u8870, \u683C\u5C40: r\u683C\u5C40, \u8C03\u5019: r\u8C03\u5019, \u5E94\u671F: r\u5E94\u671F };
+  const KEYS = ["\u65FA\u8870", "\u683C\u5C40", "\u8C03\u5019", "\u5E94\u671F"];
+  let tier = "high";
+  for (const k of KEYS) if (RANK[\u7EF4\u5EA6[k]] < RANK[tier]) tier = \u7EF4\u5EA6[k];
+  const \u4F9D\u636E = KEYS.filter((k) => \u7EF4\u5EA6[k] === tier).map((k) => `${k}\u7EF4=${tier}(${\u7EF4\u5EA6\u4F9D\u636E[k]})`);
+  if (tier === "high") {
+    \u4F9D\u636E.length = 0;
+    \u4F9D\u636E.push("\u56DB\u7EF4\u7F6E\u4FE1\u4FF1\u8DB3");
+  }
   return {
     tier,
-    \u7EF4\u5EA6: { \u65FA\u8870: d\u65FA\u8870, \u683C\u5C40: d\u683C\u5C40, \u8C03\u5019: d\u8C03\u5019, \u5E94\u671F: d\u5E94\u671F },
-    \u7EF4\u5EA6\u4F9D\u636E: { \u65FA\u8870: r\u65FA\u8870, \u683C\u5C40: r\u683C\u5C40, \u8C03\u5019: r\u8C03\u5019, \u5E94\u671F: r\u5E94\u671F },
-    \u4F9D\u636E: reasons,
-    \u8BF4\u660E: "\u603B\u6863 low \u65F6\u5168\u90E8\u9884\u6D4B\u6027\u7AE0\u8282(\u4E8B\u4E1A/\u8D22\u8FD0/\u5A5A\u604B/\u5927\u8FD0\u6D41\u5E74)\u987B\u591A\u7528\u6761\u4EF6\u53E5\u3001\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74\u3001\u7981\u7528\u9AD8\u786E\u5B9A\u63AA\u8F9E,\u5E76\u5728\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4FDD\u5B88\u53E3\u5F84;\u56DB\u7EF4\u4F9B\u6309\u8BBA\u65AD\u7C7B\u578B\u7EC6\u5206\u53D6\u6863(\u65FA\u8870\u2192\u6027\u683C\u5F3A\u5F31/\u7CBE\u529B,\u683C\u5C40\u2192\u5C42\u6B21\u7ED3\u6784/\u4E8B\u4E1A\u8DEF\u5F84,\u8C03\u5019\u2192\u5B63\u8282\u4F53\u611F/\u5BD2\u71E5\u8C03\u7406,\u5E94\u671F\u2192\u5E74\u4EFD\u7A97\u53E3),\u53D6\u5230\u7684\u7EF4\u5EA6\u4F4E\u4E8E\u603B\u6863\u6309\u7EF4\u5EA6\u4ECE\u4E25\u3001\u9AD8\u4E8E\u603B\u6863\u53EF\u6309\u7EF4\u5EA6\u653E\u5BBD\u5355\u7C7B\u8BBA\u65AD\u7684\u63AA\u8F9E(\u951A\u70B9\u58F0\u660E\u4ECD\u6309\u603B\u6863\u51FA),\u89C1 bazi-prompt\u300C\u7F6E\u4FE1\u5EA6\u4F20\u64AD\u300D;\u6B64\u673A\u5236\u5B57\u6BB5\u4E0D\u5F97\u5411\u7528\u6237\u5C55\u793A\u3002"
+    \u7EF4\u5EA6,
+    \u7EF4\u5EA6\u4F9D\u636E,
+    \u4F9D\u636E,
+    \u8BF4\u660E: "\u603B\u6863=\u56DB\u7EF4{\u65FA\u8870,\u683C\u5C40,\u8C03\u5019,\u5E94\u671F}\u53D6\u6700\u4F4E(v3.12);low \u6863\u65F6\u8BE5\u7EF4\u6240\u8F96\u9884\u6D4B\u6027\u8BBA\u65AD\u987B\u591A\u7528\u6761\u4EF6\u53E5\u3001\u5E94\u671F\u7ED9\u533A\u95F4\u4E0D\u7ED9\u5355\u5E74\u3001\u7981\u7528\u9AD8\u786E\u5B9A\u63AA\u8F9E,\u5E76\u5728\u951A\u70B9\u767D\u8BDD\u58F0\u660E\u4FDD\u5B88\u53E3\u5F84(\u603B\u6863 low \u65F6\u58F0\u660E\u4E00\u6B21);\u5176\u4F59\u7EF4\u5EA6\u6309\u5404\u81EA\u6863\u4F4D\u5B9A\u63AA\u8F9E,\u4E0D\u8FDE\u5750(\u65FA\u8870\u2192\u6027\u683C\u5F3A\u5F31/\u7CBE\u529B,\u683C\u5C40\u2192\u5C42\u6B21\u7ED3\u6784/\u4E8B\u4E1A\u8DEF\u5F84,\u8C03\u5019\u2192\u5B63\u8282\u4F53\u611F/\u5BD2\u71E5\u8C03\u7406,\u5E94\u671F\u2192\u5E74\u4EFD\u7A97\u53E3),\u89C1 bazi-prompt\u300C\u7F6E\u4FE1\u5EA6\u4F20\u64AD\u300D;\u6B64\u673A\u5236\u5B57\u6BB5\u4E0D\u5F97\u5411\u7528\u6237\u5C55\u793A\u3002"
   };
 }
 
@@ -32166,7 +32195,7 @@ function annotateShunNi(enr, dayun, dayMaster) {
 // bazi-enrich/rare.ts
 var GAN_HE3 = { \u7532: "\u5DF1", \u5DF1: "\u7532", \u4E59: "\u5E9A", \u5E9A: "\u4E59", \u4E19: "\u8F9B", \u8F9B: "\u4E19", \u4E01: "\u58EC", \u58EC: "\u4E01", \u620A: "\u7678", \u7678: "\u620A" };
 var LIU_CHONG3 = { \u5B50: "\u5348", \u5348: "\u5B50", \u4E11: "\u672A", \u672A: "\u4E11", \u5BC5: "\u7533", \u7533: "\u5BC5", \u536F: "\u9149", \u9149: "\u536F", \u8FB0: "\u620C", \u620C: "\u8FB0", \u5DF3: "\u4EA5", \u4EA5: "\u5DF3" };
-var RANK = { \u6781\u7F55: 0, \u7F55\u89C1: 1, \u5C11\u89C1: 2 };
+var RANK2 = { \u6781\u7F55: 0, \u7F55\u89C1: 1, \u5C11\u89C1: 2 };
 function detectRarePatterns(siZhu, shenshaHits, zhiRels, ganRels) {
   const out = [];
   const P = ["\u5E74", "\u6708", "\u65E5", "\u65F6"];
@@ -32220,7 +32249,7 @@ function detectRarePatterns(siZhu, shenshaHits, zhiRels, ganRels) {
     const best = Object.entries(byP).sort((a, b) => b[1] - a[1])[0];
     if (best && best[1] >= 4) out.push({ \u540D: "\u5409\u661F\u805A\u67F1", \u7F55\u89C1\u5EA6: "\u7F55\u89C1", \u6D89\u53CA: `${best[0]}\u67F1\u53E0${best[1]}\u5409`, \u8BF4\u660E: `\u5409\u795E\u624E\u5806\u4E8E${best[0]}\u67F1,\u8BE5\u5BAB\u6240\u4E3B\u4E4B\u4EBA\u4E8B\u4E3A\u5168\u76D8\u6700\u5F97\u5929\u72EC\u539A\u5904` });
   }
-  out.sort((a, b) => RANK[a.\u7F55\u89C1\u5EA6] - RANK[b.\u7F55\u89C1\u5EA6]);
+  out.sort((a, b) => RANK2[a.\u7F55\u89C1\u5EA6] - RANK2[b.\u7F55\u89C1\u5EA6]);
   return out;
 }
 

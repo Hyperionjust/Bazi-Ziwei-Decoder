@@ -6,6 +6,7 @@ import { createChart, resolveSolarClock } from '../yiqi-core/index';
 import { getTiaoHou } from '../bazi-enrich/tiao-hou';
 import { judgeGeJu } from '../bazi-enrich/ge-ju';
 import { aggregateConfidenceTier } from '../bazi-enrich/confidence';
+import { enrichBazi } from '../bazi-enrich/enrich';
 
 let failed = 0;
 function ok(cond: boolean, msg: string) { if (cond) console.log('✓', msg); else { console.log('✗', msg); failed++; } }
@@ -198,24 +199,71 @@ ok(r10d.hour === 12 && r10d.minute === 30, '缺省 longitude: 完全不校正(�
   const C = aggregateConfidenceTier({ ...base, 时辰边界: { boundary: true, 距交界分钟: 5, 最近交界: '23:00(亥→子)' } });
   ok(C.维度.调候 === 'low' && C.维度.应期 === 'low',
     `四维:23:00交界(日柱随晚子时翻转)→调候low·应期low (得到 调候${C.维度.调候}/应期${C.维度.应期})`);
-  // 边界盘(时辰确定):应期medium(年份窗口可用,吉凶定性存疑)——不再被总档low压成全链保守
+  // 边界盘(时辰确定):v3(v3.12 批A2)总档=四维取最低——四维无一low的边界盘总档=medium,
+  // 「四维全非low而总档low」的 v2 并行逻辑矛盾结构性消失(质检报告 P0 结案点)
   const D = aggregateConfidenceTier({
     用神建议: { 收敛: false, 边界盘: true, 扶抑: { 临界: true }, 出口: {} },
     旺衰: { confidence: '中', verdict: '中和(临界)' }, 格局: { confidence: '中' }, 调候条例: { 有条例: true },
   });
-  ok(D.tier === 'low' && D.维度.应期 === 'medium' && D.维度.旺衰 === 'medium' && D.维度.格局 === 'medium' && D.维度.调候 === 'high',
-    `四维:边界盘→总档low·应期medium·调候high (得到 ${D.tier}/${Object.values(D.维度).join(',')})`);
-  // 轴冲突→调候medium;从格分歧→旺衰low
+  ok(D.tier === 'medium' && D.维度.应期 === 'medium' && D.维度.旺衰 === 'medium' && D.维度.格局 === 'medium' && D.维度.调候 === 'high',
+    `四维v3:边界盘四维无low→总档medium(取最低) (得到 ${D.tier}/${Object.values(D.维度).join(',')})`);
+  // 轴冲突→调候medium;v3 总档随最低维=medium(v2 总档曾判 high——两套逻辑并行已废)
   const E = aggregateConfidenceTier({ ...base, 用神建议: { ...base.用神建议, 出口: { 轴冲突: { 五行: ['金'] } } } });
-  ok(E.维度.调候 === 'medium' && E.tier === 'high', `四维:轴冲突→调候medium(总档不动) (得到 调候${E.维度.调候}/总${E.tier})`);
+  ok(E.维度.调候 === 'medium' && E.tier === 'medium', `四维v3:轴冲突→调候medium→总档medium(取最低) (得到 调候${E.维度.调候}/总${E.tier})`);
   const F = aggregateConfidenceTier({
     用神建议: { 收敛: false, 边界盘: true, 扶抑: {}, 出口: {} },
     旺衰: { confidence: '中', verdict: '偏弱(从弱存疑)' }, 格局: { confidence: '高' }, 调候条例: { 有条例: true },
   });
-  ok(F.维度.旺衰 === 'low', `四维:从格分歧→旺衰low (得到 ${F.维度.旺衰})`);
-  // v1 总档回归:非边界不收敛=medium(聚合规则一字未动)
+  ok(F.维度.旺衰 === 'low' && F.tier === 'low', `四维:从格分歧→旺衰low→总档low (得到 ${F.维度.旺衰}/${F.tier})`);
+  // v3 行为变更留档:非边界不收敛盘四维全高→总档 high(v1/v2 判 medium)。「不收敛」不再
+  // 双重惩罚档位——不收敛的措辞约束由「出文协议」体用两分承载,置信度只反映判定拿不拿得准。
   const G = aggregateConfidenceTier({ ...base, 用神建议: { 收敛: false, 边界盘: false, 扶抑: {}, 出口: {} } });
-  ok(G.tier === 'medium', `四维:总档聚合规则零回归(非边界不收敛=medium) (得到 ${G.tier})`);
+  ok(G.tier === 'high', `四维v3:非边界不收敛·四维全高→总档high(不收敛约束走出文协议,不再降档) (得到 ${G.tier})`);
+}
+
+// ── v3.12 批A) 旺衰计分 v2 金标组:通根加成+库月+会局+置信公式,12 盘网格联调定参 ────
+{
+  const of2 = (y: number, m: number, d: number, h: number) => {
+    const c: any = createChart({ year: y, month: m, day: d, hour: h, minute: 0, gender: 'male', isLunar: false, timeZone: 8 } as any);
+    const s = c.bazi.siZhu;
+    return enrichBazi({ 年: s.year, 月: s.month, 日: s.day, 时: s.hour } as any) as any;
+  };
+  // 梅兰芳(甲午 甲戌 丁酉 癸卯):韦断「全局木火太旺」——v1 判中和-0.1(七例对照唯一遗留◐),
+  // v2 双甲通根卯×1.8+午戌半合火+1.8+库月养不扣 → 偏旺 3.82,方向翻正,M5 登记项就此结案
+  const mei = of2(1894, 10, 22, 6);
+  ok(mei.旺衰.verdict === '偏旺' && Math.abs(mei.旺衰.score - 3.82) < 0.01,
+    `旺衰v2:梅兰芳盘 偏旺3.82(韦断身强,v1 中和-0.1→翻正) (得到 ${mei.旺衰.verdict}${mei.旺衰.score})`);
+  // 蒋介石(偏旺深处 11.78):v1 置信公式看「距最近阈值」含极旺细分线→判「低」,荒谬;
+  // v2 只看中和带两界(+3/-2.5)——方向翻转线才是置信问题,同方向细分线不降置信
+  const jiang = of2(1887, 10, 31, 12);
+  ok(jiang.旺衰.verdict === '偏旺' && jiang.旺衰.confidence === '高',
+    `旺衰v2:蒋盘偏旺区间深处置信高(细分线不降置信) (得到 ${jiang.旺衰.verdict}·置信${jiang.旺衰.confidence})`);
+  // 宋子文(-2.5 压线):通根加成只认【本气】根的守门条款——宋帮身干仅通中余气根,不得加成,
+  // 保持 -2.5 偏弱(韦断身弱);联调实测若放宽到中余气根,宋被普惠推成中和(方向回退)
+  const song = of2(1894, 11, 14, 6);
+  ok(song.旺衰.verdict === '偏弱' && song.旺衰.score === -2.5,
+    `旺衰v2:宋盘-2.5偏弱不动(本气根守门防压线盘被普惠推翻) (得到 ${song.旺衰.verdict}${song.旺衰.score})`);
+  // 身弱侧零回退(S1-3 战果保全):阎/许/马 verdict 不漂移
+  ok(of2(1883, 10, 8, 22).旺衰.verdict === '偏弱' && of2(1873, 9, 10, 10).旺衰.verdict === '极弱(可能从弱)'
+    && of2(1885, 11, 30, 0).旺衰.verdict === '偏弱', '旺衰v2:身弱侧阎/许/马零回退');
+  // 200 随机盘(固定种子)总档 low 率哨兵:v1 口径 79.5% → 批A 三处合并后 23.5%。
+  // 区间 [12%,35%]:低于 12%=过度自信(从格+真压线盘天然占一成多),高于 35%=保守回潮。
+  let rng = 12345; const rand = (n: number) => { rng = (rng * 1103515245 + 12345) % 2147483648; return rng % n; };
+  let low = 0, n = 0;
+  for (let i = 0; i < 200; i++) {
+    const y = 1950 + rand(60), mo = 1 + rand(12), d = 1 + rand(28), h = rand(24), g = rand(2) ? 'male' : 'female';
+    try {
+      const c: any = createChart({ year: y, month: mo, day: d, hour: h, minute: 30, gender: g, isLunar: false, timeZone: 8 } as any);
+      const s = c.bazi.siZhu;
+      const en: any = enrichBazi({ 年: s.year, 月: s.month, 日: s.day, 时: s.hour } as any);
+      en.时辰边界 = { boundary: false };
+      if (aggregateConfidenceTier(en).tier === 'low') low++;
+      n++;
+    } catch (e) {}
+  }
+  const rate = low / n;
+  ok(rate >= 0.12 && rate <= 0.35,
+    `旺衰v2:200盘(种子12345)总档low率∈[12%,35%] (得到 ${(rate * 100).toFixed(1)}%,v1 口径为 79.5%)`);
 }
 
 // ── 汇总 ────────────────────────────────────────────────────────────────────
