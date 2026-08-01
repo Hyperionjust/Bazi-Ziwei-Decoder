@@ -1,11 +1,11 @@
 {
   "meta": {
     "archetype_name": "厚土紫垣守成客",
-    "axis_oneliner": "紫微坐命气度沉稳，正财厚土宜守成积累，忌冲动投机"
+    "axis_oneliner": "<span class=\"hl-good\">气度沉稳，适合靠正业与长期积累成事</span>，<span class=\"hl\">忌冲动投机</span>"
   },
   "axes": {
-    "bazi_main": "戊午日主火土厚重，正财格中和偏稳，宜积累守成，不宜投机冒进。",
-    "ziwei_main": "紫微午宫坐命，沉稳有威仪，武曲化禄主正业生财，文曲化忌防文书契约。"
+    "bazi_main": "戊午日主火土厚重，<span class=\"hl-good\">适合稳步积累、把长期成果守住</span>，<span class=\"hl\">不宜投机冒进</span>。",
+    "ziwei_main": "紫微午宫坐命，<span class=\"hl-good\">沉稳有威仪，武曲化禄主正业生财</span>，<span class=\"hl\">文曲化忌需防文书疏漏</span>。"
   },
   "consistency": "同向印证",
   "strengths": [
@@ -37,33 +37,33 @@
     }
   ],
   "section_01": {
-    "text": "你的八字戊午日生于子月，火土两旺、金水偏弱，正财格成中和之局——你骨子里厚重务实，财富来自稳健积累而非投机。紫微午宫坐命，气度沉稳、自带威仪，与八字这份厚土守成之性高度同向；财帛宫武曲化禄，也印证了你以正财为用、正业生财的主轴。两盘一致指向：你适合在稳定的平台里长期深耕，靠专业与信用立身。要共同留意的是，八字里子午相冲、紫微命迁线动荡，都提示你身边的环境与人事变动偏多；官禄宫又见文曲化忌，文书、合同、契约类事务须格外仔细。整体是稳中求成、厚积薄发之格，你最需要防的只有急功近利。",
-    "word_count": 241
+    "text": "你的八字戊午日生于子月，火土两旺、金水偏弱，正财格成中和之局——这在现实里表现为<span class=\"hl-good\">厚重务实，财富更适合来自稳健积累而非投机</span>。紫微午宫坐命，又给你<span class=\"hl-good\">沉稳、有分量、遇事能定住场面的气质</span>；财帛宫武曲化禄也印证了<span class=\"hl-good\">正业生财、靠专业与信用积累财富的主轴</span>。两盘一致指向：<span class=\"hl-good\">你适合在稳定的平台里长期深耕，把经验做成别人替代不了的价值</span>。要共同留意的是，八字里子午相冲、紫微命迁线动荡，都提示<span class=\"hl\">环境与人事变动偏多</span>；官禄宫又见文曲化忌，<span class=\"hl\">文书、合同、契约类事务须格外仔细</span>。整体上，你<span class=\"hl-good\">走的是稳中求成、厚积薄发的路线</span>，最需要防的是急功近利。",
+    "word_count": 252
   },
   "section_02": {
-    "conclusion": "你的少年阶段以打基础为主，十九岁后进入甲戌大运，是立业起步的阶段。二十九岁后转癸酉运，财路渐宽。三十九岁后壬申运偏财食神并见，是你财富扩张的窗口期。两盘的阶段节奏一致，都指向中年以后稳步上行。"
+    "conclusion": "少年阶段以打基础为主，十九岁后进入甲戌大运，<span class=\"hl-good\">是把专业立起来、开始建立事业位置的阶段</span>。二十九岁后转癸酉运，<span class=\"hl-good\">财路会逐步打开，前期积累更容易变成看得见的收入</span>。三十九岁后壬申运偏财食神并见，<span class=\"hl-good\">是财富扩张与成果放大的窗口期</span>。两盘的阶段节奏一致，都指向<span class=\"hl-good\">中年以后稳步上行、越积累越有回旋余地</span>；现在的动作重点，是把可复制的专业方法和长期合作关系先做扎实。"
   },
   "dim": {
     "career": {
-      "bazi": "比劫厚重，宜稳定职场或大机构深耕",
-      "ziwei": "官禄廉贞天府，适合管理/资产型岗位",
+      "bazi": "比劫厚重，<span class=\"hl-good\">宜在稳定职场或大机构深耕</span>",
+      "ziwei": "官禄廉贞天府，<span class=\"hl-good\">适合管理/资产型岗位</span>",
       "verdict": "🟢 同向",
       "verdict_class": "verdict-yes",
-      "fused": "适合大平台长期深耕，靠专业与信用立身"
+      "fused": "<span class=\"hl-good\">适合大平台长期深耕，靠专业与信用立身</span>"
     },
     "wealth": {
-      "bazi": "正财格中和，理财稳健不爱投机",
-      "ziwei": "财帛武曲化禄，正业生财能力强",
+      "bazi": "正财格中和，<span class=\"hl-good\">理财稳健、重视长期积累</span>",
+      "ziwei": "财帛武曲化禄，<span class=\"hl-good\">正业生财能力强</span>",
       "verdict": "🟢 同向",
       "verdict_class": "verdict-yes",
-      "fused": "正财稳进型，宜积累与资产配置"
+      "fused": "<span class=\"hl-good\">正财稳进型，宜积累与资产配置</span>"
     },
     "marriage": {
       "bazi": "日支午被子冲，配偶宫动荡需磨合",
-      "ziwei": "夫妻宫七杀，对象刚强有主见",
+      "ziwei": "夫妻宫七杀，<span class=\"hl-good\">对象能力强、有主见</span>",
       "verdict": "⚠ 部分冲突",
       "verdict_class": "verdict-partial",
-      "fused": "配偶能力强但需磨合，宜晚婚稳定"
+      "fused": "<span class=\"hl-good\">配偶能力强</span>但需磨合，宜等关系成熟后稳定"
     },
     "children": {
       "bazi": "时柱比肩，子女缘分中等",
@@ -77,7 +77,7 @@
       "ziwei": "父母宫平淡，早年靠自身打拼",
       "verdict": "🟢 同向",
       "verdict_class": "verdict-yes",
-      "fused": "自立型，中年后反哺家庭"
+      "fused": "<span class=\"hl-good\">自立型，中年后有能力反哺家庭</span>"
     },
     "health": {
       "bazi": "火土过旺金水弱，注意心血管脾胃",
@@ -114,32 +114,32 @@
     }
   ],
   "final": {
-    "life_axis": "稳中求成，厚积薄发；靠专业与信用立身，忌急功近利。",
+    "life_axis": "<span class=\"hl-good\">稳中求成，厚积薄发；靠专业与信用立身</span>，<span class=\"hl\">忌急功近利</span>。",
     "nodes": [
       {
         "age": 19,
         "year": 2018,
-        "event": "入甲戌大运，七杀比肩并见，立业起步"
+        "event": "入甲戌大运，<span class=\"hl-good\">立业起步、专业开始成形</span>"
       },
       {
         "age": 27,
         "year": 2026,
-        "event": "甲戌运中，事业平台选择的关键窗口"
+        "event": "甲戌运中，<span class=\"hl-good\">事业平台选择的关键窗口</span>"
       },
       {
         "age": 29,
         "year": 2028,
-        "event": "转癸酉大运，正财伤官，财路渐宽"
+        "event": "转癸酉大运，<span class=\"hl-good\">财路渐宽</span>"
       },
       {
         "age": 39,
         "year": 2038,
-        "event": "转壬申大运，偏财食神，财富扩张期"
+        "event": "转壬申大运，<span class=\"hl-good\">财富扩张与成果放大期</span>"
       },
       {
         "age": 49,
         "year": 2048,
-        "event": "转辛未大运，回归稳守与传承"
+        "event": "转辛未大运，<span class=\"hl-good\">回归稳守与传承</span>"
       }
     ],
     "risks": [
@@ -169,7 +169,7 @@
     "advice": [
       "选择稳定大平台长期深耕，靠信用立身",
       "合同契约类事务务必复核留底",
-      "理财以稳健配置为主，远离投机",
+      "理财以<span class=\"hl-good\">稳健配置</span>为主，远离投机",
       "饮食清淡作息规律，护心血管脾胃"
     ]
   },

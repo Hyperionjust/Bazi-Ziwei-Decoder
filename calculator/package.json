@@ -1,6 +1,6 @@
 {
   "name": "bazi-ziwei-calculator",
-  "version": "3.12.0",
+  "version": "3.13.0",
   "description": "八字+紫微算法层 — Yiqi core (vendored) + enrichBazi 补层。版本号由根目录 VERSION 派生，改版本一律跑 scripts/release.sh，不要手改本字段。",
   "private": true,
   "scripts": {
@@ -10,7 +10,8 @@
     "dump": "node dist-bundle/dump-text.js",
     "render": "node dist-bundle/render.js",
     "check": "node dist-bundle/check-analysis.js",
-    "test": "npx tsx fixtures/test-shensha.ts && npx tsx fixtures/test-relations.ts && npx tsx fixtures/test-boundary.ts && npx tsx fixtures/test-tiaohou.ts && npx tsx fixtures/test-check.ts && npx tsx fixtures/test-shichen.ts && npx tsx fixtures/test-liuyue.ts && npx tsx fixtures/test-compare.ts && npx tsx fixtures/test-shunni.ts && npx tsx fixtures/check-template.ts && npx tsx fixtures/test-spec-sync.ts && npx tsx fixtures/test-golden.ts && npx tsx schema-check.ts"
+    "test": "tsx fixtures/test-shensha.ts && tsx fixtures/test-relations.ts && tsx fixtures/test-boundary.ts && tsx fixtures/test-wangshuai-v3.ts && tsx fixtures/test-lineage-invariance.ts && tsx fixtures/test-wangshuai-distribution.ts && tsx fixtures/test-tiaohou.ts && tsx fixtures/test-check.ts && tsx fixtures/test-shichen.ts && tsx fixtures/test-liuyue.ts && tsx fixtures/test-compare.ts && tsx fixtures/test-shunni.ts && tsx fixtures/check-template.ts && tsx fixtures/test-spec-sync.ts && tsx fixtures/test-poster-v2.ts && tsx fixtures/test-golden.ts && tsx schema-check.ts",
+    "calibration:audit": "tsx fixtures/calibration/run-wangshuai-audit.ts"
   },
   "dependencies": {
     "lunar-typescript": "^1.8.6"
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "esbuild": "^0.24.0",
+    "tsx": "4.19.2",
     "typescript": "~5.6.2"
   }
 }

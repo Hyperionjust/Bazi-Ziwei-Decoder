@@ -543,6 +543,67 @@
     padding: 4px 8px; font-size: 11px; letter-spacing: 2px;
     transform: rotate(-2deg);
   }
+
+  /* ============ TRADITIONAL PAPER SYSTEM + NOVICE GUIDE ============ */
+  :root { --jade-deep: #28623d; --gold: #a07c4a; }
+  body {
+    background-image:
+      repeating-linear-gradient(7deg, rgba(90,72,48,.025) 0, rgba(90,72,48,.025) 1px, transparent 1px, transparent 7px),
+      radial-gradient(circle at 15% 25%, rgba(180,160,130,.08), transparent 50%),
+      radial-gradient(circle at 85% 75%, rgba(42,74,114,.045), transparent 50%);
+  }
+  .report {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: linear-gradient(rgba(245,241,232,.96), rgba(245,241,232,.96)), repeating-linear-gradient(0deg, transparent 0 14px, rgba(160,124,74,.04) 14px 15px);
+    border-color: #8e795d; outline: 5px double rgba(160,124,74,.22); outline-offset: -9px;
+    box-shadow: 0 18px 54px rgba(50,36,20,.12);
+  }
+  .report::before, .report::after {
+    content: ""; position: absolute; width: 66px; height: 66px; pointer-events: none; z-index: 3; opacity: .56;
+    background:
+      linear-gradient(var(--gold),var(--gold)) 0 0/38px 1px no-repeat,
+      linear-gradient(var(--gold),var(--gold)) 0 0/1px 38px no-repeat,
+      linear-gradient(var(--vermillion),var(--vermillion)) 8px 8px/23px 1px no-repeat,
+      linear-gradient(var(--vermillion),var(--vermillion)) 8px 8px/1px 23px no-repeat;
+  }
+  .report::before { top: 13px; left: 13px; }
+  .report::after { right: 13px; bottom: 13px; transform: rotate(180deg); }
+  .report > * { position: relative; z-index: 1; }
+  .header { position: relative; padding: 6px 4px 25px; border-bottom: 0; background: linear-gradient(90deg, rgba(193,67,47,.035), transparent 44%, rgba(46,109,164,.025)); }
+  .header::after, .section h2::after {
+    content: ""; opacity: .7;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='10' viewBox='0 0 42 10'%3E%3Cpath d='M0 8h16V2H6v3h7M21 2h16v6H27V5h7' fill='none' stroke='%23a07c4a' stroke-width='1'/%3E%3C/svg%3E");
+    background-repeat: repeat-x; background-position: center;
+  }
+  .header::after { position: absolute; left: 0; right: 0; bottom: 0; height: 9px; }
+  .section h2::after { height: 8px; min-width: 38px; flex: 1; }
+  .seal { background: rgba(193,67,47,.035); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(193,67,47,.55); }
+  .reader-guide {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
+    margin: -2px 0 18px; padding: 11px 15px; border: 1px solid rgba(160,124,74,.55); border-left: 4px solid var(--vermillion);
+    background: linear-gradient(90deg, rgba(250,246,236,.92), rgba(235,229,213,.72));
+  }
+  .reader-guide .guide-title { color: var(--vermillion-deep); font-size: 12px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+  .reader-guide .guide-copy { font-size: 11px; color: var(--ink-soft); line-height: 1.75; }
+  .reader-guide b { font-weight: 900; } .guide-good { color: var(--jade-deep); } .guide-warn { color: var(--vermillion-deep); }
+  .section { position: relative; border-color: rgba(160,124,74,.46); background: linear-gradient(145deg, rgba(250,246,236,.82), rgba(245,241,232,.68)); box-shadow: inset 3px 0 0 rgba(160,124,74,.13); }
+  .section::before { content: ""; position: absolute; top: -1px; right: -1px; width: 16px; height: 16px; border-top: 2px solid rgba(160,124,74,.72); border-right: 2px solid rgba(160,124,74,.72); }
+  .section h2 .num-box { color: var(--vermillion-deep); background: rgba(193,67,47,.055); border: 1px solid var(--vermillion); border-radius: 0; box-shadow: inset 0 0 0 2px var(--paper); }
+  .strength-side h4, .strength-side .item .star, .strength-side .item .t, .strength-side .item .d { color: var(--jade-deep); font-weight: 900; }
+  .verdict-yes, .leverage-item, .leverage-item .head { color: var(--jade-deep); font-weight: 900; }
+  .hl-good { color: var(--jade-deep); font-weight: 900; background: linear-gradient(transparent 70%, rgba(74,124,78,.17) 70%); }
+  .hl { color: var(--vermillion-deep); font-weight: 800; background: linear-gradient(transparent 72%, rgba(193,67,47,.10) 72%); }
+  @media (max-width: 720px) {
+    body { padding: 0; overflow-x: hidden; }
+    .report { width: 100%; max-width: 100%; padding: 16px; box-shadow: none; }
+    .header { grid-template-columns: auto 1fr; } .header-right { grid-column: 1 / -1; text-align: left; }
+    .reader-guide { grid-template-columns: 1fr; gap: 3px; }
+    .top-grid, .charts-grid, .row-2col { grid-template-columns: 1fr; }
+    .core-data { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .strengths-block { grid-template-columns: 1fr; }
+    .section { overflow-x: auto; }
+    .stage-grid, .cross-grid, .conflict-grid, .confidence-row { min-width: 760px; }
+  }
 </style>
 </head>
 <body>
@@ -554,10 +615,10 @@
     <div class="title-block">
       <div style="font-size:10px;color:var(--ink-soft);letter-spacing:2px;margin-bottom:4px">综合印证报告</div>
       <h1>厚土紫垣守成客</h1>
-      <div class="subtitle">紫微坐命气度沉稳，正财厚土宜守成积累，忌冲动投机</div>
+      <div class="subtitle"><span class="hl-good">气度沉稳，适合靠正业与长期积累成事</span>，<span class="hl">忌冲动投机</span></div>
     </div>
     <div class="header-right">
-      <div class="gen-time">生成时间：<span class="num">2026-07-29 11:11</span></div>
+      <div class="gen-time">生成时间：<span class="num">2026-08-02 01:39</span></div>
       <div>综合印证评级</div>
       <div class="badge-grade">✓ 同向印证</div>
       <div class="meta-row">
@@ -570,6 +631,11 @@
       </div>
     </div>
   </header>
+
+  <aside class="reader-guide" aria-label="海报阅读说明">
+    <div class="guide-title">小白这样看</div>
+    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是两套命盘指出的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的分歧与风险。先看“三大优势”和 01 的共同结论，再看 02—04 找阶段与提醒，最后按 05 的行动建议执行；专业盘面是证据，不懂也不影响阅读。</div>
+  </aside>
 
   <!-- ============ TOP GRID: info | core | right ============ -->
   <div class="top-grid">
@@ -589,11 +655,11 @@
         <div class="axes-row">
           <div class="axis-box">
             <div class="label">八字主轴</div>
-            <div class="text">戊午日主火土厚重，正财格中和偏稳，宜积累守成，不宜投机冒进。</div>
+            <div class="text">戊午日主火土厚重，<span class="hl-good">适合稳步积累、把长期成果守住</span>，<span class="hl">不宜投机冒进</span>。</div>
           </div>
           <div class="axis-box">
             <div class="label">紫微主轴</div>
-            <div class="text">紫微午宫坐命，沉稳有威仪，武曲化禄主正业生财，文曲化忌防文书契约。</div>
+            <div class="text">紫微午宫坐命，<span class="hl-good">沉稳有威仪，武曲化禄主正业生财</span>，<span class="hl">文曲化忌需防文书疏漏</span>。</div>
           </div>
         </div>
       </div>
@@ -628,9 +694,9 @@
         <div class="info-i">ⓘ</div>
         <div class="label">旺衰</div>
         <div class="value">中和</div>
-        <div class="score num">0.3</div>
+        <div class="score num">0.86</div>
         <div class="slider">
-          <div class="slider-mark" style="left:52%"></div>
+          <div class="slider-mark" style="left:54%"></div>
         </div>
         <div class="slider-labels"><span>弱</span><span>中</span><span>旺</span></div>
       </div>
@@ -873,16 +939,16 @@
   <div class="row-2col">
     <!-- 01 主轴印证结论 -->
     <section class="section">
-      <h2><span class="num-box">01</span>主轴印证结论</h2>
+      <h2><span class="num-box">01</span>两套命盘都在说什么</h2>
       <div class="axis-conclusion">
-        你的八字戊午日生于子月，火土两旺、金水偏弱，正财格成中和之局——你骨子里厚重务实，财富来自稳健积累而非投机。紫微午宫坐命，气度沉稳、自带威仪，与八字这份厚土守成之性高度同向；财帛宫武曲化禄，也印证了你以正财为用、正业生财的主轴。两盘一致指向：你适合在稳定的平台里长期深耕，靠专业与信用立身。要共同留意的是，八字里子午相冲、紫微命迁线动荡，都提示你身边的环境与人事变动偏多；官禄宫又见文曲化忌，文书、合同、契约类事务须格外仔细。整体是稳中求成、厚积薄发之格，你最需要防的只有急功近利。
-        <div class="wc">字数：241</div>
+        你的八字戊午日生于子月，火土两旺、金水偏弱，正财格成中和之局——这在现实里表现为<span class="hl-good">厚重务实，财富更适合来自稳健积累而非投机</span>。紫微午宫坐命，又给你<span class="hl-good">沉稳、有分量、遇事能定住场面的气质</span>；财帛宫武曲化禄也印证了<span class="hl-good">正业生财、靠专业与信用积累财富的主轴</span>。两盘一致指向：<span class="hl-good">你适合在稳定的平台里长期深耕，把经验做成别人替代不了的价值</span>。要共同留意的是，八字里子午相冲、紫微命迁线动荡，都提示<span class="hl">环境与人事变动偏多</span>；官禄宫又见文曲化忌，<span class="hl">文书、合同、契约类事务须格外仔细</span>。整体上，你<span class="hl-good">走的是稳中求成、厚积薄发的路线</span>，最需要防的是急功近利。
+        <div class="wc">字数：252</div>
       </div>
     </section>
 
     <!-- 02 阶段印证时间轴 -->
     <section class="section">
-      <h2><span class="num-box">02</span>阶段印证时间轴 <small style="font-size:11px;color:var(--ink-soft);font-weight:normal">（水平双轨）</small></h2>
+      <h2><span class="num-box">02</span>人生阶段对照 <small style="font-size:11px;color:var(--ink-soft);font-weight:normal">什么时候宜进、宜稳</small></h2>
       <div class="stage-legend">
         <span><span class="dot up"></span>关键上升期</span>
         <span><span class="dot flat"></span>调整期</span>
@@ -917,7 +983,7 @@
         <div>65-74</div>
       </div>
       <div class="stage-conclusion">
-        <b>印证结论：</b>你的少年阶段以打基础为主，十九岁后进入甲戌大运，是立业起步的阶段。二十九岁后转癸酉运，财路渐宽。三十九岁后壬申运偏财食神并见，是你财富扩张的窗口期。两盘的阶段节奏一致，都指向中年以后稳步上行。
+        <b>印证结论：</b>少年阶段以打基础为主，十九岁后进入甲戌大运，<span class="hl-good">是把专业立起来、开始建立事业位置的阶段</span>。二十九岁后转癸酉运，<span class="hl-good">财路会逐步打开，前期积累更容易变成看得见的收入</span>。三十九岁后壬申运偏财食神并见，<span class="hl-good">是财富扩张与成果放大的窗口期</span>。两盘的阶段节奏一致，都指向<span class="hl-good">中年以后稳步上行、越积累越有回旋余地</span>；现在的动作重点，是把可复制的专业方法和长期合作关系先做扎实。
       </div>
     </section>
   </div>
@@ -925,18 +991,18 @@
   <!-- 03 六维交叉对账 + 04 冲突清单 -->
   <div class="row-2col">
     <section class="section">
-      <h2><span class="num-box">03</span>六维交叉对账</h2>
+      <h2><span class="num-box">03</span>六个现实领域怎么对应</h2>
       <div class="cross-grid">
         <div class="ch"></div>
         <div class="ch">事业</div><div class="ch">财运</div><div class="ch">婚恋</div>
         <div class="ch">子女</div><div class="ch">六亲</div><div class="ch">健康</div>
 
         <div class="lh">八字观点</div>
-        <div>比劫厚重，宜稳定职场或大机构深耕</div><div>正财格中和，理财稳健不爱投机</div><div>日支午被子冲，配偶宫动荡需磨合</div>
+        <div>比劫厚重，<span class="hl-good">宜在稳定职场或大机构深耕</span></div><div>正财格中和，<span class="hl-good">理财稳健、重视长期积累</span></div><div>日支午被子冲，配偶宫动荡需磨合</div>
         <div>时柱比肩，子女缘分中等</div><div>年月截脚，长辈助力有限须自立</div><div>火土过旺金水弱，注意心血管脾胃</div>
 
         <div class="lh">紫微观点</div>
-        <div>官禄廉贞天府，适合管理/资产型岗位</div><div>财帛武曲化禄，正业生财能力强</div><div>夫妻宫七杀，对象刚强有主见</div>
+        <div>官禄廉贞天府，<span class="hl-good">适合管理/资产型岗位</span></div><div>财帛武曲化禄，<span class="hl-good">正业生财能力强</span></div><div>夫妻宫七杀，<span class="hl-good">对象能力强、有主见</span></div>
         <div>子女宫平稳，重在教育投入</div><div>父母宫平淡，早年靠自身打拼</div><div>疾厄天同巨门，留意消化与情绪</div>
 
         <div class="lh">印证标记</div>
@@ -948,13 +1014,13 @@
         <div><span class="verdict-tag verdict-yes">🟢 同向</span></div>
 
         <div class="lh">融合结论</div>
-        <div>适合大平台长期深耕，靠专业与信用立身</div><div>正财稳进型，宜积累与资产配置</div><div>配偶能力强但需磨合，宜晚婚稳定</div>
-        <div>缘分中等，重视陪伴与教育</div><div>自立型，中年后反哺家庭</div><div>心血管与脾胃为重，规律作息饮食清淡</div>
+        <div><span class="hl-good">适合大平台长期深耕，靠专业与信用立身</span></div><div><span class="hl-good">正财稳进型，宜积累与资产配置</span></div><div><span class="hl-good">配偶能力强</span>但需磨合，宜等关系成熟后稳定</div>
+        <div>缘分中等，重视陪伴与教育</div><div><span class="hl-good">自立型，中年后有能力反哺家庭</span></div><div>心血管与脾胃为重，规律作息饮食清淡</div>
       </div>
     </section>
 
     <section class="section">
-      <h2><span class="num-box">04</span>冲突清单 <small style="font-size:11px;color:var(--ink-soft);font-weight:normal">（已识别的主要冲突点）</small></h2>
+      <h2><span class="num-box">04</span>两套结论哪里不同 <small style="font-size:11px;color:var(--ink-soft);font-weight:normal">差异会影响什么、怎么处理</small></h2>
       <div class="conflict-grid">
         <div class="ch">冲突点</div>
         <div class="ch">八字视角</div>
@@ -985,20 +1051,20 @@
 
   <!-- 05 综合定论 -->
   <section class="section">
-    <h2><span class="num-box">05</span>综合定论</h2>
+    <h2><span class="num-box">05</span>最后怎么看、怎么做</h2>
     <div class="final-grid">
       <div class="final-block">
         <h4>终极主轴</h4>
-        <div class="big">稳中求成，厚积薄发；靠专业与信用立身，忌急功近利。</div>
+        <div class="big"><span class="hl-good">稳中求成，厚积薄发；靠专业与信用立身</span>，<span class="hl">忌急功近利</span>。</div>
       </div>
       <div class="final-block">
         <h4>5 个关键节点（人生里程碑）</h4>
         <ul class="nodes-list">
-          <li>19岁（2018）：入甲戌大运，七杀比肩并见，立业起步</li>
-          <li>27岁（2026）：甲戌运中，事业平台选择的关键窗口</li>
-          <li>29岁（2028）：转癸酉大运，正财伤官，财路渐宽</li>
-          <li>39岁（2038）：转壬申大运，偏财食神，财富扩张期</li>
-          <li>49岁（2048）：转辛未大运，回归稳守与传承</li>
+          <li>19岁（2018）：入甲戌大运，<span class="hl-good">立业起步、专业开始成形</span></li>
+          <li>27岁（2026）：甲戌运中，<span class="hl-good">事业平台选择的关键窗口</span></li>
+          <li>29岁（2028）：转癸酉大运，<span class="hl-good">财路渐宽</span></li>
+          <li>39岁（2038）：转壬申大运，<span class="hl-good">财富扩张与成果放大期</span></li>
+          <li>49岁（2048）：转辛未大运，<span class="hl-good">回归稳守与传承</span></li>
         </ul>
       </div>
       <div class="final-block">
@@ -1016,7 +1082,7 @@
         <h4>行动建议清单 <small style="color:var(--ink-faint)">（优先级）</small></h4>
         <div class="advice-item"><span class="num">1</span>选择稳定大平台长期深耕，靠信用立身</div>
         <div class="advice-item"><span class="num">2</span>合同契约类事务务必复核留底</div>
-        <div class="advice-item"><span class="num">3</span>理财以稳健配置为主，远离投机</div>
+        <div class="advice-item"><span class="num">3</span>理财以<span class="hl-good">稳健配置</span>为主，远离投机</div>
         <div class="advice-item"><span class="num">4</span>饮食清淡作息规律，护心血管脾胃</div>
       </div>
     </div>
@@ -1024,7 +1090,7 @@
 
   <!-- 06 置信度 -->
   <section class="section">
-    <h2><span class="num-box">06</span>置信度自评 <small style="font-size:11px;color:var(--ink-soft);font-weight:normal">（综合模型不确定性）</small></h2>
+    <h2><span class="num-box">06</span>这份解读有多确定 <small style="font-size:11px;color:var(--ink-soft);font-weight:normal">哪些可重点参考，哪些要保留弹性</small></h2>
     <div class="confidence-row">
       <div class="conf-card">
         <div class="label">八字模型置信度</div>

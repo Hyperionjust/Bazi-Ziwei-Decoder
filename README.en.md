@@ -6,7 +6,7 @@
 
 Deterministic charting (not LLM guesswork) · 3 analysis modes · 4 ink-style HTML poster themes
 
-[![Version](https://img.shields.io/badge/version-3.12.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.13.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-c1432f.svg)](#-installation)
 
@@ -39,7 +39,10 @@ It does three things an LLM alone does poorly:
 - 🎯 **Accurate algorithm**: charting core derived from the open-source project Yiqi (MIT); the enrichment layer is guarded by regression suites — 13 symbolic-star cases, 20 interaction/luck-cycle groups, boundary tests (lunar leap month / timezone / late-Zi hour / true solar time) and checker suites
 - 🧭 **3 analysis modes**: BaZi only / Zi Wei only / BaZi + Zi Wei cross-validation, plus a direct annual-fortune Q&A channel (`liunian-qa`)
 - 📜 **2 output formats**: in-depth Markdown long-form + 🎴 single-file HTML posters in 4 themes (cross-validation / BaZi-only / MBTI / Zi Wei standalone)
-- 🎴 **Ink-style chart posters**: modern minimal × Chinese ink — Zi Wei 12-palace chart, BaZi four-pillar chart, six-dimension cross-check, MBTI ancient-style characters, ready to screenshot and share
+- 🎴 **Chinese-inspired chart posters**: modern clarity with paper texture, meander motifs, seal-red accents, Zi Wei 12-palace and BaZi four-pillar charts — ready to screenshot and share
+- 🟢 **Complete positive-semantic highlighting**: every positive or positive-leaning statement (strengths, good traits, suitable directions, support, favorable windows, improvements and benefits) is rendered in bold green; mixed positive/risk sentences are split, and the checker rejects unhighlighted positive clauses
+- 🙋 **Beginner-readable by default**: conclusions come before chart jargon, every term is translated into observable real life, and each section ends with concrete actions
+- 🔎 **Ten Gods and rare patterns explained in full**: the Ten Gods section now contains a complete real-life reading (at least 6 sentences / 200 Chinese characters), while every algorithm-detected rare pattern gets its own rarity, positive/caution/mixed judgment, observable manifestation and action; the block disappears when no rare pattern exists
 - 🕰️ **Optional true-solar-time correction**: `--longitude=<deg>` adds the longitude offset ((lon−120)×4 min, east positive) plus the equation of time on top of the UTC+8 clock time; off by default
 - 🔌 **Cross-agent**: one SKILL.md, works across major agents
 - 🔒 **Privacy-first**: all charting runs locally, no network needed; runtime artifacts are gitignored by default
@@ -159,13 +162,7 @@ Bazi-Ziwei-Decoder/
 
 ```bash
 cd calculator
-npx tsx schema-check.ts
-cd fixtures
-npx tsx test-shensha.ts      # 13 symbolic-star cases
-npx tsx test-relations.ts    # 20 groups: clash/combination adjudication, luck cycles, yongshen, BaWei
-npx tsx test-boundary.ts     # boundary regression (lunar leap month / timezone / late-Zi hour / true solar time)
-npx tsx test-check.ts        # checker regression (bazi / mbti / zonghe / ziwei / longform)
-npx tsx check-template.ts    # poster template integrity
+npm test                    # 17 regression entry points; stops on the first failure
 ```
 
 ---

@@ -1,0 +1,28 @@
+{
+  "schema_version": 5,
+  "audit_id": "v3.13-f0-v5",
+  "declared_at": "2026-08-01",
+  "extends": "v4.config.json",
+  "parent_sha256": "cf102eb9241ae28aafb1f01425767ec440cf76ec3b6c174068052b11e5581d34",
+  "formula_revision": "v5-exclusive-repeat-echo",
+  "amendment_reason": "v4 虽过门，但基础倍率与 echo 倍率采用相加语义，且粗网格不足以验证顾盘 1.70 失败/1.75 首次通过、阮盘累计折损 0.4 失败/0.5 封顶通过的邻格。",
+  "scope_control": "source gold、22 例、关系裁决、F2 证据边界、发布门、排序和敏感性规则不变；只澄清互斥参数语义，并在首跑前预注册包含失败邻格的小网格。",
+  "parameter_aliases": {
+    "linear_scale": "repeat_scale（无同类透干 echo 的重复支总倍率）",
+    "synergy_scale": "echo_scale（有同类透干 echo 的重复支总倍率；不是 repeat 之上的加值）"
+  },
+  "fixed_formula": {
+    "linear_branch_drain": "余三支同一地支重复≥2且本气在克泄耗侧。若重复支本气类别未在年/月/时干透出，其全部克泄耗藏干单位仅乘 repeat_scale。",
+    "opposition_synergy": "若重复支本气的泄/耗/克类别也在年/月/时干透出，其全部克泄耗藏干单位仅乘 echo_scale；不再同时乘 repeat_scale，不作相加。顾=两亥耗+癸耗，周=两午克+丁克；阮两亥耗但无财透，只走 repeat。",
+    "root_discount": "沿用 v4：只计冲及月柱的非库六冲，只折月支正向得令+长生，按关系次数累计封顶100%。"
+  },
+  "grid": {
+    "linear_scale": { "min": 0.3, "max": 0.6, "step": 0.1 },
+    "synergy_scale": { "min": 1.7, "max": 1.85, "step": 0.05 },
+    "active_discount": { "min": 0.4, "max": 0.6, "step": 0.1 },
+    "reduced_discount": { "min": 0, "max": 0.25, "step": 0.25 }
+  },
+  "sensitivity": {
+    "pre_registered_edges": "echo 1.70 为顾失败邻格、1.75 为首个有余量通过格；active 0.4 为阮失败邻格、0.5 为两冲累计封顶通过格。"
+  }
+}

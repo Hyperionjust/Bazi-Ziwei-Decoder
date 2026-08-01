@@ -19,7 +19,7 @@
 // 用法: npx tsx fixtures/test-shunni.ts
 // ---------------------------------------------------------------------------
 import { createChart } from '../yiqi-core/index';
-import { enrichBazi } from '../bazi-enrich/enrich';
+import { enrichOpen as enrichBazi } from './support/open-policy';
 import { analyzeYunSui, hitWeight, gzVsChart, suiVsYun, YunSuiHit } from '../bazi-enrich/yunsui';
 import { analyzeLiuYue } from '../bazi-enrich/liuyue';
 import { annotateShunNi, scoreGZ, buildCtx } from '../bazi-enrich/shunni';

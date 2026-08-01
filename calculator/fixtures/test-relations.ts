@@ -4,7 +4,7 @@ import { detectZhiRelations } from '../bazi-enrich/zhi-relations';
 import { detectGanRelations } from '../bazi-enrich/gan-relations';
 import { adjudicateInteractions, computeTriggerWindows } from '../bazi-enrich/interactions';
 import { analyzeYunSui, gzVsChart, suiVsYun } from '../bazi-enrich/yunsui';
-import { enrichBazi } from '../bazi-enrich/enrich';
+import { enrichOpen as enrichBazi } from './support/open-policy';
 import { detectRarePatterns } from '../bazi-enrich/rare';
 import { judgeSpouseProfile } from '../bazi-enrich/zhengyuan';
 import { judgeBaWei } from '../bazi-enrich/bawei';

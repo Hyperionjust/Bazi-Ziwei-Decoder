@@ -16,7 +16,7 @@ import { enrichBazi } from './bazi-enrich/enrich';
 import { detectShichenBoundary, zishiConventionNote } from './bazi-enrich/shichen-boundary';
 import { aggregateConfidenceTier } from './bazi-enrich/confidence';
 import { computeShensha } from './shensha';
-import { adjudicateInteractions, computeTriggerWindows } from './bazi-enrich/interactions';
+import { adjudicateInteractions, assertInteractionPolicy, computeTriggerWindows } from './bazi-enrich/interactions';
 import { analyzeYunSui, analyzeCompareYears } from './bazi-enrich/yunsui';
 import { analyzeLiuYue } from './bazi-enrich/liuyue';
 import { annotateShunNi } from './bazi-enrich/shunni';
@@ -109,6 +109,16 @@ function main() {
     } catch (e: any) { fail(`无效农历日期: ${e?.message || e}`); }
   }
 
+  // 旺衰 v3 的 F2 依赖 open 中立关系裁决；这是确定性输入，缺失/非法时必须在排盘前失败。
+  let lin: any;
+  let openInteractionPolicy: any;
+  try {
+    lin = JSON.parse(fs.readFileSync(resolveData('lineages.json'), 'utf-8'));
+    openInteractionPolicy = assertInteractionPolicy(lin?.lineages?.open?.interaction_policy, 'lineages.open.interaction_policy');
+  } catch (e) {
+    fail(`lineages/open interaction_policy 加载失败: ${(e as Error)?.message || e}`);
+  }
+
   // Step 1: Yiqi 算法层 — 四柱+紫微+大运+流年
   const chart: any = createChart(birthInfo);
 
@@ -138,7 +148,7 @@ function main() {
     '日': chart.bazi.siZhu.day,
     '时': chart.bazi.siZhu.hour,
   };
-  chart.bazi.enrichment = enrichBazi(siZhuForEnrich);
+  chart.bazi.enrichment = enrichBazi(siZhuForEnrich, { interactionPolicy: openInteractionPolicy });
 
   // Step 2.5: 时辰边界检测(P0-A) — 时辰输入错一格则时柱/紫微命宫/大限全错。
   //   按归一化后的排盘时刻(农历→公历、时区→东八、经度校正若有)判定距时辰交界的分钟差,
@@ -159,7 +169,6 @@ function main() {
   //          流派权重/过滤是"解读层镜片", 仅在传 --lineage 时附加一份过滤视图, 绝不改四柱排盘。
   try {
     const defs = JSON.parse(fs.readFileSync(resolveData('shensha.json'), 'utf-8'));
-    const lin  = JSON.parse(fs.readFileSync(resolveData('lineages.json'), 'utf-8'));
     const shenChart = { siZhu: chart.bazi.siZhu, gender: birthInfo.gender };
 
     const fullHits = computeShensha(shenChart, defs, lin.lineages['open'].shensha_policy);
@@ -208,14 +217,14 @@ function main() {
         年: chart.bazi.siZhu.year, 月: chart.bazi.siZhu.month,
         日: chart.bazi.siZhu.day, 时: chart.bazi.siZhu.hour,
       };
-      const openIP = lin.lineages['open'].interaction_policy;
-      if (openIP) {
-        enr.作用关系 = { policy: 'open(通则+分歧标注)', ...adjudicateInteractions(siZhuCN, openIP) };
-        const lk = args.lineage === 'duanshi' ? 'mangpai' : args.lineage;
-        if (lk && lin.lineages[lk] && lk !== 'open' && lin.lineages[lk].interaction_policy) {
-          enr.作用关系.lineage = { id: lk, name: lin.lineages[lk].name,
-            ...adjudicateInteractions(siZhuCN, lin.lineages[lk].interaction_policy) };
-        }
+      const lk = args.lineage === 'duanshi' ? 'mangpai' : args.lineage;
+      if (lk && lin.lineages[lk] && lk !== 'open' && lin.lineages[lk].interaction_policy) {
+        const lineagePolicy = assertInteractionPolicy(
+          lin.lineages[lk].interaction_policy,
+          `lineages.${lk}.interaction_policy`,
+        );
+        enr.作用关系.lineage = { id: lk, name: lin.lineages[lk].name,
+          ...adjudicateInteractions(siZhuCN, lineagePolicy) };
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : new Date().getFullYear();
       // S3 批2: 引爆窗口 — 虚拱/半局/三刑缺一的填实·凑全检索(通则与流派视图各自附加)

@@ -65,20 +65,34 @@ var spec_default = {
       _desc: "dm/geju/wuxing/yongshen \u7684 note \u7C7B\u5B57\u6BB5:\u6070\u4E24\u53E5,\u7B2C\u4E8C\u53E5\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934"
     },
     tg_block: {
-      exact_sentences: 1,
-      _desc: "tg.mech_html \u4E0A\u53E5\u62A5\u76D8\u9762\u6070\u4E00\u53E5;tg.plain_html \u4E0B\u53E5\u6070\u4E00\u53E5\u4E14\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934"
+      mech_exact_sentences: 1,
+      plain_min_sentences: 6,
+      plain_min_chars: 200,
+      plain_max_sentences: null,
+      plain_max_chars: null,
+      min_good_highlights: 3,
+      _desc: "\u5341\u795E\u7248\u5757:tg.mech_html \u75281\u53E5\u538B\u7F29\u76D8\u9762\u8BC1\u636E;tg.plain_html \u987B\u22656\u53E5\u3001\u2265200\u5B57\u3001\u4E0D\u8BBE\u4E0A\u9650\uFF0C\u5B8C\u6574\u8BB2\u80FD\u529B\u7ED3\u6784\u3001\u73B0\u5B9E\u8868\u73B0\u3001\u5E2E\u52A9/\u4EE3\u4EF7\u4E0E\u884C\u52A8\uFF1B\u81F3\u5C113\u5904\u7EFF\u8272\u53EA\u662F\u673A\u5668\u5E95\u7EBF\uFF0C\u6B63\u5411\u8BED\u4E49\u4ECD\u987B\u96F6\u6F0F\u6807"
     },
     major_interp: {
       min_sentences: 6,
-      min_chars: 160,
+      min_chars: 200,
       max_sentences: null,
+      max_chars: null,
       min_highlights: 2,
-      _desc: "\u56DB\u5927\u89E3\u8BFB\u6BB5(\u6027\u683C/\u4E8B\u4E1A/\u5A5A\u604B/\u5065\u5EB7):\u22656 \u53E5 \u2265160 \u5B57,\u4E0D\u8BBE\u4E0A\u9650;\u7740\u8272\u77ED\u8BED\u22652 \u5904"
+      min_good_highlights: 3,
+      _desc: "\u56DB\u5927\u89E3\u8BFB\u6BB5(\u6027\u683C/\u4E8B\u4E1A/\u5A5A\u604B/\u5065\u5EB7):\u22656 \u53E5\u3001\u2265200 \u5B57\u3001\u4E0D\u8BBE\u4E0A\u9650;\u6BCF\u6BB5\u81F3\u5C113\u5904hl-good\u53EA\u662F\u673A\u5668\u5E95\u7EBF,\u771F\u6B63\u6807\u51C6\u662F\u6240\u6709\u6B63\u5411\u6216\u504F\u6B63\u5411\u8BED\u4E49\u9010\u5904\u7EFF\u8272\u7C97\u4F53\u3001\u96F6\u6F0F\u6807"
     },
     close_read: {
       min_sentences: 3,
       max_sentences: 7,
       _desc: "\u4E09\u4E2A\u7CBE\u8BFB\u6BB5(\u5408\u51B2\u5211\u5BB3/\u8FD0\u5C81/\u795E\u715E):3~7 \u53E5"
+    },
+    rare_reading: {
+      min_sentences: 4,
+      min_chars: 160,
+      max_sentences: null,
+      max_chars: null,
+      _desc: "\u7F55\u89C1\u73B0\u8C61\u89E3\u8BFB:\u4EC5\u5728\u7B97\u6CD5\u5C42\u5B58\u5728\u7F55\u8C61\u65F6\u8F93\u51FA;\u22654\u53E5\u3001\u2265160\u5B57\u3001\u4E0D\u8BBE\u4E0A\u9650;\u9010\u9879\u8BF4\u660E\u7F55\u89C1\u5EA6\u3001\u504F\u6B63\u5411/\u504F\u63D0\u9192/\u4E24\u9762\u6027\u3001\u73B0\u5B9E\u8868\u73B0\u4E0E\u884C\u52A8"
     },
     mbti_diff: {
       min_chars: 400,
@@ -96,6 +110,52 @@ var spec_default = {
     exact_items: 5,
     _desc: "\u65F6\u95F4\u8F74\u6070 5 \u9879,\u5E74\u4EFD\u987B\u843D\u5728\u7B97\u6CD5\u5C42\u300E\u8FD0\u5C81\u5F15\u52A8.\u5EFA\u8BAE\u8282\u70B9\u300F\u767D\u540D\u5355\u5185",
     mirrored_in: ["prompts/bazi-poster.md"]
+  },
+  algorithm_owned_blocks: {
+    _desc: "\u516B\u5B57\u6D77\u62A5 v2 \u7684\u4E94\u4E2A\u786E\u5B9A\u6027\u5C55\u793A\u5757\u3002owner=algorithm \u8868\u793A\u7531 chart.json \u7ECF\u6E32\u67D3\u5C42\u76F4\u63A5\u6295\u5F71\uFF0C\u4E0D\u5C5E\u4E8E analysis.json\uFF0C\u4E5F\u4E0D\u8981\u6C42\u63D0\u793A\u8BCD\u4EA7\u51FA\u3002\u6BCF\u5757\u5FC5\u987B\u540C\u65F6\u58F0\u660E\u6570\u91CF\u3001\u622A\u65AD\u4E0E\u6761\u4EF6\u663E\u793A\u89C4\u5219\u3002",
+    exact_blocks: 5,
+    blocks: {
+      tiaohou_classics: {
+        owner: "algorithm",
+        source: "\u8C03\u5019\u6761\u4F8B.\u547D\u4E2D",
+        prompt_output_required: false,
+        quantity: { max_items: 3, order: "source" },
+        truncation: { field: "\u610F\u8C61", max_chars: 36, suffix: "\u2026", unit: "unicode_code_points" },
+        condition: { show_when: "\u547D\u4E2D\u6570\u7EC4\u975E\u7A7A", otherwise: "hide_entire_block" }
+      },
+      core_insights: {
+        owner: "algorithm",
+        source: ["\u51FA\u53E3.\u76F8\u795E\u88C1\u51B3", "\u51FA\u53E3.\u8F74\u51B2\u7A81"],
+        prompt_output_required: false,
+        quantity: { max_badges: 2, source_order: ["\u51FA\u53E3.\u76F8\u795E\u88C1\u51B3", "\u51FA\u53E3.\u8F74\u51B2\u7A81"] },
+        truncation: { mode: "fixed_copy_map", max_chars_per_badge: 28, suffix: "\u2026" },
+        condition: { show_when: "\u4EFB\u4E00\u6765\u6E90\u5B58\u5728", otherwise: "hide_entire_block" }
+      },
+      timeline_triggers: {
+        owner: "algorithm",
+        source: "\u5F53\u524D\u6D77\u62A5\u5173\u7CFB\u89C6\u56FE.items + analysis.timeline[].year",
+        prompt_output_required: false,
+        quantity: { existing_timeline_items: 5, max_marked_nodes: 5, max_markers_per_node: 1 },
+        truncation: { mode: "merge_same_year_to_one_marker", detail_location: "\u4F5C\u7528\u5173\u7CFB\u533A" },
+        condition: { show_when: "\u5173\u7CFB\u5F15\u7206\u7A97\u53E3\u4E0E\u65E2\u6709 timeline \u5E74\u4EFD\u6709\u4EA4\u96C6", otherwise: "leave_timeline_unmarked" }
+      },
+      monthly_strip: {
+        owner: "algorithm",
+        source: "\u6D41\u6708\u5F15\u52A8",
+        prompt_output_required: false,
+        quantity: { exact_months: 12, best_windows: 1, worst_windows: 1, tie_break: "source_order_first" },
+        truncation: { months: "never_drop", window_ties: "keep_first_by_source_order" },
+        condition: { show_when: "\u6D41\u6708\u5F15\u52A8\u542B 12 \u6708\u4E14\u5176\u5E74\u4EFD\u7B49\u4E8E render.currentYear", otherwise: "hide_entire_block_and_warn_once" }
+      },
+      body_grade: {
+        owner: "algorithm",
+        source: "\u8FD0\u5C81\u5F15\u52A8.\u987A\u9006[].\u4F53\u6863",
+        prompt_output_required: false,
+        quantity: { max_badges_per_row: 1, rows: "follow_existing_dayun_liunian_rows" },
+        truncation: { allowed_values: ["\u5F3A", "\u4E2D", "\u5F31"], invalid_or_extra: "omit" },
+        condition: { show_when: "\u8BE5\u884C\u5B58\u5728\u5408\u6CD5\u4F53\u6863", otherwise: "preserve_v1_single_axis_layout" }
+      }
+    }
   },
   connectors: {
     _desc: "\u4E24\u53E5\u5757\u7B2C\u4E8C\u53E5\u7684\u5F00\u5934\u8FDE\u63A5\u8BCD\u767D\u540D\u5355(v3.7.1 \u53CD\u540C\u8D28\u5316:\u539F\u5148\u5F3A\u5236\u300E\u6240\u4EE5\u4F60\u300F\xD74,\u4E00\u5F20\u6D77\u62A5\u8FDE\u8BFB\u56DB\u904D\u50CF\u8282\u62CD\u5668)\u3002\u540C\u4E00\u5F20\u6D77\u62A5\u5185\u5404\u5757\u5E94\u9519\u5F00\u3002",
@@ -17682,6 +17742,154 @@ function childhoodViolations(text) {
   }
   return out;
 }
+var POSITIVE_CUE_RE = new RegExp([
+  "\u4F18\u52BF",
+  "\u4F18\u70B9",
+  "\u957F\u677F",
+  "\u5F3A\u9879",
+  "\u5929\u8D4B",
+  "\u5929\u5206",
+  "\u6F5C\u529B",
+  "\u64C5\u957F",
+  "\u5584\u4E8E",
+  "\u62FF\u624B",
+  "\u6297\u538B",
+  "\u6267\u884C\u529B",
+  "\u884C\u52A8\u529B",
+  "\u5224\u65AD\u529B",
+  "\u6D1E\u5BDF\u529B",
+  "\u521B\u9020\u529B",
+  "\u5B66\u4E60\u529B",
+  "\u8868\u8FBE\u529B",
+  "\u9002\u5E94\u529B",
+  "\u6062\u590D\u529B",
+  "\u80FD\u625B",
+  "\u80FD\u5E72",
+  "\u80FD\u6258\u5E95",
+  "\u80FD\u627F\u8F7D",
+  "\u80FD\u843D\u5730",
+  "\u80FD\u63A5\u4F4F",
+  "\u80FD\u5B88\u4F4F",
+  "\u80FD\u7A33\u4F4F",
+  "\u80FD\u5E26\u961F",
+  "\u80FD\u6210\u4E8B",
+  "\u53EF\u9760",
+  "\u9760\u5F97\u4F4F",
+  "\u503C\u5F97\u6258\u4ED8",
+  "\u539A\u5B9E",
+  "\u7A33\u5F53",
+  "\u7A33\u5065",
+  "\u6C89\u7A33",
+  "\u51B7\u9759",
+  "\u6E05\u9192",
+  "\u7406\u6027",
+  "\u679C\u65AD",
+  "\u6709\u4E3B\u89C1",
+  "\u6709\u62C5\u5F53",
+  "\u8D23\u4EFB\u611F",
+  "\u6E29\u548C",
+  "\u6E29\u539A",
+  "\u5305\u5BB9",
+  "\u7EC6\u817B",
+  "\u8010\u5FC3",
+  "\u575A\u97E7",
+  "\u97E7\u52B2",
+  "\u7075\u6D3B",
+  "\u654F\u9510",
+  "\u806A\u660E",
+  "\u901A\u900F",
+  "\u52A1\u5B9E",
+  "\u8E0F\u5B9E",
+  "\u81EA\u5F8B",
+  "\u4E13\u6CE8",
+  "\u5927\u65B9",
+  "\u8C6A\u723D",
+  "\u771F\u8BDA",
+  "\u5584\u826F",
+  "\u540C\u7406\u5FC3",
+  "\u5171\u60C5",
+  "\u4EBA\u7F18(?:\u597D|\u4F73|\u4E0D\u5DEE)",
+  "\u8D35\u4EBA",
+  "\u52A9\u529B",
+  "\u63F4\u624B",
+  "\u62C9\u4F60\u4E00\u628A",
+  "\u6276\u6301",
+  "\u652F\u6301\u4F60",
+  "\u5E2E\u624B",
+  "\u987A\u98CE",
+  "\u597D\u8FD0",
+  "\u5409\u5229",
+  "\u52A0\u5206",
+  "\u597D\u673A\u4F1A",
+  "\u673A\u4F1A\u7A97\u53E3",
+  "\u7A97\u53E3(?:\u671F|\u5E74)",
+  "\u9002\u5408",
+  "\u66F4\u5408\u9002",
+  "\u66F4\u987A",
+  "\u987A\u624B",
+  "\u987A\u5229",
+  "\u7701\u529B",
+  "\u6E10\u5BBD",
+  "\u62AC\u5347",
+  "\u4E0A\u884C",
+  "\u8D70\u9AD8",
+  "\u63D0\u5347",
+  "\u6539\u5584",
+  "\u7A81\u7834",
+  "\u6210\u957F",
+  "\u6536\u83B7",
+  "\u6210\u679C",
+  "\u56DE\u62A5",
+  "\u6709\u5229",
+  "\u5229\u4E8E",
+  "\u6709\u671B",
+  "\u53EF\u671F",
+  "\u6B63\u4E1A\u751F\u8D22",
+  "\u7A33\u5B9A\u6536\u5165",
+  "\u8D22\u8DEF\u6E10\u5BBD",
+  "\u805A\u8D22",
+  "\u79EF\u84C4",
+  "\u8D22\u5BCC\u79EF\u7D2F",
+  "\u8BDD\u8BED\u6743",
+  "\u540D\u671B",
+  "\u540D\u58F0",
+  "\u804C\u4F4D",
+  "\u826F\u7F18",
+  "\u611F\u60C5\u66F4\u7A33",
+  "\u5173\u7CFB\u66F4\u7A33",
+  "\u8D70\u5411\u786E\u5B9A",
+  "\u5386\u4E45\u5F25\u65B0",
+  "\u8D8A\u8D70\u8D8A(?:\u5BBD|\u7A33|\u987A)",
+  "\u5E95\u8272\u662F\u7A33",
+  "\u529E\u4E8B\u5F88\u7A33"
+].join("|"), "g");
+var GOOD_SPAN_RE = /<span\b[^>]*class=(['"])[^'"]*\bhl-good\b[^'"]*\1[^>]*>[\s\S]*?<\/span>/gi;
+function positiveHighlightViolations(html) {
+  const outside = strip(String(html || "").replace(GOOD_SPAN_RE, " "));
+  const leaks = [];
+  for (const raw of outside.split(/[。！？!?；;\n]/)) {
+    const clause = raw.trim();
+    if (!clause) continue;
+    POSITIVE_CUE_RE.lastIndex = 0;
+    let m;
+    while (m = POSITIVE_CUE_RE.exec(clause)) {
+      const before = clause.slice(Math.max(0, m.index - 5), m.index);
+      const after = clause.slice(m.index + m[0].length, m.index + m[0].length + 4);
+      if (/(?:不|未|无|非|难|欠|缺|莫|勿|别|不太|很难|难以|缺乏|欠缺|不够).{0,2}$/.test(before)) continue;
+      if (/^(?:有限|不足|不多|偏少|欠缺|薄弱|较弱|不够)/.test(after)) continue;
+      const excerpt = clause.length > 46 ? `${clause.slice(0, 46)}\u2026` : clause;
+      if (!leaks.includes(excerpt)) leaks.push(excerpt);
+      break;
+    }
+  }
+  return leaks.slice(0, 4);
+}
+function addPositiveHighlightChecks(bad, html, minGood = 0) {
+  const g = (String(html).match(/hl-good/g) || []).length;
+  if (g < minGood) bad.push(`\u7EFF\u8272\u7C97\u4F53\u8FC7\u5C11(\u7EFF${g},\u81F3\u5C11${minGood}\u5904\u53EA\u662F\u673A\u5668\u5E95\u7EBF;\u6240\u6709\u6B63\u5411/\u504F\u6B63\u5411\u8BED\u4E49\u4ECD\u987B\u9010\u5904\u6807\u8BB0)`);
+  const leaks = positiveHighlightViolations(html);
+  if (leaks.length) bad.push(`\u6B63\u5411/\u504F\u6B63\u5411\u63CF\u8FF0\u4ECD\u662F\u666E\u901A\u5B57\u4F53:${leaks.map((x) => `\u300C${x}\u300D`).join("\u3001")}`);
+}
 function checkAnalysis(a, chart, currentYear) {
   const R = {};
   const put = (k, bad, warn = []) => {
@@ -17724,13 +17932,14 @@ function checkAnalysis(a, chart, currentYear) {
     const bad1 = [];
     const bad2 = [];
     const m = a?.tg?.mech_html, p = a?.tg?.plain_html;
-    const TG_N = SEC.tg_block.exact_sentences;
+    const TG = SEC.tg_block;
     if (m == null) bad1.push("\u7F3A\u5B57\u6BB5");
-    else if (sentences(m).length !== TG_N) bad1.push(`\u4E0A\u53E5\u5E94\u6070${TG_N}\u53E5,\u5B9E\u9645${sentences(m).length}\u53E5`);
+    else if (sentences(m).length !== TG.mech_exact_sentences) bad1.push(`\u5341\u795E\u76D8\u9762\u8BC1\u636E\u5E94\u6070${TG.mech_exact_sentences}\u53E5,\u5B9E\u9645${sentences(m).length}\u53E5`);
     if (p == null) bad2.push("\u7F3A\u5B57\u6BB5");
     else {
-      if (sentences(p).length !== TG_N) bad2.push(`\u4E0B\u53E5\u5E94\u6070${TG_N}\u53E5,\u5B9E\u9645${sentences(p).length}\u53E5`);
-      if (!CONNECTOR_RE.test(strip(p).trim())) bad2.push(`\u4E0B\u53E5\u987B\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934(${CONNECTOR_DESC})`);
+      const n = sentences(p).length, len = strip(p).length;
+      if (n < TG.plain_min_sentences || len < TG.plain_min_chars) bad2.push(`\u5341\u795E\u89E3\u8BFB\u8BE6\u5199\u4E0D\u8DB3(\u53E5\u6570${n}/\u5B57\u6570${len},\u8981\u6C42\u2265${TG.plain_min_sentences}\u53E5\u2265${TG.plain_min_chars}\u5B57)`);
+      addPositiveHighlightChecks(bad2, p, TG.min_good_highlights || 0);
     }
     put("tg.mech_html", bad1);
     put("tg.plain_html", bad2);
@@ -17745,10 +17954,12 @@ function checkAnalysis(a, chart, currentYear) {
     if (k === "dm.desc_html") {
       const t = strip(path);
       for (const m of ["\u7279\u6027\u662F", "\u610F\u5473\u7740\u4F60", "\u6700\u5F3A\u7684\u80FD\u529B", "\u4F46"]) if (!t.includes(m)) bad.push(`\u65E5\u4E3B\u56FA\u5B9A\u53E5\u5F0F\u7F3A\u300C${m}\u300D`);
+      if (!/最强的能力是\s*<span\b[^>]*class=(['"])[^'"]*\bhl-good\b[^'"]*\1/i.test(path)) bad.push("\u300C\u6700\u5F3A\u7684\u80FD\u529B\u300D\u5185\u5BB9\u987B\u5B8C\u6574\u6807\u7EFF\u52A0\u7C97");
     } else {
       if (ss.length !== SEC.two_sentence_block.exact_sentences) bad.push(`\u5E94\u6070${SEC.two_sentence_block.exact_sentences}\u53E5,\u5B9E\u9645 ${ss.length} \u53E5`);
       if (ss[1] && !CONNECTOR_RE.test(ss[1])) bad.push(`\u7B2C\u4E8C\u53E5\u987B\u4EE5\u8FDE\u63A5\u8BCD\u5F00\u5934(${CONNECTOR_DESC})`);
     }
+    addPositiveHighlightChecks(bad, path);
     put(k, bad);
   }
   {
@@ -17772,6 +17983,7 @@ function checkAnalysis(a, chart, currentYear) {
     if (ss.length < MI.min_sentences || len < MI.min_chars) bad.push(`\u8BE6\u5199\u4E0D\u8DB3(\u53E5\u6570${ss.length}/\u5B57\u6570${len},\u8981\u6C42\u2265${MI.min_sentences}\u53E5\u2265${MI.min_chars}\u5B57)`);
     const g = (v.match(/hl-good/g) || []).length, r = (v.match(/class="hl"/g) || []).length;
     if (g + r < MI.min_highlights) bad.push(`\u7740\u8272\u4E0D\u8DB3(\u7EFF${g}\u7EA2${r},\u7279\u8D28\u77ED\u8BED\u5E94\u6210\u6BB5\u7740\u8272)`);
+    addPositiveHighlightChecks(bad, v, MI.min_good_highlights || 0);
     put(`interp.${k}`, bad);
   }
   {
@@ -17799,6 +18011,7 @@ function checkAnalysis(a, chart, currentYear) {
     const warn = [];
     const n = sentences(v).length;
     if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`\u7CBE\u8BFB\u6BB5\u5E94${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}\u53E5,\u5B9E\u9645${n}\u53E5`);
+    addPositiveHighlightChecks(bad, v);
     if (k === "yunsui.reading_html") {
       const \u5927\u8FD0\u5E74 = /* @__PURE__ */ new Set();
       for (const d of chart?.bazi?.dayun || []) {
@@ -17829,21 +18042,31 @@ function checkAnalysis(a, chart, currentYear) {
   }
   {
     const rare = chart?.bazi?.enrichment?.\u7F55\u8C61 || [];
+    const v = String(a?.rare?.reading_html || "");
+    const bad = [];
     if (rare.length) {
-      const names = rare.map((r) => String(r.\u540D || "").replace(/[(（].*$/, ""));
-      const text = strip(String(a?.shensha?.reading_html || "")) + strip(String(a?.hechong?.reading_html || ""));
-      const \u5339\u914D\u8BCD = (r) => {
-        const \u5168 = String(r.\u540D || "").replace(/[(（].*$/, "");
-        const alias = Array.isArray(r.\u5339\u914D\u8BCD) ? r.\u5339\u914D\u8BCD : [];
-        return [\u5168, \u5168.replace(/^原局/, ""), ...alias].filter((x) => x && x.length >= 2);
-      };
-      const mentioned = rare.some((r) => \u5339\u914D\u8BCD(r).some((w) => text.includes(w)));
-      if (!mentioned) {
-        for (const k of ["shensha.reading_html", "hechong.reading_html"]) {
-          R[k] = { status: "FAIL", reasons: [...R[k]?.reasons || [], `\u76D8\u6709\u7F55\u8C61(${names.join("/")})\u4F46\u7CBE\u8BFB\u6BB5\u672A\u63D0\u53CA`] };
-        }
+      const RR = SEC.rare_reading;
+      const text = strip(v);
+      const n = sentences(v).length, len = text.length;
+      if (!v) bad.push("\u76D8\u6709\u7F55\u8C61\u4F46\u7F3A rare.reading_html \u72EC\u7ACB\u89E3\u8BFB");
+      else {
+        if (n < RR.min_sentences || len < RR.min_chars) bad.push(`\u7F55\u89C1\u73B0\u8C61\u8BE6\u5199\u4E0D\u8DB3(\u53E5\u6570${n}/\u5B57\u6570${len},\u8981\u6C42\u2265${RR.min_sentences}\u53E5\u2265${RR.min_chars}\u5B57)`);
+        const terms = (r) => {
+          const full = String(r.\u540D || "").replace(/[(（].*$/, "");
+          const alias = Array.isArray(r.\u5339\u914D\u8BCD) ? r.\u5339\u914D\u8BCD : [];
+          return [full, full.replace(/^原局/, ""), ...alias].filter((x) => x && x.length >= 2);
+        };
+        for (const r of rare) if (!terms(r).some((w) => text.includes(w))) bad.push(`\u6F0F\u89E3\u7B97\u6CD5\u7F55\u8C61\u300C${r.\u540D}\u300D`);
+        const judgments = text.match(/偏正向|偏提醒|两面性/g) || [];
+        if (judgments.length < rare.length) bad.push(`\u6BCF\u9879\u7F55\u8C61\u90FD\u987B\u660E\u786E\u5224\u65AD\u504F\u6B63\u5411/\u504F\u63D0\u9192/\u4E24\u9762\u6027(\u7F55\u8C61${rare.length}\u9879,\u5224\u65AD${judgments.length}\u5904)`);
+        if (!/(现实|生活|性格|工作|事业|关系|感情|家庭|财务|阶段|合作)/.test(text)) bad.push("\u672A\u8BF4\u660E\u73B0\u5B9E\u4E2D\u53EF\u80FD\u51FA\u73B0\u7684\u73B0\u8C61");
+        if (!/(hl-good|class="hl")/.test(v)) bad.push("\u7F55\u8C61\u597D\u574F\u5224\u65AD\u672A\u7528\u7EFF\u8272/\u7EA2\u8272\u533A\u5206");
+        addPositiveHighlightChecks(bad, v);
       }
+    } else if (v.trim()) {
+      bad.push("\u7B97\u6CD5\u5C42\u65E0\u7F55\u8C61\u65F6 rare.reading_html \u5FC5\u987B\u4E3A\u7A7A\uFF0C\u7981\u6B62\u786C\u51D1");
     }
+    put("rare.reading_html", bad);
   }
   {
     const tl = chart?.bazi?.enrichment?.\u8C03\u5019\u6761\u4F8B;
@@ -17913,7 +18136,7 @@ function checkMbti(a, chart) {
     }
     const n = sentences(v).length;
     if (n < 4) bad.push(`\u5E94\u22654\u53E5,\u5B9E\u9645${n}`);
-    if (!/hl-good|class="hl"/.test(v)) bad.push("\u65E0\u7740\u8272");
+    addPositiveHighlightChecks(bad, v, 2);
     R[k] = { status: bad.length ? "FAIL" : "PASS", reasons: bad };
   }
   const tested = String(a?.meta?.tested_mbti || "").trim();
@@ -17941,8 +18164,10 @@ function checkMbti(a, chart) {
     R["diff_verdict"] = { status: dvBad.length ? "FAIL" : "PASS", reasons: dvBad };
     const len = strip(String(a?.diff_html || "")).length;
     const MD = SEC.mbti_diff;
-    const okLen = len >= MD.min_chars && len <= MD.max_chars;
-    R["diff_html"] = { status: okLen ? "PASS" : "FAIL", reasons: okLen ? [] : [`\u5DEE\u5F02\u7248\u5757\u5E94${MD.min_chars}~${MD.max_chars}\u5B57,\u5B9E\u9645${len}`] };
+    const badDiff = [];
+    if (len < MD.min_chars || len > MD.max_chars) badDiff.push(`\u5DEE\u5F02\u7248\u5757\u5E94${MD.min_chars}~${MD.max_chars}\u5B57,\u5B9E\u9645${len}`);
+    if (a?.diff_html) addPositiveHighlightChecks(badDiff, a.diff_html, 3);
+    R["diff_html"] = { status: badDiff.length ? "FAIL" : "PASS", reasons: badDiff };
   }
   R["_\u5168\u5C40"] = { status: bad0.length ? "FAIL" : "PASS", reasons: bad0 };
   return R;
@@ -17982,6 +18207,7 @@ function checkZonghe(a, _chart) {
     const len = strip(a?.section_01?.text || "").length;
     if (!a?.section_01?.text) bad.push("\u7F3A\u5B57\u6BB5");
     else if (len < 160 || len > 280) bad.push(`\u4E3B\u8F74\u5370\u8BC1\u6BB5\u5E94\u7EA6180-250\u5B57(\u5BB9\u5DEE160-280),\u5B9E\u9645${len}`);
+    if (a?.section_01?.text) addPositiveHighlightChecks(bad, a.section_01.text, 3);
     put("section_01.text", bad);
   }
   {
@@ -17989,7 +18215,23 @@ function checkZonghe(a, _chart) {
     const n = sentences(a?.section_02?.conclusion || "").length;
     if (!a?.section_02?.conclusion) bad.push("\u7F3A\u5B57\u6BB5");
     else if (n < 3) bad.push(`\u9636\u6BB5\u5370\u8BC1\u7ED3\u8BBA\u5E94\u22653\u53E5\u6210\u6BB5,\u5B9E\u9645${n}\u53E5`);
+    if (a?.section_02?.conclusion) addPositiveHighlightChecks(bad, a.section_02.conclusion, 2);
     put("section_02.conclusion", bad);
+  }
+  {
+    const bad = [];
+    const skip = /^(meta\.archetype_name|consistency|strengths(?:\[|\.|$)|weaknesses(?:\[|\.|$)|conflicts(?:\[|\.|$)|final\.leverage(?:\[|\.|$)|final\.risks(?:\[|\.|$)|confidence(?:\.|$)|section_01\.|section_02\.)/;
+    const walkVisible = (obj, path) => {
+      if (typeof obj === "string") {
+        if (!skip.test(path)) {
+          const leaks = positiveHighlightViolations(obj);
+          if (leaks.length) bad.push(`${path} \u6B63\u5411/\u504F\u6B63\u5411\u63CF\u8FF0\u4ECD\u662F\u666E\u901A\u5B57\u4F53:${leaks.map((x) => `\u300C${x}\u300D`).join("\u3001")}`);
+        }
+      } else if (Array.isArray(obj)) obj.forEach((v, i) => walkVisible(v, `${path}[${i}]`));
+      else if (obj && typeof obj === "object") for (const k of Object.keys(obj)) walkVisible(obj[k], path ? `${path}.${k}` : k);
+    };
+    walkVisible(a, "");
+    put("_\u6B63\u5411\u7740\u8272\u8986\u76D6", bad);
   }
   {
     const bad = [];
@@ -18045,7 +18287,7 @@ function checkZiwei(a, _chart) {
     }
     const n = sentences(v).length, len = strip(v).length;
     if (n < 5 || len < 140) bad.push(`\u8BE6\u5199\u4E0D\u8DB3(\u53E5\u6570${n}/\u5B57\u6570${len},\u8981\u6C42\u22656\u53E5\u7EA6200\u5B57\u8D77,\u5BB9\u5DEE5\u53E5140\u5B57)`);
-    if (["mingshen_html", "career_html", "wealth_html", "marriage_html", "health_html"].includes(k) && !/hl-good|class="hl"/.test(v)) bad.push("\u65E0\u7740\u8272(\u7279\u8D28\u77ED\u8BED\u5E94\u6210\u6BB5\u7740\u8272)");
+    addPositiveHighlightChecks(bad, v, 2);
     put(k, bad);
   }
   return R;

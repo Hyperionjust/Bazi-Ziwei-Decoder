@@ -5,16 +5,16 @@ import * as path from 'path';
 let failed = 0;
 const ok = (c: boolean, m: string) => { if (c) console.log('✓', m); else { console.log('✗', m); failed++; } };
 const chart = { bazi: { enrichment: { 运岁引动: { 建议节点: [{ 年: 2030 }, { 年: 2035 }, { 年: 2040 }, { 年: 2045 }, { 年: 2050 }] }, 用神建议: { 出口: { 缺补说明: '缺金但金非本盘用忌关键' } } } } };
-const seg = (n: number, extra = '') => Array.from({ length: n }, (_, i) => `第${i}句内容足够长撑起字数要求所以多写一点内容${extra}`).join('。') + '。';
-const goodPara = `<span class="hl-good">${seg(3)}</span>${seg(4)}<span class="hl">${seg(1)}</span>`;
+const seg = (n: number, extra = '') => Array.from({ length: n }, (_, i) => `第${i}句内容足够长撑起字数要求所以多写一点内容并给出具体落点${extra}`).join('。') + '。';
+const goodPara = `<span class="hl-good">${seg(1)}</span>${seg(1)}<span class="hl-good">${seg(1)}</span>${seg(2)}<span class="hl-good">${seg(1)}</span>${seg(1)}<span class="hl">${seg(1)}</span>`;
 const good: any = {
   meta: { archetype_name: '厚土载物·静水流深' },
-  dm: { desc_html: '己土，属田园之土，特性是包容，意味着你能托底，最强的能力是整合，但易被琐事缠身。' },
-  geju: { sub_html: '官印相生格局清。所以你宜借平台成事。' },
+  dm: { desc_html: '己土，属田园之土，特性是<span class="hl-good">包容</span>，意味着你<span class="hl-good">能托底</span>，最强的能力是<span class="hl-good">整合</span>，但易被琐事缠身。' },
+  geju: { sub_html: '官印相生格局清。所以你宜借平台推进。' },
   wuxing: { note_html: '全盘缺金而金非用忌关键。所以你不必刻意补金。' },
-  tg: { mech_html: '官杀生印。', plain_html: '所以你靠信用立身。' },
+  tg: { mech_html: '官杀生印。', plain_html: goodPara },
   yongshen: { note_html: '临界盘体用两分。所以你护体发用并行。' },
-  interp: { personality_html: goodPara, career_html: goodPara, marriage_html: goodPara + '你适合的另一半<span class="hl-good">更可能是一个比你年长、有担当、性格柔和的男生</span>。他会在大事上替你拿主意。', health_html: goodPara },
+  interp: { personality_html: goodPara, career_html: goodPara, marriage_html: goodPara + '<span class="hl-good">你适合的另一半更可能是一个比你年长、有担当、性格柔和的男生</span>。他会在大事上替你拿主意。', health_html: goodPara },
   hechong: { reading_html: seg(4) }, yunsui: { reading_html: seg(3) }, shensha: { reading_html: seg(4) },
   kaiyun: { ye: 'x', place_html: 'x', item_html: 'x', skill_html: 'x', note_html: 'x' },
   timeline: [2030, 2035, 2040, 2045, 2050].map((y, i) => ({ age: i * 10, year: y, run: '干支', run_class: 'flat', desc: '平路', marker_class: 'flat' })),
@@ -31,16 +31,28 @@ ok(rep2['meta.archetype_name'].status === 'FAIL', '判词术语被抓');
 ok(rep2['_全局禁词'].status === 'FAIL', 'tier/大凶被抓');
 ok(rep2['interp.marriage_html'].status === 'FAIL', '画像骑墙被抓');
 ok(rep2['timeline'].status === 'FAIL', '白名单越界被抓');
+const noGreen = JSON.parse(JSON.stringify(good));
+noGreen.interp.career_html = seg(6) + `<span class="hl">${seg(2)}</span>`;
+const repGreen = checkAnalysis(noGreen, chart, 2026);
+ok(repGreen['interp.career_html'].status === 'FAIL' && repGreen['interp.career_html'].reasons.some(r => r.includes('绿色粗体')), '四大段只有红色、没有 hl-good 会被抓');
+const leakedPositive = JSON.parse(JSON.stringify(good));
+leakedPositive.interp.career_html = goodPara + '你做事可靠、有担当，关键节点很适合主动争取。';
+const repLeak = checkAnalysis(leakedPositive, chart, 2026);
+ok(repLeak['interp.career_html'].status === 'FAIL' && repLeak['interp.career_html'].reasons.some(r => r.includes('普通字体')), '已有三处 hl-good 但仍漏标正向语义也会被抓');
+const shortTg = JSON.parse(JSON.stringify(good));
+shortTg.tg.plain_html = '<span class="hl-good">所以你靠信用立身</span>。';
+const repTg = checkAnalysis(shortTg, chart, 2026);
+ok(repTg['tg.plain_html'].status === 'FAIL' && repTg['tg.plain_html'].reasons.some(r => r.includes('十神解读详写不足')), '十神只有一句白话会被抓');
 // ---- v3.7.1 正缘画像四型分型 + 连接词白名单 ----
 {
   const mk = (marriage: string) => { const b = JSON.parse(JSON.stringify(good)); b.interp.marriage_html = goodPara + marriage; return b; };
   const chartGZ = JSON.parse(JSON.stringify(chart));
   chartGZ.bazi.enrichment.正缘倾向 = { 年龄倾向: '年长', 置信: '高', 宫坐: '七杀' };
   // 七杀宫坐 + 印星锚头 → 分型错位被抓
-  const rWrong = checkAnalysis(mk('你适合的另一半<span class="hl-good">更可能是一个比你年长、有担当、外柔内刚的男生</span>。他会在大事上撑住你。'), chartGZ, 2026);
+  const rWrong = checkAnalysis(mk('<span class="hl-good">你适合的另一半更可能是一个比你年长、有担当、外柔内刚的男生</span>。他会在大事上撑住你。'), chartGZ, 2026);
   ok(rWrong['interp.marriage_html'].status === 'FAIL' && rWrong['interp.marriage_html'].reasons.some(r => r.includes('不符')), '分型:七杀宫坐配印星锚头被抓');
   // 七杀宫坐 + 官杀锚头 → PASS
-  const rRight = checkAnalysis(mk('能接住你的，<span class="hl-good">更可能是一个比你年长、有担当、雷厉风行的男生</span>。他会在你硬扛的时候毫不含糊地接手。'), chartGZ, 2026);
+  const rRight = checkAnalysis(mk('<span class="hl-good">能接住你的，更可能是一个比你年长、有担当、雷厉风行的男生</span>。他会在你硬扛的时候毫不含糊地接手。'), chartGZ, 2026);
   ok(rRight['interp.marriage_html'] == null || rRight['interp.marriage_html'].status !== 'FAIL', '分型:官杀宫坐配官杀锚头 PASS: ' + JSON.stringify(rRight['interp.marriage_html']?.reasons || []));
   // 无宫坐数据 → 任一锚头均可(向后兼容,good 样本已验证)
   // 连接词白名单:新连接词「这让你」PASS,盘外开头 FAIL
@@ -112,7 +124,7 @@ ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与�
   const zseg = (n: number) => Array.from({ length: n }, (_, i) => `第${i}句紫微解读内容足够具体足够长撑起段落规格要求`).join('。') + '。';
   const zgood: any = { meta: { archetype_name: '紫垣定鼎掌枢客' } };
   for (const k of ['axis_html', 'mingshen_html', 'career_html', 'wealth_html', 'marriage_html', 'health_html', 'daxian_html', 'liunian_html', 'advice_html'])
-    zgood[k] = `<span class="hl-good">${zseg(3)}</span>${zseg(4)}`;
+    zgood[k] = `<span class="hl-good">${zseg(2)}</span>${zseg(2)}<span class="hl-good">${zseg(1)}</span>${zseg(2)}`;
   const rw = checkZiwei(zgood, {});
   ok(Object.values(rw).every((r: any) => r.status !== 'FAIL'), 'ziwei:合格样全 PASS: ' + JSON.stringify(Object.entries(rw).filter(([, r]: any) => r.status === 'FAIL').map(([k]) => k)));
   const zbad = JSON.parse(JSON.stringify(zgood));
@@ -133,13 +145,13 @@ ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与�
   const mkM = (tagline: string) => ({
     meta: { archetype_name: '厚土载物·静水流深' },
     mbti_tagline: tagline,
-    overview_html: `<span class="hl-good">${seg(2)}</span>${seg(3)}`,
-    sanguan_html: `<span class="hl">${seg(2)}</span>${seg(3)}`,
-    friends_html: `<span class="hl-good">${seg(5)}</span>`,
-    love_html: `<span class="hl-good">${seg(5)}</span>`,
-    work_html: `<span class="hl">${seg(5)}</span>`,
-    family_html: `<span class="hl-good">${seg(5)}</span>`,
-    hobbies_html: `<span class="hl-good">${seg(5)}</span>`,
+    overview_html: `<span class="hl-good">${seg(1)}</span>${seg(2)}<span class="hl-good">${seg(1)}</span>${seg(1)}`,
+    sanguan_html: `<span class="hl-good">${seg(1)}</span><span class="hl">${seg(1)}</span>${seg(2)}<span class="hl-good">${seg(1)}</span>`,
+    friends_html: `<span class="hl-good">${seg(2)}</span>${seg(1)}<span class="hl-good">${seg(2)}</span>`,
+    love_html: `<span class="hl-good">${seg(2)}</span>${seg(1)}<span class="hl-good">${seg(2)}</span>`,
+    work_html: `<span class="hl-good">${seg(1)}</span><span class="hl">${seg(1)}</span>${seg(2)}<span class="hl-good">${seg(1)}</span>`,
+    family_html: `<span class="hl-good">${seg(2)}</span>${seg(1)}<span class="hl-good">${seg(2)}</span>`,
+    hobbies_html: `<span class="hl-good">${seg(2)}</span>${seg(1)}<span class="hl-good">${seg(2)}</span>`,
   });
   const rImgBad = checkMbti(mkM('你沉静而笃定，按自己的节奏稳稳向前。'), mChart);
   ok(rImgBad['_全局'].status === 'FAIL', 'mbti:意象嫁接违规→总体判定不通过(回归:_全局不提前冻结): ' + JSON.stringify(rImgBad['_全局']?.reasons));
@@ -187,11 +199,11 @@ ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与�
   {
     const ch: any = JSON.parse(JSON.stringify(chart));
     ch.bazi.enrichment.罕象 = [{ 名: '原局天克地冲', 罕见度: '罕见', 涉及: '年-日', 说明: 'x', 匹配词: ['天克地冲'] }];
-    const a = 基(); a.shensha.reading_html = seg(3) + '你这盘还有天克地冲的结构在。';
-    ok(!F(a, ch).some(x => x.startsWith('shensha.reading_html')),
-      '批4-c 正例:文里写「天克地冲」即算点名(不必凑「原局天」这个前缀)');
+    const a = 基(); a.rare = { reading_html: '<span class="hl-good">天克地冲带来很强的转场与重组能力</span>，整体属于两面性，现实工作与关系会更有换挡感。' + seg(5) };
+    ok(!F(a, ch).some(x => x.startsWith('rare.reading_html')),
+      '批4-c 正例:独立罕象段写「天克地冲」即算点名(不必凑「原局天」前缀)');
     const b = 基();
-    ok(F(b, ch).some(x => x.includes('罕象')), '批4-c 反例:盘有罕象而只字未提,仍 FAIL');
+    ok(F(b, ch).some(x => x.includes('罕象')), '批4-c 反例:盘有罕象却缺独立解读,仍 FAIL');
   }
 }
 

@@ -271,7 +271,7 @@ function dumpBazi(b, bi) {
       lines.push(`\u2502 \u251C\u65FA\u8870 : ${lvl}  (${score}, \u7F6E\u4FE1\u5EA6: ${ws.confidence || "-"})`);
       if (ws.breakdown) {
         const b2 = ws.breakdown;
-        lines.push(`\u2502 \u2502 \u2514\u56DB\u7EF4 : \u5F97\u4EE4${b2.\u5F97\u4EE4} \u957F\u751F${b2.\u957F\u751F} \u5F97\u5730${b2.\u5F97\u5730} \u5F97\u52BF${b2.\u5F97\u52BF}`);
+        lines.push(`\u2502 \u2502 \u2514\u4E03\u9879\u8D26\u672C : \u5F97\u4EE4${b2.\u5F97\u4EE4 ?? 0} \u957F\u751F${b2.\u957F\u751F ?? 0} \u5F97\u5730${b2.\u5F97\u5730 ?? 0} \u5F97\u52BF${b2.\u5F97\u52BF ?? 0} \u4F1A\u5C40${b2.\u4F1A\u5C40 ?? 0} \u8017\u65B9\u7FA4\u52BF${b2.\u8017\u65B9\u7FA4\u52BF ?? 0} \u51B2\u6839\u4FEE\u6B63${b2.\u51B2\u6839\u4FEE\u6B63 ?? 0}`);
       }
     }
     if (en.\u8C03\u5019\u7528\u795E) lines.push(`\u2502 \u251C\u8C03\u5019\u7528\u795E : ${en.\u8C03\u5019\u7528\u795E.join("\u3001")}`);

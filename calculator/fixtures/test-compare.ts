@@ -3,7 +3,7 @@
 // 用法: npx tsx test-compare.ts (或 esbuild 打包后 node 直跑);全过 exit 0
 import { analyzeCompareYears } from '../bazi-enrich/yunsui';
 import { createChart } from '../yiqi-core/index';
-import { enrichBazi } from '../bazi-enrich/enrich';
+import { enrichOpen as enrichBazi } from './support/open-policy';
 
 let failed = 0;
 function ok(cond: boolean, msg: string) { if (cond) console.log('✓', msg); else { console.log('✗', msg); failed++; } }

@@ -1,6 +1,6 @@
 // 终选:三组候选参数 × (7韦例 tier + 200盘总档分布),confidence 用 A2 新口径完整模拟
 import { createChart } from './yiqi-core/index';
-import { enrichBazi } from './bazi-enrich/enrich';
+import { enrichOpen as enrichBazi } from './fixtures/support/open-policy';
 import { Tiangan, Dizhi, GAN_WUXING, ZHI_CANG_GAN, getShiShen, getChangSheng } from './bazi-enrich/tables';
 import { detectZhiRelations } from './bazi-enrich/zhi-relations';
 type P = '年'|'月'|'日'|'时';

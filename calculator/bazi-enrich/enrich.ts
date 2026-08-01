@@ -9,9 +9,18 @@ import { judgeGeJu } from './ge-ju';
 import { getTiaoHou } from './tiao-hou';
 import { evalTiaoLi, TiaoLiResult } from './tiaohou-tiaoli';
 import { adviseYongShen, YongShenAdvice } from './yongshen';
+import { adjudicateInteractions, assertInteractionPolicy, AdjudicationResult, InteractionPolicy } from './interactions';
 
 type Pillar = '年'|'月'|'日'|'时';
 type GanZhi = {gan: Tiangan, zhi: Dizhi};
+
+export type EnrichOptions = {
+  interactionPolicy: InteractionPolicy;
+};
+
+type InteractionView = AdjudicationResult & { id?: string; name?: string };
+type OpenInteractionView = AdjudicationResult & { policy: string; lineage?: InteractionView };
+
 
 export type BaziEnrichment = {
   自坐: Record<Pillar, string>;           // 每柱 干 vs 自身支 的长生
@@ -27,12 +36,26 @@ export type BaziEnrichment = {
   用神建议: YongShenAdvice;
   天干关系: ReturnType<typeof detectGanRelations>;
   地支关系: ReturnType<typeof detectZhiRelations>;
+  作用关系: OpenInteractionView;
   整柱: ReturnType<typeof judgePillars>;
 };
 
-export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
+export function enrichBazi(
+  siZhu: Record<Pillar, GanZhi>,
+  options: EnrichOptions,
+): BaziEnrichment {
   const dm = siZhu.日.gan;
   const monthZhi = siZhu.月.zhi;
+
+  const interactionPolicy = assertInteractionPolicy(options?.interactionPolicy, 'enrichBazi.open.interaction_policy');
+  const ganRelations = detectGanRelations({
+    年: siZhu.年.gan, 月: siZhu.月.gan, 日: siZhu.日.gan, 时: siZhu.时.gan
+  });
+  const zhiRelations = detectZhiRelations({
+    年: siZhu.年.zhi, 月: siZhu.月.zhi, 日: siZhu.日.zhi, 时: siZhu.时.zhi
+  });
+  const adjudicated = adjudicateInteractions(siZhu, interactionPolicy, zhiRelations, ganRelations);
+
 
   // 自坐 — 每柱干在自身支的长生位
   const ziZuo: Record<Pillar, string> = {} as any;
@@ -41,7 +64,7 @@ export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
   }
 
   const geJu = judgeGeJu(siZhu);
-  const wangShuai = judgeWangShuai(siZhu);
+  const wangShuai = judgeWangShuai(siZhu, { interactions: adjudicated.items });
   const tiaoHou = getTiaoHou(dm, monthZhi);
   const wxCount = countWuXing(siZhu, dm);
   const wxForYs: Record<string, number> = (wxCount as any).withCangGan || (wxCount as any).surface || (wxCount as any);
@@ -57,12 +80,9 @@ export function enrichBazi(siZhu: Record<Pillar, GanZhi>): BaziEnrichment {
     格局: geJu,
     旺衰: wangShuai,
     用神建议: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs, siZhu), // S1-3:传四柱供相神裁决判重神透干
-    天干关系: detectGanRelations({
-      年: siZhu.年.gan, 月: siZhu.月.gan, 日: siZhu.日.gan, 时: siZhu.时.gan
-    }),
-    地支关系: detectZhiRelations({
-      年: siZhu.年.zhi, 月: siZhu.月.zhi, 日: siZhu.日.zhi, 时: siZhu.时.zhi
-    }),
+    作用关系: { policy: 'open(通则+分歧标注)', ...adjudicated },
+    天干关系: ganRelations,
+    地支关系: zhiRelations,
     整柱: judgePillars(siZhu)
   };
 }

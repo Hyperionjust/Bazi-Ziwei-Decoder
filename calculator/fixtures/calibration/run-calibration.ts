@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { createChart } from '../../yiqi-core/index';
-import { enrichBazi } from '../../bazi-enrich/enrich';
+import { enrichOpen as enrichBazi } from '../support/open-policy';
 import { analyzeYunSui } from '../../bazi-enrich/yunsui';
 import { judgeSpouseProfile } from '../../bazi-enrich/zhengyuan';
 

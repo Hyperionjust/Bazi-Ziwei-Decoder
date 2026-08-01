@@ -77,26 +77,31 @@ check-analysis / version-check 五个 js 均由 `npm run bundle` 重建，改任
 cd calculator && npm test
 ```
 
-它按顺序串起下面 13 项，任一非 0 即中断：
+它按顺序串起下面 17 个入口，任一非 0 即中断：
 
 ```bash
-npx tsx fixtures/test-shensha.ts      # 神煞引擎 13 例
-npx tsx fixtures/test-relations.ts    # 关系/运岁/正缘
-npx tsx fixtures/test-boundary.ts     # 边界回归(阴阳年干/农历/时区/晚子时/真太阳时/调候/格局)
-npx tsx fixtures/test-tiaohou.ts      # ⭐ 调候 120 格:结构 + 快照锁 + 寒暖不变式(不主张取值权威性)
-npx tsx fixtures/test-check.ts        # 体检器五模式(含边界盘高确定断语红线)
-npx tsx fixtures/test-shichen.ts      # 时辰边界检测 + 晚子时约定
-npx tsx fixtures/test-liuyue.ts       # 流月引动(12 节气月干支/公历对照/逐月命中)
-npx tsx fixtures/test-compare.ts      # 多年对比(逐年引动/喜忌评分/可复现)
-npx tsx fixtures/check-template.ts    # 海报模板完整性
-npx tsx fixtures/test-spec-sync.ts    # ⭐ 规格漂移哨兵:spec.json ↔ SKILL/提示词 数字比对
-npx tsx fixtures/test-golden.ts       # ⭐ 四线随包样例即金标:各自过对应 mode 体检 + 渲染无残留占位符
-npx tsx schema-check.ts               # shensha/lineages 配置一致性
+npx --no-install tsx fixtures/test-shensha.ts              # 神煞引擎 13 例
+npx --no-install tsx fixtures/test-relations.ts            # 关系/运岁/正缘
+npx --no-install tsx fixtures/test-boundary.ts             # 边界回归(历法/时区/调候/格局/出口)
+npx --no-install tsx fixtures/test-wangshuai-v3.ts         # ⭐ 旺衰 v3:22 例冻结候选 + F1/F2 正反例
+npx --no-install tsx fixtures/test-lineage-invariance.ts   # ⭐ 五流派中立结果逐字一致
+npx --no-install tsx fixtures/test-wangshuai-distribution.ts # ⭐ 两种子 5000 盘分布门
+npx --no-install tsx fixtures/test-tiaohou.ts              # ⭐ 调候 120 格结构/快照/求值器
+npx --no-install tsx fixtures/test-check.ts                # 体检器五模式
+npx --no-install tsx fixtures/test-shichen.ts              # 时辰边界检测 + 晚子时约定
+npx --no-install tsx fixtures/test-liuyue.ts               # 流月引动 12 节气月
+npx --no-install tsx fixtures/test-compare.ts              # 多年对比
+npx --no-install tsx fixtures/test-shunni.ts               # 顺逆双轴 + 三机制锚点
+npx --no-install tsx fixtures/check-template.ts            # 海报模板完整性
+npx --no-install tsx fixtures/test-spec-sync.ts            # ⭐ spec ↔ SKILL/提示词规格同步
+npx --no-install tsx fixtures/test-poster-v2.ts            # ⭐ 五项算法海报块/兼容/source↔dist
+npx --no-install tsx fixtures/test-golden.ts               # ⭐ 四线随包金标 + 最终 HTML 条件块
+npx --no-install tsx schema-check.ts                       # shensha/lineages 配置一致性
 ```
 
 全部 exit 0 才算过。改任何 `.ts` 后须重建 dist-bundle：`npm run bundle`。
 
-> 这些 fixtures 用相对路径定位 `examples/`、`templates/`、`shensha.json`，**请按上面的写法从 `calculator/` 目录用 `npx tsx` 跑源码**；换成先 `tsc` 再 `node dist/…` 会因为多一层目录而 ENOENT。
+> 这些 fixtures 用相对路径定位 `examples/`、`templates/`、`shensha.json`，**请按上面的写法从 `calculator/` 目录用本地固定的 `tsx` 跑源码**；`--no-install` 可防止断网时临时下载执行器。换成先 `tsc` 再 `node dist/…` 会因为多一层目录而 ENOENT。
 
 ### 0.2 v3.9 新链路冒烟（人工，可选）
 
@@ -219,10 +224,18 @@ node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0
 - ✅ 无可见 `{{占位符}}` 残留
 - ✅ 紫微 12 宫每宫有星曜，八字四柱含藏干/星运/自坐/纳音
 - ✅ 02 阶段印证时间轴有数据（不空白）
+- ✅ 阅读引导明确说明绿色/红色含义；所有优势、好性格、适合方向、助力、顺风/上行窗口和改善收益均为绿色粗体
+- ✅ 随机挑三句带「但/同时/因此/更容易/适合」的复合句，正向半句为绿、风险半句为红或普通中性，不出现“只标风险、漏掉优点”
+- ✅ 暂时删除 `hl-good` 标签及其中内容后复读 analysis；剩余文字不再含普通字体的正向或偏正向判断
+- ✅ 八字海报的十神“机制”恰好一句，“白话”至少 6 句、200 字且不设上限，能直接看出能力、内在需要、决策与协作方式、适合的工作落点、发挥收益、过度代价和具体建议
+- ✅ 盘有罕象时出现独立“罕见现象”板块，每项都显示名称/罕见度，并在解读中逐项判断“偏正向／偏提醒／两面性”、说明现实表现和行动；盘无罕象时整块不出现
 
 **❌ 失败信号**：
 - LLM 输出 markdown 包装的 JSON → 渲染前需剥掉，否则 HTML 全是占位符
 - HTML 里大量 `-`（兜底字符）→ LLM 的 JSON schema 不完整
+- 一段里虽然已有绿色粗体，但普通正文仍写着「可靠」「有担当」「适合」「贵人」「顺风」「提升」「收获」等正向结论 → 着色覆盖不完整，须重生该字段
+- 十神白话仍只有一两句话，或只把“正印/七杀”等术语换成另一套术语，没有现实场景 → 仍是早期遗留短文，须重生 `tg.plain_html`
+- chart 有罕象但独立板块漏掉任一项、只写“很罕见”不判好坏、没有现实表现，或无罕象却出现空卡 → 罕象展示不合格
 
 **快速验证 LLM 输出 JSON 是否合格**：
 ```bash

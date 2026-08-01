@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { assertInteractionPolicy } from './bazi-enrich/interactions';
 
 const here = __dirname;
 const defs = JSON.parse(fs.readFileSync(path.join(here, 'shensha.json'), 'utf-8'));
@@ -35,7 +36,14 @@ for (const d of defs.shensha) {
 }
 
 // lineage 引用的神煞 id 必须存在
+if (!lin.lineages?.open || !Object.prototype.hasOwnProperty.call(lin.lineages.open, 'interaction_policy')) {
+  errs.push('[lineage open] interaction_policy 为旺衰 v3 必需配置');
+}
 for (const [key, L] of Object.entries<any>(lin.lineages)) {
+  if (L.interaction_policy !== undefined) {
+    try { assertInteractionPolicy(L.interaction_policy, `lineage ${key}.interaction_policy`); }
+    catch (error: any) { errs.push(error?.message || `[lineage ${key}] interaction_policy 非法`); }
+  }
   const pol = L.shensha_policy || {};
   const wl = pol.whitelist || pol.whitelist_TODO || {};
   for (const sid of Object.keys(wl)) {

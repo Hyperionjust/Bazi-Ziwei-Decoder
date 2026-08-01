@@ -25,20 +25,34 @@
       "_desc": "dm/geju/wuxing/yongshen 的 note 类字段:恰两句,第二句以连接词开头"
     },
     "tg_block": {
-      "exact_sentences": 1,
-      "_desc": "tg.mech_html 上句报盘面恰一句;tg.plain_html 下句恰一句且以连接词开头"
+      "mech_exact_sentences": 1,
+      "plain_min_sentences": 6,
+      "plain_min_chars": 200,
+      "plain_max_sentences": null,
+      "plain_max_chars": null,
+      "min_good_highlights": 3,
+      "_desc": "十神版块:tg.mech_html 用1句压缩盘面证据;tg.plain_html 须≥6句、≥200字、不设上限，完整讲能力结构、现实表现、帮助/代价与行动；至少3处绿色只是机器底线，正向语义仍须零漏标"
     },
     "major_interp": {
       "min_sentences": 6,
-      "min_chars": 160,
+      "min_chars": 200,
       "max_sentences": null,
+      "max_chars": null,
       "min_highlights": 2,
-      "_desc": "四大解读段(性格/事业/婚恋/健康):≥6 句 ≥160 字,不设上限;着色短语≥2 处"
+      "min_good_highlights": 3,
+      "_desc": "四大解读段(性格/事业/婚恋/健康):≥6 句、≥200 字、不设上限;每段至少3处hl-good只是机器底线,真正标准是所有正向或偏正向语义逐处绿色粗体、零漏标"
     },
     "close_read": {
       "min_sentences": 3,
       "max_sentences": 7,
       "_desc": "三个精读段(合冲刑害/运岁/神煞):3~7 句"
+    },
+    "rare_reading": {
+      "min_sentences": 4,
+      "min_chars": 160,
+      "max_sentences": null,
+      "max_chars": null,
+      "_desc": "罕见现象解读:仅在算法层存在罕象时输出;≥4句、≥160字、不设上限;逐项说明罕见度、偏正向/偏提醒/两面性、现实表现与行动"
     },
     "mbti_diff": {
       "min_chars": 400,
@@ -57,6 +71,53 @@
     "exact_items": 5,
     "_desc": "时间轴恰 5 项,年份须落在算法层『运岁引动.建议节点』白名单内",
     "mirrored_in": ["prompts/bazi-poster.md"]
+  },
+
+  "algorithm_owned_blocks": {
+    "_desc": "八字海报 v2 的五个确定性展示块。owner=algorithm 表示由 chart.json 经渲染层直接投影，不属于 analysis.json，也不要求提示词产出。每块必须同时声明数量、截断与条件显示规则。",
+    "exact_blocks": 5,
+    "blocks": {
+      "tiaohou_classics": {
+        "owner": "algorithm",
+        "source": "调候条例.命中",
+        "prompt_output_required": false,
+        "quantity": { "max_items": 3, "order": "source" },
+        "truncation": { "field": "意象", "max_chars": 36, "suffix": "…", "unit": "unicode_code_points" },
+        "condition": { "show_when": "命中数组非空", "otherwise": "hide_entire_block" }
+      },
+      "core_insights": {
+        "owner": "algorithm",
+        "source": ["出口.相神裁决", "出口.轴冲突"],
+        "prompt_output_required": false,
+        "quantity": { "max_badges": 2, "source_order": ["出口.相神裁决", "出口.轴冲突"] },
+        "truncation": { "mode": "fixed_copy_map", "max_chars_per_badge": 28, "suffix": "…" },
+        "condition": { "show_when": "任一来源存在", "otherwise": "hide_entire_block" }
+      },
+      "timeline_triggers": {
+        "owner": "algorithm",
+        "source": "当前海报关系视图.items + analysis.timeline[].year",
+        "prompt_output_required": false,
+        "quantity": { "existing_timeline_items": 5, "max_marked_nodes": 5, "max_markers_per_node": 1 },
+        "truncation": { "mode": "merge_same_year_to_one_marker", "detail_location": "作用关系区" },
+        "condition": { "show_when": "关系引爆窗口与既有 timeline 年份有交集", "otherwise": "leave_timeline_unmarked" }
+      },
+      "monthly_strip": {
+        "owner": "algorithm",
+        "source": "流月引动",
+        "prompt_output_required": false,
+        "quantity": { "exact_months": 12, "best_windows": 1, "worst_windows": 1, "tie_break": "source_order_first" },
+        "truncation": { "months": "never_drop", "window_ties": "keep_first_by_source_order" },
+        "condition": { "show_when": "流月引动含 12 月且其年份等于 render.currentYear", "otherwise": "hide_entire_block_and_warn_once" }
+      },
+      "body_grade": {
+        "owner": "algorithm",
+        "source": "运岁引动.顺逆[].体档",
+        "prompt_output_required": false,
+        "quantity": { "max_badges_per_row": 1, "rows": "follow_existing_dayun_liunian_rows" },
+        "truncation": { "allowed_values": ["强", "中", "弱"], "invalid_or_extra": "omit" },
+        "condition": { "show_when": "该行存在合法体档", "otherwise": "preserve_v1_single_axis_layout" }
+      }
+    }
   },
 
   "connectors": {

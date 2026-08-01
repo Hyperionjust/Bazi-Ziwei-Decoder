@@ -1,0 +1,29 @@
+{
+  "schema_version": 6,
+  "audit_id": "v3.13-f0-v6",
+  "declared_at": "2026-08-01",
+  "extends": "v5.config.json",
+  "parent_sha256": "44b6425ed2c8cdd914bdf3d134704ca9d5cc42452b387cf5c5cd3b4b7a38807c",
+  "formula_revision": "v6-exact-repeat-stem-gated",
+  "amendment_reason": "v5 通过发布门后复核发现，同支重复实现遗漏了 v2 已预注册的总耗方透干门，令李国杰在没有任何克泄耗干透出的情况下被额外扣 2.4 分。",
+  "scope_control": "source gold、22 例、关系裁决、参数网格、F2 证据边界、发布门、排序和敏感性规则不变；只恢复年/月/时至少一枚克泄耗干透出的总门控。",
+  "parameter_aliases": {
+    "linear_scale": "repeat_scale（无本气同类透干 echo 的重复支总倍率）",
+    "synergy_scale": "echo_scale（有本气同类透干 echo 的重复支总倍率；不是 repeat 之上的加值）"
+  },
+  "fixed_formula": {
+    "causal_gate": "年/月/时至少透出一个克泄耗干；否则所有重复耗方支群势单位均为零。该门只证明耗方已进入可见结构，不重复加分。",
+    "linear_branch_drain": "门控通过后，余三支同一地支重复≥2且本气在克泄耗侧。若本气类别未在年/月/时干透出，其全部克泄耗藏干单位仅乘 repeat_scale。",
+    "opposition_synergy": "若重复支本气的泄/耗/克类别也在年/月/时干透出，其全部克泄耗藏干单位仅乘 echo_scale；不再同时乘 repeat_scale。",
+    "root_discount": "只计冲及月柱的非库六冲，只折月支正向得令+长生，按关系次数累计封顶100%。"
+  },
+  "grid": {
+    "linear_scale": { "min": 0.3, "max": 0.6, "step": 0.1 },
+    "synergy_scale": { "min": 1.7, "max": 1.85, "step": 0.05 },
+    "active_discount": { "min": 0.4, "max": 0.6, "step": 0.1 },
+    "reduced_discount": { "min": 0, "max": 0.25, "step": 0.25 }
+  },
+  "sensitivity": {
+    "pre_registered_edges": "沿用 v5：echo 1.70 为顾失败邻格、1.75 为首个有余量通过格；active 0.4 为阮失败邻格、0.5 为两冲累计封顶通过格。"
+  }
+}

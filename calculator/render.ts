@@ -330,11 +330,173 @@ const ZODIAC: Record<string,string> = {子:'鼠',丑:'牛',寅:'虎',卯:'兔',�
 const SS_KEY: Record<string,string> = {比肩:'bijian',劫财:'jiecai',食神:'shishen',伤官:'shangguan',偏财:'piancai',正财:'zhengcai',七杀:'qisha',七煞:'qisha',正官:'zhengguan',偏印:'pianyin',枭神:'pianyin',正印:'zhengyin'};
 const SS_POL: Record<string,string> = {吉:'good','中性':'neutral',凶:'warn'};
 
+function escapeHtml(value:any): string {
+  return String(value ?? '').replace(/[&<>"']/g, (ch:string) =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'} as Record<string,string>)[ch]);
+}
+
+function truncateChars(value:any, max:number): string {
+  const chars = [...String(value ?? '')];
+  return chars.length > max ? `${chars.slice(0, max).join('')}…` : chars.join('');
+}
+
+function hasOwn(obj:any, key:string): boolean {
+  return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function selectedBaziInteractionView(en:any): any {
+  const ix = en?.作用关系;
+  if (!ix || typeof ix !== 'object') return undefined;
+  return hasOwn(ix, 'lineage') ? ix.lineage : ix;
+}
+
+function selectedBaziInteractionItems(en:any): any[] {
+  const items = selectedBaziInteractionView(en)?.items;
+  return Array.isArray(items) ? items : [];
+}
+
+function safeClass(value:any, allowed:readonly string[], fallback:string): string {
+  const token = String(value ?? '');
+  return allowed.includes(token) ? token : fallback;
+}
+
+const CLASSIC_GRADE: Record<string,{text:string; cls:string}> = {
+  上: { text:'传统论法偏有利', cls:'grade-up' },
+  中: { text:'传统论法偏中性', cls:'grade-mid' },
+  下: { text:'传统论法偏受限', cls:'grade-down' },
+  忌: { text:'传统论法提醒避开', cls:'grade-avoid' },
+};
+
+function baziClassicsCard(hits:any[], solo:boolean): string {
+  if (!Array.isArray(hits) || !hits.length) return '';
+  const rows = hits.slice(0, 3).map((hit:any) => {
+    const grade = CLASSIC_GRADE[String(hit?.档)] || CLASSIC_GRADE.中;
+    const title = escapeHtml(hit?.显示名 || hit?.名 || '古法条目');
+    const image = escapeHtml(truncateChars(hit?.意象 || '', 36));
+    return `<li><span class="classic-name">${title}</span><span class="classic-grade ${grade.cls}">${grade.text}</span>${image ? `<span class="classic-image">${image}</span>` : ''}</li>`;
+  }).join('');
+  return `<section class="algo-card classics-card${solo ? ' solo' : ''}"><div class="algo-card-head"><b>典出</b><span>古法参照 · 仅列盘面命中</span></div><ol class="classic-list">${rows}</ol></section>`;
+}
+
+function baziInsightBadges(exportData:any): string[] {
+  const badges:string[] = [];
+  const exception = exportData?.相神裁决;
+  if (exception) {
+    const elements = Array.isArray(exception.格局相神) ? exception.格局相神.join('、') : '';
+    const method = String(exception.改法 || exception.重神 || '');
+    let copy = '';
+    if (method.includes('佩印')) copy = `${elements || '相关元素'}宜先稳住表达，再把冲劲沉淀为学习与执行。`;
+    else if (method.includes('制化两全')) copy = `${elements || '相关元素'}宜一边疏压、一边承托，把挑战转成可执行节奏。`;
+    else copy = `${elements || '相关元素'}需按先稳后发使用，不宜简单归为宜或忌。`;
+    badges.push(`<div class="insight-badge"><span class="insight-label">例外用法</span><span>${escapeHtml(truncateChars(copy, 28))}</span></div>`);
+  }
+  const tension = exportData?.轴冲突;
+  if (tension) {
+    const elements = Array.isArray(tension.五行) ? tension.五行.join('、') : '';
+    const copy = `${elements || '相关元素'}有两面性：可调节气候，过量也会打破平衡。`;
+    badges.push(`<div class="insight-badge"><span class="insight-label">双面提醒</span><span>${escapeHtml(truncateChars(copy, 28))}</span></div>`);
+  }
+  return badges.slice(0, 2);
+}
+
+function baziInsightsCard(badges:string[], solo:boolean): string {
+  if (!badges.length) return '';
+  return `<section class="algo-card insights-card${solo ? ' solo' : ''}"><div class="algo-card-head"><b>核心看点</b><span>把例外与两面性说清楚</span></div><div class="insight-list">${badges.join('')}</div></section>`;
+}
+
+function baziRarePhenomenaBlock(items:any[], readingHtml:any): string {
+  if (!Array.isArray(items) || !items.length) return '';
+  const cls:Record<string,string> = { 极罕:'rare-extreme', 罕见:'rare-high', 少见:'rare-mid' };
+  const rows = items.map((item:any) => {
+    const rarity = String(item?.罕见度 || '少见');
+    return `<div class="rare-item"><span class="rare-grade ${cls[rarity] || 'rare-mid'}">${escapeHtml(rarity)}</span><span class="rare-name">${escapeHtml(item?.名 || '罕见结构')}</span><span class="rare-evidence">${escapeHtml(item?.涉及 || '')}</span></div>`;
+  }).join('');
+  const reading = String(readingHtml || '').trim();
+  return `<section class="section rare-phenomena"><h2><span class="rare-title-seal">特别观察</span>罕见现象 <small>少见不等于吉凶，重点看它怎样落到现实</small></h2><div class="rare-list">${rows}</div>${reading ? `<div class="prose rare-reading">${reading}</div>` : ''}</section>`;
+}
+
+function baziTriggerDetail(item:any): string {
+  const win = item?.引爆窗口;
+  if (!win || !Array.isArray(win.应期) || !win.应期.length) return '';
+  const waiting = Array.isArray(win.待) ? win.待.join('、') : '';
+  const method = String(win.方式 || '');
+  const periods = win.应期.map((x:any) => {
+    const year = Number(x?.年);
+    if (!Number.isFinite(year)) return '';
+    return `${year} ${String(x?.载体 || '').trim()}`.trim();
+  }).filter(Boolean);
+  if (!periods.length) return '';
+  const lead = [waiting ? `待${waiting}` : '', method].filter(Boolean).join('·');
+  return `<span class="hc-trigger">⏳ ${escapeHtml(lead)}：${escapeHtml(periods.join('、'))}</span>`;
+}
+
+function baziTriggerYears(items:any[]): number[] {
+  const years = new Set<number>();
+  for (const item of items) for (const x of (item?.引爆窗口?.应期 || [])) {
+    const year = Number(x?.年);
+    if (Number.isInteger(year)) years.add(year);
+  }
+  return [...years].sort((a,b) => a-b);
+}
+
+function baziMonthFlowCard(flow:any, currentYear:number): string {
+  const months = Array.isArray(flow?.月) ? flow.月 : [];
+  if (!flow || !months.length) return '';
+  if (Number(flow.年) !== currentYear || months.length !== 12) {
+    const why = Number(flow.年) !== currentYear
+      ? `数据年份${escapeHtml(flow.年)}与渲染年份${currentYear}不一致`
+      : `月份数量为${months.length}，需要12个月`;
+    console.error(`[render][warn] 流月风向条已隐藏：${why}`);
+    return '';
+  }
+  const directionRank:Record<string,number> = {顺:1,平:0,逆:-1};
+  const scoreOf = (m:any) => Number.isFinite(Number(m?.顺逆?.发用)) ? Number(m.顺逆.发用) : (directionRank[m?.顺逆?.方向] ?? 0);
+  let best = months[0], worst = months[0];
+  for (const month of months.slice(1)) {
+    if (scoreOf(month) > scoreOf(best)) best = month;
+    if (scoreOf(month) < scoreOf(worst)) worst = month;
+  }
+  const dirInfo:Record<string,{cls:string; mark:string}> = {
+    顺:{cls:'flow-up',mark:'▲ 顺'}, 平:{cls:'flow-flat',mark:'◆ 平'}, 逆:{cls:'flow-down',mark:'▼ 逆'},
+  };
+  const cells = months.map((month:any) => {
+    const direction = safeClass(month?.顺逆?.方向, ['顺','平','逆'], '平');
+    const info = dirInfo[direction];
+    return `<div class="month-cell ${info.cls}"><span class="month-term">${escapeHtml(month?.节气 || month?.约农历月 || '')}</span><span class="month-gz">${escapeHtml(month?.干支 || '')}</span><span class="month-dir">${info.mark}</span></div>`;
+  }).join('');
+  const monthLabel = (m:any) => [m?.节气 || m?.约农历月, m?.干支].filter(Boolean).join('·');
+  return `<section class="month-flow"><div class="month-flow-head"><b>${currentYear} 十二月风向</b><span><strong>最顺</strong> ${escapeHtml(monthLabel(best))}　<strong>最逆</strong> ${escapeHtml(monthLabel(worst))}</span></div><div class="month-grid">${cells}</div></section>`;
+}
+
+function baziStateBadge(direction:any, grade:any): string {
+  const body = safeClass(grade, ['强','中','弱'], '');
+  if (!body) return '';
+  const dir = safeClass(direction, ['顺','平','逆'], '平');
+  const dirMap:Record<string,{cls:string; mark:string}> = {
+    顺:{cls:'dir-up',mark:'▲ 顺'}, 平:{cls:'dir-flat',mark:'◆ 平'}, 逆:{cls:'dir-down',mark:'▼ 逆'},
+  };
+  const bodyMap:Record<string,string> = {强:'body-strong',中:'body-mid',弱:'body-weak'};
+  return `<span class="state-pair"><span class="dir-token ${dirMap[dir].cls}">${dirMap[dir].mark}</span><span class="body-token ${bodyMap[body]}">体${body}</span></span>`;
+}
+
+function applyBaziTimelineTriggers(data:Record<string,any>, chart:any): void {
+  const items = selectedBaziInteractionItems(chart?.bazi?.enrichment);
+  const years = new Set(baziTriggerYears(items));
+  for (let i = 0; i < 5; i++) {
+    const year = Number(data[`timeline.${i}.year`]);
+    data[`timeline.${i}.trigger_html`] = years.has(year)
+      ? `<span class="tl-trigger" title="该年与盘内潜伏关系的引爆窗口重合" aria-label="引爆窗口">⏳</span>`
+      : '';
+  }
+}
+
 function shenshaByPillarBazi(chart:any): Record<string,string[]> {
   const ss = chart.bazi?.enrichment?.神煞;
-  const hits = (ss?.lineage?.hits) || ss?.hits || []; // 流派镜片优先(修:海报曾漏用中立全集)
+  const hits = hasOwn(ss, 'lineage') ? (ss?.lineage?.hits || []) : (ss?.hits || []);
   const m: Record<string,string[]> = {年:[],月:[],日:[],时:[]};
-  for (const h of hits) for (const pl of (h.pillars||[])) if (m[pl]) m[pl].push(`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`);
+  for (const h of hits) for (const pl of (h.pillars||[])) if (m[pl]) {
+    m[pl].push(`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${escapeHtml(h.name)}</span>`);
+  }
   return m;
 }
 
@@ -342,34 +504,43 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   const out: Record<string,any> = {};
   const bi = chart.bazi.birthInfo, bz = chart.bazi, en = bz.enrichment||{}, zw = chart.ziwei||{};
   currentYear = currentYear || new Date().getFullYear();
+  out['algo.classics_html'] = '';
+  out['algo.insights_html'] = '';
+  out['algo.month_flow_html'] = '';
+  out['rare.block_html'] = '';
+  for (let i = 0; i < 5; i++) out[`timeline.${i}.trigger_html`] = '';
+  for (let i = 0; i < 10; i++) {
+    out[`dayun.${i}.state_html`] = '';
+    out[`liunian.${i}.state_html`] = '';
+  }
   const virtualAge = currentYear - bi.year + 1;
   const p2 = (n:number)=>String(n).padStart(2,'0');
   out['meta.solar_date'] = `${bi.year}-${p2(bi.month)}-${p2(bi.day)} ${p2(bi.hour)}:${p2(bi.minute)}`;
   out['meta.true_solar_time'] = out['meta.solar_date'];
   out['meta.solar_correction'] = '未做真太阳时校正（钟表时间）';
-  out['meta.lunar_date'] = zw.lunarDate ? `${zw.lunarDate.year}年${zw.lunarDate.monthCn}月${zw.lunarDate.dayCn}` : '-';
+  out['meta.lunar_date'] = zw.lunarDate ? escapeHtml(`${zw.lunarDate.year}年${zw.lunarDate.monthCn}月${zw.lunarDate.dayCn}`) : '-';
   out['meta.gender'] = bi.gender==='male'?'男':'女';
   out['meta.age_virtual'] = String(virtualAge);
   out['meta.current_year'] = String(currentYear);
   const now=new Date(); out['meta.gen_time']=`${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
-  out['meta.day_master'] = bz.dayMaster || bz.siZhu.day.gan;
+  out['meta.day_master'] = escapeHtml(bz.dayMaster || bz.siZhu.day.gan);
   out['meta.zodiac'] = ZODIAC[bz.siZhu.year.zhi]||'-';
-  out['meta.wangshuai'] = en.旺衰?.verdict || '-';
-  out['meta.geju_full'] = en.格局?.primary || '-';
+  out['meta.wangshuai'] = escapeHtml(en.旺衰?.verdict || '-');
+  out['meta.geju_full'] = escapeHtml(en.格局?.primary || '-');
   out['meta.qiyun'] = bz.dayunStart!=null ? `${bz.dayunStart}岁起运` : '-';
-  out['meta.name']='命主'; out['meta.birthplace']='-'; out['meta.minggong']=en.命宫||'-'; out['meta.taiyuan']=en.胎元||'-'; out['meta.direction_note']='';
-  const cangGanFmt=(arr:any[])=>(arr||[]).map((x:any)=>`${x.gan}(${x.shiShen||''})`).join(' ');
+  out['meta.name']='命主'; out['meta.birthplace']='-'; out['meta.minggong']=escapeHtml(en.命宫||'-'); out['meta.taiyuan']=escapeHtml(en.胎元||'-'); out['meta.direction_note']='';
+  const cangGanFmt=(arr:any[])=>(arr||[]).map((x:any)=>`${escapeHtml(x.gan)}(${escapeHtml(x.shiShen||'')})`).join(' ');
   const cnMap:any={year:'年',month:'月',day:'日',hour:'时'};
   const ssP = shenshaByPillarBazi(chart);
   for (const k of ['year','month','day','hour']) {
     const gz=bz.siZhu[k];
-    out[`bazi.${k}.gan`]=gz.gan; out[`bazi.${k}.zhi`]=gz.zhi;
+    out[`bazi.${k}.gan`]=escapeHtml(gz.gan); out[`bazi.${k}.zhi`]=escapeHtml(gz.zhi);
     out[`bazi.${k}.gan_wx`]=GAN_WX[gz.gan]||'-'; out[`bazi.${k}.zhi_wx`]=ZHI_WX[gz.zhi]||'-';
-    if (k!=='day') out[`bazi.${k}.shiShen`]=bz.shiShen?.[k]||'-';
+    if (k!=='day') out[`bazi.${k}.shiShen`]=escapeHtml(bz.shiShen?.[k]||'-');
     out[`bazi.${k}.cangGanHtml`]=cangGanFmt(bz.cangGan?.[k]);
-    out[`bazi.${k}.zhangSheng`]=bz.zhangSheng?.[k]||'-';
-    out[`bazi.${k}.ziZuo`]=en.自坐?.[cnMap[k]]||en.自坐?.[k]||'-';
-    out[`bazi.${k}.naYin`]=bz.naYin?.[k]||'-';
+    out[`bazi.${k}.zhangSheng`]=escapeHtml(bz.zhangSheng?.[k]||'-');
+    out[`bazi.${k}.ziZuo`]=escapeHtml(en.自坐?.[cnMap[k]]||en.自坐?.[k]||'-');
+    out[`bazi.${k}.naYin`]=escapeHtml(bz.naYin?.[k]||'-');
     out[`bazi.${k}.shenshaHtml`]=(ssP[cnMap[k]]||[]).join(' ')||'—';
   }
   const wx = en.五行统计?.withCangGan || en.五行统计?.surface || en.五行统计 || {};
@@ -390,59 +561,65 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   out['dm.deling_class']=dlc; out['dm.deling_mark']=dlm; out['dm.dedi_class']=ddc; out['dm.dedi_mark']=ddm; out['dm.deshi_class']=dsc; out['dm.deshi_mark']=dsm;
   const sc = en.旺衰?.score ?? 0;
   out['dm.score_pct']=String(Math.max(0,Math.min(100,Math.round((sc+10)*5))));
-  out['dm.score_label']=en.旺衰?.verdict||'-'; out['dm.verdict']=en.旺衰?.verdict||'-';
-  out['geju.name']=en.格局?.primary||'-'; out['geju.confidence']=en.格局?.confidence||'-';
-  out['geju.chenge']=en.格局?.chenge || (en.格局?.primary&&en.格局.primary!=='-'?'成格':'-');
-  const allHits = (en.神煞?.lineage?.hits) || en.神煞?.hits || []; // 流派镜片优先
-  out['shensha.list_html']= allHits.length? allHits.map((h:any)=>`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${h.name}</span>`).join(' ') : '—';
+  out['dm.score_label']=escapeHtml(en.旺衰?.verdict||'-'); out['dm.verdict']=escapeHtml(en.旺衰?.verdict||'-');
+  out['geju.name']=escapeHtml(en.格局?.primary||'-'); out['geju.confidence']=escapeHtml(en.格局?.confidence||'-');
+  out['geju.chenge']=escapeHtml(en.格局?.chenge || (en.格局?.primary&&en.格局.primary!=='-'?'成格':'-'));
+  const ssView = en.神煞;
+  const allHits = hasOwn(ssView, 'lineage') ? (ssView?.lineage?.hits || []) : (ssView?.hits || []);
+  out['shensha.list_html']= allHits.length? allHits.map((h:any)=>`<span class="ss-name ${SS_POL[h.polarity]||'neutral'}">${escapeHtml(h.name)}</span>`).join(' ') : '—';
   // v2.3: 用神出口注入 — 用/忌/喜/调候/开运方色数由算法层确定性生成,LLM 产出将被忽略
   const yaX = en.用神建议;
   if (yaX?.出口) {
     const ck = yaX.出口;
-    out['yongshen.yong_html'] = wxChip((yaX.边界盘 || !yaX.收敛)
-      ? `护体:${(yaX.调候?.取干 || []).join('')}<br>发用:${(yaX.格局?.取 || []).join('、')}`
-      : (yaX.共识用神 || []).join('、'));
-    out['yongshen.xi_text'] = wxChip((ck.喜神 || []).join('、'));
-    out['yongshen.ji_html'] = (ck.忌神 || []).length ? wxChip(ck.忌神.join('、')) : '无明显忌神(临界盘,以流通为要)';
-    out['yongshen.tiaohou_html'] = wxChip(ck.调候提示 || '-');
-    out['yongshen.divergence_note'] = [ck.divergence, ck.缺补说明].filter(Boolean).join('　');
-    out['kaiyun.yong_html'] = wxChip((ck.开运用神 || []).join('、'));
-    out['kaiyun.fang_html'] = (ck.吉方 || []).join('·');
-    out['kaiyun.se_html'] = (ck.吉色 || []).join('·');
-    out['kaiyun.shu_html'] = (ck.吉数 || []).join('、');
-    out['kaiyun.tiaohou_html'] = wxChip(ck.调候提示 || '-');
+    out['yongshen.yong_html'] = (yaX.边界盘 || !yaX.收敛)
+      ? `护体:${wxChip(escapeHtml((yaX.调候?.取干 || []).join('')))}<br>发用:${wxChip(escapeHtml((yaX.格局?.取 || []).join('、')))}`
+      : wxChip(escapeHtml((yaX.共识用神 || []).join('、')));
+    out['yongshen.xi_text'] = wxChip(escapeHtml((ck.喜神 || []).join('、')));
+    out['yongshen.ji_html'] = (ck.忌神 || []).length ? wxChip(escapeHtml(ck.忌神.join('、'))) : '无明显忌神(临界盘,以流通为要)';
+    out['yongshen.tiaohou_html'] = wxChip(escapeHtml(ck.调候提示 || '-'));
+    out['yongshen.divergence_note'] = [ck.divergence, ck.缺补说明].filter(Boolean).map(escapeHtml).join('　');
+    out['kaiyun.yong_html'] = wxChip(escapeHtml((ck.开运用神 || []).join('、')));
+    out['kaiyun.fang_html'] = escapeHtml((ck.吉方 || []).join('·'));
+    out['kaiyun.se_html'] = escapeHtml((ck.吉色 || []).join('·'));
+    out['kaiyun.shu_html'] = escapeHtml((ck.吉数 || []).join('、'));
+    out['kaiyun.tiaohou_html'] = wxChip(escapeHtml(ck.调候提示 || '-'));
     out['__algo_yongshen'] = '1';
   }
+  const classicHits = Array.isArray(en.调候条例?.命中) ? en.调候条例.命中 : [];
+  const insightBadges = baziInsightBadges(yaX?.出口);
+  out['algo.classics_html'] = baziClassicsCard(classicHits, insightBadges.length === 0);
+  out['algo.insights_html'] = baziInsightsCard(insightBadges, classicHits.length === 0);
+  out['algo.month_flow_html'] = baziMonthFlowCard(en.流月引动, currentYear);
   // v1.6: 合冲刑害(作用关系)注入 — 有流派视图用流派视图,否则用 open 通则
   const ix = en.作用关系;
-  const ixView = ix?.lineage || ix;
-  out['hechong.policy'] = ix?.lineage ? `${ix.lineage.name}规则集` : (ix ? '通则(不限流派)' : '-');
+  const ixView = selectedBaziInteractionView(en);
+  out['hechong.policy'] = escapeHtml(hasOwn(ix, 'lineage') ? `${ix?.lineage?.name || '所选流派'}规则集` : (ix ? '通则(不限流派)' : '-'));
   const stCls = (st:string)=> (st==='生效'||st==='成局'||st==='合而化') ? 'st-on' : (st==='被解'||st==='被绊'||st==='合而不化(绊)') ? 'st-off' : 'st-mid';
-  const ixItems = (ixView?.items)||[];
+  const ixItems = Array.isArray(ixView?.items) ? ixView.items : [];
   out['hechong.rows_html'] = ixItems.length ? ixItems.map((r:any)=>
-    `<div class="hc-row"><span class="hc-type">${r.type}</span><span class="hc-mem">${(r.members||[]).join('')}(${(r.pillars||[]).join('-')}·${r.distance})</span><span class="hc-status ${stCls(r.status)}">【${r.status}】</span><span class="hc-cause">${r.cause||''}</span></div>`
+    `<div class="hc-row"><span class="hc-type">${escapeHtml(r.type)}</span><span class="hc-mem">${escapeHtml((r.members||[]).join(''))}(${escapeHtml((r.pillars||[]).join('-'))}·${escapeHtml(r.distance)})</span><span class="hc-status ${stCls(r.status)}">【${escapeHtml(r.status)}】</span><span class="hc-cause">${escapeHtml(r.cause||'')}${baziTriggerDetail(r)}</span></div>`
   ).join('') : '<div class="hc-row"><span class="hc-cause">本盘干支之间无显著合冲刑害关系</span></div>';
   // v1.6: 运岁引动注入 — 大运引动全列 + 当前大运流年(有引动的年份)
   const ys = en.运岁引动;
   const ysRows: string[] = [];
   for (const dstep of (ys?.大运引动||[])) {
     for (const h of (dstep.hits||[])) ysRows.push(
-      `<div class="hc-row"><span class="hc-type">${h.type}</span><span class="hc-mem">大运${dstep.干支} ${dstep.年龄}</span><span class="hc-cause">${h.desc}</span></div>`);
+      `<div class="hc-row"><span class="hc-type">${escapeHtml(h.type)}</span><span class="hc-mem">大运${escapeHtml(dstep.干支)} ${escapeHtml(dstep.年龄)}</span><span class="hc-cause">${escapeHtml(h.desc)}</span></div>`);
   }
   for (const y of (ys?.当前大运流年?.流年||[])) {
     if (y.年 < currentYear || y.年 >= currentYear + 5) continue; // 【用户定】海报只看今年起未来5年
     const all=[...(y.vs原局||[]),...(y.vs大运||[])];
     if (all.length) ysRows.push(
-      `<div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">${y.年} ${y.干支}</span><span class="hc-cause">${all.map((h:any)=>`[${h.type}]`).join('')} ${all.map((h:any)=>h.desc.replace(/^(大运|流年)/,'')).join(';')}</span></div>`);
+      `<div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">${escapeHtml(y.年)} ${escapeHtml(y.干支)}</span><span class="hc-cause">${all.map((h:any)=>`[${escapeHtml(h.type)}]`).join('')} ${all.map((h:any)=>escapeHtml(String(h.desc || '').replace(/^(大运|流年)/,''))).join(';')}</span></div>`);
   }
   out['yunsui.rows_html'] = ysRows.length ? ysRows.join('') : '<div class="hc-row"><span class="hc-cause">运岁与原局无显著引动</span></div>';
   out['hechong.reading_html']='-'; out['yunsui.reading_html']='-'; out['shensha.reading_html']='-';
   // v2.8: 「你最像的是」小版块(全算法注入)
   const bw = en.八维结构;
   if (bw) {
-    out['mbti.type'] = bw.最像类型; out['mbti.alt'] = bw.备选类型; out['mbti.alt2'] = bw.备选2 || '—'; out['mbti.conf'] = bw.置信;
-    out['mbti.dom'] = bw.主导; out['mbti.aux'] = bw.辅助;
-    out['mbti.bars_html'] = (bw.八维 || []).slice(0, 4).map((x: any) => `<span><b>${x.功能}</b> ${x.百分比}%</span>`).join(' ');
+    out['mbti.type'] = escapeHtml(bw.最像类型); out['mbti.alt'] = escapeHtml(bw.备选类型); out['mbti.alt2'] = escapeHtml(bw.备选2 || '—'); out['mbti.conf'] = escapeHtml(bw.置信);
+    out['mbti.dom'] = escapeHtml(bw.主导); out['mbti.aux'] = escapeHtml(bw.辅助);
+    out['mbti.bars_html'] = (bw.八维 || []).slice(0, 4).map((x: any) => `<span><b>${escapeHtml(x.功能)}</b> ${escapeHtml(x.百分比)}%</span>`).join(' ');
     // v3.7: 古风小人接入八字海报头部(按最像类型+性别复用 MBTI 32 变体)
     out['mbti.char_svg'] = guFengCharSvg(bw.最像类型 || 'XXXX', bi.gender);
   } else {
@@ -453,13 +630,13 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   let curDy:any=null; for (const d of dyArr) if (d.startAge<=virtualAge&&virtualAge<=d.endAge) curDy=d;
   for (let i=0;i<10;i++){ const d=dyArr[i];
     if(!d){ ['gz','age_range','shishen','start_year','year_range','age_note'].forEach(f=>out[`dayun.${i}.${f}`]='-'); out[`dayun.${i}.current_class`]=''; out[`dayun.${i}.luck_class`]='luck-ping'; continue; }
-    out[`dayun.${i}.gz`]=d.ganZhi.gan+d.ganZhi.zhi;
+    out[`dayun.${i}.gz`]=escapeHtml(d.ganZhi.gan+d.ganZhi.zhi);
     // P1-C: 大运边界年份为主、年龄为辅(冠"约"避虚岁/周岁歧义);旧键保留兼容旧模板
     out[`dayun.${i}.year_range`]=`${d.startYear||'-'}-${d.endYear||'-'}`;
     out[`dayun.${i}.age_note`]=`约${d.startAge}-${d.endAge}岁`;
     out[`dayun.${i}.age_range`]=`${d.startAge}-${d.endAge}`;
     out[`dayun.${i}.start_year`]=String(d.startYear||'-');
-    out[`dayun.${i}.shishen`]=((d.ganShiShen||'').slice(0,1))+((d.zhiShiShen||'').slice(0,1));
+    out[`dayun.${i}.shishen`]=escapeHtml(((d.ganShiShen||'').slice(0,1))+((d.zhiShiShen||'').slice(0,1)));
     out[`dayun.${i}.current_class`]=(curDy&&d===curDy)?'current':'';
     out[`dayun.${i}.luck_class`]='luck-ping';
   }
@@ -475,8 +652,8 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   for (let i=0;i<10;i++){ const ln=lnArr[i];
     if(!ln){ ['year','gz','shishen'].forEach(f=>out[`liunian.${i}.${f}`]='-'); out[`liunian.${i}.current_class`]=''; out[`liunian.${i}.luck_class`]='luck-ping'; continue; }
     out[`liunian.${i}.year`]=String(ln.year);
-    out[`liunian.${i}.gz`]=ln.ganZhi.gan+ln.ganZhi.zhi;
-    out[`liunian.${i}.shishen`]=ln.ganShiShen?((ln.ganShiShen.slice(0,1))+((ln.zhiShiShen?.slice(0,1))||'')):'';
+    out[`liunian.${i}.gz`]=escapeHtml(ln.ganZhi.gan+ln.ganZhi.zhi);
+    out[`liunian.${i}.shishen`]=escapeHtml(ln.ganShiShen?((ln.ganShiShen.slice(0,1))+((ln.zhiShiShen?.slice(0,1))||'')):'');
     out[`liunian.${i}.current_class`]=(ln.age===virtualAge)?'current':'';
     out[`liunian.${i}.luck_class`]='luck-ping';
   }
@@ -495,6 +672,7 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
       const s = byStep[i]; if (!s) continue;
       out[`dayun.${i}.luck_class`] = clsOf(s.方向);
       out[`dayun.${i}.amp_label`] = s.振幅 === '静' ? '' : s.振幅;
+      out[`dayun.${i}.state_html`] = baziStateBadge(s.方向, s.体档);
     }
     const byYear: Record<number, any> = {};
     for (const x of (snX.流年 || [])) byYear[x.年] = x;
@@ -503,6 +681,7 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
       const s = byYear[ln.year]; if (!s) continue;
       out[`liunian.${i}.luck_class`] = clsOf(s.方向);
       out[`liunian.${i}.amp_label`] = s.振幅 === '静' ? '' : s.振幅;
+      out[`liunian.${i}.state_html`] = baziStateBadge(s.方向, s.体档);
     }
     out['__algo_luck'] = '1';
   }
@@ -566,7 +745,8 @@ function guFengCharSvg(type: string, gender?: string): string {
   // v3.1.2: 正面低多边形站姿(回退 v3.1.0 构图) + 16 型服装全差异:
   //   袍系×道具=四类群 | 袍色明暗+披帛=E/I | 头饰=SJ乌纱/N系J方冠/N系P逍遥巾/SP斗笠 | 腰佩=T剑柄/F玉环流苏
   // v3.3: 分男女(32 变体)——女版换发式头饰(高髻步摇/单髻玉簪/双环髻/束发红绳)+鬓发耳坠花钿+裙摆,身体几何不动防叠压
-  const t = (type || 'XXXX').toUpperCase();
+  const rawType = String(type || '').toUpperCase();
+  const t = /^[EI][NS][TF][JP]$/.test(rawType) ? rawType : 'XXXX';
   const F = gender === 'female' || gender === '女';
   const N = t[1] === 'N', T = t[2] === 'T', J = t[3] === 'J', E = t[0] === 'E';
   const grp = N ? (T ? 'NT' : 'NF') : (J ? 'SJ' : 'SP');
@@ -768,6 +948,10 @@ function main() {
       delete chartFlat['__algo_luck'];
     }
     data = { ...chartFlat, ...analysisFlat };
+    data['rare.block_html'] = baziRarePhenomenaBlock(chart?.bazi?.enrichment?.罕象 || [], analysis?.rare?.reading_html);
+    // v3.14:timeline 来自 analysis、引爆窗口来自 chart，须在两层合并后按年份相交。
+    // 只写现有五个节点的可选图标；同年多条关系仍合并为一个 ⏳。
+    applyBaziTimelineTriggers(data, chart);
   } else if (mode === 'ziwei') {
     // v3.7 紫微独立海报:十二宫盘复用 zonghe 的 chartToFlat 注入(gongs.*/meta.*/ziwei.*),解读字段走 z.* 命名空间
     data = { ...chartToFlat(chart, args.currentYear ? +args.currentYear : undefined), ...analysisToFlatZiwei(analysis) };

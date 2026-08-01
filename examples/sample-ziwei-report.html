@@ -182,6 +182,28 @@
     display: flex; align-items: center; justify-content: center; text-align: center;
     font-size: 9px; line-height: 1.2; letter-spacing: 1px; transform: rotate(-3deg);
   }
+  /* ============ TRADITIONAL PAPER SYSTEM + NOVICE GUIDE ============ */
+  :root { --jade-deep: #28623d; --gold: #a07c4a; }
+  body { padding: 24px; background-image: repeating-linear-gradient(7deg, rgba(90,72,48,.025) 0, rgba(90,72,48,.025) 1px, transparent 1px, transparent 7px), radial-gradient(circle at 18% 20%, rgba(42,74,114,.05), transparent 48%); }
+  .report { position: relative; isolation: isolate; overflow: hidden; border: 1px solid #8e795d; outline: 5px double rgba(160,124,74,.22); outline-offset: -9px; box-shadow: 0 18px 54px rgba(50,36,20,.12); }
+  .report::before, .report::after { content: ""; position: absolute; width: 62px; height: 62px; pointer-events: none; z-index: 3; opacity: .55; background: linear-gradient(var(--gold),var(--gold)) 0 0/36px 1px no-repeat, linear-gradient(var(--gold),var(--gold)) 0 0/1px 36px no-repeat, linear-gradient(var(--vermillion),var(--vermillion)) 8px 8px/22px 1px no-repeat, linear-gradient(var(--vermillion),var(--vermillion)) 8px 8px/1px 22px no-repeat; }
+  .report::before { top: 13px; left: 13px; } .report::after { right: 13px; bottom: 13px; transform: rotate(180deg); }
+  .report > * { position: relative; z-index: 1; }
+  .header { position: relative; padding: 6px 4px 25px; border-bottom: 0; background: linear-gradient(90deg, rgba(193,67,47,.035), transparent 44%, rgba(46,109,164,.025)); }
+  .header::after, .section h2::after { content: ""; opacity: .7; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='10' viewBox='0 0 42 10'%3E%3Cpath d='M0 8h16V2H6v3h7M21 2h16v6H27V5h7' fill='none' stroke='%23a07c4a' stroke-width='1'/%3E%3C/svg%3E"); background-repeat: repeat-x; background-position: center; }
+  .header::after { position: absolute; left: 0; right: 0; bottom: 0; height: 9px; }
+  .section h2::after { height: 8px; min-width: 34px; flex: 1; }
+  .seal { background: rgba(193,67,47,.035); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(193,67,47,.55); }
+  .reader-guide { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; margin: -2px 0 20px; padding: 11px 15px; border: 1px solid rgba(160,124,74,.55); border-left: 4px solid var(--vermillion); background: linear-gradient(90deg, rgba(250,246,236,.92), rgba(235,229,213,.72)); }
+  .reader-guide .guide-title { color: var(--vermillion-deep); font-size: 12px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+  .reader-guide .guide-copy { font-size: 11px; color: var(--ink-soft); line-height: 1.75; } .reader-guide b { font-weight: 900; }
+  .guide-good { color: var(--jade-deep); } .guide-warn { color: var(--vermillion-deep); }
+  .section { position: relative; padding: 14px 16px; border: 1px solid rgba(160,124,74,.46); background: linear-gradient(145deg, rgba(250,246,236,.82), rgba(245,241,232,.68)); box-shadow: inset 3px 0 0 rgba(160,124,74,.13); }
+  .section::before { content: ""; position: absolute; top: -1px; right: -1px; width: 16px; height: 16px; border-top: 2px solid rgba(160,124,74,.72); border-right: 2px solid rgba(160,124,74,.72); }
+  .section h2 { border-bottom: 0; } .section h2 small { font-size: 10px; color: var(--ink-soft); font-weight: 500; letter-spacing: 0; }
+  .hl-good { color: var(--jade-deep); font-weight: 900; background: linear-gradient(transparent 70%, rgba(74,124,78,.17) 70%); }
+  .hl { color: var(--vermillion-deep); font-weight: 800; background: linear-gradient(transparent 72%, rgba(193,67,47,.10) 72%); }
+  @media (max-width: 720px) { body { padding: 0; overflow-x: hidden; } .report { width: 100%; max-width: 100%; padding: 16px; box-shadow: none; } .header { grid-template-columns: auto 1fr; } .h-char { width: 62px; } .header-right { grid-column: 1 / -1; text-align: left; } .reader-guide { grid-template-columns: 1fr; gap: 3px; } .info-bar { grid-template-columns: repeat(2,minmax(0,1fr)); } .ziwei-grid { height: 620px; } }
   @media print { html, body { background: var(--paper); } .report { max-width: none; } }
 </style>
 </head>
@@ -232,11 +254,16 @@
       <div class="subtitle">紫微坐午身命同宫，武曲化禄生财，一生稳中求成</div>
     </div>
     <div class="header-right">
-      <div>生成于 2026-07-29 11:11</div>
+      <div>生成于 2026-08-02 01:39</div>
       <div class="badge">阴男 · 土五局</div>
       <div class="meta-row">命主 破军 · 身主 天同</div>
     </div>
   </header>
+
+  <aside class="reader-guide" aria-label="海报阅读说明">
+    <div class="guide-title">小白这样看</div>
+    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、贵人助力、适合方向或顺风窗口，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的消耗与风险。第一次看可跳过十二宫盘，直接从 01 开始读现实结论，再到 07—08 看时间，最后照 09 的建议行动。</div>
+  </aside>
 
   <div class="info-bar">
     <div class="info-cell"><div class="k">阳历</div><div class="v num">2000-01-01 12:00</div></div>
@@ -363,40 +390,40 @@
   </div>
 
   <section class="section">
-    <h2><span class="num-box">01</span>命格主轴</h2>
-    <div class="prose lead">你的命宫落在午宫，紫微独坐，这颗星像坐镇中军的主帅，天生带着一份沉稳与威仪。身宫与命宫同宫，意味着你这一生不必到中年才改换跑道——你早年认定的方向，往往就是一直走下去的方向，越早立定目标的人越占便宜。生年四化里，武曲化禄落在财帛宫，化禄就是能量被点亮的意思，你的财路天生偏向<span class="hl-good">正业生财、一分耕耘一分收获</span>。贪狼化权落在迁移宫，你走出舒适圈、向外拓展时，反而更容易拿到话语权。天梁化科落在子女宫，主名声清贵、得人扶持。需要留意的是文曲化忌落在官禄宫，化忌是能量打了结，你的事业路上<span class="hl">文书、合同、数据类事务容易出纰漏</span>。综合来看，你这盘的主轴非常清晰：以沉稳立身处世，以正业积累财富，以外拓赢得舞台，唯一要反复修炼的是细致。这不是一条暴发的路，而是一条越走越宽、越走越稳的路。</div>
+    <h2><span class="num-box">01</span>你这一生最看重什么 <small>命格主轴</small></h2>
+    <div class="prose lead">你的命宫落在午宫，紫微独坐，这颗星像坐镇中军的主帅，给你<span class="hl-good">沉稳、有分量、关键时刻能定住场面的气质</span>。身宫与命宫同宫，意味着你早年认定的方向往往能一路延续，<span class="hl-good">越早立定长期目标，越容易把时间变成你的优势</span>。生年四化里，武曲化禄落在财帛宫，化禄就是能量被点亮的意思，你的财路偏向<span class="hl-good">正业生财、一分耕耘一分收获</span>。贪狼化权落在迁移宫，说明<span class="hl-good">走出舒适圈、向外拓展时，你更容易拿到话语权</span>。天梁化科落在子女宫，带来<span class="hl-good">名声、专业认可与他人扶持</span>。需要留意的是文曲化忌落在官禄宫，化忌是能量打了结，你的事业路上<span class="hl">文书、合同、数据类事务容易出纰漏</span>。综合来看，你<span class="hl-good">适合以沉稳立身、以正业积累财富、再用外拓赢得舞台</span>；这不是一条暴发的路，而是<span class="hl-good">一条越走越宽、越走越稳的路</span>。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">02</span>命身格局 · 三方四正</h2>
-    <div class="prose">命宫的三方四正——也就是财帛、官禄、迁移三个互相呼应的宫位——构成了你的基本盘。对宫迁移有贪狼化权，又有右弼、天魁两颗贵人星，你出门在外<span class="hl-good">容易遇到愿意拉你一把的人</span>，尤其是前辈型的贵人。财帛宫武曲、天相同坐还带左辅，官禄宫廉贞、天府镇守，这构成传统上说的「府相朝垣」之象，白话讲就是财星与库星分列两旁朝拱命宫，你天生适合<span class="hl-good">在体制健全的平台里做管钱、管事、管资产的角色</span>。命宫自带禄存，像随身带着一座小粮仓，你<span class="hl-good">守成与积蓄的天赋比开拓更强</span>。兄弟宫天机与地空、地劫、陀罗同宫，同辈合作容易多想多变、聚聚散散，合伙分钱的事要格外明算账。田宅宫没有主星，借用对宫子女宫的太阳、天梁来看，置业不宜贪快，<span class="hl">不动产决策宁可慢一步、看清楚再出手</span>。身命同宫再加上紫微的定力，你的性格底色是稳：不是不动，而是每一步都要踩在实处。</div>
+    <h2><span class="num-box">02</span>你的性格与能力底盘 <small>命身格局 · 三方四正</small></h2>
+    <div class="prose">命宫的三方四正——也就是财帛、官禄、迁移三个互相呼应的宫位——构成了你的基本盘。对宫迁移有贪狼化权，<span class="hl-good">又有右弼、天魁两颗贵人星，你出门在外容易遇到愿意拉你一把的人，尤其是有经验、能给资源的前辈</span>。财帛宫武曲、天相同坐还带左辅，官禄宫廉贞、天府镇守，这构成传统上说的「府相朝垣」之象，白话讲就是财星与库星分列两旁朝拱命宫，你天生<span class="hl-good">适合在体制健全的平台里做管钱、管事、管资产的角色</span>。命宫自带禄存，像随身带着一座小粮仓，你<span class="hl-good">守成与积蓄的天赋比开拓更强</span>。兄弟宫天机与地空、地劫、陀罗同宫，<span class="hl">同辈合作容易多想多变、聚聚散散，合伙分钱要格外明算账</span>。田宅宫没有主星，借用对宫子女宫的太阳、天梁来看，<span class="hl">不动产决策宁可慢一步、看清楚再出手</span>。身命同宫再加上紫微的定力，给你<span class="hl-good">稳而不乱、每一步都愿意踩实的性格底色</span>。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">03</span>事业官禄</h2>
-    <div class="prose">官禄宫廉贞、天府同坐，廉贞主执行与开拓，天府主库藏与管理，两颗星在一起，你适合的路是<span class="hl-good">先在大平台里打磨专业，再逐步走向管理或资产运营的位置</span>。天府是「库」，你管账、管项目、管团队，都比同龄人更有耐心。要注意的是同宫的文曲化忌：文曲主文书、表达、数据，化忌之后，<span class="hl">合同条款、报表数字、重要邮件这类细节最容易在你手上出岔子</span>——不是能力不够，而是这类事务天然是你的盲区，复核一遍再发出去，能避开大多数麻烦。从事业线看，你现在正走二十五到三十四岁这步大限，大限命宫落在原盘夫妻宫的七杀，这是一步开创之限：机会与压力同时加大，<span class="hl">换赛道、独立扛项目的念头会反复出现</span>，适合小步试错，不宜一次压上全部。三十岁前整体算平路偏顺，三十五岁后大限走进太阳、天梁化科的宫位，名声与贵人同步抬升，那才是你事业的主升段。你的优势在稳，凡是需要「快、险、赌」的机会，天然与你这盘的气场不合，让给别人也无妨。</div>
+    <h2><span class="num-box">03</span>事业怎么发展更顺 <small>工作环境与成长路径</small></h2>
+    <div class="prose">官禄宫廉贞、天府同坐，廉贞主执行与开拓，天府主库藏与管理，两颗星在一起，你<span class="hl-good">适合先在大平台里打磨专业，再逐步走向管理或资产运营的位置</span>。天府是「库」，说明你<span class="hl-good">管账、管项目、管团队时有耐心，也能把长期责任接住</span>。要注意的是同宫的文曲化忌：文曲主文书、表达、数据，化忌之后，<span class="hl">合同条款、报表数字、重要邮件这类细节容易成为盲区</span>；建立复核流程，<span class="hl-good">能帮你避开大多数本可避免的麻烦</span>。你现在正走二十五到三十四岁这步大限，大限命宫落在原盘夫妻宫的七杀：<span class="hl-good">这是一步开创新机会增多的阶段</span>，同时<span class="hl">压力也会加大，换赛道、独立扛项目的念头会更强</span>，<span class="hl-good">适合小步试错</span>，不宜一次压上全部。三十岁前整体是平路偏顺；三十五岁后太阳、天梁化科被大限点亮，<span class="hl-good">名声、贵人与发展空间会同步抬升，进入事业主升段</span>。<span class="hl-good">你的优势在稳，长期建设与复杂管理比“快、险、赌”的机会更适合你</span>。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">04</span>财帛田宅</h2>
-    <div class="prose">财帛宫武曲化禄配天相，又有左辅相助，这是很典型的正财结构：武曲是财星之首，化禄之后力量更足，天相讲究规则与体面，左辅代表帮手。你的财路性质是<span class="hl-good">靠专业与信用换来的稳定收入</span>，工资、项目酬劳、资产管理这类「看得见来路」的钱最旺你；横财、快钱、杠杆钱则不是你的主场，<span class="hl">高杠杆与短炒类的诱惑值得你主动远离</span>。命宫禄存贴身，你的禀赋属于<span class="hl-good">能量内收、擅长积谷防饥</span>的类型，对积蓄天然不排斥，关键是给存款找到清晰的用途。田宅宫无主星，借对宫太阳、天梁化科来论：置业这件事宜晚不宜急，三十五岁后太阳、天梁的力量被大限点亮，那时再做大额资产配置，胜率高得多。化科主名也主保障，房产对你而言更像「安定感的容器」而非增值筹码，抱着这个心态去买，你就不容易被市场情绪带着走。如果你已经有定投或储蓄计划，务必保持；如果还没有，从收入的固定比例开始，是最贴合你命盘的做法。</div>
+    <h2><span class="num-box">04</span>钱从哪里来、怎么留住 <small>财帛田宅</small></h2>
+    <div class="prose"><span class="hl-good">财帛宫武曲化禄配天相，又有左辅相助，这是很典型的正财结构：武曲是财星之首，化禄之后力量更足，天相讲究规则与体面，左辅代表帮手</span>。<span class="hl-good">你的财路性质是靠专业与信用换来的稳定收入，工资、项目酬劳、资产管理这类「看得见来路」的钱更适合你</span>；横财、快钱、杠杆钱不是你的主场，<span class="hl">高杠杆与短炒类的诱惑值得主动远离</span>。命宫禄存贴身，你的禀赋属于<span class="hl-good">能量内收、擅长积谷防饥</span>的类型，关键是给存款找到清晰用途。田宅宫无主星，借对宫太阳、天梁化科来论：置业宜晚不宜急，<span class="hl-good">三十五岁后再做大额资产配置，条件会更成熟</span>。化科主名也主保障，房产对你更像「安定感的容器」而非增值筹码；<span class="hl-good">抱着长期安顿的心态，更不容易被短期市场情绪带着走</span>。如果你已有定投或储蓄计划，务必保持；如果还没有，<span class="hl-good">从收入固定比例开始，是最贴合你节奏、也最容易坚持的做法</span>。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">05</span>婚恋情感</h2>
-    <div class="prose">夫妻宫七杀坐守，文昌同宫，旁边还有一颗铃星。七杀是将星，落在感情位，你容易被<span class="hl-good">能力出众、性格果断、有主见的人</span>吸引——对方往往不是温顺型，而是能与你并肩作战的那种。文昌带来文雅气，意味着精神层面的聊得来对你很重要；铃星则是暗火，<span class="hl">相处中容易因小事急起来、话赶话</span>，磨合的关键是双方都慢半拍再开口。红鸾在迁移、天喜在命宫，你的良缘气息偏「动中生情」：走出去的场合、工作相关的圈子，比宅在家里更容易遇到对的人——这是倾向，不是断言。你现在走的这步大限，大限命宫恰好落在原盘夫妻宫，二十五到三十四岁这十年，感情本来就是你人生的主题之一，大限与宫位重叠，<span class="hl-good">认真经营的关系在这个阶段容易走向确定</span>。七杀坐夫妻宫的人，感情里最怕争高下，把「赢了道理、输了关系」这句话放在心里，你的亲密关系会顺很多。至于婚期早晚，盘上只有节奏提示、没有定数，选择权始终在你手里。</div>
+    <h2><span class="num-box">05</span>感情与相处模式 <small>怎么爱人、怎样相处更顺</small></h2>
+    <div class="prose">夫妻宫七杀坐守，文昌同宫，旁边还有一颗铃星。七杀是将星，落在感情位，你容易被<span class="hl-good">能力出众、性格果断、有主见、能与你并肩作战的人</span>吸引。文昌带来文雅气，说明<span class="hl-good">精神层面聊得来、能交换观点的关系更适合你</span>；铃星则是暗火，<span class="hl">相处中容易因小事急起来、话赶话</span>，磨合关键是双方都慢半拍再开口。红鸾在迁移、天喜在命宫，<span class="hl-good">你的良缘气息偏「动中生情」：走出去的场合、工作相关的圈子，更容易给你遇见合适对象的机会</span>——这是倾向，不是断言。你现在这步大限的命宫恰好落在原盘夫妻宫，二十五到三十四岁感情是人生主题之一，<span class="hl-good">认真经营的关系在这个阶段更容易走向确定</span>。七杀坐夫妻宫最怕争高下；把「赢了道理、输了关系」放在心里，<span class="hl-good">先降温再讨论，会让亲密关系顺很多</span>。至于婚期早晚，盘上只有节奏提示、没有定数，选择权始终在你手里。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">06</span>健康提示</h2>
-    <div class="prose">疾厄宫天同、巨门同坐，天同是颗福星也带着慵懒之气，巨门主口与暗昧。你的体质偏向<span class="hl">能量内收型，代谢与消化系统是需要长期养护的重点</span>——这不是说你有什么问题，而是这类系统在你身上「用进废退」的特性最明显。巨门主口，饮食节律对你的影响比常人大：<span class="hl-good">规律三餐、清淡少腻，对你的回报比常人更大</span>。你的能量禀赋偏静，规律的有氧运动——快走、游泳、骑行任选其一——是你性价比最高的健康投资。父疾一线带着擎羊、天刑，这两颗星主金铁与意外，<span class="hl">运动前的热身、用刀用火用电的留神，值得变成肌肉记忆</span>。巨门也关联情绪出口，如果心里有事不说的习惯存在，找一个固定的倾诉或记录渠道，对你的睡眠与消化都有直接好处。如果你已有稳定作息，请继续保持；如果还在熬夜与补觉的循环里，先把入睡时间固定下来，是回报最快的一步。</div>
+    <h2><span class="num-box">06</span>身体保养重点 <small>优先守住什么习惯</small></h2>
+    <div class="prose">疾厄宫天同、巨门同坐，天同是颗福星也带着慵懒之气，巨门主口与暗昧。你的体质偏向<span class="hl">能量内收型，代谢与消化系统需要长期养护</span>——这不是说你有什么问题，而是这类系统在你身上「用进废退」更明显。巨门主口，饮食节律对你的影响比常人大：<span class="hl-good">规律三餐、清淡少腻，对你的回报比常人更大</span>。你的能量禀赋偏静，<span class="hl-good">快走、游泳、骑行等规律有氧，是性价比很高的健康投资</span>。父疾一线带着擎羊、天刑，这两颗星主金铁与意外，运动前热身、用刀用火用电时留神，值得变成固定流程。巨门也关联情绪出口；如果心里有事不说的情况存在，<span class="hl-good">固定倾诉或记录，对睡眠与消化都会有直接帮助</span>。如果你已有稳定作息，请继续保持；如果还在熬夜与补觉之间摇摆，<span class="hl-good">先固定入睡时间，是回报最快、也最容易观察效果的一步</span>。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">07</span>大限走向</h2>
-    <div class="prose">你五岁起限，每一步大限管十年。回顾十五到二十四岁那步限，大限走在天机、天马同宫又带地空地劫的宫位，那十年的主题是流动与试错：方向的调整、居住地的变动、存不住钱的体验，都是这步限的典型剧情。你现在所在的二十五到三十四岁，大限命宫落在辰宫七杀——这是一步<span class="hl">开创与压力并行之限</span>：七杀主破旧立新，你会明显感到原有的舒适模式不够用，逼着你长出自己的獠牙；好在文昌同宫，<span class="hl-good">这十年学到的硬本领，会成为你后半生的本钱</span>。整体节奏是平路开局、越走越顺，三十岁后上坡的体感会更明显。三十五到四十四岁，大限走进太阳、天梁化科的宫位，太阳主发散与名望，天梁主荫庇与贵人，化科再点一把火——那是你全盘<span class="hl-good">最顺风的十年，名声、职位、资源同步抬升</span>。再往后四十五到五十四岁走武曲化禄的财帛大限，财富积累进入收获期。把眼光放长，你的命盘是典型的「前段蓄力、中后段发力」，年轻时不必急。</div>
+    <h2><span class="num-box">07</span>你正处在人生哪一段 <small>大限走向</small></h2>
+    <div class="prose">你五岁起限，每一步大限管十年。回顾十五到二十四岁那步限，大限走在天机、天马同宫又带地空地劫的宫位，那十年的主题是流动与试错：方向调整、居住变动、存钱费力，都是这步限的典型主题。你现在所在的二十五到三十四岁，大限命宫落在辰宫七杀——这是一步<span class="hl">开创与压力并行之限</span>：原有舒适模式不够用，会推动你长出更强的独立处理能力；好在文昌同宫，<span class="hl-good">这十年学到的硬本领，会成为你后半生的本钱</span>。<span class="hl-good">整体节奏是平路开局、越走越顺，三十岁后上坡感会更明显</span>。三十五到四十四岁，大限走进<span class="hl-good">太阳、天梁化科的宫位，太阳主名望，天梁主荫庇与贵人，化科再点一把火——那是你全盘最顺风的十年，名声、职位、资源同步抬升</span>。再往后四十五到五十四岁走武曲化禄的财帛大限，<span class="hl-good">财富积累进入更明显的收获期</span>。把眼光放长，你的节奏是<span class="hl-good">前段蓄力、中后段发力，越往后越能显出积累的价值</span>。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">08</span>重点流年</h2>
-    <div class="prose">🔴 重大节点三年，逐个讲。2026 丙午年，流年命宫走回你的本命宫，紫微再度值年，这是<span class="hl-good">十年一轮的定调之年</span>——这一年立下的目标、开始的布局，影响力会延续整个流年循环，适合主动开局。2030 庚戌年流年走进官禄宫，引动同宫的文曲化忌，那是<span class="hl">文书、合约、评审类事务的大考之年</span>，签字之前多一道复核，就能把这年的逆风化成虚惊。2034 甲寅年前后是你转入下一步大限的转限年，转限年前后运势交替，重大决定宜等气场落定再拍板。🟡 一般年各有主题：2027 丁未年流年入父母宫，宫带擎羊、天刑，与长辈相处、房产手续、证件文书多留一份心；2032 壬子年流年入迁移宫，贪狼化权被引动，那是<span class="hl-good">外派、出差、异地机会的顺风年</span>，值得主动争取。⚪ 平稳年如 2028、2029、2031，盘面没有强烈信号，按自己的节奏推进即可，不必刻意求变。流年给的是天气，路怎么走，方向盘一直在你手里。</div>
+    <h2><span class="num-box">08</span>哪些年份更有感 <small>宜进、宜稳、宜避险</small></h2>
+    <div class="prose">🔴 重大节点三年，逐个讲。2026 丙午年，流年命宫走回你的本命宫，紫微再度值年，这是<span class="hl-good">十年一轮的定调之年；立下长期目标、开始关键布局，更容易把影响延续到后面几年</span>。2030 庚戌年流年走进官禄宫，引动同宫的文曲化忌，那是<span class="hl">文书、合约、评审类事务需要重点复核的一年</span>；签字前多一道检查，<span class="hl-good">能把不少逆风化成可控的小插曲</span>。2034 甲寅年前后是转入下一步大限的换挡年，重大决定宜等节奏落定再拍板。🟡 一般年各有主题：2027 丁未年与长辈相处、房产手续、证件文书多留一份心；2032 壬子年流年入迁移宫，贪狼化权被引动，那是<span class="hl-good">外派、出差、异地机会的顺风年，值得主动争取</span>。⚪ 平稳年如 2028、2029、2031，盘面没有强烈信号，<span class="hl-good">按自己的节奏持续推进即可，不必刻意求变</span>。流年给的是天气，路怎么走，方向盘一直在你手里。</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">09</span>针对性建议</h2>
-    <div class="prose">给你五条能落地的行动。第一，把「复核」做成流程：凡是合同、报价、报表、重要邮件，发出去之前强制自己隔天再看一遍或请同事过一眼——这是冲着官禄宫文曲化忌去的，<span class="hl">你的盲区在文书细节</span>，流程比自觉可靠。第二，收入的固定比例先存后花，三十五岁后再考虑大额置业：财帛武曲化禄配命宫禄存，<span class="hl-good">你的财富靠滚雪球而非押大小</span>，雪球要趁早开始滚。第三，每年至少安排两次「走出去」的动作——行业会议、异地项目、跨界社群都算：迁移宫贪狼化权带双贵人，<span class="hl-good">你的机会与人脉都在舒适圈之外</span>。第四，选一项能出汗的运动固定下来，每周三次起步，运动前认真热身：疾厄天同巨门加父疾线羊刑，你的身体吃「规律」这味药，回报比别人大。第五，感情里遇到分歧时，约定一个「冷静十分钟再谈」的规则：夫妻宫七杀带铃星，你的良缘是能人型，<span class="hl">输赢心一上头容易话赶话</span>，规则能替你们保住感情。这五条都不复杂，难在坚持——好在紫微坐命的人，最不缺的就是定力。</div>
+    <h2><span class="num-box">09</span>日常可执行建议 <small>今天就能开始做</small></h2>
+    <div class="prose">给你<span class="hl-good">五条能落地的行动</span>。第一，把「复核」做成流程：合同、报价、报表和重要邮件，发出前隔天再看一遍或请同事过一眼——<span class="hl">你的盲区在文书细节</span>，<span class="hl-good">固定流程会比临时提醒更可靠</span>。第二，收入固定比例先存后花，三十五岁后再考虑大额置业：<span class="hl-good">你的财富靠滚雪球而非押大小，越早开始越能发挥积累优势</span>。第三，每年至少安排两次「走出去」的动作：<span class="hl-good">迁移宫贪狼化权带双贵人，你的机会与人脉更容易在舒适圈之外被打开</span>。第四，选一项能出汗的运动固定下来，每周三次起步并认真热身：<span class="hl-good">规律运动对你的身体回报比常人更大</span>。第五，感情有分歧时约定<span class="hl-good">「冷静十分钟再谈」</span>：<span class="hl">输赢心一上头容易话赶话</span>，<span class="hl-good">规则能替你们保住感情，也让问题更容易谈清</span>。这些动作不复杂；<span class="hl-good">紫微坐命给你的定力，正适合用来把好习惯做成长期积累</span>。</div>
   </section>
 
   <div class="footer-disclaim">

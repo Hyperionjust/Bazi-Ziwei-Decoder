@@ -267,52 +267,206 @@ var ZHI_WX = { \u5BC5: "\u6728", \u536F: "\u6728", \u5DF3: "\u706B", \u5348: "\u
 var ZODIAC = { \u5B50: "\u9F20", \u4E11: "\u725B", \u5BC5: "\u864E", \u536F: "\u5154", \u8FB0: "\u9F99", \u5DF3: "\u86C7", \u5348: "\u9A6C", \u672A: "\u7F8A", \u7533: "\u7334", \u9149: "\u9E21", \u620C: "\u72D7", \u4EA5: "\u732A" };
 var SS_KEY = { \u6BD4\u80A9: "bijian", \u52AB\u8D22: "jiecai", \u98DF\u795E: "shishen", \u4F24\u5B98: "shangguan", \u504F\u8D22: "piancai", \u6B63\u8D22: "zhengcai", \u4E03\u6740: "qisha", \u4E03\u715E: "qisha", \u6B63\u5B98: "zhengguan", \u504F\u5370: "pianyin", \u67AD\u795E: "pianyin", \u6B63\u5370: "zhengyin" };
 var SS_POL = { \u5409: "good", "\u4E2D\u6027": "neutral", \u51F6: "warn" };
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+}
+function truncateChars(value, max) {
+  const chars = [...String(value ?? "")];
+  return chars.length > max ? `${chars.slice(0, max).join("")}\u2026` : chars.join("");
+}
+function hasOwn(obj, key) {
+  return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+}
+function selectedBaziInteractionView(en) {
+  const ix = en?.\u4F5C\u7528\u5173\u7CFB;
+  if (!ix || typeof ix !== "object") return void 0;
+  return hasOwn(ix, "lineage") ? ix.lineage : ix;
+}
+function selectedBaziInteractionItems(en) {
+  const items = selectedBaziInteractionView(en)?.items;
+  return Array.isArray(items) ? items : [];
+}
+function safeClass(value, allowed, fallback) {
+  const token = String(value ?? "");
+  return allowed.includes(token) ? token : fallback;
+}
+var CLASSIC_GRADE = {
+  \u4E0A: { text: "\u4F20\u7EDF\u8BBA\u6CD5\u504F\u6709\u5229", cls: "grade-up" },
+  \u4E2D: { text: "\u4F20\u7EDF\u8BBA\u6CD5\u504F\u4E2D\u6027", cls: "grade-mid" },
+  \u4E0B: { text: "\u4F20\u7EDF\u8BBA\u6CD5\u504F\u53D7\u9650", cls: "grade-down" },
+  \u5FCC: { text: "\u4F20\u7EDF\u8BBA\u6CD5\u63D0\u9192\u907F\u5F00", cls: "grade-avoid" }
+};
+function baziClassicsCard(hits, solo) {
+  if (!Array.isArray(hits) || !hits.length) return "";
+  const rows = hits.slice(0, 3).map((hit) => {
+    const grade = CLASSIC_GRADE[String(hit?.\u6863)] || CLASSIC_GRADE.\u4E2D;
+    const title = escapeHtml(hit?.\u663E\u793A\u540D || hit?.\u540D || "\u53E4\u6CD5\u6761\u76EE");
+    const image = escapeHtml(truncateChars(hit?.\u610F\u8C61 || "", 36));
+    return `<li><span class="classic-name">${title}</span><span class="classic-grade ${grade.cls}">${grade.text}</span>${image ? `<span class="classic-image">${image}</span>` : ""}</li>`;
+  }).join("");
+  return `<section class="algo-card classics-card${solo ? " solo" : ""}"><div class="algo-card-head"><b>\u5178\u51FA</b><span>\u53E4\u6CD5\u53C2\u7167 \xB7 \u4EC5\u5217\u76D8\u9762\u547D\u4E2D</span></div><ol class="classic-list">${rows}</ol></section>`;
+}
+function baziInsightBadges(exportData) {
+  const badges = [];
+  const exception = exportData?.\u76F8\u795E\u88C1\u51B3;
+  if (exception) {
+    const elements = Array.isArray(exception.\u683C\u5C40\u76F8\u795E) ? exception.\u683C\u5C40\u76F8\u795E.join("\u3001") : "";
+    const method = String(exception.\u6539\u6CD5 || exception.\u91CD\u795E || "");
+    let copy = "";
+    if (method.includes("\u4F69\u5370")) copy = `${elements || "\u76F8\u5173\u5143\u7D20"}\u5B9C\u5148\u7A33\u4F4F\u8868\u8FBE\uFF0C\u518D\u628A\u51B2\u52B2\u6C89\u6DC0\u4E3A\u5B66\u4E60\u4E0E\u6267\u884C\u3002`;
+    else if (method.includes("\u5236\u5316\u4E24\u5168")) copy = `${elements || "\u76F8\u5173\u5143\u7D20"}\u5B9C\u4E00\u8FB9\u758F\u538B\u3001\u4E00\u8FB9\u627F\u6258\uFF0C\u628A\u6311\u6218\u8F6C\u6210\u53EF\u6267\u884C\u8282\u594F\u3002`;
+    else copy = `${elements || "\u76F8\u5173\u5143\u7D20"}\u9700\u6309\u5148\u7A33\u540E\u53D1\u4F7F\u7528\uFF0C\u4E0D\u5B9C\u7B80\u5355\u5F52\u4E3A\u5B9C\u6216\u5FCC\u3002`;
+    badges.push(`<div class="insight-badge"><span class="insight-label">\u4F8B\u5916\u7528\u6CD5</span><span>${escapeHtml(truncateChars(copy, 28))}</span></div>`);
+  }
+  const tension = exportData?.\u8F74\u51B2\u7A81;
+  if (tension) {
+    const elements = Array.isArray(tension.\u4E94\u884C) ? tension.\u4E94\u884C.join("\u3001") : "";
+    const copy = `${elements || "\u76F8\u5173\u5143\u7D20"}\u6709\u4E24\u9762\u6027\uFF1A\u53EF\u8C03\u8282\u6C14\u5019\uFF0C\u8FC7\u91CF\u4E5F\u4F1A\u6253\u7834\u5E73\u8861\u3002`;
+    badges.push(`<div class="insight-badge"><span class="insight-label">\u53CC\u9762\u63D0\u9192</span><span>${escapeHtml(truncateChars(copy, 28))}</span></div>`);
+  }
+  return badges.slice(0, 2);
+}
+function baziInsightsCard(badges, solo) {
+  if (!badges.length) return "";
+  return `<section class="algo-card insights-card${solo ? " solo" : ""}"><div class="algo-card-head"><b>\u6838\u5FC3\u770B\u70B9</b><span>\u628A\u4F8B\u5916\u4E0E\u4E24\u9762\u6027\u8BF4\u6E05\u695A</span></div><div class="insight-list">${badges.join("")}</div></section>`;
+}
+function baziRarePhenomenaBlock(items, readingHtml) {
+  if (!Array.isArray(items) || !items.length) return "";
+  const cls = { \u6781\u7F55: "rare-extreme", \u7F55\u89C1: "rare-high", \u5C11\u89C1: "rare-mid" };
+  const rows = items.map((item) => {
+    const rarity = String(item?.\u7F55\u89C1\u5EA6 || "\u5C11\u89C1");
+    return `<div class="rare-item"><span class="rare-grade ${cls[rarity] || "rare-mid"}">${escapeHtml(rarity)}</span><span class="rare-name">${escapeHtml(item?.\u540D || "\u7F55\u89C1\u7ED3\u6784")}</span><span class="rare-evidence">${escapeHtml(item?.\u6D89\u53CA || "")}</span></div>`;
+  }).join("");
+  const reading = String(readingHtml || "").trim();
+  return `<section class="section rare-phenomena"><h2><span class="rare-title-seal">\u7279\u522B\u89C2\u5BDF</span>\u7F55\u89C1\u73B0\u8C61 <small>\u5C11\u89C1\u4E0D\u7B49\u4E8E\u5409\u51F6\uFF0C\u91CD\u70B9\u770B\u5B83\u600E\u6837\u843D\u5230\u73B0\u5B9E</small></h2><div class="rare-list">${rows}</div>${reading ? `<div class="prose rare-reading">${reading}</div>` : ""}</section>`;
+}
+function baziTriggerDetail(item) {
+  const win = item?.\u5F15\u7206\u7A97\u53E3;
+  if (!win || !Array.isArray(win.\u5E94\u671F) || !win.\u5E94\u671F.length) return "";
+  const waiting = Array.isArray(win.\u5F85) ? win.\u5F85.join("\u3001") : "";
+  const method = String(win.\u65B9\u5F0F || "");
+  const periods = win.\u5E94\u671F.map((x) => {
+    const year = Number(x?.\u5E74);
+    if (!Number.isFinite(year)) return "";
+    return `${year} ${String(x?.\u8F7D\u4F53 || "").trim()}`.trim();
+  }).filter(Boolean);
+  if (!periods.length) return "";
+  const lead = [waiting ? `\u5F85${waiting}` : "", method].filter(Boolean).join("\xB7");
+  return `<span class="hc-trigger">\u23F3 ${escapeHtml(lead)}\uFF1A${escapeHtml(periods.join("\u3001"))}</span>`;
+}
+function baziTriggerYears(items) {
+  const years = /* @__PURE__ */ new Set();
+  for (const item of items) for (const x of item?.\u5F15\u7206\u7A97\u53E3?.\u5E94\u671F || []) {
+    const year = Number(x?.\u5E74);
+    if (Number.isInteger(year)) years.add(year);
+  }
+  return [...years].sort((a, b) => a - b);
+}
+function baziMonthFlowCard(flow, currentYear) {
+  const months = Array.isArray(flow?.\u6708) ? flow.\u6708 : [];
+  if (!flow || !months.length) return "";
+  if (Number(flow.\u5E74) !== currentYear || months.length !== 12) {
+    const why = Number(flow.\u5E74) !== currentYear ? `\u6570\u636E\u5E74\u4EFD${escapeHtml(flow.\u5E74)}\u4E0E\u6E32\u67D3\u5E74\u4EFD${currentYear}\u4E0D\u4E00\u81F4` : `\u6708\u4EFD\u6570\u91CF\u4E3A${months.length}\uFF0C\u9700\u898112\u4E2A\u6708`;
+    console.error(`[render][warn] \u6D41\u6708\u98CE\u5411\u6761\u5DF2\u9690\u85CF\uFF1A${why}`);
+    return "";
+  }
+  const directionRank = { \u987A: 1, \u5E73: 0, \u9006: -1 };
+  const scoreOf = (m) => Number.isFinite(Number(m?.\u987A\u9006?.\u53D1\u7528)) ? Number(m.\u987A\u9006.\u53D1\u7528) : directionRank[m?.\u987A\u9006?.\u65B9\u5411] ?? 0;
+  let best = months[0], worst = months[0];
+  for (const month of months.slice(1)) {
+    if (scoreOf(month) > scoreOf(best)) best = month;
+    if (scoreOf(month) < scoreOf(worst)) worst = month;
+  }
+  const dirInfo = {
+    \u987A: { cls: "flow-up", mark: "\u25B2 \u987A" },
+    \u5E73: { cls: "flow-flat", mark: "\u25C6 \u5E73" },
+    \u9006: { cls: "flow-down", mark: "\u25BC \u9006" }
+  };
+  const cells = months.map((month) => {
+    const direction = safeClass(month?.\u987A\u9006?.\u65B9\u5411, ["\u987A", "\u5E73", "\u9006"], "\u5E73");
+    const info = dirInfo[direction];
+    return `<div class="month-cell ${info.cls}"><span class="month-term">${escapeHtml(month?.\u8282\u6C14 || month?.\u7EA6\u519C\u5386\u6708 || "")}</span><span class="month-gz">${escapeHtml(month?.\u5E72\u652F || "")}</span><span class="month-dir">${info.mark}</span></div>`;
+  }).join("");
+  const monthLabel = (m) => [m?.\u8282\u6C14 || m?.\u7EA6\u519C\u5386\u6708, m?.\u5E72\u652F].filter(Boolean).join("\xB7");
+  return `<section class="month-flow"><div class="month-flow-head"><b>${currentYear} \u5341\u4E8C\u6708\u98CE\u5411</b><span><strong>\u6700\u987A</strong> ${escapeHtml(monthLabel(best))}\u3000<strong>\u6700\u9006</strong> ${escapeHtml(monthLabel(worst))}</span></div><div class="month-grid">${cells}</div></section>`;
+}
+function baziStateBadge(direction, grade) {
+  const body = safeClass(grade, ["\u5F3A", "\u4E2D", "\u5F31"], "");
+  if (!body) return "";
+  const dir = safeClass(direction, ["\u987A", "\u5E73", "\u9006"], "\u5E73");
+  const dirMap = {
+    \u987A: { cls: "dir-up", mark: "\u25B2 \u987A" },
+    \u5E73: { cls: "dir-flat", mark: "\u25C6 \u5E73" },
+    \u9006: { cls: "dir-down", mark: "\u25BC \u9006" }
+  };
+  const bodyMap = { \u5F3A: "body-strong", \u4E2D: "body-mid", \u5F31: "body-weak" };
+  return `<span class="state-pair"><span class="dir-token ${dirMap[dir].cls}">${dirMap[dir].mark}</span><span class="body-token ${bodyMap[body]}">\u4F53${body}</span></span>`;
+}
+function applyBaziTimelineTriggers(data, chart) {
+  const items = selectedBaziInteractionItems(chart?.bazi?.enrichment);
+  const years = new Set(baziTriggerYears(items));
+  for (let i = 0; i < 5; i++) {
+    const year = Number(data[`timeline.${i}.year`]);
+    data[`timeline.${i}.trigger_html`] = years.has(year) ? `<span class="tl-trigger" title="\u8BE5\u5E74\u4E0E\u76D8\u5185\u6F5C\u4F0F\u5173\u7CFB\u7684\u5F15\u7206\u7A97\u53E3\u91CD\u5408" aria-label="\u5F15\u7206\u7A97\u53E3">\u23F3</span>` : "";
+  }
+}
 function shenshaByPillarBazi(chart) {
   const ss = chart.bazi?.enrichment?.\u795E\u715E;
-  const hits = ss?.lineage?.hits || ss?.hits || [];
+  const hits = hasOwn(ss, "lineage") ? ss?.lineage?.hits || [] : ss?.hits || [];
   const m = { \u5E74: [], \u6708: [], \u65E5: [], \u65F6: [] };
-  for (const h of hits) for (const pl of h.pillars || []) if (m[pl]) m[pl].push(`<span class="ss-name ${SS_POL[h.polarity] || "neutral"}">${h.name}</span>`);
+  for (const h of hits) for (const pl of h.pillars || []) if (m[pl]) {
+    m[pl].push(`<span class="ss-name ${SS_POL[h.polarity] || "neutral"}">${escapeHtml(h.name)}</span>`);
+  }
   return m;
 }
 function chartToFlatBazi(chart, currentYear) {
   const out = {};
   const bi = chart.bazi.birthInfo, bz = chart.bazi, en = bz.enrichment || {}, zw = chart.ziwei || {};
   currentYear = currentYear || (/* @__PURE__ */ new Date()).getFullYear();
+  out["algo.classics_html"] = "";
+  out["algo.insights_html"] = "";
+  out["algo.month_flow_html"] = "";
+  out["rare.block_html"] = "";
+  for (let i = 0; i < 5; i++) out[`timeline.${i}.trigger_html`] = "";
+  for (let i = 0; i < 10; i++) {
+    out[`dayun.${i}.state_html`] = "";
+    out[`liunian.${i}.state_html`] = "";
+  }
   const virtualAge = currentYear - bi.year + 1;
   const p2 = (n) => String(n).padStart(2, "0");
   out["meta.solar_date"] = `${bi.year}-${p2(bi.month)}-${p2(bi.day)} ${p2(bi.hour)}:${p2(bi.minute)}`;
   out["meta.true_solar_time"] = out["meta.solar_date"];
   out["meta.solar_correction"] = "\u672A\u505A\u771F\u592A\u9633\u65F6\u6821\u6B63\uFF08\u949F\u8868\u65F6\u95F4\uFF09";
-  out["meta.lunar_date"] = zw.lunarDate ? `${zw.lunarDate.year}\u5E74${zw.lunarDate.monthCn}\u6708${zw.lunarDate.dayCn}` : "-";
+  out["meta.lunar_date"] = zw.lunarDate ? escapeHtml(`${zw.lunarDate.year}\u5E74${zw.lunarDate.monthCn}\u6708${zw.lunarDate.dayCn}`) : "-";
   out["meta.gender"] = bi.gender === "male" ? "\u7537" : "\u5973";
   out["meta.age_virtual"] = String(virtualAge);
   out["meta.current_year"] = String(currentYear);
   const now = /* @__PURE__ */ new Date();
   out["meta.gen_time"] = `${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
-  out["meta.day_master"] = bz.dayMaster || bz.siZhu.day.gan;
+  out["meta.day_master"] = escapeHtml(bz.dayMaster || bz.siZhu.day.gan);
   out["meta.zodiac"] = ZODIAC[bz.siZhu.year.zhi] || "-";
-  out["meta.wangshuai"] = en.\u65FA\u8870?.verdict || "-";
-  out["meta.geju_full"] = en.\u683C\u5C40?.primary || "-";
+  out["meta.wangshuai"] = escapeHtml(en.\u65FA\u8870?.verdict || "-");
+  out["meta.geju_full"] = escapeHtml(en.\u683C\u5C40?.primary || "-");
   out["meta.qiyun"] = bz.dayunStart != null ? `${bz.dayunStart}\u5C81\u8D77\u8FD0` : "-";
   out["meta.name"] = "\u547D\u4E3B";
   out["meta.birthplace"] = "-";
-  out["meta.minggong"] = en.\u547D\u5BAB || "-";
-  out["meta.taiyuan"] = en.\u80CE\u5143 || "-";
+  out["meta.minggong"] = escapeHtml(en.\u547D\u5BAB || "-");
+  out["meta.taiyuan"] = escapeHtml(en.\u80CE\u5143 || "-");
   out["meta.direction_note"] = "";
-  const cangGanFmt = (arr) => (arr || []).map((x) => `${x.gan}(${x.shiShen || ""})`).join(" ");
+  const cangGanFmt = (arr) => (arr || []).map((x) => `${escapeHtml(x.gan)}(${escapeHtml(x.shiShen || "")})`).join(" ");
   const cnMap = { year: "\u5E74", month: "\u6708", day: "\u65E5", hour: "\u65F6" };
   const ssP = shenshaByPillarBazi(chart);
   for (const k of ["year", "month", "day", "hour"]) {
     const gz = bz.siZhu[k];
-    out[`bazi.${k}.gan`] = gz.gan;
-    out[`bazi.${k}.zhi`] = gz.zhi;
+    out[`bazi.${k}.gan`] = escapeHtml(gz.gan);
+    out[`bazi.${k}.zhi`] = escapeHtml(gz.zhi);
     out[`bazi.${k}.gan_wx`] = GAN_WX[gz.gan] || "-";
     out[`bazi.${k}.zhi_wx`] = ZHI_WX[gz.zhi] || "-";
-    if (k !== "day") out[`bazi.${k}.shiShen`] = bz.shiShen?.[k] || "-";
+    if (k !== "day") out[`bazi.${k}.shiShen`] = escapeHtml(bz.shiShen?.[k] || "-");
     out[`bazi.${k}.cangGanHtml`] = cangGanFmt(bz.cangGan?.[k]);
-    out[`bazi.${k}.zhangSheng`] = bz.zhangSheng?.[k] || "-";
-    out[`bazi.${k}.ziZuo`] = en.\u81EA\u5750?.[cnMap[k]] || en.\u81EA\u5750?.[k] || "-";
-    out[`bazi.${k}.naYin`] = bz.naYin?.[k] || "-";
+    out[`bazi.${k}.zhangSheng`] = escapeHtml(bz.zhangSheng?.[k] || "-");
+    out[`bazi.${k}.ziZuo`] = escapeHtml(en.\u81EA\u5750?.[cnMap[k]] || en.\u81EA\u5750?.[k] || "-");
+    out[`bazi.${k}.naYin`] = escapeHtml(bz.naYin?.[k] || "-");
     out[`bazi.${k}.shenshaHtml`] = (ssP[cnMap[k]] || []).join(" ") || "\u2014";
   }
   const wx = en.\u4E94\u884C\u7EDF\u8BA1?.withCangGan || en.\u4E94\u884C\u7EDF\u8BA1?.surface || en.\u4E94\u884C\u7EDF\u8BA1 || {};
@@ -352,48 +506,54 @@ function chartToFlatBazi(chart, currentYear) {
   out["dm.deshi_mark"] = dsm;
   const sc = en.\u65FA\u8870?.score ?? 0;
   out["dm.score_pct"] = String(Math.max(0, Math.min(100, Math.round((sc + 10) * 5))));
-  out["dm.score_label"] = en.\u65FA\u8870?.verdict || "-";
-  out["dm.verdict"] = en.\u65FA\u8870?.verdict || "-";
-  out["geju.name"] = en.\u683C\u5C40?.primary || "-";
-  out["geju.confidence"] = en.\u683C\u5C40?.confidence || "-";
-  out["geju.chenge"] = en.\u683C\u5C40?.chenge || (en.\u683C\u5C40?.primary && en.\u683C\u5C40.primary !== "-" ? "\u6210\u683C" : "-");
-  const allHits = en.\u795E\u715E?.lineage?.hits || en.\u795E\u715E?.hits || [];
-  out["shensha.list_html"] = allHits.length ? allHits.map((h) => `<span class="ss-name ${SS_POL[h.polarity] || "neutral"}">${h.name}</span>`).join(" ") : "\u2014";
+  out["dm.score_label"] = escapeHtml(en.\u65FA\u8870?.verdict || "-");
+  out["dm.verdict"] = escapeHtml(en.\u65FA\u8870?.verdict || "-");
+  out["geju.name"] = escapeHtml(en.\u683C\u5C40?.primary || "-");
+  out["geju.confidence"] = escapeHtml(en.\u683C\u5C40?.confidence || "-");
+  out["geju.chenge"] = escapeHtml(en.\u683C\u5C40?.chenge || (en.\u683C\u5C40?.primary && en.\u683C\u5C40.primary !== "-" ? "\u6210\u683C" : "-"));
+  const ssView = en.\u795E\u715E;
+  const allHits = hasOwn(ssView, "lineage") ? ssView?.lineage?.hits || [] : ssView?.hits || [];
+  out["shensha.list_html"] = allHits.length ? allHits.map((h) => `<span class="ss-name ${SS_POL[h.polarity] || "neutral"}">${escapeHtml(h.name)}</span>`).join(" ") : "\u2014";
   const yaX = en.\u7528\u795E\u5EFA\u8BAE;
   if (yaX?.\u51FA\u53E3) {
     const ck = yaX.\u51FA\u53E3;
-    out["yongshen.yong_html"] = wxChip(yaX.\u8FB9\u754C\u76D8 || !yaX.\u6536\u655B ? `\u62A4\u4F53:${(yaX.\u8C03\u5019?.\u53D6\u5E72 || []).join("")}<br>\u53D1\u7528:${(yaX.\u683C\u5C40?.\u53D6 || []).join("\u3001")}` : (yaX.\u5171\u8BC6\u7528\u795E || []).join("\u3001"));
-    out["yongshen.xi_text"] = wxChip((ck.\u559C\u795E || []).join("\u3001"));
-    out["yongshen.ji_html"] = (ck.\u5FCC\u795E || []).length ? wxChip(ck.\u5FCC\u795E.join("\u3001")) : "\u65E0\u660E\u663E\u5FCC\u795E(\u4E34\u754C\u76D8,\u4EE5\u6D41\u901A\u4E3A\u8981)";
-    out["yongshen.tiaohou_html"] = wxChip(ck.\u8C03\u5019\u63D0\u793A || "-");
-    out["yongshen.divergence_note"] = [ck.divergence, ck.\u7F3A\u8865\u8BF4\u660E].filter(Boolean).join("\u3000");
-    out["kaiyun.yong_html"] = wxChip((ck.\u5F00\u8FD0\u7528\u795E || []).join("\u3001"));
-    out["kaiyun.fang_html"] = (ck.\u5409\u65B9 || []).join("\xB7");
-    out["kaiyun.se_html"] = (ck.\u5409\u8272 || []).join("\xB7");
-    out["kaiyun.shu_html"] = (ck.\u5409\u6570 || []).join("\u3001");
-    out["kaiyun.tiaohou_html"] = wxChip(ck.\u8C03\u5019\u63D0\u793A || "-");
+    out["yongshen.yong_html"] = yaX.\u8FB9\u754C\u76D8 || !yaX.\u6536\u655B ? `\u62A4\u4F53:${wxChip(escapeHtml((yaX.\u8C03\u5019?.\u53D6\u5E72 || []).join("")))}<br>\u53D1\u7528:${wxChip(escapeHtml((yaX.\u683C\u5C40?.\u53D6 || []).join("\u3001")))}` : wxChip(escapeHtml((yaX.\u5171\u8BC6\u7528\u795E || []).join("\u3001")));
+    out["yongshen.xi_text"] = wxChip(escapeHtml((ck.\u559C\u795E || []).join("\u3001")));
+    out["yongshen.ji_html"] = (ck.\u5FCC\u795E || []).length ? wxChip(escapeHtml(ck.\u5FCC\u795E.join("\u3001"))) : "\u65E0\u660E\u663E\u5FCC\u795E(\u4E34\u754C\u76D8,\u4EE5\u6D41\u901A\u4E3A\u8981)";
+    out["yongshen.tiaohou_html"] = wxChip(escapeHtml(ck.\u8C03\u5019\u63D0\u793A || "-"));
+    out["yongshen.divergence_note"] = [ck.divergence, ck.\u7F3A\u8865\u8BF4\u660E].filter(Boolean).map(escapeHtml).join("\u3000");
+    out["kaiyun.yong_html"] = wxChip(escapeHtml((ck.\u5F00\u8FD0\u7528\u795E || []).join("\u3001")));
+    out["kaiyun.fang_html"] = escapeHtml((ck.\u5409\u65B9 || []).join("\xB7"));
+    out["kaiyun.se_html"] = escapeHtml((ck.\u5409\u8272 || []).join("\xB7"));
+    out["kaiyun.shu_html"] = escapeHtml((ck.\u5409\u6570 || []).join("\u3001"));
+    out["kaiyun.tiaohou_html"] = wxChip(escapeHtml(ck.\u8C03\u5019\u63D0\u793A || "-"));
     out["__algo_yongshen"] = "1";
   }
+  const classicHits = Array.isArray(en.\u8C03\u5019\u6761\u4F8B?.\u547D\u4E2D) ? en.\u8C03\u5019\u6761\u4F8B.\u547D\u4E2D : [];
+  const insightBadges = baziInsightBadges(yaX?.\u51FA\u53E3);
+  out["algo.classics_html"] = baziClassicsCard(classicHits, insightBadges.length === 0);
+  out["algo.insights_html"] = baziInsightsCard(insightBadges, classicHits.length === 0);
+  out["algo.month_flow_html"] = baziMonthFlowCard(en.\u6D41\u6708\u5F15\u52A8, currentYear);
   const ix = en.\u4F5C\u7528\u5173\u7CFB;
-  const ixView = ix?.lineage || ix;
-  out["hechong.policy"] = ix?.lineage ? `${ix.lineage.name}\u89C4\u5219\u96C6` : ix ? "\u901A\u5219(\u4E0D\u9650\u6D41\u6D3E)" : "-";
+  const ixView = selectedBaziInteractionView(en);
+  out["hechong.policy"] = escapeHtml(hasOwn(ix, "lineage") ? `${ix?.lineage?.name || "\u6240\u9009\u6D41\u6D3E"}\u89C4\u5219\u96C6` : ix ? "\u901A\u5219(\u4E0D\u9650\u6D41\u6D3E)" : "-");
   const stCls = (st) => st === "\u751F\u6548" || st === "\u6210\u5C40" || st === "\u5408\u800C\u5316" ? "st-on" : st === "\u88AB\u89E3" || st === "\u88AB\u7ECA" || st === "\u5408\u800C\u4E0D\u5316(\u7ECA)" ? "st-off" : "st-mid";
-  const ixItems = ixView?.items || [];
+  const ixItems = Array.isArray(ixView?.items) ? ixView.items : [];
   out["hechong.rows_html"] = ixItems.length ? ixItems.map(
-    (r) => `<div class="hc-row"><span class="hc-type">${r.type}</span><span class="hc-mem">${(r.members || []).join("")}(${(r.pillars || []).join("-")}\xB7${r.distance})</span><span class="hc-status ${stCls(r.status)}">\u3010${r.status}\u3011</span><span class="hc-cause">${r.cause || ""}</span></div>`
+    (r) => `<div class="hc-row"><span class="hc-type">${escapeHtml(r.type)}</span><span class="hc-mem">${escapeHtml((r.members || []).join(""))}(${escapeHtml((r.pillars || []).join("-"))}\xB7${escapeHtml(r.distance)})</span><span class="hc-status ${stCls(r.status)}">\u3010${escapeHtml(r.status)}\u3011</span><span class="hc-cause">${escapeHtml(r.cause || "")}${baziTriggerDetail(r)}</span></div>`
   ).join("") : '<div class="hc-row"><span class="hc-cause">\u672C\u76D8\u5E72\u652F\u4E4B\u95F4\u65E0\u663E\u8457\u5408\u51B2\u5211\u5BB3\u5173\u7CFB</span></div>';
   const ys = en.\u8FD0\u5C81\u5F15\u52A8;
   const ysRows = [];
   for (const dstep of ys?.\u5927\u8FD0\u5F15\u52A8 || []) {
     for (const h of dstep.hits || []) ysRows.push(
-      `<div class="hc-row"><span class="hc-type">${h.type}</span><span class="hc-mem">\u5927\u8FD0${dstep.\u5E72\u652F} ${dstep.\u5E74\u9F84}</span><span class="hc-cause">${h.desc}</span></div>`
+      `<div class="hc-row"><span class="hc-type">${escapeHtml(h.type)}</span><span class="hc-mem">\u5927\u8FD0${escapeHtml(dstep.\u5E72\u652F)} ${escapeHtml(dstep.\u5E74\u9F84)}</span><span class="hc-cause">${escapeHtml(h.desc)}</span></div>`
     );
   }
   for (const y of ys?.\u5F53\u524D\u5927\u8FD0\u6D41\u5E74?.\u6D41\u5E74 || []) {
     if (y.\u5E74 < currentYear || y.\u5E74 >= currentYear + 5) continue;
     const all = [...y.vs\u539F\u5C40 || [], ...y.vs\u5927\u8FD0 || []];
     if (all.length) ysRows.push(
-      `<div class="hc-row"><span class="hc-type">\u6D41\u5E74</span><span class="hc-mem">${y.\u5E74} ${y.\u5E72\u652F}</span><span class="hc-cause">${all.map((h) => `[${h.type}]`).join("")} ${all.map((h) => h.desc.replace(/^(大运|流年)/, "")).join(";")}</span></div>`
+      `<div class="hc-row"><span class="hc-type">\u6D41\u5E74</span><span class="hc-mem">${escapeHtml(y.\u5E74)} ${escapeHtml(y.\u5E72\u652F)}</span><span class="hc-cause">${all.map((h) => `[${escapeHtml(h.type)}]`).join("")} ${all.map((h) => escapeHtml(String(h.desc || "").replace(/^(大运|流年)/, ""))).join(";")}</span></div>`
     );
   }
   out["yunsui.rows_html"] = ysRows.length ? ysRows.join("") : '<div class="hc-row"><span class="hc-cause">\u8FD0\u5C81\u4E0E\u539F\u5C40\u65E0\u663E\u8457\u5F15\u52A8</span></div>';
@@ -402,13 +562,13 @@ function chartToFlatBazi(chart, currentYear) {
   out["shensha.reading_html"] = "-";
   const bw = en.\u516B\u7EF4\u7ED3\u6784;
   if (bw) {
-    out["mbti.type"] = bw.\u6700\u50CF\u7C7B\u578B;
-    out["mbti.alt"] = bw.\u5907\u9009\u7C7B\u578B;
-    out["mbti.alt2"] = bw.\u5907\u90092 || "\u2014";
-    out["mbti.conf"] = bw.\u7F6E\u4FE1;
-    out["mbti.dom"] = bw.\u4E3B\u5BFC;
-    out["mbti.aux"] = bw.\u8F85\u52A9;
-    out["mbti.bars_html"] = (bw.\u516B\u7EF4 || []).slice(0, 4).map((x) => `<span><b>${x.\u529F\u80FD}</b> ${x.\u767E\u5206\u6BD4}%</span>`).join(" ");
+    out["mbti.type"] = escapeHtml(bw.\u6700\u50CF\u7C7B\u578B);
+    out["mbti.alt"] = escapeHtml(bw.\u5907\u9009\u7C7B\u578B);
+    out["mbti.alt2"] = escapeHtml(bw.\u5907\u90092 || "\u2014");
+    out["mbti.conf"] = escapeHtml(bw.\u7F6E\u4FE1);
+    out["mbti.dom"] = escapeHtml(bw.\u4E3B\u5BFC);
+    out["mbti.aux"] = escapeHtml(bw.\u8F85\u52A9);
+    out["mbti.bars_html"] = (bw.\u516B\u7EF4 || []).slice(0, 4).map((x) => `<span><b>${escapeHtml(x.\u529F\u80FD)}</b> ${escapeHtml(x.\u767E\u5206\u6BD4)}%</span>`).join(" ");
     out["mbti.char_svg"] = guFengCharSvg(bw.\u6700\u50CF\u7C7B\u578B || "XXXX", bi.gender);
   } else {
     out["mbti.type"] = "-";
@@ -430,12 +590,12 @@ function chartToFlatBazi(chart, currentYear) {
       out[`dayun.${i}.luck_class`] = "luck-ping";
       continue;
     }
-    out[`dayun.${i}.gz`] = d.ganZhi.gan + d.ganZhi.zhi;
+    out[`dayun.${i}.gz`] = escapeHtml(d.ganZhi.gan + d.ganZhi.zhi);
     out[`dayun.${i}.year_range`] = `${d.startYear || "-"}-${d.endYear || "-"}`;
     out[`dayun.${i}.age_note`] = `\u7EA6${d.startAge}-${d.endAge}\u5C81`;
     out[`dayun.${i}.age_range`] = `${d.startAge}-${d.endAge}`;
     out[`dayun.${i}.start_year`] = String(d.startYear || "-");
-    out[`dayun.${i}.shishen`] = (d.ganShiShen || "").slice(0, 1) + (d.zhiShiShen || "").slice(0, 1);
+    out[`dayun.${i}.shishen`] = escapeHtml((d.ganShiShen || "").slice(0, 1) + (d.zhiShiShen || "").slice(0, 1));
     out[`dayun.${i}.current_class`] = curDy && d === curDy ? "current" : "";
     out[`dayun.${i}.luck_class`] = "luck-ping";
   }
@@ -459,8 +619,8 @@ function chartToFlatBazi(chart, currentYear) {
       continue;
     }
     out[`liunian.${i}.year`] = String(ln.year);
-    out[`liunian.${i}.gz`] = ln.ganZhi.gan + ln.ganZhi.zhi;
-    out[`liunian.${i}.shishen`] = ln.ganShiShen ? ln.ganShiShen.slice(0, 1) + (ln.zhiShiShen?.slice(0, 1) || "") : "";
+    out[`liunian.${i}.gz`] = escapeHtml(ln.ganZhi.gan + ln.ganZhi.zhi);
+    out[`liunian.${i}.shishen`] = escapeHtml(ln.ganShiShen ? ln.ganShiShen.slice(0, 1) + (ln.zhiShiShen?.slice(0, 1) || "") : "");
     out[`liunian.${i}.current_class`] = ln.age === virtualAge ? "current" : "";
     out[`liunian.${i}.luck_class`] = "luck-ping";
   }
@@ -475,6 +635,7 @@ function chartToFlatBazi(chart, currentYear) {
       if (!s) continue;
       out[`dayun.${i}.luck_class`] = clsOf(s.\u65B9\u5411);
       out[`dayun.${i}.amp_label`] = s.\u632F\u5E45 === "\u9759" ? "" : s.\u632F\u5E45;
+      out[`dayun.${i}.state_html`] = baziStateBadge(s.\u65B9\u5411, s.\u4F53\u6863);
     }
     const byYear = {};
     for (const x of snX.\u6D41\u5E74 || []) byYear[x.\u5E74] = x;
@@ -485,6 +646,7 @@ function chartToFlatBazi(chart, currentYear) {
       if (!s) continue;
       out[`liunian.${i}.luck_class`] = clsOf(s.\u65B9\u5411);
       out[`liunian.${i}.amp_label`] = s.\u632F\u5E45 === "\u9759" ? "" : s.\u632F\u5E45;
+      out[`liunian.${i}.state_html`] = baziStateBadge(s.\u65B9\u5411, s.\u4F53\u6863);
     }
     out["__algo_luck"] = "1";
   }
@@ -559,7 +721,8 @@ function analysisToFlatZiwei(a) {
   return out;
 }
 function guFengCharSvg(type, gender) {
-  const t = (type || "XXXX").toUpperCase();
+  const rawType = String(type || "").toUpperCase();
+  const t = /^[EI][NS][TF][JP]$/.test(rawType) ? rawType : "XXXX";
   const F = gender === "female" || gender === "\u5973";
   const N = t[1] === "N", T = t[2] === "T", J = t[3] === "J", E = t[0] === "E";
   const grp = N ? T ? "NT" : "NF" : J ? "SJ" : "SP";
@@ -751,6 +914,8 @@ function main() {
       delete chartFlat["__algo_luck"];
     }
     data = { ...chartFlat, ...analysisFlat };
+    data["rare.block_html"] = baziRarePhenomenaBlock(chart?.bazi?.enrichment?.\u7F55\u8C61 || [], analysis?.rare?.reading_html);
+    applyBaziTimelineTriggers(data, chart);
   } else if (mode === "ziwei") {
     data = { ...chartToFlat(chart, args.currentYear ? +args.currentYear : void 0), ...analysisToFlatZiwei(analysis) };
     const bwZ = chart.bazi?.enrichment?.\u516B\u7EF4\u7ED3\u6784;

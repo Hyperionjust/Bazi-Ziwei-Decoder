@@ -29,7 +29,9 @@ bazi-ziwei-decoder/
 │   ├── lineages.json                 ← 流派配置（用神模型/神煞白名单权重/支柱侧重）
 │   ├── package.json                  ← 依赖声明 + npm test（fixtures 一键跑法）
 │   ├── yiqi-core/                    ← Yiqi 算法（已 vendored 入库，无外部依赖）
-│   ├── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰/调候/关系/整柱/时辰边界/置信度四维/流月/多年对比）
+│   ├── bazi-enrich/                  ← enrichBazi 补层（格局/旺衰 v3/调候/关系/整柱/时辰边界/置信度四维/流月/多年对比）
+│   │   ├── wang-shuai-v3.ts          ← ⭐ F0 v6 冻结调整层：重复耗方支群势 + 月柱普通六冲折正向月令支持
+│   │   ├── interactions.ts           ← ⭐ 合冲刑害裁决 + 稳定关系 ID；open 先裁决后供旺衰与解读同源复用
 │   │   └── tiaohou-tiaoli.ts         ← ⭐ 调候条例求值器（受控词表 + DSL 解析，对盘面求值每条「若」；v3.11.0 M1 立）
 │   └── fixtures/                     ← 回归测试
 │       ├── test-shensha.ts           ← 神煞 13 例
@@ -40,12 +42,16 @@ bazi-ziwei-decoder/
 │       ├── test-liuyue.ts            ← 流月引动
 │       ├── test-compare.ts           ← 多年对比
 │       ├── test-spec-sync.ts         ← ⭐ 规格漂移哨兵（spec.json ↔ 提示词/SKILL 数字比对）
+│       ├── test-poster-v2.ts         ← ⭐ 八字海报 v2 五项算法块 + 新旧兼容 + source↔dist
 │       ├── test-tiaohou.ts           ← ⭐ 调候表结构 + 快照锁 + 寒暖不变式
 │       ├── test-shunni.ts            ← ⭐ 顺逆双轴 + 验收实况点
+│       ├── test-wangshuai-v3.ts      ← ⭐ 22 例生产对齐 + F1/F2/F3 正反例 + 七项账本
+│       ├── test-lineage-invariance.ts← ⭐ 五派镜片下旺衰/open关系/confidence 不变
+│       ├── test-wangshuai-distribution.ts ← ⭐ 两种子 5000 盘 v3.12→v3.13 分布门
 │       ├── check-template.ts         ← 海报模板完整性
 │       ├── test-golden.ts            ← ⭐ 随包样例即金标（四线 sample-analysis 过对应 mode 体检）
 │       ├── bless-tiaoli-relations.ts ← 条例「关系/蕴含」生成脚本（重跑会冲掉手工块——跑完须回填 EXPECTED_TIAOLI_HASH）
-│       └── calibration/              ← 校准回测脚手架（schema + runner）；classics/ 典籍命例白名单入库（韦千里 7 例），现实事件类仍不入库
+│       └── calibration/              ← 校准回测 + 韦千里 22 例语义金标/算法快照/F0 v1–v6 审计/5000 盘冻结基线
 ├── prompts/
 │   ├── disclaimer-preamble.md        ← ⭐ 成长心态前置声明（八字/紫微/综合三线开头必出）
 │   ├── output-mode-B.md              ← ⭐ 总领速览 + 按需下钻 输出模式规则
@@ -65,8 +71,10 @@ bazi-ziwei-decoder/
 │   ├── report-ziwei-poster.html      ← 紫微独立海报模板（十二宫盘可视化）
 │   └── report-mbti-poster.html       ← MBTI 海报模板（实测×底盘差异版块）
 ├── examples/                         ← 四条海报线各一套金标样例（chart / analysis / 渲染产物）
-└── docs/                             ← release-notes/（分批次变更摘要；版本流水见 CHANGELOG.md）
-    ├── 条例撰写规范.md               ← ⭐ 条例怎么写/词表边界/影印本抽查法/每批必踩的坑（M2 立，M3+ 沿用）
+└── docs/                             ← 当前工单 + release-notes/（版本流水见 CHANGELOG.md）
+    ├── 工单-v3.13-旺衰v3.md          ← ⭐ 已立项：群势/冲根/双轴校准，先证据门后生产改分
+    ├── 工单-v3.14-八字海报v2.md      ← 已立项：确定性新区块可视化（排在 v3.13 后）
+    ├── 条例撰写规范.md               ← 条例怎么写/词表边界/影印本抽查法
     └── archive/                      ← 已完结工单归档（v3.11 工单发版后移入）
 ```
 

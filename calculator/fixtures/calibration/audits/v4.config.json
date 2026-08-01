@@ -1,0 +1,22 @@
+{
+  "schema_version": 4,
+  "audit_id": "v3.13-f0-v4",
+  "declared_at": "2026-08-01",
+  "extends": "v3.config.json",
+  "parent_sha256": "43ce5f3ab956f493ec509cb79e773ca1a07ee101d0d20756b573a3ac400a1000",
+  "formula_revision": "v4-exact-repeat-counted-root",
+  "amendment_reason": "v3 无发布候选；最小非零 active_discount=0.25 在同柱两冲累计后过粗，且同十神类别分组会扩大到没有重复支的案例。",
+  "scope_control": "source gold、22 例、其他参数范围、发布门、排序、留一和邻格规则均不变。仅把群势边界收窄为同支重复，并将有实锤冲突的 active_discount 步长从 0.25 细化到 0.1。",
+  "fixed_formula": {
+    "linear_branch_drain": "仅年/日/时支；只有完全相同且本气属于克泄耗侧的地支重复≥2才启动。repeat_base 为这些重复支全部克泄耗藏干的线性单位；没有重复支的盘为0。",
+    "opposition_synergy": "same_class_echo 与 repeat_base 分列：重复支本气的泄/耗/克类别若也在年/月/时干透出，echo 单位等于该重复支 repeat_base；无同类别透干则 echo=0。",
+    "root_discount": "只计冲及月柱的非库六冲；辰戌、丑未保留展示但 score_eligible=false。只折月支正向得令+长生（各自负值按0），按月柱关系次数在候选内累计并封顶100%；年/日/时得地、会局和任何天干通根加成都不折。",
+    "gold_boundary": "直接冲根金标仅阮玲玉巳亥。袁克文虽有两条寅申冲，但月申得令/长生本为负且年寅不在折损范围，F2=0；其他关系只用于守回归，不外推准确率。"
+  },
+  "grid": {
+    "active_discount": { "min": 0, "max": 1, "step": 0.1 }
+  },
+  "release_gates": {
+    "causal_f2_joint": "阮玲玉 group_delta<0 且 root_delta<0，两条月支生效巳亥冲均入账，最终为弱。"
+  }
+}

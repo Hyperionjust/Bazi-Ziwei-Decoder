@@ -1,0 +1,18 @@
+{
+  "schema_version": 3,
+  "audit_id": "v3.13-f0-v3",
+  "declared_at": "2026-08-01",
+  "extends": "v2.config.json",
+  "parent_sha256": "cb0e4c857f4ab1c09d8cf44ecde768ace0e5a07d4976d5d1da5fbdbd8ce89ef5",
+  "formula_revision": "v3-counted-root-causal-gates",
+  "amendment_reason": "v2 首跑后发现冲次数在乘折损率前被错误布尔化，且发布门没有编码工单已有的 F1/F2 因果验收；v2 结果原样留档，本版本明示修复。",
+  "scope_control": "数值范围、步长、方向守门、选择顺序、留一和邻格规则全部继承 v1/v2；不新增命例、不改 source gold、不扩大球门。",
+  "fixed_formula": {
+    "root_discount": "按柱保留 active_count/reduced_count；候选折损率=min(100%, active_count×active_discount + reduced_count×reduced_discount)，再乘该柱可归因正向支持。两条冲不再先压成一条。",
+    "opposition_synergy": "显式分列 repeat_base 与 same_class_echo：顾的两亥耗+癸耗、周的两午克+丁克均有 echo；阮两亥耗但无财星透干，仅有 repeat_base，须与两条冲根累计共同过门。"
+  },
+  "release_gates": {
+    "causal_f1": "顾维钧、周信芳的 group_delta 必须 < 0。",
+    "causal_f2": "阮玲玉 root_delta 必须 < 0，月支两条生效六冲均在 adjudicated_six_clashes，且最终方向为弱。"
+  }
+}

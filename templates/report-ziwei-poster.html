@@ -182,6 +182,28 @@
     display: flex; align-items: center; justify-content: center; text-align: center;
     font-size: 9px; line-height: 1.2; letter-spacing: 1px; transform: rotate(-3deg);
   }
+  /* ============ TRADITIONAL PAPER SYSTEM + NOVICE GUIDE ============ */
+  :root { --jade-deep: #28623d; --gold: #a07c4a; }
+  body { padding: 24px; background-image: repeating-linear-gradient(7deg, rgba(90,72,48,.025) 0, rgba(90,72,48,.025) 1px, transparent 1px, transparent 7px), radial-gradient(circle at 18% 20%, rgba(42,74,114,.05), transparent 48%); }
+  .report { position: relative; isolation: isolate; overflow: hidden; border: 1px solid #8e795d; outline: 5px double rgba(160,124,74,.22); outline-offset: -9px; box-shadow: 0 18px 54px rgba(50,36,20,.12); }
+  .report::before, .report::after { content: ""; position: absolute; width: 62px; height: 62px; pointer-events: none; z-index: 3; opacity: .55; background: linear-gradient(var(--gold),var(--gold)) 0 0/36px 1px no-repeat, linear-gradient(var(--gold),var(--gold)) 0 0/1px 36px no-repeat, linear-gradient(var(--vermillion),var(--vermillion)) 8px 8px/22px 1px no-repeat, linear-gradient(var(--vermillion),var(--vermillion)) 8px 8px/1px 22px no-repeat; }
+  .report::before { top: 13px; left: 13px; } .report::after { right: 13px; bottom: 13px; transform: rotate(180deg); }
+  .report > * { position: relative; z-index: 1; }
+  .header { position: relative; padding: 6px 4px 25px; border-bottom: 0; background: linear-gradient(90deg, rgba(193,67,47,.035), transparent 44%, rgba(46,109,164,.025)); }
+  .header::after, .section h2::after { content: ""; opacity: .7; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='10' viewBox='0 0 42 10'%3E%3Cpath d='M0 8h16V2H6v3h7M21 2h16v6H27V5h7' fill='none' stroke='%23a07c4a' stroke-width='1'/%3E%3C/svg%3E"); background-repeat: repeat-x; background-position: center; }
+  .header::after { position: absolute; left: 0; right: 0; bottom: 0; height: 9px; }
+  .section h2::after { height: 8px; min-width: 34px; flex: 1; }
+  .seal { background: rgba(193,67,47,.035); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(193,67,47,.55); }
+  .reader-guide { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; margin: -2px 0 20px; padding: 11px 15px; border: 1px solid rgba(160,124,74,.55); border-left: 4px solid var(--vermillion); background: linear-gradient(90deg, rgba(250,246,236,.92), rgba(235,229,213,.72)); }
+  .reader-guide .guide-title { color: var(--vermillion-deep); font-size: 12px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+  .reader-guide .guide-copy { font-size: 11px; color: var(--ink-soft); line-height: 1.75; } .reader-guide b { font-weight: 900; }
+  .guide-good { color: var(--jade-deep); } .guide-warn { color: var(--vermillion-deep); }
+  .section { position: relative; padding: 14px 16px; border: 1px solid rgba(160,124,74,.46); background: linear-gradient(145deg, rgba(250,246,236,.82), rgba(245,241,232,.68)); box-shadow: inset 3px 0 0 rgba(160,124,74,.13); }
+  .section::before { content: ""; position: absolute; top: -1px; right: -1px; width: 16px; height: 16px; border-top: 2px solid rgba(160,124,74,.72); border-right: 2px solid rgba(160,124,74,.72); }
+  .section h2 { border-bottom: 0; } .section h2 small { font-size: 10px; color: var(--ink-soft); font-weight: 500; letter-spacing: 0; }
+  .hl-good { color: var(--jade-deep); font-weight: 900; background: linear-gradient(transparent 70%, rgba(74,124,78,.17) 70%); }
+  .hl { color: var(--vermillion-deep); font-weight: 800; background: linear-gradient(transparent 72%, rgba(193,67,47,.10) 72%); }
+  @media (max-width: 720px) { body { padding: 0; overflow-x: hidden; } .report { width: 100%; max-width: 100%; padding: 16px; box-shadow: none; } .header { grid-template-columns: auto 1fr; } .h-char { width: 62px; } .header-right { grid-column: 1 / -1; text-align: left; } .reader-guide { grid-template-columns: 1fr; gap: 3px; } .info-bar { grid-template-columns: repeat(2,minmax(0,1fr)); } .ziwei-grid { height: 620px; } }
   @media print { html, body { background: var(--paper); } .report { max-width: none; } }
 </style>
 </head>
@@ -203,6 +225,11 @@
       <div class="meta-row">命主 {{ziwei.ming_zhu}} · 身主 {{ziwei.shen_zhu}}</div>
     </div>
   </header>
+
+  <aside class="reader-guide" aria-label="海报阅读说明">
+    <div class="guide-title">小白这样看</div>
+    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、贵人助力、适合方向或顺风窗口，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的消耗与风险。第一次看可跳过十二宫盘，直接从 01 开始读现实结论，再到 07—08 看时间，最后照 09 的建议行动。</div>
+  </aside>
 
   <div class="info-bar">
     <div class="info-cell"><div class="k">阳历</div><div class="v num">{{meta.solar_date}}</div></div>
@@ -329,39 +356,39 @@
   </div>
 
   <section class="section">
-    <h2><span class="num-box">01</span>命格主轴</h2>
+    <h2><span class="num-box">01</span>你这一生最看重什么 <small>命格主轴</small></h2>
     <div class="prose lead">{{z.axis_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">02</span>命身格局 · 三方四正</h2>
+    <h2><span class="num-box">02</span>你的性格与能力底盘 <small>命身格局 · 三方四正</small></h2>
     <div class="prose">{{z.mingshen_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">03</span>事业官禄</h2>
+    <h2><span class="num-box">03</span>事业怎么发展更顺 <small>工作环境与成长路径</small></h2>
     <div class="prose">{{z.career_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">04</span>财帛田宅</h2>
+    <h2><span class="num-box">04</span>钱从哪里来、怎么留住 <small>财帛田宅</small></h2>
     <div class="prose">{{z.wealth_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">05</span>婚恋情感</h2>
+    <h2><span class="num-box">05</span>感情与相处模式 <small>怎么爱人、怎样相处更顺</small></h2>
     <div class="prose">{{z.marriage_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">06</span>健康提示</h2>
+    <h2><span class="num-box">06</span>身体保养重点 <small>优先守住什么习惯</small></h2>
     <div class="prose">{{z.health_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">07</span>大限走向</h2>
+    <h2><span class="num-box">07</span>你正处在人生哪一段 <small>大限走向</small></h2>
     <div class="prose">{{z.daxian_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">08</span>重点流年</h2>
+    <h2><span class="num-box">08</span>哪些年份更有感 <small>宜进、宜稳、宜避险</small></h2>
     <div class="prose">{{z.liunian_html}}</div>
   </section>
   <section class="section">
-    <h2><span class="num-box">09</span>针对性建议</h2>
+    <h2><span class="num-box">09</span>日常可执行建议 <small>今天就能开始做</small></h2>
     <div class="prose">{{z.advice_html}}</div>
   </section>
 

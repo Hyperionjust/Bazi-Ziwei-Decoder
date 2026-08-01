@@ -1,7 +1,7 @@
 // 终验:参数 tBen=1.8 hu=1.8 thEx=12 + 置信公式改「只看中和带两界(±3/-2.5)」
 // 12 盘金标 + 韦例 tier + 200 盘总档分布,一次出全
 import { createChart } from './yiqi-core/index';
-import { enrichBazi } from './bazi-enrich/enrich';
+import { enrichOpen as enrichBazi } from './fixtures/support/open-policy';
 import { Tiangan, Dizhi, GAN_WUXING, ZHI_CANG_GAN, getShiShen, getChangSheng } from './bazi-enrich/tables';
 import { detectZhiRelations } from './bazi-enrich/zhi-relations';
 type P = '年'|'月'|'日'|'时';

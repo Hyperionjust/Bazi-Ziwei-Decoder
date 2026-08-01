@@ -48,9 +48,21 @@ for (const f of ['sample-bazi-report.html', 'sample-zonghe-report.html', 'sample
   const p = path.join(EX, f);
   if (!fs.existsSync(p)) { console.error(`❌ 缺渲染样例 ${f}`); fail++; continue; }
   const html = fs.readFileSync(p, 'utf-8');
-  const left = html.match(/\{\{[A-Za-z_0-9]+\}\}/g);
+  const left = html.match(/\{\{[^{}]+\}\}/g);
   if (left) { console.error(`❌ ${f} 残留未替换占位符 ${left.length} 处: ${left.slice(0, 3).join(',')}`); fail++; }
+  if (/>\s*(?:undefined|null)\s*</i.test(html)) { console.error(`❌ ${f} 出现 undefined/null 渲染残渣`); fail++; }
+  if (f === 'sample-bazi-report.html') {
+    const n = (needle: string) => html.split(needle).length - 1;
+    const checks: [boolean, string][] = [
+      [n('<section class="algo-card classics-card') === 1, '典出应出现 1 块'],
+      [n('<section class="algo-card insights-card') === 0, '无裁决/轴冲突时核心看点应隐藏'],
+      [n('<section class="month-flow">') === 1 && n('<div class="month-cell ') === 12, '流月条应出现且恰 12 月'],
+      [n('<span class="state-pair">') === 19, '护体档应随 9 步大运 + 10 流年出现'],
+      [n('<span class="tl-trigger"') === 0 && n('<span class="hc-trigger"') === 0, '无引爆窗口样例不得误挂 ⏳/详情'],
+    ];
+    for (const [pass, msg] of checks) if (!pass) { console.error(`❌ ${f} v3.14 条件块：${msg}`); fail++; }
+  }
 }
 
 if (fail) { console.error(`\n金标样例 ${fail} 处不合格`); process.exit(1); }
-console.log('✅ 全部通过 (四线金标样例 + 四份渲染产物)');
+console.log('✅ 全部通过 (四线金标样例 + 四份渲染产物 + v3.14 条件块)');

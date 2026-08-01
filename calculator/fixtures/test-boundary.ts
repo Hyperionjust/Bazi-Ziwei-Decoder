@@ -6,7 +6,7 @@ import { createChart, resolveSolarClock } from '../yiqi-core/index';
 import { getTiaoHou } from '../bazi-enrich/tiao-hou';
 import { judgeGeJu } from '../bazi-enrich/ge-ju';
 import { aggregateConfidenceTier } from '../bazi-enrich/confidence';
-import { enrichBazi } from '../bazi-enrich/enrich';
+import { enrichOpen as enrichBazi, judgeOpen as judgeWangShuai } from './support/open-policy';
 
 let failed = 0;
 function ok(cond: boolean, msg: string) { if (cond) console.log('✓', msg); else { console.log('✗', msg); failed++; } }
@@ -88,7 +88,6 @@ const zr8b = detectZhiRelations({ 年: '寅', 月: '卯', 日: '子', 时: '戌'
 ok(!zr8b.some(r => r.type === '拱会') && zr8b.some(r => r.type === '半会'), '寅卯=木方半会(修复前误报拱会辰)');
 
 // ── 9) 旺衰: 墓库不作衰论 / 极旺门槛抬高 ─────────────────────────────────────
-import { judgeWangShuai } from '../bazi-enrich/wang-shuai';
 const ws9 = judgeWangShuai({ 年: { gan: '甲', zhi: '寅' }, 月: { gan: '丙', zhi: '未' }, 日: { gan: '甲', zhi: '子' }, 时: { gan: '甲', zhi: '子' } } as any);
 ok(!(ws9.breakdown.details.join('').match(/墓 \(-3\)/)), '甲日主未月(墓): 长生修正不再判 -3(墓库有根)');
 const ws9b = judgeWangShuai({ 年: { gan: '丙', zhi: '午' }, 月: { gan: '甲', zhi: '午' }, 日: { gan: '丙', zhi: '午' }, 时: { gan: '甲', zhi: '午' } } as any);
@@ -113,7 +112,7 @@ ok(r10d.hour === 12 && r10d.minute === 30, '缺省 longitude: 完全不校正(�
 // 解读层只能读成两个独立信号,写出来就是「宜金」和「忌金」并列出现,自相矛盾还看不出
 // 为什么。现在把交集摆到明处 + 给出文硬约束。验收用两个公开命例(多案例制,不单盘校准)。
 {
-  const enrich = require('../bazi-enrich/enrich').enrichBazi;
+  const enrich = enrichBazi;
   const of = (y: number, m: number, d: number, h: number) => {
     const c: any = createChart({ year: y, month: m, day: d, hour: h, minute: 0, gender: 'male', isLunar: false, timeZone: 8 } as any);
     const sz = c.bazi.siZhu;

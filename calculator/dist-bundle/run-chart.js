@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// node_modules/lunar-typescript/dist/index.mjs
+// node_modules/.pnpm/lunar-typescript@1.8.6/node_modules/lunar-typescript/dist/index.mjs
 var _SolarUtil = class {
   static isLeapYear(year) {
     if (year < 1600) {
@@ -30326,6 +30326,486 @@ function wuXingMonthStatus(monthZhi) {
   return getWuXingMonthStatus(monthZhi);
 }
 
+// bazi-enrich/interactions.ts
+function assertInteractionPolicy(value, source = "interaction_policy") {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${source} \u7F3A\u5931\u6216\u4E0D\u662F\u5BF9\u8C61`);
+  }
+  const policy = value;
+  for (const key of ["he_jie_chong", "juju_jie_chongxing", "chongku_wei_kai"]) {
+    if (typeof policy[key] !== "boolean") throw new Error(`${source}.${key} \u5FC5\u987B\u662F boolean`);
+  }
+  if (!["no", "yes", "strong_only"].includes(String(policy.chong_po_he))) {
+    throw new Error(`${source}.chong_po_he \u975E\u6CD5: ${String(policy.chong_po_he)}`);
+  }
+  if (!["normal", "heavy"].includes(String(policy.chuan_weight))) {
+    throw new Error(`${source}.chuan_weight \u975E\u6CD5: ${String(policy.chuan_weight)}`);
+  }
+  if (policy.divergence_notes !== void 0 && typeof policy.divergence_notes !== "boolean") {
+    throw new Error(`${source}.divergence_notes \u5FC5\u987B\u662F boolean`);
+  }
+  for (const key of ["id", "note"]) {
+    if (policy[key] !== void 0 && typeof policy[key] !== "string") throw new Error(`${source}.${key} \u5FC5\u987B\u662F string`);
+  }
+  return policy;
+}
+var GAN10_TW = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+var ZHI12_TW = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+var SAN_XING_TW = [["\u5BC5", "\u5DF3", "\u7533"], ["\u4E11", "\u620C", "\u672A"]];
+function missingOfTriple(members, triples) {
+  for (const t of triples) {
+    if (members.every((m) => t.zhi.includes(m))) return t.zhi.filter((z) => !members.includes(z));
+  }
+  return [];
+}
+function computeTriggerWindows(items, dayun, fromYear) {
+  for (const r of items) {
+    if (r.kind !== "\u5730\u652F") continue;
+    let \u5F85 = [];
+    let \u65B9\u5F0F = null;
+    if (r.status === "\u865A\u62F1" && (r.type === "\u62F1\u5408" || r.type === "\u62F1\u4F1A")) {
+      \u5F85 = missingOfTriple(r.members, r.type === "\u62F1\u5408" ? SAN_HE : SAN_HUI);
+      \u65B9\u5F0F = "\u586B\u5B9E";
+    } else if (r.status === "\u534A\u5C40" && (r.type === "\u534A\u5408" || r.type === "\u534A\u4F1A")) {
+      \u5F85 = missingOfTriple(r.members, r.type === "\u534A\u5408" ? SAN_HE : SAN_HUI);
+      \u65B9\u5F0F = "\u8865\u5168\u6210\u5C40";
+    } else if (r.type === "\u76F8\u5211" && r.status === "\u51CF\u529B" && r.cause.includes("\u7F3A\u4E00")) {
+      \u5F85 = missingOfTriple(r.members, SAN_XING_TW.map((z) => ({ zhi: z })));
+      \u65B9\u5F0F = "\u51D1\u5168\u4E09\u5211";
+    }
+    if (!\u5F85.length || !\u65B9\u5F0F) continue;
+    const \u5E94\u671F = [];
+    for (const d of dayun || []) {
+      const z = d?.ganZhi?.zhi;
+      if (z && \u5F85.includes(z) && d.endYear >= fromYear)
+        \u5E94\u671F.push({ \u5E74: d.startYear, \u8F7D\u4F53: `\u5927\u8FD0${d.ganZhi.gan}${z}(${d.startYear}-${d.endYear})` });
+    }
+    for (let y = fromYear; y < fromYear + 12; y++) {
+      const z = ZHI12_TW[(y - 4) % 12];
+      if (\u5F85.includes(z)) \u5E94\u671F.push({ \u5E74: y, \u8F7D\u4F53: `\u6D41\u5E74${GAN10_TW[(y - 4) % 10]}${z}` });
+    }
+    \u5E94\u671F.sort((a, b) => a.\u5E74 - b.\u5E74);
+    r.\u5F15\u7206\u7A97\u53E3 = { \u5F85, \u65B9\u5F0F, \u5E94\u671F: \u5E94\u671F.slice(0, 4) };
+  }
+}
+var PILLAR_IDX = { \u5E74: 0, \u6708: 1, \u65E5: 2, \u65F6: 3 };
+var HE_HUA = { \u7532\u5DF1: "\u571F", \u4E59\u5E9A: "\u91D1", \u4E19\u8F9B: "\u6C34", \u4E01\u58EC: "\u6728", \u620A\u7678: "\u706B" };
+var KU_CHONG = /* @__PURE__ */ new Set(["\u8FB0\u620C", "\u4E11\u672A", "\u620C\u8FB0", "\u672A\u4E11"]);
+function interactionRelationId(relation, siZhu) {
+  const members = relation.members || [];
+  const pairs = (relation.pillars || []).map((pillar, index) => ({
+    pillar,
+    member: siZhu?.[pillar] ? relation.kind === "\u5730\u652F" ? siZhu[pillar].zhi : siZhu[pillar].gan : members[index] ?? (members.length === 1 ? members[0] : "?")
+  })).sort((a, b) => (PILLAR_IDX[a.pillar] ?? 99) - (PILLAR_IDX[b.pillar] ?? 99));
+  const pairedMemberCount = Math.min(members.length, pairs.length);
+  const extraMembers = members.slice(pairedMemberCount).sort();
+  const body = pairs.map((item) => `${item.pillar}${item.member}`).concat(extraMembers).join("-");
+  return `${relation.type}:${body || members.slice().sort().join("-") || "unknown"}`;
+}
+function dist(pillars) {
+  if (pillars.length < 2) return "-";
+  const idx = pillars.map((p) => PILLAR_IDX[p]).sort((a, b) => a - b);
+  const span = idx[idx.length - 1] - idx[0];
+  return span <= 1 ? "\u7D27\u8D34" : span === 2 ? "\u9694\u67F1" : "\u9065\u9694";
+}
+function heHuaJudge(a, b, siZhu, adjacent) {
+  const key = HE_HUA[a + b] !== void 0 ? a + b : b + a;
+  const huaWx = HE_HUA[key];
+  if (!huaWx) return { hua: false, why: "\u975E\u4E94\u5408" };
+  if (!adjacent) return { hua: false, why: "\u4E8C\u5E72\u4E0D\u7D27\u8D34,\u5408\u610F\u865A,\u4E0D\u5316" };
+  const monthZhi = siZhu["\u6708"].zhi;
+  const benQi = ZHI_CANG_GAN[monthZhi][0].gan;
+  const dangLing = GAN_WUXING[benQi] === huaWx;
+  const cangDeQi = ZHI_CANG_GAN[monthZhi].some((c) => GAN_WUXING[c.gan] === huaWx);
+  const touGan = ["\u5E74", "\u6708", "\u65E5", "\u65F6"].some((p) => GAN_WUXING[siZhu[p].gan] === huaWx);
+  const youGen = ["\u5E74", "\u6708", "\u65E5", "\u65F6"].some((p) => ZHI_CANG_GAN[siZhu[p].zhi].some((c) => GAN_WUXING[c.gan] === huaWx));
+  if (dangLing && (touGan || youGen)) return { hua: true, why: `\u5316\u795E${huaWx}\u5F53\u4EE4(\u6708\u652F${monthZhi}\u672C\u6C14)\u4E14\u6709\u5F15` };
+  if (cangDeQi && touGan) return { hua: false, why: `\u5316\u795E${huaWx}\u5F97\u6708\u6C14\u800C\u672A\u5F53\u4EE4,\u5316\u610F\u4E0D\u8DB3(\u4ECE\u4E25\u4E0D\u4F5C\u5316\u8BBA)` };
+  return { hua: false, why: `\u5316\u795E${huaWx}\u5931\u4EE4,\u5408\u800C\u4E0D\u5316` };
+}
+function adjudicateInteractions(siZhu, policy, zhiRels, ganRels) {
+  assertInteractionPolicy(policy, "adjudicateInteractions.policy");
+  const zr = zhiRels || detectZhiRelations({ \u5E74: siZhu["\u5E74"].zhi, \u6708: siZhu["\u6708"].zhi, \u65E5: siZhu["\u65E5"].zhi, \u65F6: siZhu["\u65F6"].zhi });
+  const gr = ganRels || detectGanRelations({ \u5E74: siZhu["\u5E74"].gan, \u6708: siZhu["\u6708"].gan, \u65E5: siZhu["\u65E5"].gan, \u65F6: siZhu["\u65F6"].gan });
+  const out = [];
+  const div = (s) => policy.divergence_notes ? s : void 0;
+  const monthZhi = siZhu["\u6708"].zhi;
+  const juZhi = /* @__PURE__ */ new Set();
+  for (const r of zr) if (r.type === "\u4E09\u5408" || r.type === "\u4E09\u4F1A") r.zhi.forEach((z) => juZhi.add(z));
+  const heZhi = /* @__PURE__ */ new Set();
+  for (const r of zr) if (r.type === "\u516D\u5408" || r.type === "\u534A\u5408") r.zhi.forEach((z) => heZhi.add(z));
+  const chongPairs = zr.filter((r) => r.type === "\u516D\u51B2");
+  for (const r of gr) {
+    if (r.type === "\u5929\u5E72\u5408") {
+      const adjacent = dist(r.pillars) === "\u7D27\u8D34";
+      const zheng = (r.detail || "").includes("\u4E89\u5408");
+      if (zheng) {
+        out.push({
+          kind: "\u5929\u5E72",
+          type: "\u5929\u5E72\u5408",
+          members: r.gans,
+          pillars: r.pillars,
+          distance: dist(r.pillars),
+          status: "\u5408\u800C\u4E0D\u5316(\u7ECA)",
+          cause: "\u4E89\u5408(\u5992\u5408),\u5408\u529B\u5206\u6563,\u4E0D\u4F5C\u5316\u8BBA",
+          detail: r.detail
+        });
+        continue;
+      }
+      const j = heHuaJudge(r.gans[0], r.gans[1], siZhu, adjacent);
+      out.push({
+        kind: "\u5929\u5E72",
+        type: "\u5929\u5E72\u5408",
+        members: r.gans,
+        pillars: r.pillars,
+        distance: dist(r.pillars),
+        status: j.hua ? "\u5408\u800C\u5316" : "\u5408\u800C\u4E0D\u5316(\u7ECA)",
+        cause: j.why,
+        divergence: div("\u5316\u4E4B\u5BBD\u4E25\u5404\u6D3E\u4E0D\u4E00:\u6B64\u6309\u300C\u5316\u795E\u5F53\u4EE4+\u6709\u5F15\u300D\u4ECE\u4E25;\u6EF4\u5929\u9AD3\u6D3E\u8BBA\u5316\u5C24\u4E25(\u771F\u5316\u5047\u5316),\u76F2\u6D3E\u591A\u4E0D\u8BBA\u5316\u53EA\u8BBA\u5408\u7ECA")
+      });
+    } else if (r.type === "\u5929\u5E72\u76F8\u514B") {
+      out.push({
+        kind: "\u5929\u5E72",
+        type: "\u5929\u5E72\u76F8\u514B",
+        members: r.gans,
+        pillars: r.pillars,
+        distance: dist(r.pillars),
+        status: dist(r.pillars) === "\u7D27\u8D34" ? "\u751F\u6548" : "\u51CF\u529B",
+        cause: dist(r.pillars) === "\u7D27\u8D34" ? "\u7D27\u8D34\u76F8\u514B\u6709\u529B" : "\u9694\u4F4D\u76F8\u514B\u529B\u51CF(\u6EF4\u5929\u9AD3:\u5929\u6218\u72B9\u81EA\u53EF)"
+      });
+    }
+  }
+  for (const r of zr) {
+    const d0 = dist(r.pillars);
+    switch (r.type) {
+      case "\u516D\u51B2": {
+        const [a, b] = r.zhi;
+        const isKu = KU_CHONG.has(a + b);
+        if (policy.juju_jie_chongxing && (juZhi.has(a) || juZhi.has(b))) {
+          out.push({
+            kind: "\u5730\u652F",
+            type: "\u516D\u51B2",
+            members: r.zhi,
+            pillars: r.pillars,
+            distance: d0,
+            status: "\u88AB\u89E3",
+            cause: `${juZhi.has(a) ? a : b}\u5165\u4E09\u5408/\u4E09\u4F1A\u6210\u5C40,\u4F1A\u5C40\u89E3\u51B2`,
+            divergence: div("\u76F2\u6D3E\u4E0D\u6982\u4EE5\u6210\u5C40\u89E3\u51B2,\u770B\u5C40\u4E0E\u51B2\u4F55\u8005\u529B\u5927\u3001\u51B2\u662F\u5426\u6B63\u662F\u505A\u529F")
+          });
+          break;
+        }
+        const heSideA = policy.he_jie_chong && heZhi.has(a);
+        const heSideB = policy.he_jie_chong && heZhi.has(b);
+        if (heSideA || heSideB) {
+          out.push({
+            kind: "\u5730\u652F",
+            type: "\u516D\u51B2",
+            members: r.zhi,
+            pillars: r.pillars,
+            distance: d0,
+            status: heSideA && heSideB ? "\u88AB\u89E3" : "\u51CF\u529B",
+            cause: `${heSideA ? a : ""}${heSideA && heSideB ? "\u4E0E" : ""}${heSideB ? b : ""}\u53E6\u6709\u5408(\u8D2A\u5408\u5FD8\u51B2)${heSideA && heSideB ? ",\u4E24\u5934\u88AB\u7ECA\u51B2\u89E3" : ",\u51B2\u529B\u51CF\u534A"}`,
+            divergence: div("\u8D2A\u5408\u5FD8\u51B2\u4E3A\u901A\u5219;\u76F2\u6D3E\u770B\u4F4D\u7F6E\u4E0E\u529B\u91CF,\u8FD1\u5408\u65B9\u7ECA\u3001\u9065\u5408\u4E0D\u7ECA")
+          });
+          break;
+        }
+        if (isKu) {
+          out.push({
+            kind: "\u5730\u652F",
+            type: "\u516D\u51B2",
+            members: r.zhi,
+            pillars: r.pillars,
+            distance: d0,
+            status: "\u751F\u6548",
+            cause: policy.chongku_wei_kai ? "\u5E93\u51B2(\u670B\u51B2)\u4F5C\u5F00\u5E93\u8BBA:\u5893\u5E93\u4E4B\u7269\u51B2\u51FA\u53EF\u7528,\u975E\u5355\u7EAF\u51F6(\u9700\u65FA\u795E\u5F15\u51FA)" : "\u5E93\u51B2(\u670B\u51B2):\u52A8\u6447\u5E93\u4E2D\u4E4B\u7269,\u5409\u51F6\u968F\u683C\u5C40\u559C\u5FCC\u5B9A",
+            divergence: div("\u6EF4\u5929\u9AD3\u300C\u5E93\u5B9C\u5F00\u300D/\u76F2\u6D3E\u300C\u51B2\u5893\u4E3A\u5F00\u300D\u89C6\u5E93\u51B2\u4E3A\u7528;\u5B50\u5E73\u683C\u5C40\u6D3E\u4EE5\u559C\u5FCC\u8BBA,\u51B2\u52A8\u559C\u7528\u4E4B\u5E93\u5219\u51F6")
+          });
+          break;
+        }
+        out.push({
+          kind: "\u5730\u652F",
+          type: "\u516D\u51B2",
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: d0 === "\u9065\u9694" ? "\u51CF\u529B" : "\u751F\u6548",
+          cause: d0 === "\u9065\u9694" ? "\u5E74\u65F6\u9065\u51B2,\u529B\u51CF" : `${d0}\u76F8\u51B2\u6709\u529B${r.zhi.includes(monthZhi) ? "\xB7\u51B2\u53CA\u63D0\u7EB2(\u6708\u4EE4),\u52A8\u6447\u683C\u57FA" : ""}`
+        });
+        break;
+      }
+      case "\u516D\u5408":
+      case "\u534A\u5408": {
+        const broken = chongPairs.find((cp) => cp.zhi.some((z) => r.zhi.includes(z)));
+        if (broken && policy.chong_po_he !== "no") {
+          const chongDe = policy.chong_po_he === "yes" || policy.chong_po_he === "strong_only" && broken.zhi.includes(monthZhi);
+          if (chongDe) {
+            out.push({
+              kind: "\u5730\u652F",
+              type: r.type,
+              members: r.zhi,
+              pillars: r.pillars,
+              distance: d0,
+              status: "\u88AB\u89E3",
+              cause: `\u6240\u5408\u4E4B\u652F\u9022${policy.chong_po_he === "strong_only" ? "\u5F53\u4EE4\u4E4B" : ""}\u51B2,\u5408\u88AB\u51B2\u7834`,
+              detail: r.detail,
+              divergence: div("\u51B2\u7834\u5408\u4E0E\u8D2A\u5408\u5FD8\u51B2\u4E92\u4E3A\u53CD\u9762,\u5404\u6D3E\u4EE5\u4F4D\u7F6E/\u529B\u91CF\u88C1,\u6B64\u6309\u672C\u6D3E\u89C4\u5219\u96C6")
+            });
+            break;
+          }
+        }
+        out.push({
+          kind: "\u5730\u652F",
+          type: r.type,
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: r.type === "\u534A\u5408" ? "\u534A\u5C40" : "\u751F\u6548",
+          cause: r.type === "\u534A\u5408" ? r.detail || "\u534A\u5408\u542B\u65FA\u795E,\u534A\u5C40\u6709\u6548" : `\u516D\u5408(${d0}),\u5408\u7ECA/\u5408\u8FD1`,
+          detail: r.detail
+        });
+        break;
+      }
+      case "\u4E09\u5408":
+      case "\u4E09\u4F1A":
+        out.push({
+          kind: "\u5730\u652F",
+          type: r.type,
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: "\u6210\u5C40",
+          cause: `${r.detail}${r.zhi.includes(monthZhi) ? "\xB7\u5F97\u6708\u4EE4,\u5C40\u6709\u529B" : "\xB7\u672A\u5F97\u6708\u4EE4,\u5C40\u529B\u5F85\u8FD0\u5F15"}`,
+          detail: r.detail
+        });
+        break;
+      case "\u62F1\u5408":
+      case "\u62F1\u4F1A":
+        out.push({
+          kind: "\u5730\u652F",
+          type: r.type,
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: "\u865A\u62F1",
+          cause: `${r.detail};\u865A\u795E\u5F85\u8FD0\u5C81\u586B\u5B9E`,
+          detail: r.detail
+        });
+        break;
+      case "\u534A\u4F1A":
+        out.push({
+          kind: "\u5730\u652F",
+          type: r.type,
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: "\u534A\u5C40",
+          cause: `${r.detail};\u65B9\u6C14\u4E24\u652F,\u4F1A\u800C\u672A\u5168`,
+          detail: r.detail
+        });
+        break;
+      case "\u76F8\u5211":
+      case "\u81EA\u5211": {
+        if (policy.juju_jie_chongxing && r.zhi.some((z) => juZhi.has(z))) {
+          out.push({
+            kind: "\u5730\u652F",
+            type: r.type,
+            members: r.zhi,
+            pillars: r.pillars,
+            distance: d0,
+            status: "\u88AB\u89E3",
+            cause: "\u5211\u652F\u5165\u4E09\u5408/\u4E09\u4F1A\u6210\u5C40,\u4F1A\u5C40\u89E3\u5211",
+            detail: r.detail
+          });
+          break;
+        }
+        const quan = (r.detail || "").includes("\u5168") || r.type === "\u81EA\u5211" || (r.detail || "").includes("\u65E0\u793C");
+        out.push({
+          kind: "\u5730\u652F",
+          type: r.type,
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: quan ? "\u751F\u6548" : "\u51CF\u529B",
+          cause: quan ? `${r.detail || "\u81EA\u5211"}` : `${r.detail},\u4E09\u5211\u7F3A\u4E00,\u5211\u610F\u8F7B,\u5F85\u8FD0\u5C81\u51D1\u5168`,
+          detail: r.detail
+        });
+        break;
+      }
+      case "\u516D\u5BB3":
+        out.push({
+          kind: "\u5730\u652F",
+          type: "\u516D\u5BB3",
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: "\u751F\u6548",
+          cause: policy.chuan_weight === "heavy" ? "\u7A7F(\u5BB3):\u672C\u6D3E\u89C6\u4E3A\u91CD\u7834\u574F\u5173\u7CFB(\u6380\u7FFB/\u635F\u4F24\u5BAB\u4F4D\u516D\u4EB2)" : "\u516D\u5BB3:\u635F\u4F24\u6240\u5BB3\u5BAB\u4F4D,\u529B\u6B21\u4E8E\u51B2",
+          divergence: div("\u5BB3\u4E4B\u8F7B\u91CD\u5206\u6B67\u5927:\u5B50\u5E73\u7CFB\u89C6\u4E3A\u5C0F\u715E,\u76F2\u6D3E/\u6BB5\u6C0F\u4F5C\u300C\u7A7F\u300D\u4E3A\u5927\u51F6\u5668")
+        });
+        break;
+      case "\u76F8\u7834":
+        out.push({
+          kind: "\u5730\u652F",
+          type: "\u76F8\u7834",
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: "\u51CF\u529B",
+          cause: `\u76F8\u7834:\u635F\u800C\u4E0D\u6BC1,\u529B\u6700\u8F7B${r.detail ? ";" + r.detail : ""}`,
+          detail: r.detail,
+          divergence: div("\u7834\u591A\u6570\u6D3E\u4EC5\u4F5C\u53C2\u8003;\u53E4\u6CD5\u7834\u4E3B\u635F\u8017\u6697\u635F")
+        });
+        break;
+      case "\u6697\u5408":
+        out.push({
+          kind: "\u5730\u652F",
+          type: "\u6697\u5408",
+          members: r.zhi,
+          pillars: r.pillars,
+          distance: d0,
+          status: "\u751F\u6548",
+          cause: `\u85CF\u5E72\u6697\u5408(${r.detail}):\u6697\u4E2D\u7275\u7CFB`,
+          detail: r.detail
+        });
+        break;
+    }
+  }
+  const byId = /* @__PURE__ */ new Map();
+  for (const item of out) {
+    const id = interactionRelationId(item, siZhu);
+    if (!byId.has(id)) byId.set(id, { ...item, id });
+  }
+  return { policy_note: policy.note || "", items: [...byId.values()] };
+}
+
+// bazi-enrich/wang-shuai-v3.ts
+var REPEAT_SCALE = 0.4;
+var ECHO_SCALE = 1.75;
+var ACTIVE_MONTH_CLASH_DISCOUNT = 0.5;
+var REDUCED_MONTH_CLASH_DISCOUNT = 0;
+var RESIDUAL_PILLARS = ["\u5E74", "\u65E5", "\u65F6"];
+var VISIBLE_STEM_PILLARS = ["\u5E74", "\u6708", "\u65F6"];
+function round2(value) {
+  return +value.toFixed(2);
+}
+function oppositionGroup(role) {
+  if (role === "\u98DF\u795E" || role === "\u4F24\u5B98") return "\u6CC4";
+  if (role === "\u6B63\u8D22" || role === "\u504F\u8D22") return "\u8017";
+  if (role === "\u6B63\u5B98" || role === "\u4E03\u6740") return "\u514B";
+  return null;
+}
+function layerWeight(role) {
+  return role === "\u672C\u6C14" ? 2 : role === "\u4E2D\u6C14" ? 0.8 : 0.5;
+}
+function oppositionWeight(group) {
+  return group === "\u6CC4" ? 0.5 : group === "\u8017" ? 1 : 1.5;
+}
+function scoreOppositionGroups(dayMaster, siZhu) {
+  const visibleStems = VISIBLE_STEM_PILLARS.map((pillar) => ({
+    pillar,
+    gan: siZhu[pillar].gan,
+    group: oppositionGroup(getShiShen2(dayMaster, siZhu[pillar].gan))
+  })).filter((item) => item.group !== null);
+  const visibleGroups = new Set(visibleStems.map((item) => item.group));
+  const gateText = visibleStems.map((item) => `${item.pillar}${item.gan}(${item.group})`).join("/");
+  if (!visibleGroups.size) return { \u8017\u65B9\u7FA4\u52BF: 0, details: [], audit: [] };
+  const occurrences = /* @__PURE__ */ new Map();
+  for (const pillar of RESIDUAL_PILLARS) {
+    const branch = siZhu[pillar].zhi;
+    const pillars = occurrences.get(branch) || [];
+    pillars.push(pillar);
+    occurrences.set(branch, pillars);
+  }
+  let score = 0;
+  const details = [];
+  const audit = [];
+  for (const [branch, pillars] of occurrences) {
+    if (pillars.length < 2) continue;
+    const mainGroup = oppositionGroup(getShiShen2(dayMaster, ZHI_CANG_GAN[branch][0].gan));
+    if (!mainGroup) continue;
+    let raw = 0;
+    for (let occurrence = 0; occurrence < pillars.length; occurrence++) {
+      for (const hidden of ZHI_CANG_GAN[branch]) {
+        const group = oppositionGroup(getShiShen2(dayMaster, hidden.gan));
+        if (group) raw += layerWeight(hidden.role) * oppositionWeight(group);
+      }
+    }
+    const echo = visibleGroups.has(mainGroup);
+    const echoText = visibleStems.filter((item) => item.group === mainGroup).map((item) => `${item.pillar}${item.gan}(${item.group})`).join("/");
+    const scale = echo ? ECHO_SCALE : REPEAT_SCALE;
+    const effective = -round2(raw * scale);
+    score += effective;
+    const sourceBranches = pillars.map(() => branch);
+    const detail = `\u8017\u65B9\u7FA4\u52BF ${pillars.map((pillar) => `${pillar}${branch}`).join("/")}\uFF1A\u95E8\u63A7=${gateText}\uFF1B${echo ? `\u540C\u7C7B\u900F\u5E72=${echoText}` : "\u672C\u6C14\u65E0\u540C\u7C7B\u900F\u5E72"}\uFF1B\u539F\u59CB${round2(raw)} \xD7 \u500D\u7387${scale} = ${effective}`;
+    details.push(detail);
+    audit.push({
+      id: `\u8017\u65B9\u7FA4\u52BF:${pillars.map((pillar) => `${pillar}${branch}`).join("-")}`,
+      bucket: "\u8017\u65B9\u7FA4\u52BF",
+      raw: round2(raw),
+      effective,
+      sourcePillars: pillars.slice(),
+      sourceBranches,
+      relationIds: [],
+      discount: scale,
+      detail
+    });
+  }
+  return { \u8017\u65B9\u7FA4\u52BF: round2(score), details, audit };
+}
+function isStorageClash(relation) {
+  const pair = new Set(relation.members);
+  return pair.has("\u8FB0") && pair.has("\u620C") || pair.has("\u4E11") && pair.has("\u672A");
+}
+function relationBranches(relation) {
+  return relation.pillars.map((_, index) => relation.members[index]).filter((branch) => !!branch);
+}
+function scoreMonthClashes(siZhu, monthOrder, changSheng, interactions) {
+  const positiveSupport = Math.max(0, monthOrder) + Math.max(0, changSheng);
+  const unique = /* @__PURE__ */ new Map();
+  for (const relation of interactions || []) {
+    if (relation.kind !== "\u5730\u652F" || relation.type !== "\u516D\u51B2") continue;
+    const id = interactionRelationId(relation, siZhu);
+    if (!unique.has(id)) unique.set(id, relation);
+  }
+  const eligible = [...unique.entries()].filter(([, relation]) => relation.pillars.includes("\u6708") && !isStorageClash(relation)).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
+  let usedRate = 0;
+  let score = 0;
+  const details = [];
+  const audit = [];
+  for (const [relationId, relation] of eligible) {
+    const configuredRate = relation.status === "\u751F\u6548" ? ACTIVE_MONTH_CLASH_DISCOUNT : relation.status === "\u51CF\u529B" ? REDUCED_MONTH_CLASH_DISCOUNT : 0;
+    const appliedRate = Math.max(0, Math.min(configuredRate, 1 - usedRate));
+    usedRate += appliedRate;
+    const effective = -round2(positiveSupport * appliedRate);
+    score += effective;
+    const sourcePillars = relation.pillars.filter((pillar) => pillar === "\u5E74" || pillar === "\u6708" || pillar === "\u65E5" || pillar === "\u65F6");
+    const detail = `\u51B2\u6839\u4FEE\u6B63 ${relationId}\uFF08${relation.status}\uFF09\uFF1A\u6708\u4EE4\u6B63\u5411\u652F\u6301${round2(positiveSupport)} \xD7 ${round2(appliedRate)} = ${effective}`;
+    details.push(detail);
+    audit.push({
+      id: `\u51B2\u6839\u4FEE\u6B63:${relationId}`,
+      bucket: "\u51B2\u6839\u4FEE\u6B63",
+      raw: round2(positiveSupport),
+      effective,
+      sourcePillars,
+      sourceBranches: relationBranches(relation),
+      relationIds: [relationId],
+      discount: round2(appliedRate),
+      detail
+    });
+  }
+  return { \u51B2\u6839\u4FEE\u6B63: round2(score), details, audit };
+}
+function scoreWangShuaiV3Adjustments(dayMaster, siZhu, monthOrder, changSheng, interactions) {
+  const group = scoreOppositionGroups(dayMaster, siZhu);
+  const clash = scoreMonthClashes(siZhu, monthOrder, changSheng, interactions);
+  return {
+    \u8017\u65B9\u7FA4\u52BF: group.\u8017\u65B9\u7FA4\u52BF,
+    \u51B2\u6839\u4FEE\u6B63: clash.\u51B2\u6839\u4FEE\u6B63,
+    details: [...group.details, ...clash.details],
+    audit: [...group.audit, ...clash.audit]
+  };
+}
+
 // bazi-enrich/wang-shuai.ts
 function scoreMonthOrder(dayMaster, monthZhi) {
   const cangGan = ZHI_CANG_GAN[monthZhi];
@@ -30468,7 +30948,7 @@ function scoreHuJu(dayMaster, siZhu) {
   }
   return { score: total, desc };
 }
-function judgeWangShuai(siZhu) {
+function judgeWangShuai(siZhu, options) {
   const dm = siZhu.\u65E5.gan;
   const monthZhi = siZhu.\u6708.zhi;
   const month = scoreMonthOrder(dm, monthZhi);
@@ -30476,7 +30956,8 @@ function judgeWangShuai(siZhu) {
   const ground = scoreGround(dm, siZhu);
   const stems = scoreStems(dm, siZhu);
   const huju = scoreHuJu(dm, siZhu);
-  const score = +(month.score + cs.score + ground.score + stems.score + huju.score).toFixed(2);
+  const adjustments = scoreWangShuaiV3Adjustments(dm, siZhu, month.score, cs.score, options.interactions);
+  const score = +(month.score + cs.score + ground.score + stems.score + huju.score + adjustments.\u8017\u65B9\u7FA4\u52BF + adjustments.\u51B2\u6839\u4FEE\u6B63).toFixed(2);
   let verdict;
   if (score >= 12) verdict = "\u6781\u65FA(\u53EF\u80FD\u4ECE\u5F3A)";
   else if (score >= 3) verdict = "\u504F\u65FA";
@@ -30498,7 +30979,10 @@ function judgeWangShuai(siZhu) {
       \u5F97\u5730: +ground.score.toFixed(2),
       \u5F97\u52BF: +stems.score.toFixed(2),
       \u4F1A\u5C40: +huju.score.toFixed(2),
-      details: [month.desc, cs.desc, ...ground.desc, ...stems.desc, ...huju.desc]
+      \u8017\u65B9\u7FA4\u52BF: adjustments.\u8017\u65B9\u7FA4\u52BF,
+      \u51B2\u6839\u4FEE\u6B63: adjustments.\u51B2\u6839\u4FEE\u6B63,
+      audit: adjustments.audit,
+      details: [month.desc, cs.desc, ...ground.desc, ...stems.desc, ...huju.desc, ...adjustments.details]
     }
   };
 }
@@ -31013,15 +31497,29 @@ function adviseYongShen(dayMaster, ws, tiaoHouGans, geju, wuxingCount, siZhu) {
 }
 
 // bazi-enrich/enrich.ts
-function enrichBazi(siZhu) {
+function enrichBazi(siZhu, options) {
   const dm = siZhu.\u65E5.gan;
   const monthZhi = siZhu.\u6708.zhi;
+  const interactionPolicy = assertInteractionPolicy(options?.interactionPolicy, "enrichBazi.open.interaction_policy");
+  const ganRelations = detectGanRelations({
+    \u5E74: siZhu.\u5E74.gan,
+    \u6708: siZhu.\u6708.gan,
+    \u65E5: siZhu.\u65E5.gan,
+    \u65F6: siZhu.\u65F6.gan
+  });
+  const zhiRelations = detectZhiRelations({
+    \u5E74: siZhu.\u5E74.zhi,
+    \u6708: siZhu.\u6708.zhi,
+    \u65E5: siZhu.\u65E5.zhi,
+    \u65F6: siZhu.\u65F6.zhi
+  });
+  const adjudicated = adjudicateInteractions(siZhu, interactionPolicy, zhiRelations, ganRelations);
   const ziZuo = {};
   for (const p of ["\u5E74", "\u6708", "\u65E5", "\u65F6"]) {
     ziZuo[p] = getChangSheng2(siZhu[p].gan, siZhu[p].zhi);
   }
   const geJu = judgeGeJu(siZhu);
-  const wangShuai = judgeWangShuai(siZhu);
+  const wangShuai = judgeWangShuai(siZhu, { interactions: adjudicated.items });
   const tiaoHou = getTiaoHou(dm, monthZhi);
   const wxCount = countWuXing(siZhu, dm);
   const wxForYs = wxCount.withCangGan || wxCount.surface || wxCount;
@@ -31040,18 +31538,9 @@ function enrichBazi(siZhu) {
     \u65FA\u8870: wangShuai,
     \u7528\u795E\u5EFA\u8BAE: adviseYongShen(dm, wangShuai, tiaoHou, geJu, wxForYs, siZhu),
     // S1-3:传四柱供相神裁决判重神透干
-    \u5929\u5E72\u5173\u7CFB: detectGanRelations({
-      \u5E74: siZhu.\u5E74.gan,
-      \u6708: siZhu.\u6708.gan,
-      \u65E5: siZhu.\u65E5.gan,
-      \u65F6: siZhu.\u65F6.gan
-    }),
-    \u5730\u652F\u5173\u7CFB: detectZhiRelations({
-      \u5E74: siZhu.\u5E74.zhi,
-      \u6708: siZhu.\u6708.zhi,
-      \u65E5: siZhu.\u65E5.zhi,
-      \u65F6: siZhu.\u65F6.zhi
-    }),
+    \u4F5C\u7528\u5173\u7CFB: { policy: "open(\u901A\u5219+\u5206\u6B67\u6807\u6CE8)", ...adjudicated },
+    \u5929\u5E72\u5173\u7CFB: ganRelations,
+    \u5730\u652F\u5173\u7CFB: zhiRelations,
     \u6574\u67F1: judgePillars(siZhu)
   };
 }
@@ -31530,319 +32019,6 @@ function computeShensha(chart, defs, policy) {
   const tierRank = { T1: 0, T2: 1, COMPOUND: 2, T3: 3, MODERN: 4 };
   out.sort((a, b) => b.weight - a.weight || (tierRank[a.tier] ?? 9) - (tierRank[b.tier] ?? 9));
   return out;
-}
-
-// bazi-enrich/interactions.ts
-var GAN10_TW = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
-var ZHI12_TW = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
-var SAN_XING_TW = [["\u5BC5", "\u5DF3", "\u7533"], ["\u4E11", "\u620C", "\u672A"]];
-function missingOfTriple(members, triples) {
-  for (const t of triples) {
-    if (members.every((m) => t.zhi.includes(m))) return t.zhi.filter((z) => !members.includes(z));
-  }
-  return [];
-}
-function computeTriggerWindows(items, dayun, fromYear) {
-  for (const r of items) {
-    if (r.kind !== "\u5730\u652F") continue;
-    let \u5F85 = [];
-    let \u65B9\u5F0F = null;
-    if (r.status === "\u865A\u62F1" && (r.type === "\u62F1\u5408" || r.type === "\u62F1\u4F1A")) {
-      \u5F85 = missingOfTriple(r.members, r.type === "\u62F1\u5408" ? SAN_HE : SAN_HUI);
-      \u65B9\u5F0F = "\u586B\u5B9E";
-    } else if (r.status === "\u534A\u5C40" && (r.type === "\u534A\u5408" || r.type === "\u534A\u4F1A")) {
-      \u5F85 = missingOfTriple(r.members, r.type === "\u534A\u5408" ? SAN_HE : SAN_HUI);
-      \u65B9\u5F0F = "\u8865\u5168\u6210\u5C40";
-    } else if (r.type === "\u76F8\u5211" && r.status === "\u51CF\u529B" && r.cause.includes("\u7F3A\u4E00")) {
-      \u5F85 = missingOfTriple(r.members, SAN_XING_TW.map((z) => ({ zhi: z })));
-      \u65B9\u5F0F = "\u51D1\u5168\u4E09\u5211";
-    }
-    if (!\u5F85.length || !\u65B9\u5F0F) continue;
-    const \u5E94\u671F = [];
-    for (const d of dayun || []) {
-      const z = d?.ganZhi?.zhi;
-      if (z && \u5F85.includes(z) && d.endYear >= fromYear)
-        \u5E94\u671F.push({ \u5E74: d.startYear, \u8F7D\u4F53: `\u5927\u8FD0${d.ganZhi.gan}${z}(${d.startYear}-${d.endYear})` });
-    }
-    for (let y = fromYear; y < fromYear + 12; y++) {
-      const z = ZHI12_TW[(y - 4) % 12];
-      if (\u5F85.includes(z)) \u5E94\u671F.push({ \u5E74: y, \u8F7D\u4F53: `\u6D41\u5E74${GAN10_TW[(y - 4) % 10]}${z}` });
-    }
-    \u5E94\u671F.sort((a, b) => a.\u5E74 - b.\u5E74);
-    r.\u5F15\u7206\u7A97\u53E3 = { \u5F85, \u65B9\u5F0F, \u5E94\u671F: \u5E94\u671F.slice(0, 4) };
-  }
-}
-var PILLAR_IDX = { \u5E74: 0, \u6708: 1, \u65E5: 2, \u65F6: 3 };
-var HE_HUA = { \u7532\u5DF1: "\u571F", \u4E59\u5E9A: "\u91D1", \u4E19\u8F9B: "\u6C34", \u4E01\u58EC: "\u6728", \u620A\u7678: "\u706B" };
-var KU_CHONG = /* @__PURE__ */ new Set(["\u8FB0\u620C", "\u4E11\u672A", "\u620C\u8FB0", "\u672A\u4E11"]);
-function dist(pillars) {
-  if (pillars.length < 2) return "-";
-  const idx = pillars.map((p) => PILLAR_IDX[p]).sort((a, b) => a - b);
-  const span = idx[idx.length - 1] - idx[0];
-  return span <= 1 ? "\u7D27\u8D34" : span === 2 ? "\u9694\u67F1" : "\u9065\u9694";
-}
-function heHuaJudge(a, b, siZhu, adjacent) {
-  const key = HE_HUA[a + b] !== void 0 ? a + b : b + a;
-  const huaWx = HE_HUA[key];
-  if (!huaWx) return { hua: false, why: "\u975E\u4E94\u5408" };
-  if (!adjacent) return { hua: false, why: "\u4E8C\u5E72\u4E0D\u7D27\u8D34,\u5408\u610F\u865A,\u4E0D\u5316" };
-  const monthZhi = siZhu["\u6708"].zhi;
-  const benQi = ZHI_CANG_GAN[monthZhi][0].gan;
-  const dangLing = GAN_WUXING[benQi] === huaWx;
-  const cangDeQi = ZHI_CANG_GAN[monthZhi].some((c) => GAN_WUXING[c.gan] === huaWx);
-  const touGan = ["\u5E74", "\u6708", "\u65E5", "\u65F6"].some((p) => GAN_WUXING[siZhu[p].gan] === huaWx);
-  const youGen = ["\u5E74", "\u6708", "\u65E5", "\u65F6"].some((p) => ZHI_CANG_GAN[siZhu[p].zhi].some((c) => GAN_WUXING[c.gan] === huaWx));
-  if (dangLing && (touGan || youGen)) return { hua: true, why: `\u5316\u795E${huaWx}\u5F53\u4EE4(\u6708\u652F${monthZhi}\u672C\u6C14)\u4E14\u6709\u5F15` };
-  if (cangDeQi && touGan) return { hua: false, why: `\u5316\u795E${huaWx}\u5F97\u6708\u6C14\u800C\u672A\u5F53\u4EE4,\u5316\u610F\u4E0D\u8DB3(\u4ECE\u4E25\u4E0D\u4F5C\u5316\u8BBA)` };
-  return { hua: false, why: `\u5316\u795E${huaWx}\u5931\u4EE4,\u5408\u800C\u4E0D\u5316` };
-}
-function adjudicateInteractions(siZhu, policy, zhiRels, ganRels) {
-  const zr = zhiRels || detectZhiRelations({ \u5E74: siZhu["\u5E74"].zhi, \u6708: siZhu["\u6708"].zhi, \u65E5: siZhu["\u65E5"].zhi, \u65F6: siZhu["\u65F6"].zhi });
-  const gr = ganRels || detectGanRelations({ \u5E74: siZhu["\u5E74"].gan, \u6708: siZhu["\u6708"].gan, \u65E5: siZhu["\u65E5"].gan, \u65F6: siZhu["\u65F6"].gan });
-  const out = [];
-  const div = (s) => policy.divergence_notes ? s : void 0;
-  const monthZhi = siZhu["\u6708"].zhi;
-  const juZhi = /* @__PURE__ */ new Set();
-  for (const r of zr) if (r.type === "\u4E09\u5408" || r.type === "\u4E09\u4F1A") r.zhi.forEach((z) => juZhi.add(z));
-  const heZhi = /* @__PURE__ */ new Set();
-  for (const r of zr) if (r.type === "\u516D\u5408" || r.type === "\u534A\u5408") r.zhi.forEach((z) => heZhi.add(z));
-  const chongPairs = zr.filter((r) => r.type === "\u516D\u51B2");
-  for (const r of gr) {
-    if (r.type === "\u5929\u5E72\u5408") {
-      const adjacent = dist(r.pillars) === "\u7D27\u8D34";
-      const zheng = (r.detail || "").includes("\u4E89\u5408");
-      if (zheng) {
-        out.push({
-          kind: "\u5929\u5E72",
-          type: "\u5929\u5E72\u5408",
-          members: r.gans,
-          pillars: r.pillars,
-          distance: dist(r.pillars),
-          status: "\u5408\u800C\u4E0D\u5316(\u7ECA)",
-          cause: "\u4E89\u5408(\u5992\u5408),\u5408\u529B\u5206\u6563,\u4E0D\u4F5C\u5316\u8BBA",
-          detail: r.detail
-        });
-        continue;
-      }
-      const j = heHuaJudge(r.gans[0], r.gans[1], siZhu, adjacent);
-      out.push({
-        kind: "\u5929\u5E72",
-        type: "\u5929\u5E72\u5408",
-        members: r.gans,
-        pillars: r.pillars,
-        distance: dist(r.pillars),
-        status: j.hua ? "\u5408\u800C\u5316" : "\u5408\u800C\u4E0D\u5316(\u7ECA)",
-        cause: j.why,
-        divergence: div("\u5316\u4E4B\u5BBD\u4E25\u5404\u6D3E\u4E0D\u4E00:\u6B64\u6309\u300C\u5316\u795E\u5F53\u4EE4+\u6709\u5F15\u300D\u4ECE\u4E25;\u6EF4\u5929\u9AD3\u6D3E\u8BBA\u5316\u5C24\u4E25(\u771F\u5316\u5047\u5316),\u76F2\u6D3E\u591A\u4E0D\u8BBA\u5316\u53EA\u8BBA\u5408\u7ECA")
-      });
-    } else if (r.type === "\u5929\u5E72\u76F8\u514B") {
-      out.push({
-        kind: "\u5929\u5E72",
-        type: "\u5929\u5E72\u76F8\u514B",
-        members: r.gans,
-        pillars: r.pillars,
-        distance: dist(r.pillars),
-        status: dist(r.pillars) === "\u7D27\u8D34" ? "\u751F\u6548" : "\u51CF\u529B",
-        cause: dist(r.pillars) === "\u7D27\u8D34" ? "\u7D27\u8D34\u76F8\u514B\u6709\u529B" : "\u9694\u4F4D\u76F8\u514B\u529B\u51CF(\u6EF4\u5929\u9AD3:\u5929\u6218\u72B9\u81EA\u53EF)"
-      });
-    }
-  }
-  for (const r of zr) {
-    const d0 = dist(r.pillars);
-    switch (r.type) {
-      case "\u516D\u51B2": {
-        const [a, b] = r.zhi;
-        const isKu = KU_CHONG.has(a + b);
-        if (policy.juju_jie_chongxing && (juZhi.has(a) || juZhi.has(b))) {
-          out.push({
-            kind: "\u5730\u652F",
-            type: "\u516D\u51B2",
-            members: r.zhi,
-            pillars: r.pillars,
-            distance: d0,
-            status: "\u88AB\u89E3",
-            cause: `${juZhi.has(a) ? a : b}\u5165\u4E09\u5408/\u4E09\u4F1A\u6210\u5C40,\u4F1A\u5C40\u89E3\u51B2`,
-            divergence: div("\u76F2\u6D3E\u4E0D\u6982\u4EE5\u6210\u5C40\u89E3\u51B2,\u770B\u5C40\u4E0E\u51B2\u4F55\u8005\u529B\u5927\u3001\u51B2\u662F\u5426\u6B63\u662F\u505A\u529F")
-          });
-          break;
-        }
-        const heSideA = policy.he_jie_chong && heZhi.has(a);
-        const heSideB = policy.he_jie_chong && heZhi.has(b);
-        if (heSideA || heSideB) {
-          out.push({
-            kind: "\u5730\u652F",
-            type: "\u516D\u51B2",
-            members: r.zhi,
-            pillars: r.pillars,
-            distance: d0,
-            status: heSideA && heSideB ? "\u88AB\u89E3" : "\u51CF\u529B",
-            cause: `${heSideA ? a : ""}${heSideA && heSideB ? "\u4E0E" : ""}${heSideB ? b : ""}\u53E6\u6709\u5408(\u8D2A\u5408\u5FD8\u51B2)${heSideA && heSideB ? ",\u4E24\u5934\u88AB\u7ECA\u51B2\u89E3" : ",\u51B2\u529B\u51CF\u534A"}`,
-            divergence: div("\u8D2A\u5408\u5FD8\u51B2\u4E3A\u901A\u5219;\u76F2\u6D3E\u770B\u4F4D\u7F6E\u4E0E\u529B\u91CF,\u8FD1\u5408\u65B9\u7ECA\u3001\u9065\u5408\u4E0D\u7ECA")
-          });
-          break;
-        }
-        if (isKu) {
-          out.push({
-            kind: "\u5730\u652F",
-            type: "\u516D\u51B2",
-            members: r.zhi,
-            pillars: r.pillars,
-            distance: d0,
-            status: "\u751F\u6548",
-            cause: policy.chongku_wei_kai ? "\u5E93\u51B2(\u670B\u51B2)\u4F5C\u5F00\u5E93\u8BBA:\u5893\u5E93\u4E4B\u7269\u51B2\u51FA\u53EF\u7528,\u975E\u5355\u7EAF\u51F6(\u9700\u65FA\u795E\u5F15\u51FA)" : "\u5E93\u51B2(\u670B\u51B2):\u52A8\u6447\u5E93\u4E2D\u4E4B\u7269,\u5409\u51F6\u968F\u683C\u5C40\u559C\u5FCC\u5B9A",
-            divergence: div("\u6EF4\u5929\u9AD3\u300C\u5E93\u5B9C\u5F00\u300D/\u76F2\u6D3E\u300C\u51B2\u5893\u4E3A\u5F00\u300D\u89C6\u5E93\u51B2\u4E3A\u7528;\u5B50\u5E73\u683C\u5C40\u6D3E\u4EE5\u559C\u5FCC\u8BBA,\u51B2\u52A8\u559C\u7528\u4E4B\u5E93\u5219\u51F6")
-          });
-          break;
-        }
-        out.push({
-          kind: "\u5730\u652F",
-          type: "\u516D\u51B2",
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: d0 === "\u9065\u9694" ? "\u51CF\u529B" : "\u751F\u6548",
-          cause: d0 === "\u9065\u9694" ? "\u5E74\u65F6\u9065\u51B2,\u529B\u51CF" : `${d0}\u76F8\u51B2\u6709\u529B${r.zhi.includes(monthZhi) ? "\xB7\u51B2\u53CA\u63D0\u7EB2(\u6708\u4EE4),\u52A8\u6447\u683C\u57FA" : ""}`
-        });
-        break;
-      }
-      case "\u516D\u5408":
-      case "\u534A\u5408": {
-        const broken = chongPairs.find((cp) => cp.zhi.some((z) => r.zhi.includes(z)));
-        if (broken && policy.chong_po_he !== "no") {
-          const chongDe = policy.chong_po_he === "yes" || policy.chong_po_he === "strong_only" && broken.zhi.includes(monthZhi);
-          if (chongDe) {
-            out.push({
-              kind: "\u5730\u652F",
-              type: r.type,
-              members: r.zhi,
-              pillars: r.pillars,
-              distance: d0,
-              status: "\u88AB\u89E3",
-              cause: `\u6240\u5408\u4E4B\u652F\u9022${policy.chong_po_he === "strong_only" ? "\u5F53\u4EE4\u4E4B" : ""}\u51B2,\u5408\u88AB\u51B2\u7834`,
-              detail: r.detail,
-              divergence: div("\u51B2\u7834\u5408\u4E0E\u8D2A\u5408\u5FD8\u51B2\u4E92\u4E3A\u53CD\u9762,\u5404\u6D3E\u4EE5\u4F4D\u7F6E/\u529B\u91CF\u88C1,\u6B64\u6309\u672C\u6D3E\u89C4\u5219\u96C6")
-            });
-            break;
-          }
-        }
-        out.push({
-          kind: "\u5730\u652F",
-          type: r.type,
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: r.type === "\u534A\u5408" ? "\u534A\u5C40" : "\u751F\u6548",
-          cause: r.type === "\u534A\u5408" ? r.detail || "\u534A\u5408\u542B\u65FA\u795E,\u534A\u5C40\u6709\u6548" : `\u516D\u5408(${d0}),\u5408\u7ECA/\u5408\u8FD1`,
-          detail: r.detail
-        });
-        break;
-      }
-      case "\u4E09\u5408":
-      case "\u4E09\u4F1A":
-        out.push({
-          kind: "\u5730\u652F",
-          type: r.type,
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: "\u6210\u5C40",
-          cause: `${r.detail}${r.zhi.includes(monthZhi) ? "\xB7\u5F97\u6708\u4EE4,\u5C40\u6709\u529B" : "\xB7\u672A\u5F97\u6708\u4EE4,\u5C40\u529B\u5F85\u8FD0\u5F15"}`,
-          detail: r.detail
-        });
-        break;
-      case "\u62F1\u5408":
-      case "\u62F1\u4F1A":
-        out.push({
-          kind: "\u5730\u652F",
-          type: r.type,
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: "\u865A\u62F1",
-          cause: `${r.detail};\u865A\u795E\u5F85\u8FD0\u5C81\u586B\u5B9E`,
-          detail: r.detail
-        });
-        break;
-      case "\u534A\u4F1A":
-        out.push({
-          kind: "\u5730\u652F",
-          type: r.type,
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: "\u534A\u5C40",
-          cause: `${r.detail};\u65B9\u6C14\u4E24\u652F,\u4F1A\u800C\u672A\u5168`,
-          detail: r.detail
-        });
-        break;
-      case "\u76F8\u5211":
-      case "\u81EA\u5211": {
-        if (policy.juju_jie_chongxing && r.zhi.some((z) => juZhi.has(z))) {
-          out.push({
-            kind: "\u5730\u652F",
-            type: r.type,
-            members: r.zhi,
-            pillars: r.pillars,
-            distance: d0,
-            status: "\u88AB\u89E3",
-            cause: "\u5211\u652F\u5165\u4E09\u5408/\u4E09\u4F1A\u6210\u5C40,\u4F1A\u5C40\u89E3\u5211",
-            detail: r.detail
-          });
-          break;
-        }
-        const quan = (r.detail || "").includes("\u5168") || r.type === "\u81EA\u5211" || (r.detail || "").includes("\u65E0\u793C");
-        out.push({
-          kind: "\u5730\u652F",
-          type: r.type,
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: quan ? "\u751F\u6548" : "\u51CF\u529B",
-          cause: quan ? `${r.detail || "\u81EA\u5211"}` : `${r.detail},\u4E09\u5211\u7F3A\u4E00,\u5211\u610F\u8F7B,\u5F85\u8FD0\u5C81\u51D1\u5168`,
-          detail: r.detail
-        });
-        break;
-      }
-      case "\u516D\u5BB3":
-        out.push({
-          kind: "\u5730\u652F",
-          type: "\u516D\u5BB3",
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: "\u751F\u6548",
-          cause: policy.chuan_weight === "heavy" ? "\u7A7F(\u5BB3):\u672C\u6D3E\u89C6\u4E3A\u91CD\u7834\u574F\u5173\u7CFB(\u6380\u7FFB/\u635F\u4F24\u5BAB\u4F4D\u516D\u4EB2)" : "\u516D\u5BB3:\u635F\u4F24\u6240\u5BB3\u5BAB\u4F4D,\u529B\u6B21\u4E8E\u51B2",
-          divergence: div("\u5BB3\u4E4B\u8F7B\u91CD\u5206\u6B67\u5927:\u5B50\u5E73\u7CFB\u89C6\u4E3A\u5C0F\u715E,\u76F2\u6D3E/\u6BB5\u6C0F\u4F5C\u300C\u7A7F\u300D\u4E3A\u5927\u51F6\u5668")
-        });
-        break;
-      case "\u76F8\u7834":
-        out.push({
-          kind: "\u5730\u652F",
-          type: "\u76F8\u7834",
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: "\u51CF\u529B",
-          cause: `\u76F8\u7834:\u635F\u800C\u4E0D\u6BC1,\u529B\u6700\u8F7B${r.detail ? ";" + r.detail : ""}`,
-          detail: r.detail,
-          divergence: div("\u7834\u591A\u6570\u6D3E\u4EC5\u4F5C\u53C2\u8003;\u53E4\u6CD5\u7834\u4E3B\u635F\u8017\u6697\u635F")
-        });
-        break;
-      case "\u6697\u5408":
-        out.push({
-          kind: "\u5730\u652F",
-          type: "\u6697\u5408",
-          members: r.zhi,
-          pillars: r.pillars,
-          distance: d0,
-          status: "\u751F\u6548",
-          cause: `\u85CF\u5E72\u6697\u5408(${r.detail}):\u6697\u4E2D\u7275\u7CFB`,
-          detail: r.detail
-        });
-        break;
-    }
-  }
-  return { policy_note: policy.note || "", items: out };
 }
 
 // bazi-enrich/yunsui.ts
@@ -32638,6 +32814,14 @@ function main() {
       fail(`\u65E0\u6548\u519C\u5386\u65E5\u671F: ${e?.message || e}`);
     }
   }
+  let lin;
+  let openInteractionPolicy;
+  try {
+    lin = JSON.parse(fs.readFileSync(resolveData("lineages.json"), "utf-8"));
+    openInteractionPolicy = assertInteractionPolicy(lin?.lineages?.open?.interaction_policy, "lineages.open.interaction_policy");
+  } catch (e) {
+    fail(`lineages/open interaction_policy \u52A0\u8F7D\u5931\u8D25: ${e?.message || e}`);
+  }
   const chart = createChart(birthInfo);
   const dm = chart.bazi.dayMaster;
   const z = chart.bazi.siZhu;
@@ -32660,7 +32844,7 @@ function main() {
     "\u65E5": chart.bazi.siZhu.day,
     "\u65F6": chart.bazi.siZhu.hour
   };
-  chart.bazi.enrichment = enrichBazi(siZhuForEnrich);
+  chart.bazi.enrichment = enrichBazi(siZhuForEnrich, { interactionPolicy: openInteractionPolicy });
   try {
     const eff = resolveSolarClock(birthInfo);
     chart.bazi.enrichment.\u65F6\u8FB0\u8FB9\u754C = detectShichenBoundary(eff.hour, eff.minute, {
@@ -32673,7 +32857,6 @@ function main() {
   }
   try {
     const defs = JSON.parse(fs.readFileSync(resolveData("shensha.json"), "utf-8"));
-    const lin = JSON.parse(fs.readFileSync(resolveData("lineages.json"), "utf-8"));
     const shenChart = { siZhu: chart.bazi.siZhu, gender: birthInfo.gender };
     const fullHits = computeShensha(shenChart, defs, lin.lineages["open"].shensha_policy);
     const LK_CN = { ziping: "\u5B50\u5E73", ditian: "\u6EF4\u5929\u9AD3", shenfeng: "\u795E\u5CF0", mangpai: "\u76F2\u6D3E(\u542B\u6BB5\u6C0F)" };
@@ -32717,17 +32900,17 @@ function main() {
         \u65E5: chart.bazi.siZhu.day,
         \u65F6: chart.bazi.siZhu.hour
       };
-      const openIP = lin.lineages["open"].interaction_policy;
-      if (openIP) {
-        enr.\u4F5C\u7528\u5173\u7CFB = { policy: "open(\u901A\u5219+\u5206\u6B67\u6807\u6CE8)", ...adjudicateInteractions(siZhuCN, openIP) };
-        const lk = args.lineage === "duanshi" ? "mangpai" : args.lineage;
-        if (lk && lin.lineages[lk] && lk !== "open" && lin.lineages[lk].interaction_policy) {
-          enr.\u4F5C\u7528\u5173\u7CFB.lineage = {
-            id: lk,
-            name: lin.lineages[lk].name,
-            ...adjudicateInteractions(siZhuCN, lin.lineages[lk].interaction_policy)
-          };
-        }
+      const lk = args.lineage === "duanshi" ? "mangpai" : args.lineage;
+      if (lk && lin.lineages[lk] && lk !== "open" && lin.lineages[lk].interaction_policy) {
+        const lineagePolicy = assertInteractionPolicy(
+          lin.lineages[lk].interaction_policy,
+          `lineages.${lk}.interaction_policy`
+        );
+        enr.\u4F5C\u7528\u5173\u7CFB.lineage = {
+          id: lk,
+          name: lin.lineages[lk].name,
+          ...adjudicateInteractions(siZhuCN, lineagePolicy)
+        };
       }
       const curYear = args.currentYear ? parseInt(args.currentYear, 10) : (/* @__PURE__ */ new Date()).getFullYear();
       if (enr.\u4F5C\u7528\u5173\u7CFB) {

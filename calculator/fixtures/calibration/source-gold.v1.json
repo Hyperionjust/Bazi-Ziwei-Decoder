@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "gold_id": "wei-qianli-22-source-semantics-v1",
+  "declared_at": "2026-08-01",
+  "scope_note": "22 例同出韦千里《批命104例》，这里只规范化原文语义，不主张跨作者或跨流派普遍准确率。",
+  "provenance_note": "source_case 指向保留书名、篇名、完整摘录和书载四柱的典籍命例文件；evidence 必须是该文件 classic.断语摘录 的连续原文片段。",
+  "cases": [
+    {
+      "id": "韦千里·阎锡山",
+      "source_case": "classics/yan-xishan.case.json",
+      "pillars": "癸未 辛酉 乙酉 丁亥",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["秋木凋零", "杀重身轻"]
+    },
+    {
+      "id": "韦千里·马占山",
+      "source_case": "classics/ma-zhanshan.case.json",
+      "pillars": "乙酉 丁亥 己丑 甲子",
+      "axis": "调候",
+      "direction": "不适用",
+      "evidence": ["病于水盛", "助成寒湿", "妙有丁火煦融"]
+    },
+    {
+      "id": "韦千里·许世英",
+      "source_case": "classics/xu-shiying.case.json",
+      "pillars": "癸酉 辛酉 乙丑 辛巳",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["不能从杀", "应作身弱用印"]
+    },
+    {
+      "id": "韦千里·吴佩孚",
+      "source_case": "classics/wu-peifu.case.json",
+      "pillars": "甲戌 戊辰 戊申 壬子",
+      "axis": "扶抑",
+      "direction": "强",
+      "evidence": ["比肩重叠", "乃身财两美"]
+    },
+    {
+      "id": "韦千里·梅兰芳",
+      "source_case": "classics/mei-lanfang.case.json",
+      "pillars": "甲午 甲戌 丁酉 癸卯",
+      "axis": "扶抑",
+      "direction": "强",
+      "evidence": ["全局木火太旺"]
+    },
+    {
+      "id": "韦千里·宋子文",
+      "source_case": "classics/song-ziwen.case.json",
+      "pillars": "甲午 乙亥 庚申 己卯",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["财旺身弱", "日主较弱"]
+    },
+    {
+      "id": "韦千里·蒋介石",
+      "source_case": "classics/jiang-jieshi.case.json",
+      "pillars": "丁亥 庚戌 己巳 庚午",
+      "axis": "混合",
+      "direction": "强",
+      "evidence": ["天生康壮之体", "伤官佩印为用"]
+    },
+    {
+      "id": "韦千里·蒋邦彦",
+      "source_case": "classics/jiang-bangyan.case.json",
+      "pillars": "庚辰 己卯 壬寅 辛丑",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["木多水缩为患", "自取庚金为用，赖其生水制木也"]
+    },
+    {
+      "id": "韦千里·李国杰",
+      "source_case": "classics/li-guojie.case.json",
+      "pillars": "辛巳 辛丑 庚申 辛巳",
+      "axis": "混合",
+      "direction": "强",
+      "evidence": ["乃属一行得气", "金寒而失令"]
+    },
+    {
+      "id": "韦千里·某军人",
+      "source_case": "classics/mou-junren.case.json",
+      "pillars": "癸卯 辛酉 乙卯 辛巳",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["乙木死于秋", "受克太重", "仍嫌柔弱"]
+    },
+    {
+      "id": "韦千里·冼冠生",
+      "source_case": "classics/xian-guansheng.case.json",
+      "pillars": "戊子 癸亥 庚寅 戊寅",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["财重身轻", "制水帮身"]
+    },
+    {
+      "id": "韦千里·杨宇霆",
+      "source_case": "classics/yang-yuting.case.json",
+      "pillars": "乙酉 甲申 丙辰 戊戌",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["晦火太甚", "甲乙印绶之制土帮身"]
+    },
+    {
+      "id": "韦千里·虞洽卿",
+      "source_case": "classics/yu-qiaqing.case.json",
+      "pillars": "丁卯 丙午 庚午 己卯",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["木火虽盛", "弱中有气", "全得力于时上正印"]
+    },
+    {
+      "id": "韦千里·镇江金君",
+      "source_case": "classics/zhenjiang-jin-jun.case.json",
+      "pillars": "己亥 乙亥 丙戌 壬辰",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["病于水多身弱"]
+    },
+    {
+      "id": "韦千里·商震",
+      "source_case": "classics/shang-zhen.case.json",
+      "pillars": "戊子 辛酉 乙未 己卯",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["杀重身轻", "日主弱中有气"]
+    },
+    {
+      "id": "韦千里·孙传芳",
+      "source_case": "classics/sun-chuanfang.case.json",
+      "pillars": "乙酉 庚辰 壬寅 己酉",
+      "axis": "扶抑",
+      "direction": "强",
+      "evidence": ["金水占优，以身强论"]
+    },
+    {
+      "id": "韦千里·杨杏佛",
+      "source_case": "classics/yang-xingfo.case.json",
+      "pillars": "癸巳 丙辰 壬申 癸卯",
+      "axis": "扶抑",
+      "direction": "强",
+      "evidence": ["身强有余"]
+    },
+    {
+      "id": "韦千里·袁克文",
+      "source_case": "classics/yuan-kewen.case.json",
+      "pillars": "庚寅 甲申 甲申 甲戌",
+      "axis": "扶抑",
+      "direction": "强",
+      "evidence": ["身杀两强"]
+    },
+    {
+      "id": "韦千里·顾维钧",
+      "source_case": "classics/gu-weijun.case.json",
+      "pillars": "丁亥 癸丑 己亥 戊辰",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["财旺极矣", "恐身主更弱矣", "无戊则安可任财"]
+    },
+    {
+      "id": "韦千里·阮玲玉",
+      "source_case": "classics/ruan-lingyu.case.json",
+      "pillars": "庚戌 辛巳 己亥 乙亥",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["印绶冲散", "身主与七杀，一无可恃"]
+    },
+    {
+      "id": "韦千里·郑正秋",
+      "source_case": "classics/zheng-zhengqiu.case.json",
+      "pillars": "戊子 乙丑 辛丑 壬辰",
+      "axis": "调候",
+      "direction": "不适用",
+      "evidence": ["辛诞寒冬", "既患寒湿，又兼柔弱"],
+      "interpretation_note": "原文的弱与寒湿同句出现，本轮不把它强制映射为扶抑弱。"
+    },
+    {
+      "id": "韦千里·周信芳",
+      "source_case": "classics/zhou-xinfang.case.json",
+      "pillars": "甲午 丁丑 辛酉 甲午",
+      "axis": "扶抑",
+      "direction": "弱",
+      "evidence": ["财杀两强", "日主较弱", "不堪任财任杀"]
+    }
+  ]
+}

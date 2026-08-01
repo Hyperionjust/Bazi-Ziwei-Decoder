@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "audit_id": "v3.13-distribution-5000",
+  "declared_at": "2026-08-01",
+  "sampling_and_gates_pre_registered_before_first_run": true,
+  "baseline_method_amended_after_invalid_dry_run": true,
+  "amendment_note": "首轮干跑误以 interactions=[] 代表 v3.12；发现 F1 仍执行后该轮作废。种子、采样域和门限保持原冻结值，只把基线方法改为旧五项重建，并在有效发布运行前冻结。",
+  "seeds": [12345, 20260801],
+  "samples_per_seed": 2500,
+  "rng": "LCG32: state=(imul(state,1664525)+1013904223)>>>0; value=state%n",
+  "domain": {
+    "year": [1950, 2009],
+    "month": [1, 12],
+    "day": [1, 28],
+    "hour": [0, 23],
+    "minute": 30,
+    "gender": "rng bit: 1=male, 0=female",
+    "isLunar": false,
+    "timeZone": 8
+  },
+  "gates": {
+    "exact_sample_count": 5000,
+    "current_total_low_rate": [0.12, 0.35],
+    "max_daymaster_element_single_verdict_drift_percentage_points": 15
+  },
+  "baseline": "同一四柱取当前 breakdown 的得令+长生+得地+得势+会局直接重建 v3.12 旺衰 v2 score/verdict/confidence，并以该身势重跑调候条例与用神建议；不得用 interactions=[] 代替，因为 F1 与关系参数无关。"
+}

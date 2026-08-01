@@ -22,8 +22,10 @@
     --indigo-soft: #5c7aa3;
     --water: #2a4a72;
     --jade: #4a7c4e;
+    --jade-deep: #28623d;
     --jade-soft: #6f9971;
     --gold: #a07c4a;
+    --gold-soft: #c8ab78;
     --metal: #9c9382;
     --obsidian: #1a1a1a;
     --line: #8b8378;
@@ -43,8 +45,10 @@
   }
   body {
     background-image:
-      radial-gradient(circle at 15% 20%, rgba(42,74,114,0.05), transparent 50%),
-      radial-gradient(circle at 85% 80%, rgba(180,160,130,0.06), transparent 50%);
+      repeating-linear-gradient(7deg, rgba(90,72,48,.025) 0, rgba(90,72,48,.025) 1px, transparent 1px, transparent 7px),
+      repeating-linear-gradient(97deg, rgba(255,255,255,.22) 0, rgba(255,255,255,.22) 1px, transparent 1px, transparent 11px),
+      radial-gradient(circle at 15% 20%, rgba(42,74,114,0.06), transparent 48%),
+      radial-gradient(circle at 85% 80%, rgba(180,160,130,0.08), transparent 48%);
     min-height: 100vh;
     padding: 24px;
   }
@@ -53,11 +57,33 @@
   .report {
     max-width: 1080px;
     margin: 0 auto;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      linear-gradient(rgba(245,241,232,.96), rgba(245,241,232,.96)),
+      repeating-linear-gradient(0deg, transparent 0 14px, rgba(160,124,74,.045) 14px 15px);
+    border: 1px solid #8e795d;
+    outline: 5px double rgba(160,124,74,.22);
+    outline-offset: -9px;
+    box-shadow: 0 18px 54px rgba(50,36,20,0.12);
     padding: 28px;
   }
+  .report::before,
+  .report::after {
+    content: "";
+    position: absolute;
+    width: 74px; height: 74px;
+    pointer-events: none; z-index: 3; opacity: .58;
+    background:
+      linear-gradient(var(--gold), var(--gold)) 0 0 / 42px 1px no-repeat,
+      linear-gradient(var(--gold), var(--gold)) 0 0 / 1px 42px no-repeat,
+      linear-gradient(var(--vermillion), var(--vermillion)) 8px 8px / 26px 1px no-repeat,
+      linear-gradient(var(--vermillion), var(--vermillion)) 8px 8px / 1px 26px no-repeat;
+  }
+  .report::before { top: 13px; left: 13px; }
+  .report::after { right: 13px; bottom: 13px; transform: rotate(180deg); }
+  .report > * { position: relative; z-index: 1; }
 
   /* ============ HEADER ============ */
   .header {
@@ -65,9 +91,17 @@
     grid-template-columns: auto auto 1fr auto;
     gap: 16px;
     align-items: start;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--line-soft);
+    padding: 6px 4px 25px;
     margin-bottom: 20px;
+    position: relative;
+    background: linear-gradient(90deg, rgba(193,67,47,.035), transparent 42%, rgba(42,74,114,.028));
+  }
+  .header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 9px;
+    opacity: .75;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='10' viewBox='0 0 42 10'%3E%3Cpath d='M0 8h16V2H6v3h7M21 2h16v6H27V5h7' fill='none' stroke='%23a07c4a' stroke-width='1'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center;
   }
   /* v3.7 古风小人（按最像类型×性别，与 MBTI 海报同源 32 变体） */
   .h-char { width: 78px; align-self: center; }
@@ -82,6 +116,8 @@
     font-size: 13px; letter-spacing: 2px; line-height: 1.15;
     transform: rotate(-3deg);
     font-weight: 600;
+    background: rgba(193,67,47,.035);
+    box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(193,67,47,.55);
   }
   .title-block .kicker {
     font-size: 10px; color: var(--ink-soft);
@@ -93,6 +129,7 @@
   .title-block h1 {
     font-size: 38px; margin: 0 0 7px;
     letter-spacing: 5px; font-weight: 700;
+    text-shadow: 0 1px 0 rgba(255,255,255,.7);
   }
   .title-block .subtitle {
     font-size: 12.5px; color: var(--ink-soft);
@@ -117,17 +154,31 @@
   .header-right .meta-row span { color: var(--ink); }
   .header-right .meta-row b { color: var(--vermillion); font-weight: 600; }
 
+  /* ============ NOVICE READING GUIDE ============ */
+  .reader-guide {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
+    margin: -2px 0 18px; padding: 11px 15px;
+    border: 1px solid rgba(160,124,74,.55); border-left: 4px solid var(--vermillion);
+    background: linear-gradient(90deg, rgba(250,246,236,.92), rgba(235,229,213,.72));
+    box-shadow: inset 0 0 18px rgba(160,124,74,.05);
+  }
+  .reader-guide .guide-title { color: var(--vermillion-deep); font-size: 12px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+  .reader-guide .guide-copy { font-size: 11px; color: var(--ink-soft); line-height: 1.75; }
+  .reader-guide .guide-copy b { font-weight: 900; }
+  .reader-guide .guide-good { color: var(--jade-deep); }
+  .reader-guide .guide-warn { color: var(--vermillion-deep); }
+
   /* ============ INFO BAR ============ */
   .info-bar {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 1px;
-    background: var(--line-soft);
-    border: 1px solid var(--line-soft);
+    background: rgba(160,124,74,.32);
+    border: 1px solid rgba(160,124,74,.45);
     margin-bottom: 20px;
   }
   .info-cell {
-    background: var(--paper-card);
+    background: rgba(250,246,236,.88);
     padding: 9px 12px;
   }
   .info-cell .k { font-size: 10px; color: var(--ink-faint); letter-spacing: 1px; margin-bottom: 3px; }
@@ -144,13 +195,14 @@
 
   /* ============ FOUR PILLARS HERO ============ */
   .hero {
-    border: 1px solid var(--line);
+    border: 1px solid #927d5f;
     margin-bottom: 20px;
     background: var(--paper);
+    box-shadow: inset 0 0 0 3px rgba(160,124,74,.055);
   }
   .hero-head {
     display: flex; justify-content: space-between; align-items: baseline;
-    padding: 9px 14px; background: var(--paper-deep);
+    padding: 9px 14px; background: linear-gradient(90deg, var(--paper-deep), rgba(250,246,236,.9));
     border-bottom: 1px solid var(--line-soft);
   }
   .hero-head h3 { margin: 0; font-size: 13px; letter-spacing: 1px; }
@@ -233,7 +285,7 @@
   .a-stack { display: flex; flex-direction: column; gap: 14px; }
   .a-stack > .a-card:last-child { flex-grow: 1; }
   .a-card {
-    background: var(--paper-card); border: 1px solid var(--line-soft);
+    position: relative; background: linear-gradient(145deg, rgba(250,246,236,.96), rgba(245,241,232,.86)); border: 1px solid rgba(160,124,74,.43);
     padding: 12px 14px;
   }
   .a-card h4 {
@@ -284,14 +336,14 @@
   .tgi-fill { height: 100%; border-radius: 2px; min-width: 0; }
   .tgi-n { text-align: right; color: var(--ink); font-size: 12px; }
   .tg-mech { margin-top: 10px; font-size: 10.5px; color: var(--ink-soft); line-height: 1.65; border-top: 1px dashed var(--line-faint); padding-top: 8px; }
-  .tg-plain { margin-top: 7px; font-size: 11px; line-height: 1.75; }
+  .tg-plain { margin-top: 9px; font-size: 12.2px; line-height: 1.9; color: var(--ink); }
 
   /* ============ GEJU + YONGSHEN ============ */
   .core-block {
     display: grid; grid-template-columns: 0.9fr 1.4fr;
     gap: 14px; margin-bottom: 20px;
   }
-  .core-panel { background: var(--paper-card); border: 1px solid var(--line-soft); padding: 12px 14px; }
+  .core-panel { position: relative; background: linear-gradient(145deg, rgba(250,246,236,.96), rgba(245,241,232,.86)); border: 1px solid rgba(160,124,74,.43); padding: 12px 14px; }
   .core-panel h4 { margin: 0 0 10px; font-size: 12.5px; letter-spacing: 1px; }
   .geju-name { font-size: 22px; font-weight: 700; color: var(--vermillion); letter-spacing: 2px; margin-bottom: 4px; }
   .geju-sub { font-size: 11.5px; color: var(--ink-soft); line-height: 1.75; }
@@ -308,13 +360,56 @@
     display: inline-block; padding: 3px 13px; font-size: 17px; font-weight: 600;
     border: 1px solid; border-radius: 3px; margin-right: 5px;
   }
-  .ys-good { border-color: var(--jade); color: var(--jade); background: rgba(74,124,78,0.06); }
+  .ys-good { border-color: var(--jade-deep); color: var(--jade-deep); background: rgba(74,124,78,0.08); font-weight: 900; }
   .ys-bad { border-color: var(--vermillion); color: var(--vermillion); background: rgba(193,67,47,0.06); }
   .ys-mid { border-color: var(--indigo); color: var(--indigo); background: rgba(42,74,114,0.06); }
   .ys-note {
     grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-soft);
     line-height: 1.75; border-top: 1px dashed var(--line-faint); padding-top: 10px; margin-top: 3px;
   }
+
+  /* ============ v3.14 ALGORITHM-OWNED CARDS ============ */
+  .algo-card {
+    display: inline-block; vertical-align: top; width: calc(50% - 8px);
+    min-height: 122px; margin: 0 12px 20px 0; padding: 12px 14px;
+    position: relative; border: 1px solid rgba(160,124,74,.43); background: linear-gradient(145deg, rgba(250,246,236,.96), rgba(245,241,232,.86));
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .algo-card.insights-card { margin-right: 0; }
+  .algo-card.solo { width: 100%; min-height: 0; margin-right: 0; }
+  .algo-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+  .algo-card-head b { font-size: 13px; letter-spacing: 1px; }
+  .algo-card-head span { font-size: 9.5px; color: var(--ink-faint); text-align: right; }
+  .classic-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .classic-list li {
+    display: grid; grid-template-columns: minmax(72px, .8fr) auto minmax(110px, 1.4fr);
+    align-items: baseline; gap: 8px; padding-bottom: 5px;
+    border-bottom: 1px dashed var(--line-faint); font-size: 10.5px; min-width: 0;
+  }
+  .classic-list li:last-child { border-bottom: none; padding-bottom: 0; }
+  .classic-name { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+  .classic-grade { white-space: nowrap; font-size: 9.5px; padding: 1px 5px; border-radius: 2px; border: 1px solid currentColor; }
+  .classic-grade.grade-up { color: var(--jade-deep); font-weight: 900; }
+  .classic-grade.grade-mid { color: var(--indigo); }
+  .classic-grade.grade-down, .classic-grade.grade-avoid { color: var(--warn); }
+  .classic-image { color: var(--ink-soft); line-height: 1.6; overflow-wrap: anywhere; }
+  .insight-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .insight-badge { display: flex; flex-direction: column; gap: 5px; min-width: 0; padding: 8px 10px; border-left: 3px solid var(--indigo); background: var(--paper); font-size: 10.5px; line-height: 1.65; overflow-wrap: anywhere; }
+  .insight-badge:nth-child(2) { border-left-color: var(--warn); }
+  .insight-label { font-size: 9.5px; font-weight: 700; color: var(--indigo); letter-spacing: 1px; }
+  .insight-badge:nth-child(2) .insight-label { color: var(--warn); }
+
+  /* ============ RARE PHENOMENA · HYBRID FACT + INTERPRETATION ============ */
+  .rare-phenomena { margin-bottom: 20px; border-color: rgba(160,124,74,.58); background: linear-gradient(145deg, rgba(250,246,236,.96), rgba(239,232,216,.82)); }
+  .rare-phenomena h2 { margin-bottom: 12px; }
+  .rare-title-seal { display: inline-block; margin-right: 10px; padding: 3px 7px; color: #fff; background: var(--vermillion-deep); font-size: 10px; line-height: 1; letter-spacing: 1px; }
+  .rare-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+  .rare-item { display: grid; grid-template-columns: auto minmax(72px,.8fr) minmax(110px,1.3fr); align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid rgba(160,124,74,.35); background: rgba(255,255,255,.42); min-width: 0; }
+  .rare-grade { padding: 2px 5px; border: 1px solid currentColor; font-size: 9px; font-weight: 800; white-space: nowrap; }
+  .rare-grade.rare-extreme { color: var(--vermillion-deep); } .rare-grade.rare-high { color: var(--gold); } .rare-grade.rare-mid { color: var(--indigo); }
+  .rare-name { color: var(--ink); font-size: 11.5px; font-weight: 800; overflow-wrap: anywhere; }
+  .rare-evidence { color: var(--ink-soft); font-size: 10px; line-height: 1.55; overflow-wrap: anywhere; }
+  .rare-reading { padding-top: 11px; border-top: 1px dashed rgba(160,124,74,.45); }
 
   /* ============ DAYUN / LIUNIAN ============ */
   .strip { border: 1px solid var(--line-soft); margin-bottom: 20px; }
@@ -342,30 +437,57 @@
   .cell .ss { font-size: 9px; color: var(--ink-faint); margin: 1px 0 3px; }
   .cell .ages, .cell .yr { color: var(--ink-soft); font-family: "JetBrains Mono", monospace; }
   .cell .luck { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-top: 4px; }
+  .state-pair { display: flex; justify-content: center; gap: 3px; margin-top: 4px; font-size: 8px; line-height: 1.25; white-space: nowrap; }
+  .dir-token, .body-token { display: inline-block; padding: 1px 3px; border: 1px solid currentColor; border-radius: 2px; background: rgba(255,255,255,.45); }
+  .dir-token.dir-up { color: var(--jade); } .dir-token.dir-flat { color: var(--indigo); } .dir-token.dir-down { color: var(--vermillion); }
+  .body-token.body-strong { color: var(--jade); } .body-token.body-mid { color: var(--gold); } .body-token.body-weak { color: var(--vermillion-deep); }
   .cell.current::after {
     content: "当前"; position: absolute; top: 3px; right: 4px;
     font-size: 8px; color: var(--vermillion);
   }
   .liunian .cell .yr { font-size: 10px; display: block; }
   .liunian .cell .gz { font-size: 14px; }
+  .month-flow { border: 1px solid var(--line-soft); margin: -6px 0 20px; background: var(--paper-card); break-inside: avoid; page-break-inside: avoid; }
+  .month-flow-head { display: flex; justify-content: space-between; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--line-soft); background: var(--paper-deep); font-size: 10px; color: var(--ink-soft); }
+  .month-flow-head b { color: var(--ink); font-size: 11.5px; letter-spacing: 1px; }
+  .month-flow-head strong:first-child { color: var(--jade-deep); font-weight: 900; } .month-flow-head strong:last-of-type { color: var(--vermillion); font-weight: 900; }
+  .month-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .month-cell { min-width: 0; padding: 6px 2px; text-align: center; border-right: 1px solid var(--line-faint); font-size: 8.5px; }
+  .month-cell:last-child { border-right: none; }
+  .month-term, .month-gz, .month-dir { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .month-term { color: var(--ink-faint); } .month-gz { color: var(--ink); font-size: 10px; font-weight: 700; margin: 1px 0; }
+  .month-dir { font-weight: 700; } .month-cell.flow-up .month-dir { color: var(--jade-deep); font-weight: 900; } .month-cell.flow-flat .month-dir { color: var(--indigo); } .month-cell.flow-down .month-dir { color: var(--vermillion); }
 
   /* ============ NUMBERED SECTIONS ============ */
   .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .section {
-    background: var(--paper); border: 1px solid var(--line-soft);
+    position: relative;
+    background: linear-gradient(145deg, rgba(250,246,236,.82), rgba(245,241,232,.68)); border: 1px solid rgba(160,124,74,.46);
     padding: 14px 18px; margin-bottom: 14px;
+    box-shadow: inset 3px 0 0 rgba(160,124,74,.13);
+  }
+  .a-card::before, .core-panel::before, .algo-card::before, .section::before {
+    content: ""; position: absolute; top: -1px; right: -1px; width: 16px; height: 16px;
+    border-top: 2px solid rgba(160,124,74,.72); border-right: 2px solid rgba(160,124,74,.72);
+    pointer-events: none;
   }
   .section h2 {
     margin: 0 0 11px; font-size: 14px; letter-spacing: 1px;
     display: flex; align-items: center; gap: 8px;
   }
   .section h2 .num-box {
-    background: var(--indigo); color: var(--paper);
-    padding: 2px 7px; border-radius: 2px;
+    background: rgba(193,67,47,.055); color: var(--vermillion-deep);
+    border: 1px solid var(--vermillion); box-shadow: inset 0 0 0 2px var(--paper);
+    padding: 2px 7px; border-radius: 0;
     font-size: 11px; font-family: "JetBrains Mono", monospace;
   }
-  .section h2 small { font-size: 10px; color: var(--ink-faint); font-weight: 400; letter-spacing: 0; }
-  .prose { font-size: 12px; line-height: 2; color: var(--ink); text-align: justify; }
+  .section h2 small { font-size: 10px; color: var(--ink-soft); font-weight: 500; letter-spacing: 0; }
+  .section h2::after {
+    content: ""; height: 7px; min-width: 36px; flex: 1; opacity: .58;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='8' viewBox='0 0 34 8'%3E%3Cpath d='M0 7h13V1H5v3h6M17 1h13v6H22V4h6' fill='none' stroke='%23a07c4a' stroke-width='.8'/%3E%3C/svg%3E");
+    background-repeat: repeat-x; background-position: right center;
+  }
+  .prose { font-size: 12.5px; line-height: 2.05; color: var(--ink); text-align: justify; }
   .prose.lead { border-left: 3px solid var(--indigo); background: var(--paper-card); padding: 10px 14px; }
   /* 合冲刑害 / 运岁引动 行 */
   .hc-table { display: flex; flex-direction: column; gap: 5px; }
@@ -377,8 +499,9 @@
   .hc-status.st-off { color: var(--ink-faint); }
   .hc-status.st-mid { color: var(--indigo); }
   .hc-cause { flex: 1; color: var(--ink-soft); }
-  .hl { color: var(--vermillion); font-weight: 700; }
-  .hl-good { color: var(--jade); font-weight: 700; }
+  .hc-trigger { display: block; margin-top: 2px; color: var(--warn); font-size: 9.5px; font-weight: 600; overflow-wrap: anywhere; }
+  .hl { color: var(--vermillion-deep); font-weight: 800; background: linear-gradient(transparent 72%, rgba(193,67,47,.10) 72%); }
+  .hl-good { color: var(--jade-deep); font-weight: 900; background: linear-gradient(transparent 70%, rgba(74,124,78,.17) 70%); padding: 0 .04em; }
 
   /* timeline */
   .timeline-legend { display: flex; gap: 16px; font-size: 10.5px; margin-bottom: 14px; color: var(--ink-soft); }
@@ -400,9 +523,10 @@
     border: 3px solid var(--paper); position: relative; z-index: 2;
     box-shadow: 0 0 0 1px var(--line-soft);
   }
+  .tl-trigger { position: absolute; left: 50%; top: -25px; transform: translateX(-50%); font-size: 13px; line-height: 1; filter: grayscale(.15); }
   .tl-marker.up { background: var(--jade); } .tl-marker.flat { background: var(--indigo); } .tl-marker.down { background: var(--vermillion); }
   .tl-run { font-size: 11px; font-weight: 600; color: var(--indigo); margin-bottom: 4px; }
-  .tl-run.down { color: var(--vermillion); } .tl-run.up { color: var(--jade); }
+  .tl-run.down { color: var(--vermillion); } .tl-run.up { color: var(--jade-deep); font-weight: 900; }
   .tl-desc { font-size: 10px; color: var(--ink-soft); line-height: 1.6; }
 
   /* shensha overview */
@@ -412,7 +536,7 @@
     font-weight: 600; white-space: nowrap; padding: 1px 6px; border-radius: 2px;
     border: 1px solid var(--line-soft); font-size: 10px;
   }
-  .ss-item .ss-name.good { color: var(--jade); border-color: var(--jade); }
+  .ss-item .ss-name.good { color: var(--jade-deep); border-color: var(--jade-deep); font-weight: 900; background: rgba(74,124,78,.06); }
   .ss-item .ss-name.warn { color: var(--vermillion); border-color: var(--vermillion); }
   .ss-item .ss-name.neutral { color: var(--indigo); border-color: var(--indigo); }
   .ss-item .ss-desc { color: var(--ink-soft); line-height: 1.5; }
@@ -427,7 +551,7 @@
   .ky-row:last-child { border-bottom: none; }
   .ky-row .ky-k { color: var(--ink-soft); }
   .ky-row .ky-v { color: var(--ink); line-height: 1.7; }
-  .ky-row .ky-v .em { color: var(--jade); font-weight: 600; }
+  .ky-row .ky-v .em { color: var(--jade-deep); font-weight: 900; }
   .ky-row .ky-v .avoid { color: var(--vermillion); }
   .ys-divergence { font-size: 10px; color: var(--warn, #c97c3a); line-height: 1.7; margin-top: 4px; }
   .ys-divergence:empty { display: none; }
@@ -439,6 +563,35 @@
   .mbti-note { font-size: 9.5px; color: var(--ink-faint); border-top: 1px dashed var(--line-faint); padding-top: 5px; margin-top: 3px; }
   .ky-note { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line-faint); font-size: 11px; line-height: 1.9; color: var(--ink-soft); }
   .ky-tag { display: inline-block; padding: 1px 8px; margin: 0 3px 3px 0; border: 1px solid var(--line-soft); border-radius: 3px; font-size: 11px; color: var(--ink); background: rgba(255,255,255,0.5); }
+
+  @media (max-width: 720px) {
+    body { padding: 0; overflow-x: hidden; }
+    .report { width: 100%; max-width: 100%; padding: 16px; border-left: 0; border-right: 0; box-shadow: none; overflow: hidden; }
+    .header { grid-template-columns: auto auto 1fr; gap: 10px; }
+    .header-right { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; text-align: left; white-space: normal; }
+    .header-right .gen-time { width: 100%; margin: 0; }
+    .header-right .meta-row { justify-content: flex-start; margin: 0; }
+    .reader-guide { grid-template-columns: 1fr; gap: 3px; padding: 10px 12px; }
+    .title-block h1 { font-size: clamp(25px, 8vw, 34px); letter-spacing: 2px; overflow-wrap: anywhere; }
+    .info-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .info-cell, .core-panel, .section { min-width: 0; overflow-wrap: anywhere; }
+    .core-block, .row-2col { grid-template-columns: 1fr; }
+    .algo-card { display: block; width: 100%; min-height: 0; margin: 0 0 12px; }
+    .classic-list li { grid-template-columns: minmax(74px, .8fr) auto; }
+    .classic-image { grid-column: 1 / -1; }
+    .insight-list { grid-template-columns: 1fr; }
+    .rare-list { grid-template-columns: 1fr; }
+    .rare-item { grid-template-columns: auto minmax(82px,.8fr) minmax(0,1.3fr); }
+    .strip { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+    .strip-row { min-width: 760px; }
+    .month-flow-head { flex-direction: column; gap: 3px; }
+    .month-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .month-cell { border-bottom: 1px solid var(--line-faint); }
+    .section:has(.timeline) { overflow-x: auto; }
+    .timeline { min-width: 600px; }
+    .hc-row { flex-wrap: wrap; gap: 3px 7px; }
+    .hc-cause { flex-basis: 100%; }
+  }
 
   /* footer */
   .footer-disclaim {
@@ -511,20 +664,25 @@
   <polygon points="75,43 70,42 71,47" fill="#e8a898" opacity="0.6"/>
 </svg></div>
     <div class="title-block">
-      <div class="kicker">八字命盘 · 子平命理详批</div>
-      <div class="mingzhu"><span class="mz-label">命主</span><span class="mz-name">命主</span></div>
+      <div class="kicker">命理底盘 · 人生使用说明</div>
+      <div class="mingzhu"><span class="mz-label">命主</span></div>
       <h1>厚土藏丙守中客</h1>
       <div class="subtitle">底盘厚、进项稳，靠长期累积换回旋余地</div>
     </div>
     <div class="header-right">
-      <div class="gen-time">生成时间：<span class="num">2026-07-29 11:11</span></div>
-      <div>旺衰评级</div>
+      <div class="gen-time">生成时间：<span class="num">2026-08-02 01:39</span></div>
+      <div>自身能量（旺衰）</div>
       <div class="badge-grade">◆ 中和</div>
       <div class="meta-row"><span>日主：<b>戊</b></span></div>
       <div class="meta-row"><span>格局：<b>正财格</b></span></div>
       <div class="meta-row"><span>起运：<b>8岁起运</b></span></div>
     </div>
   </header>
+
+  <aside class="reader-guide" aria-label="海报阅读说明">
+    <div class="guide-title">小白这样看</div>
+    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的风险。第一次看可以跳过上方专业盘面，先读下方 01—04 的现实解读，再看大运流年找时机，最后照 09 的建议行动；括号里的命理词不影响理解。</div>
+  </aside>
 
   <!-- ============ INFO BAR ============ -->
   <div class="info-bar">
@@ -539,8 +697,8 @@
   <!-- ============ FOUR PILLARS HERO ============ -->
   <div class="hero">
     <div class="hero-head">
-      <h3>四柱命盘</h3>
-      <div class="legend">干支五行分色 · <b>日柱为日元</b> · 藏干标本气/中气/余气十神 · 星运=日主十二运 / 自坐=本柱干坐支</div>
+      <h3>四柱命盘 <span style="font-size:10px;color:var(--ink-soft);font-weight:400">· 解读所依据的原始盘面</span></h3>
+      <div class="legend">第一次看可直接跳到下方现实解读 · <b>红框“日柱”代表你自己</b> · 其余专业名词无需记忆</div>
     </div>
     <div class="pillars">
       <!-- 年柱 -->
@@ -607,23 +765,23 @@
     <div class="a-stack">
     <!-- 日主旺衰 -->
     <div class="a-card">
-      <h4>日主旺衰 <span class="verdict">中和</span></h4>
+      <h4>你的能量底盘 <span class="verdict">中和（旺衰）</span></h4>
       <div class="dm-line">
         <span class="dm-gan">戊</span>
-        <span class="dm-desc">戊土的特性是城墙之土——厚重、能承载、不轻易被外力推动，意味着你天然是别人愿意托付事情的那一类人；你最强的能力是把一摊散乱的事收拢成一个能落地的秩序，但也正因为太能扛，容易把本不该由你担的部分一并接了过来。</span>
+        <span class="dm-desc">戊土的特性是城墙之土——<span class="hl-good">厚重、能承载、不轻易被外力推动</span>，意味着你<span class="hl-good">天然是别人愿意托付事情的那一类人</span>；你最强的能力是<span class="hl-good">把一摊散乱的事收拢成一个能落地的秩序</span>，但也正因为<span class="hl-good">太能扛</span>，<span class="hl">容易把本不该由你担的部分一并接了过来</span>。</span>
       </div>
       <div class="checks">
         <div class="check yes"><span class="cv">✓</span>得令</div>
         <div class="check yes"><span class="cv">✓</span>得地</div>
         <div class="check yes"><span class="cv">✓</span>得势</div>
       </div>
-      <div class="slider"><div class="slider-mark" style="left:52%"></div></div>
+      <div class="slider"><div class="slider-mark" style="left:54%"></div></div>
       <div class="slider-labels"><span>弱</span><span>中和</span><span>旺</span></div>
       <div style="text-align:right;margin-top:4px"><span class="dm-score">中和</span></div>
     </div>
     <!-- 五行力量 -->
     <div class="a-card">
-      <h4>五行统计 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">含藏干 · 共9</span></h4>
+      <h4>五种能量配比 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">五行 · 含藏干 · 共9</span></h4>
       <div class="wx-bars">
         <div class="wx-bar"><div class="col" style="height:11%;background:var(--jade)"></div><div class="name">木</div><div class="num-val num">1</div></div>
         <div class="wx-bar"><div class="col" style="height:33%;background:var(--vermillion)"></div><div class="name">火</div><div class="num-val num">3</div></div>
@@ -631,12 +789,12 @@
         <div class="wx-bar"><div class="col" style="height:0%;background:var(--metal)"></div><div class="name">金</div><div class="num-val num">0</div></div>
         <div class="wx-bar"><div class="col" style="height:11%;background:var(--water)"></div><div class="name">水</div><div class="num-val num">1</div></div>
       </div>
-      <div class="wx-note">全盘火土偏旺、水木尚有根，唯独金一点不见，而金恰恰是你最缺又最对症的那一味。这让你在需要果断切割、划清边界的场合，往往要比旁人多花一倍力气。</div>
+      <div class="wx-note">全盘火土偏旺、水木尚有根，唯独金一点不见，而金恰恰是你最缺又最对症的那一味。这让你在需要<span class="hl-good">果断切割、划清边界</span>的场合，往往要比旁人多花一倍力气。</div>
     </div>
     </div>
     <!-- 十神分布 -->
     <div class="a-card">
-      <h4>十神分布 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">不含日元</span></h4>
+      <h4>能力与需求结构 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">十神 · 专业名词不用记，重点看下方白话</span></h4>
       <div class="tg10">
         <div class="tg10-item"><span class="tgi-name">比肩</span><div class="tgi-track"><div class="tgi-fill" style="width:11%;background:var(--ink-soft)"></div></div><span class="tgi-n num">1</span></div>
         <div class="tg10-item"><span class="tgi-name">劫财</span><div class="tgi-track"><div class="tgi-fill" style="width:33%;background:var(--ink-soft)"></div></div><span class="tgi-n num">3</span></div>
@@ -650,23 +808,23 @@
         <div class="tg10-item"><span class="tgi-name">正印</span><div class="tgi-track"><div class="tgi-fill" style="width:22%;background:var(--gold)"></div></div><span class="tgi-n num">2</span></div>
       </div>
       <div class="tg-mech">你的日主是戊土，生在子月正财当令，年支卯木、日时两柱同为戊午。</div>
-      <div class="tg-plain">所以你这个人底盘厚实、进项有据，做事既讲根据也讲分寸。</div>
+      <div class="tg-plain">这组十神最鲜明的主轴，是正财负责现实与结果，比肩负责自主和承压，正印负责吸收经验，三股力量一起把你推向“先站稳、再扩张”的节奏。<span class="hl-good">你的核心能力，是把复杂任务拆成成本、责任和时间表，再一步一步做成可交付的结果</span>。做决定时，你<span class="hl-good">很少只凭一时情绪，更愿意先核对条件、判断能否长期维持</span>，所以涉及钱、资源和承诺的事情交给你更容易让人放心。与人协作时，比肩让你<span class="hl-good">有独立扛事、守住自己判断的能力</span>，正印又让你愿意先把规则和来龙去脉弄明白，不会为了显得快而跳过基础。放到工作和赚钱上，<span class="hl-good">稳定进项、可重复的方法、长期客户与有清楚制度的平台更适合你</span>，你的收益往往来自复利，而不是一次性的运气。代价是<span class="hl">当责任边界含糊时，你容易一边觉得别人不够可靠，一边把任务越接越多，最后让自己变成整个流程的瓶颈</span>。把“谁负责、何时交、做到什么标准”在开工前写清楚，并固定留一个复盘节点，<span class="hl-good">既能保住你的可靠，也能让成果不再只靠你一个人硬撑</span>。</div>
     </div>
   </div>
 
   <!-- ============ GEJU + YONGSHEN ============ -->
   <div class="core-block">
     <div class="core-panel">
-      <h4>格局判定</h4>
+      <h4>你的优势模式 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">格局</span></h4>
       <div class="geju-name">正财格</div>
-      <div class="geju-sub">月支子水本气癸正落在正财位，纯气立格，走的是稳定进项而非横财一路。意味着你适合把收入建在可累积的手艺与长期关系上，而不是押注一次性的机会。</div>
+      <div class="geju-sub">月支子水本气癸正落在正财位，纯气立格，走的是稳定进项而非横财一路。意味着你<span class="hl-good">适合把收入建在可累积的手艺与长期关系上</span>，而不是押注一次性的机会。</div>
       <div class="geju-tags">
         <span class="gt">成格 <b>成格</b></span>
         <span class="gt">置信度 <b>高</b></span>
       </div>
     </div>
     <div class="core-panel">
-      <h4>用神喜忌 · 调候</h4>
+      <h4>什么环境更帮你 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">用神喜忌 · 调候</span></h4>
       <div class="ys-grid">
         <div class="ys-item"><span class="ys-k">用神</span><span>护体:<span class="wx-chip wx-火">丙</span><span class="wx-chip wx-木">甲</span><br>发用:<span class="wx-chip wx-金">金</span>、<span class="wx-chip wx-木">木</span></span></div>
         <div class="ys-item"><span class="ys-k">忌神</span><span><span class="wx-chip wx-土">土</span></span></div>
@@ -679,21 +837,23 @@
   </div>
 
   <!-- ============ DAYUN ============ -->
+  <section class="algo-card classics-card solo"><div class="algo-card-head"><b>典出</b><span>古法参照 · 仅列盘面命中</span></div><ol class="classic-list"><li><span class="classic-name">有丙无甲</span><span class="classic-grade grade-mid">传统论法偏中性</span><span class="classic-image">寒土得暖而不得疏，厚而能积</span></li><li><span class="classic-name">弱中复强</span><span class="classic-grade grade-mid">传统论法偏中性</span><span class="classic-image">冬土本弱而满盘火气来助，转弱为强</span></li><li><span class="classic-name">乏壬孤寒</span><span class="classic-grade grade-down">传统论法偏受限</span><span class="classic-image">火土偏枯而无水润，暖而孤</span></li></ol></section>
+
   <div class="strip">
     <div class="strip-head">
-      <span><span class="sh-title">大运</span><span class="sh-note">　青年段木运连行，正是把手艺与关系立起来的窗口；四十岁后金水转旺，缺金一环逐步补上。</span></span>
+      <span><span class="sh-title">大运</span><span class="sh-note">　<span class="hl-good">青年段木运连行，正是把手艺与关系立起来的窗口；四十岁后金水转旺，缺金一环逐步补上</span>。</span></span>
       <span class="luck-legend"><span><span class="luck-dot luck-ji"></span>顺风</span><span><span class="luck-dot luck-ping"></span>平路</span><span><span class="luck-dot luck-xiong"></span>逆风</span></span>
     </div>
     <div class="strip-row">
-      <div class="cell "><div class="gz">乙亥</div><div class="ss">正偏</div><div class="ages num">2008-2017</div><div class="ages num">约9-18岁</div><span class="luck luck-ji"></span></div>
-      <div class="cell current"><div class="gz">甲戌</div><div class="ss">七比</div><div class="ages num">2018-2027</div><div class="ages num">约19-28岁</div><span class="luck luck-ping"></span></div>
-      <div class="cell "><div class="gz">癸酉</div><div class="ss">正伤</div><div class="ages num">2028-2037</div><div class="ages num">约29-38岁</div><span class="luck luck-ji"></span></div>
-      <div class="cell "><div class="gz">壬申</div><div class="ss">偏食</div><div class="ages num">2038-2047</div><div class="ages num">约39-48岁</div><span class="luck luck-ji"></span></div>
-      <div class="cell "><div class="gz">辛未</div><div class="ss">伤劫</div><div class="ages num">2048-2057</div><div class="ages num">约49-58岁</div><span class="luck luck-ping"></span></div>
-      <div class="cell "><div class="gz">庚午</div><div class="ss">食正</div><div class="ages num">2058-2067</div><div class="ages num">约59-68岁</div><span class="luck luck-ji"></span></div>
-      <div class="cell "><div class="gz">己巳</div><div class="ss">劫偏</div><div class="ages num">2068-2077</div><div class="ages num">约69-78岁</div><span class="luck luck-xiong"></span></div>
-      <div class="cell "><div class="gz">戊辰</div><div class="ss">比比</div><div class="ages num">2078-2087</div><div class="ages num">约79-88岁</div><span class="luck luck-xiong"></span></div>
-      <div class="cell "><div class="gz">丁卯</div><div class="ss">正正</div><div class="ages num">2088-2097</div><div class="ages num">约89-98岁</div><span class="luck luck-ji"></span></div>
+      <div class="cell "><div class="gz">乙亥</div><div class="ss">正偏</div><div class="ages num">2008-2017</div><div class="ages num">约9-18岁</div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-mid">体中</span></span></div>
+      <div class="cell current"><div class="gz">甲戌</div><div class="ss">七比</div><div class="ages num">2018-2027</div><div class="ages num">约19-28岁</div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-mid">体中</span></span></div>
+      <div class="cell "><div class="gz">癸酉</div><div class="ss">正伤</div><div class="ages num">2028-2037</div><div class="ages num">约29-38岁</div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="gz">壬申</div><div class="ss">偏食</div><div class="ages num">2038-2047</div><div class="ages num">约39-48岁</div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="gz">辛未</div><div class="ss">伤劫</div><div class="ages num">2048-2057</div><div class="ages num">约49-58岁</div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="gz">庚午</div><div class="ss">食正</div><div class="ages num">2058-2067</div><div class="ages num">约59-68岁</div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-mid">体中</span></span></div>
+      <div class="cell "><div class="gz">己巳</div><div class="ss">劫偏</div><div class="ages num">2068-2077</div><div class="ages num">约69-78岁</div><span class="luck luck-xiong"></span><span class="state-pair"><span class="dir-token dir-down">▼ 逆</span><span class="body-token body-mid">体中</span></span></div>
+      <div class="cell "><div class="gz">戊辰</div><div class="ss">比比</div><div class="ages num">2078-2087</div><div class="ages num">约79-88岁</div><span class="luck luck-xiong"></span><span class="state-pair"><span class="dir-token dir-down">▼ 逆</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="gz">丁卯</div><div class="ss">正正</div><div class="ages num">2088-2097</div><div class="ages num">约89-98岁</div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-strong">体强</span></span></div>
       <div class="cell "><div class="gz">-</div><div class="ss">-</div><div class="ages num">-</div><div class="ages num">-</div><span class="luck luck-ping"></span></div>
     </div>
   </div>
@@ -701,60 +861,64 @@
   <!-- ============ LIUNIAN ============ -->
   <div class="strip liunian">
     <div class="strip-head">
-      <span><span class="sh-title">流年</span><span class="sh-note">　甲戌运中段，2026 前后动、2028 换挡，两个节点之间适合把可交接的东西做扎实。</span></span>
+      <span><span class="sh-title">流年</span><span class="sh-note">　甲戌运中段，2026 前后动、2028 换挡，<span class="hl-good">两个节点之间适合把可交接的东西做扎实</span>。</span></span>
       <span class="strip-head-note" style="font-size:10px;color:var(--ink-soft)">色点=当年顺逆倾向</span>
     </div>
     <div class="strip-row">
-      <div class="cell "><div class="yr num">2018</div><div class="gz">戊戌</div><div class="ss"></div><span class="luck luck-xiong"></span></div>
-      <div class="cell "><div class="yr num">2019</div><div class="gz">己亥</div><div class="ss"></div><span class="luck luck-xiong"></span></div>
-      <div class="cell "><div class="yr num">2020</div><div class="gz">庚子</div><div class="ss"></div><span class="luck luck-ji"></span></div>
-      <div class="cell "><div class="yr num">2021</div><div class="gz">辛丑</div><div class="ss"></div><span class="luck luck-ping"></span></div>
-      <div class="cell "><div class="yr num">2022</div><div class="gz">壬寅</div><div class="ss"></div><span class="luck luck-ji"></span></div>
-      <div class="cell "><div class="yr num">2023</div><div class="gz">癸卯</div><div class="ss"></div><span class="luck luck-ji"></span></div>
-      <div class="cell "><div class="yr num">2024</div><div class="gz">甲辰</div><div class="ss"></div><span class="luck luck-ping"></span></div>
-      <div class="cell "><div class="yr num">2025</div><div class="gz">乙巳</div><div class="ss"></div><span class="luck luck-ji"></span></div>
-      <div class="cell current"><div class="yr num">2026</div><div class="gz">丙午</div><div class="ss"></div><span class="luck luck-ping"></span></div>
-      <div class="cell "><div class="yr num">2027</div><div class="gz">丁未</div><div class="ss"></div><span class="luck luck-xiong"></span></div>
+      <div class="cell "><div class="yr num">2018</div><div class="gz">戊戌</div><div class="ss"></div><span class="luck luck-xiong"></span><span class="state-pair"><span class="dir-token dir-down">▼ 逆</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="yr num">2019</div><div class="gz">己亥</div><div class="ss"></div><span class="luck luck-xiong"></span><span class="state-pair"><span class="dir-token dir-down">▼ 逆</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="yr num">2020</div><div class="gz">庚子</div><div class="ss"></div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="yr num">2021</div><div class="gz">辛丑</div><div class="ss"></div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="yr num">2022</div><div class="gz">壬寅</div><div class="ss"></div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="yr num">2023</div><div class="gz">癸卯</div><div class="ss"></div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-weak">体弱</span></span></div>
+      <div class="cell "><div class="yr num">2024</div><div class="gz">甲辰</div><div class="ss"></div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-mid">体中</span></span></div>
+      <div class="cell "><div class="yr num">2025</div><div class="gz">乙巳</div><div class="ss"></div><span class="luck luck-ji"></span><span class="state-pair"><span class="dir-token dir-up">▲ 顺</span><span class="body-token body-strong">体强</span></span></div>
+      <div class="cell current"><div class="yr num">2026</div><div class="gz">丙午</div><div class="ss"></div><span class="luck luck-ping"></span><span class="state-pair"><span class="dir-token dir-flat">◆ 平</span><span class="body-token body-strong">体强</span></span></div>
+      <div class="cell "><div class="yr num">2027</div><div class="gz">丁未</div><div class="ss"></div><span class="luck luck-xiong"></span><span class="state-pair"><span class="dir-token dir-down">▼ 逆</span><span class="body-token body-mid">体中</span></span></div>
     </div>
   </div>
+  <section class="month-flow"><div class="month-flow-head"><b>2026 十二月风向</b><span><strong>最顺</strong> 立春·庚寅　<strong>最逆</strong> 寒露·戊戌</span></div><div class="month-grid"><div class="month-cell flow-up"><span class="month-term">立春</span><span class="month-gz">庚寅</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-up"><span class="month-term">惊蛰</span><span class="month-gz">辛卯</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-down"><span class="month-term">清明</span><span class="month-gz">壬辰</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-flat"><span class="month-term">立夏</span><span class="month-gz">癸巳</span><span class="month-dir">◆ 平</span></div><div class="month-cell flow-up"><span class="month-term">芒种</span><span class="month-gz">甲午</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-flat"><span class="month-term">小暑</span><span class="month-gz">乙未</span><span class="month-dir">◆ 平</span></div><div class="month-cell flow-up"><span class="month-term">立秋</span><span class="month-gz">丙申</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-up"><span class="month-term">白露</span><span class="month-gz">丁酉</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-down"><span class="month-term">寒露</span><span class="month-gz">戊戌</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-down"><span class="month-term">立冬</span><span class="month-gz">己亥</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-up"><span class="month-term">大雪</span><span class="month-gz">庚子</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-flat"><span class="month-term">小寒</span><span class="month-gz">辛丑</span><span class="month-dir">◆ 平</span></div></div></section>
+
+  <!-- 条件板块：罕见现象（无算法命中时由 render 输出空字符串） -->
+  <section class="section rare-phenomena"><h2><span class="rare-title-seal">特别观察</span>罕见现象 <small>少见不等于吉凶，重点看它怎样落到现实</small></h2><div class="rare-list"><div class="rare-item"><span class="rare-grade rare-extreme">极罕</span><span class="rare-name">德秀满盘</span><span class="rare-evidence">德秀贵人见于年日时月柱</span></div><div class="rare-item"><span class="rare-grade rare-mid">少见</span><span class="rare-name">原局伏吟</span><span class="rare-evidence">日时柱戊午</span></div></div><div class="prose rare-reading">这张盘有两项需要单独看的罕见现象，罕见只说明组合少见，不等于天然全好或全坏。第一项是极罕的德秀满盘，整体判断<span class="hl-good">偏正向：聪明、温厚、愿意把事情做得体面周全的气质，会成为你取得信任的重要来源</span>；<span class="hl-good">现实里更容易表现为学习新规则快、写作表达有条理、遇到关键任务时被人托付</span>。它的发挥条件是让能力进入可被看见的作品、证书或长期项目，而不是只在熟人圈里默默帮忙。第二项是日时两柱戊午相同形成的原局伏吟，判断属于两面性：<span class="hl-good">相似问题第二次出现时，你会因为经验积累而处理得更熟练</span>，但<span class="hl">同一种责任、关系模式或内耗也可能反复回来，若一直沿用旧办法，就会有“怎么又是这件事”的感觉</span>。现实中遇到重复问题时，不要只加力气；把触发条件、旧做法和这次要改的一步写下来，<span class="hl-good">会更容易把重复变成升级，而不是循环消耗</span>。</div></section>
 
   <!-- ============ 01 性格 / 02 事业 ============ -->
   <div class="row-2col">
     <section class="section">
-      <h2><span class="num-box">01</span>性格与天赋</h2>
-      <div class="prose">你是那种<span class="hl-good">先把地基打稳、再谈盖几层楼</span>的人。戊土坐午，火来生土，让你对秩序和分寸有近乎本能的敏感，别人还在争论方案时，你已经在盘算谁来落地、什么时候交付。这份稳当带来的直接好处，是你说出口的承诺别人敢信。同时月支子水正财透着一股清醒的计算，让你在热闹场合也保持着一分不轻易上头的距离感。你不太喜欢用情绪解决问题，更愿意把事情拆成条件、成本和期限。<span class="hl-good">这份把混乱翻译成秩序的能力</span>，是你最容易被人低估、却最经得起时间检验的长板。要留意的是，太能承载有时会变成<span class="hl">默认自己该扛</span>，界线一模糊，消耗就悄悄堆上来了。</div>
+      <h2><span class="num-box">01</span>性格与天赋 <small>你平时怎么想、怎么做</small></h2>
+      <div class="prose">你是那种<span class="hl-good">先把地基打稳、再谈盖几层楼</span>的人。戊土坐午，火来生土，让你<span class="hl-good">对秩序和分寸有近乎本能的敏感，能很快看见事情该由谁落地、什么时候交付</span>。<span class="hl-good">这份稳当带来的直接好处，是你说出口的承诺别人敢信</span>。同时月支子水正财透着<span class="hl-good">一股清醒的计算，让你在热闹场合也能保持一分不轻易上头的距离感</span>。你<span class="hl-good">更愿意把事情拆成条件、成本和期限，用清楚的标准解决问题</span>。<span class="hl-good">这份把混乱翻译成秩序的能力，是你最经得起时间检验的长板</span>。要留意的是，<span class="hl-good">太能承载</span>有时会变成<span class="hl">默认自己该扛，界线一模糊，消耗就悄悄堆上来</span>。</div>
     </section>
     <section class="section">
-      <h2><span class="num-box">02</span>事业与格局</h2>
-      <div class="prose">事业上你适合走<span class="hl-good">长期累积型</span>的路，而不是靠一次爆发定输赢。正财格的底色决定了你的优势在于把一件事做深、做出可复用的方法，而不是频繁换赛道。用神在木，意味着与生长、教育、内容、木质材料、规划设计相关的方向，会比纯守成的岗位更能把你的力气使出来。你在团队里往往是那个把流程理顺、把责任分清的人，这类价值短期不显眼，时间一拉长就成了别人绕不开的依赖。金在盘中缺位，提示你要有意识地补上<span class="hl">果断收口</span>的一环——该结束的项目、该谈的价格、该拒的请求，拖着不办的成本比想象中高。给自己设一个明确的复盘节奏，会比再多加班有用。</div>
+      <h2><span class="num-box">02</span>事业与赚钱方式 <small>适合什么环境，收入从哪里来</small></h2>
+      <div class="prose">事业上你<span class="hl-good">适合走长期累积型的路</span>，而不是靠一次爆发定输赢。正财格的底色决定了<span class="hl-good">你的优势在于把一件事做深、做出可复用的方法</span>，而不是频繁换赛道。用神在木，意味着<span class="hl-good">教育、内容、规划设计等需要持续生长与输出的方向，更能把你的力气使出来</span>。你在团队里有<span class="hl-good">把流程理顺、把责任分清，让项目长期稳定运转的能力</span>，这类价值时间一拉长就会成为别人绕不开的依赖。金在盘中缺位，提示你要有意识地补上<span class="hl-good">该结束时果断收口</span>的一环；<span class="hl">该谈的价格、该拒的请求若一直拖着，成本会越堆越高</span>。给自己设一个明确的复盘节奏，<span class="hl-good">会比单纯增加工时更容易换来稳定成果</span>。</div>
     </section>
   </div>
 
   <!-- ============ 03 婚姻 / 04 健康 ============ -->
   <div class="row-2col">
     <section class="section">
-      <h2><span class="num-box">03</span>婚姻感情</h2>
-      <div class="prose">配偶宫坐印，妻星见于月柱，这一组合偏向成熟稳重之气。<span class="hl-good">你适合的另一半，更可能是一个沉静、务实又肯替你托底的女生</span>，年纪上偏年长一些的相处会更顺手。你要的不是热烈的追逐，而是一个能在你埋头做事时把生活那一头稳住的人。相处中你习惯用做事来表达在意——修东西、扛麻烦、提前把路铺好，这些都是你的情话。但对方未必总能读懂，<span class="hl">把想法讲出来</span>这件事，对你来说是需要刻意练习的功课。感情里最消耗你的往往不是冲突，而是你一个人默默把问题都吞下去。愿意开口，关系才有回旋余地。</div>
+      <h2><span class="num-box">03</span>感情与相处模式 <small>怎么爱人、怎样相处更顺</small></h2>
+      <div class="prose">配偶宫坐印，妻星见于月柱，这一组合带来<span class="hl-good">成熟、稳重、愿意照顾现实生活的伴侣倾向</span>。<span class="hl-good">你适合的另一半，更可能是一个沉静、务实又肯替你托底的女生</span>，<span class="hl-good">年纪偏长一些的相处节奏更容易顺手</span>。你真正需要的是<span class="hl-good">一个能在你埋头做事时把生活另一头稳住的人</span>。相处中，你<span class="hl-good">很会把在意变成具体行动：修好东西、接住麻烦、提前把路铺好</span>。但对方未必总能读懂，<span class="hl">把想法讲出来是你需要刻意练习的功课；最消耗关系的，是你一个人默默把问题吞下去</span>。<span class="hl-good">愿意及时开口，会让关系多出回旋余地，也更容易长期稳定</span>。</div>
     </section>
     <section class="section">
-      <h2><span class="num-box">04</span>健康提示</h2>
-      <div class="prose">火土偏旺而金水偏薄，身体上要重点照看<span class="hl-good">脾胃与消化节律</span>。这类盘常见的不是急病，而是长期作息不规律积出来的钝痛——饭点被工作推迟、坐着的时间过长、口味偏重偏燥。金缺又提示呼吸道和皮肤在干燥季节会更敏感，秋冬记得给房间补湿。运动上不必追求强度，<span class="hl">规律优先于剧烈</span>，快走、游泳、拉伸这类能让气机通开的方式最合适。饮食可有意识地增加白色食材与清润之物，少一点厚味重油。情绪上最需要防的是把压力憋成沉默，找个能定期说话的出口，比任何补品都管用。</div>
+      <h2><span class="num-box">04</span>身体保养重点 <small>优先守住什么习惯</small></h2>
+      <div class="prose">火土偏旺而金水偏薄，身体上要重点照看脾胃与消化节律。这类盘常见的不是急病，而是长期作息不规律积出来的钝痛——饭点被工作推迟、坐着的时间过长、口味偏重偏燥。金缺又提示呼吸道和皮肤在干燥季节会更敏感，秋冬记得给房间补湿。运动上不必追求强度，<span class="hl-good">规律优先于剧烈，快走、游泳、拉伸这类能让身体舒展开的方式更适合你</span>。饮食上<span class="hl-good">增加清润食物、减少厚味重油，更容易帮你守住稳定的消化节奏</span>。情绪上最需要防的是<span class="hl">把压力憋成沉默，让紧绷感长期积在身体里</span>。<span class="hl-good">找一个能定期说话或记录的出口，对你的睡眠与消化都会有实际帮助</span>。<span class="hl-good">只要把饮食、运动和情绪出口做成固定节律，你的日常状态就会更稳</span>。</div>
     </section>
     <section class="section">
-      <h2><span class="num-box">05</span>作用关系 · 合冲刑害</h2>
+      <h2><span class="num-box">05</span>关系与变化提醒 <small>合冲刑害在现实里会带来什么</small></h2>
       <div class="hc-table"><div class="hc-row"><span class="hc-type">六冲</span><span class="hc-mem">子午(月-日·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">紧贴相冲有力·冲及提纲(月令),动摇格基</span></div><div class="hc-row"><span class="hc-type">六冲</span><span class="hc-mem">子午(月-时·隔柱)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">隔柱相冲有力·冲及提纲(月令),动摇格基</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">卯子(年-月·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">无礼之刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">午午(日-时·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">自刑</span></div><div class="hc-row"><span class="hc-type">相破</span><span class="hc-mem">卯午(年-日·隔柱)</span><span class="hc-status st-mid">【减力】</span><span class="hc-cause">相破:损而不毁,力最轻</span></div><div class="hc-row"><span class="hc-type">相破</span><span class="hc-mem">卯午(年-时·遥隔)</span><span class="hc-status st-mid">【减力】</span><span class="hc-cause">相破:损而不毁,力最轻</span></div></div>
-      <div class="prose lead" style="margin-top:12px;">日时两柱同为戊午，构成原局伏吟，同一件事在你身上常以相似的形式重来一遍。这既是重复，也是熟练——同类场景你第二次处理时明显更省力。年支卯木与日时午火之间木火相生，把年少时的方向感一路输送到中年，主线不容易断。子午一冲落在月日之间，是这张盘最要紧的一处张力：进项与家宅两头，总有一头要你先让步。逆风时不必硬顶，把节奏放慢半拍，让冲的力道过去再动。</div>
+      <div class="prose lead" style="margin-top:12px;">日时两柱同为戊午，构成原局伏吟，同一件事在你身上常以相似的形式重来一遍。这既是重复，也是熟练——<span class="hl-good">同类场景你第二次处理时会明显更省力</span>。年支卯木与日时午火之间木火相生，<span class="hl-good">把早期形成的方向感一路输送到中年，长期主线不容易断</span>。子午一冲落在月日之间，是这张盘最要紧的一处张力：<span class="hl">进项与家宅两头，容易出现需要你先协调取舍的时刻</span>。逆风时不必硬顶，<span class="hl-good">把节奏放慢半拍，会更容易等到力量重新理顺再行动</span>。</div>
     </section>
     <section class="section">
-      <h2><span class="num-box">06</span>运岁引动 <small>（大运 / 流年与原局的作用 · 应期线索）</small></h2>
+      <h2><span class="num-box">06</span>哪些年份更有感 <small>什么时候宜进、宜稳、宜避险</small></h2>
       <div class="hc-table"><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运天干甲合年干己(合绊)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运支戌合年柱(祖上/早年宫)卯(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运癸酉与年柱(祖上/早年宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运支酉破月柱(提纲·父母兄弟/事业宫)子(力轻)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合日干戊(合绊,合动日主本人)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合时干戊(合绊)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运天干辛合月干丙(合绊)</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未害(穿)月柱(提纲·父母兄弟/事业宫)子</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合日支(夫妻宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午破年柱(祖上/早年宫)卯(力轻)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运庚午与月柱(提纲·父母兄弟/事业宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与日支自刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运戊辰 2078-2087年(约79-88岁)</span><span class="hc-cause">大运支辰害(穿)年柱(祖上/早年宫)卯</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯刑月支子(无礼之刑)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破日支(夫妻宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破时柱(子女/晚年宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2026 丙午</span><span class="hc-cause">[支破][支冲][自刑][自刑] 支午破年柱(祖上/早年宫)卯(力轻);支午冲月柱(提纲·父母兄弟/事业宫)子——冲提纲,岁运大动;支午与日支自刑;支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2027 丁未</span><span class="hc-cause">[支害(穿)][支合][支合] 支未害(穿)月柱(提纲·父母兄弟/事业宫)子;支未合日支(夫妻宫)午(引动/合绊该宫);支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div></div>
-      <div class="prose lead" style="margin-top:12px;">当前走甲戌大运，甲木透出正是你的开运用神，这一段适合把手艺立起来、把长期关系铺开。2026 丙午年支冲提纲，动的力道偏重，工作地点、职务或居所有一头会明显松动。这类年份顺着走比拧着走省力，把变动当成筛选而不是损失。2028 交癸酉大运，天克地冲年柱，是一次重量级的换挡，宜提前一年把手上的事做出可交接的样子。整体节奏是：眼下打桩，两年后换场。</div>
+      <div class="prose lead" style="margin-top:12px;">当前走甲戌大运，甲木透出正是你的开运用神，<span class="hl-good">这一段适合把手艺立起来、把长期关系铺开</span>。2026 丙午年支冲提纲，动的力道偏重，工作地点、职务或居所有一头会明显松动。<span class="hl-good">这类年份顺着走比拧着走省力，把变动当成筛选更有利于留下真正适合你的选择</span>。2028 交癸酉大运，天克地冲年柱，是一次重量级的换挡，宜提前一年把手上的事做出可交接的样子。<span class="hl-good">整体节奏是眼下打桩、两年后换场，提前准备会让换挡更顺</span>。</div>
     </section>
   </div>
 
   <!-- ============ 07 人生关键节点时间轴 ============ -->
   <section class="section">
-    <h2><span class="num-box">07</span>人生关键节点 <small>（基于大运流年推衍的五个里程碑）</small></h2>
+    <h2><span class="num-box">07</span>人生关键阶段 <small>五个值得提前留意的时间窗口</small></h2>
     <div class="timeline-legend">
       <span><span class="dot up"></span>上升 / 进取期</span>
       <span><span class="dot flat"></span>平稳 / 名位期</span>
@@ -797,12 +961,12 @@
   <!-- ============ 08 神煞速览 / 09 开运调理 ============ -->
   <div class="row-2col">
     <section class="section">
-      <h2><span class="num-box">08</span>神煞速览</h2>
+      <h2><span class="num-box">08</span>性格加分与提醒 <small>神煞在现实里代表什么</small></h2>
       <div class="shensha-list"><span class="ss-name good">天乙贵人</span> <span class="ss-name neutral">桃花(咸池)</span> <span class="ss-name good">将星</span> <span class="ss-name warn">羊刃</span> <span class="ss-name neutral">空亡</span> <span class="ss-name good">德秀贵人</span> <span class="ss-name good">红鸾</span> <span class="ss-name good">天喜</span> <span class="ss-name neutral">红艳煞</span> <span class="ss-name good">天福贵人</span> <span class="ss-name warn">灾煞</span> <span class="ss-name warn">孤鸾煞</span> <span class="ss-name warn">流霞</span> <span class="ss-name warn">血刃</span> <span class="ss-name good">天厨贵人</span></div>
-      <div class="prose" style="margin-top:10px;">这张盘最罕见的一处是德秀满盘，德秀贵人遍布多柱，主聪明温厚之气贯穿全局，遇财官更容易被人托付要紧的事。天乙贵人与将星同现，说明你不缺关键时刻拉你一把的人，前提是你肯开口。桃花与红艳并见，人际吸引力不弱，但也容易招来分散注意力的热闹。羊刃与空亡各占一位，提示锋芒要收着用、期待值要放平一点。神煞只增色不定大局，真正的骨架仍在五行与格局那一层。</div>
+      <div class="prose" style="margin-top:10px;">这张盘最罕见的一处是德秀满盘，<span class="hl-good">德秀贵人遍布多柱，聪明温厚的气质贯穿全局，遇到重要事情更容易被人托付</span>。<span class="hl-good">天乙贵人与将星同现，说明你在关键时刻不缺愿意拉你一把的人</span>，前提是你肯开口。桃花与红艳并见，<span class="hl-good">你在人际互动里有自然的吸引力</span>，但也<span class="hl">容易招来分散注意力的热闹</span>。羊刃与空亡各占一位，提示锋芒要收着用、期待值要放平一点。神煞只增色不定大局，真正的骨架仍在五行与格局那一层。</div>
     </section>
     <section class="section">
-      <h2><span class="num-box">09</span>开运调理</h2>
+      <h2><span class="num-box">09</span>日常可执行建议 <small>今天就能开始做</small></h2>
       <div class="kaiyun-grid">
         <div class="ky-row"><span class="ky-k">用神</span><span class="ky-v"><span class="wx-chip wx-木">木</span></span></div>
         <div class="ky-row"><span class="ky-k">吉方</span><span class="ky-v">东·西</span></div>

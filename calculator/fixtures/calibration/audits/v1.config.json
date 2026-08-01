@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "audit_id": "v3.13-f0-v1",
+  "declared_at": "2026-08-01",
+  "declaration": "候选公式、范围、步长和排序在首次结果运行前冻结；若本轮无解，只记录无解，不在本配置内扩球门。",
+  "baseline": "v3.12.0 production judgeWangShuai output",
+  "thresholds": {
+    "extreme_strong_min": 12,
+    "strong_min": 3,
+    "weak_max_exclusive": -2.5,
+    "extreme_weak_max": -8
+  },
+  "fixed_formula": {
+    "linear_branch_drain": "仅年/日/时支；藏干层级本气=2、中气=0.8、余气=0.5，乘十神相对系数泄=0.5、耗=1、克=1.5，再乘 linear_scale。月支已在得令中计，不重复扣。",
+    "opposition_synergy": "四支本气属克泄耗侧且至少两支时，单位=max(0,数量-1)；若同侧类别在年/月/时干透出，再加 0.5，整体乘 synergy_scale。每盘只计一次并封顶于该公式值。",
+    "root_discount": "先按 open interaction_policy 裁决，只处理六冲；生效乘 active_discount，减力乘 reduced_discount，被解/被绊不折损。按柱位归因正向得令、长生、得地、帮身会局及天干通本气根加成；同柱多冲累计封顶 100%，不扣成负数。",
+    "stem_root_attribution": "通本气根加成只取相对基础分的增量；若同五行本气根有多个，均分到各根柱，避免重复扣。",
+    "rounding": "总修正和候选总分均四舍五入到 2 位。"
+  },
+  "grid": {
+    "linear_scale": { "min": 0, "max": 3, "step": 0.25 },
+    "synergy_scale": { "min": 0, "max": 4, "step": 0.5 },
+    "active_discount": { "min": 0, "max": 1, "step": 0.25 },
+    "reduced_discount": { "min": 0, "max": 0.5, "step": 0.25 }
+  },
+  "release_gates": {
+    "ok_cases": "14 个 v3.12 ✅ 案例不得方向回退",
+    "targets": "顾维钧、阮玲玉、周信芳 3/3 进入弱侧",
+    "partial_cases": "4 个 v3.12 ◐ 案例不得进入原文方向的反侧",
+    "cross_axis": "郑正秋不参与扶抑翻向门"
+  },
+  "selection_priority": [
+    "先满足 14✅ 零方向回退、3 目标全翻正、4◐ 零反向",
+    "再取 4◐ 向错误方向移动的案例数最少",
+    "再取非零参数数最少",
+    "再取非目标案例总绝对分差最小",
+    "仍同分则按 linear_scale、synergy_scale、active_discount、reduced_discount 数值升序"
+  ],
+  "diagnostic_only_priority_when_no_release_candidate": [
+    "目标翻正数最多",
+    "14✅ 回退数最少",
+    "4◐ 反向数最少",
+    "4◐ 向错误方向移动数最少",
+    "非零参数数最少",
+    "非目标总绝对分差最小",
+    "参数数值升序"
+  ],
+  "sensitivity": {
+    "leave_one_out": "逐一排除 22 例后按同一排序重选，记录参数是否改变及被留出例是否仍过门。",
+    "adjacent": "每次只把一个参数移动一个网格步；若选中格通过而全部相邻格失败，判过拟合，不准入。"
+  }
+}

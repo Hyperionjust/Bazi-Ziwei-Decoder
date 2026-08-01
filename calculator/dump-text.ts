@@ -291,7 +291,9 @@ function dumpBazi(b: any, bi: any): string[] {
       lines.push(`│ ├旺衰 : ${lvl}  (${score}, 置信度: ${ws.confidence || '-'})`);
       if (ws.breakdown) {
         const b = ws.breakdown;
-        lines.push(`│ │ └四维 : 得令${b.得令} 长生${b.长生} 得地${b.得地} 得势${b.得势}`);
+        lines.push(`│ │ └七项账本 : 得令${b.得令 ?? 0} 长生${b.长生 ?? 0} 得地${b.得地 ?? 0} `
+          + `得势${b.得势 ?? 0} 会局${b.会局 ?? 0} 耗方群势${b.耗方群势 ?? 0} `
+          + `冲根修正${b.冲根修正 ?? 0}`);
       }
     }
     if (en.调候用神) lines.push(`│ ├调候用神 : ${en.调候用神.join('、')}`);

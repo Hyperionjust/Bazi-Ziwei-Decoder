@@ -9,7 +9,7 @@ import { Tiangan, Dizhi, GAN_WUXING, ZHI_WUXING, ZHI_CANG_GAN, shengKe } from '.
 import { detectZhiRelations, ZhiRelation, SAN_HE, SAN_HUI } from './zhi-relations';
 import { detectGanRelations, GanRelation } from './gan-relations';
 
-type Pillar = '年'|'月'|'日'|'时';
+export type Pillar = '年'|'月'|'日'|'时';
 export interface SiZhu { [k: string]: { gan: Tiangan; zhi: Dizhi }; }
 
 export interface InteractionPolicy {
@@ -23,7 +23,31 @@ export interface InteractionPolicy {
   note?: string;                            // 该派口径一句话
 }
 
+export function assertInteractionPolicy(value: unknown, source = 'interaction_policy'): InteractionPolicy {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${source} 缺失或不是对象`);
+  }
+  const policy = value as Record<string, unknown>;
+  for (const key of ['he_jie_chong', 'juju_jie_chongxing', 'chongku_wei_kai'] as const) {
+    if (typeof policy[key] !== 'boolean') throw new Error(`${source}.${key} 必须是 boolean`);
+  }
+  if (!['no', 'yes', 'strong_only'].includes(String(policy.chong_po_he))) {
+    throw new Error(`${source}.chong_po_he 非法: ${String(policy.chong_po_he)}`);
+  }
+  if (!['normal', 'heavy'].includes(String(policy.chuan_weight))) {
+    throw new Error(`${source}.chuan_weight 非法: ${String(policy.chuan_weight)}`);
+  }
+  if (policy.divergence_notes !== undefined && typeof policy.divergence_notes !== 'boolean') {
+    throw new Error(`${source}.divergence_notes 必须是 boolean`);
+  }
+  for (const key of ['id', 'note'] as const) {
+    if (policy[key] !== undefined && typeof policy[key] !== 'string') throw new Error(`${source}.${key} 必须是 string`);
+  }
+  return policy as unknown as InteractionPolicy;
+}
+
 export interface AdjudicatedRelation {
+  id: string;                 // 稳定关系 ID，包含柱位，供计分去重与审计追溯
   kind: '地支'|'天干';
   type: string;
   members: string[];       // 干或支
@@ -34,6 +58,11 @@ export interface AdjudicatedRelation {
   divergence?: string;     // 派系分歧(仅 open)
   detail?: string;
   引爆窗口?: TriggerWindow; // S3 批2:待触发关系的填实/凑全检索(见 computeTriggerWindows)
+}
+
+export interface AdjudicationResult {
+  policy_note: string;
+  items: AdjudicatedRelation[];
 }
 
 // ---------------------------------------------------------------------------
@@ -92,6 +121,24 @@ const PILLAR_IDX: Record<Pillar, number> = { 年: 0, 月: 1, 日: 2, 时: 3 };
 const HE_HUA: Record<string, string> = { 甲己: '土', 乙庚: '金', 丙辛: '水', 丁壬: '木', 戊癸: '火' };
 const KU_CHONG = new Set(['辰戌', '丑未', '戌辰', '未丑']); // 库冲(朋冲)
 
+export function interactionRelationId(
+  relation: Pick<AdjudicatedRelation, 'kind'|'type'|'members'|'pillars'>,
+  siZhu?: SiZhu,
+): string {
+  const members = relation.members || [];
+  const pairs = (relation.pillars || []).map((pillar, index) => ({
+    pillar,
+    member: siZhu?.[pillar]
+      ? (relation.kind === '地支' ? siZhu[pillar].zhi : siZhu[pillar].gan)
+      : members[index] ?? (members.length === 1 ? members[0] : '?'),
+  })).sort((a, b) => (PILLAR_IDX[a.pillar as Pillar] ?? 99) - (PILLAR_IDX[b.pillar as Pillar] ?? 99));
+  const pairedMemberCount = Math.min(members.length, pairs.length);
+  const extraMembers = members.slice(pairedMemberCount).sort();
+  const body = pairs.map(item => `${item.pillar}${item.member}`).concat(extraMembers).join('-');
+  return `${relation.type}:${body || members.slice().sort().join('-') || 'unknown'}`;
+}
+
+
 function dist(pillars: string[]): AdjudicatedRelation['distance'] {
   if (pillars.length < 2) return '-';
   const idx = pillars.map(p => PILLAR_IDX[p as Pillar]).sort((a, b) => a - b);
@@ -121,10 +168,11 @@ export function adjudicateInteractions(
   policy: InteractionPolicy,
   zhiRels?: ZhiRelation[],
   ganRels?: GanRelation[]
-): { policy_note: string; items: AdjudicatedRelation[] } {
+): AdjudicationResult {
+  assertInteractionPolicy(policy, 'adjudicateInteractions.policy');
   const zr = zhiRels || detectZhiRelations({ 年: siZhu['年'].zhi, 月: siZhu['月'].zhi, 日: siZhu['日'].zhi, 时: siZhu['时'].zhi } as any);
   const gr = ganRels || detectGanRelations({ 年: siZhu['年'].gan, 月: siZhu['月'].gan, 日: siZhu['日'].gan, 时: siZhu['时'].gan } as any);
-  const out: AdjudicatedRelation[] = [];
+  const out: Array<Omit<AdjudicatedRelation, 'id'>> = [];
   const div = (s: string) => (policy.divergence_notes ? s : undefined);
   const monthZhi = siZhu['月'].zhi;
 
@@ -261,5 +309,10 @@ export function adjudicateInteractions(
     }
   }
 
-  return { policy_note: policy.note || '', items: out };
+  const byId = new Map<string, AdjudicatedRelation>();
+  for (const item of out) {
+    const id = interactionRelationId(item, siZhu);
+    if (!byId.has(id)) byId.set(id, { ...item, id });
+  }
+  return { policy_note: policy.note || '', items: [...byId.values()] };
 }

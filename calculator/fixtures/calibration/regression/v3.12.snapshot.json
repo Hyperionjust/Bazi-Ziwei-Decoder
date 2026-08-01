@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "v3.12.0-classics-22",
+  "captured_at": "2026-08-01",
+  "purpose": "算法回归快照；与 source-gold.v1.json 物理分离，不作为典籍语义金标。",
+  "source_gold_sha256": "0b7e8c713caced406b7dc7c28d2515c8c44e6715b8b17bdb61fa6dc5028c56c2",
+  "audit_config_sha256": "388df2cf65874721243568cf7e4c683a12b7bb8d8985b637df83226e7e010476",
+  "cases": [
+    { "id": "韦千里·阎锡山", "source_case": "classics/yan-xishan.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -5.44, "verdict": "偏弱", "confidence": "高", "breakdown": { "得令": -4, "长生": -3, "得地": 2.3, "得势": -0.74, "会局": 0 } },
+    { "id": "韦千里·马占山", "source_case": "classics/ma-zhanshan.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -6.3, "verdict": "偏弱", "confidence": "高", "breakdown": { "得令": -5, "长生": -1, "得地": 2, "得势": -2.3, "会局": 0 } },
+    { "id": "韦千里·许世英", "source_case": "classics/xu-shiying.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -8.8, "verdict": "极弱(可能从弱)", "confidence": "高", "breakdown": { "得令": -4, "长生": -3, "得地": 0.5, "得势": -2.3, "会局": 0 } },
+    { "id": "韦千里·吴佩孚", "source_case": "classics/wu-peifu.case.json", "guard_class": "ok", "guard_direction": "强", "score": 8.1, "verdict": "偏旺", "confidence": "高", "breakdown": { "得令": 5, "长生": 1, "得地": 2.8, "得势": -0.7, "会局": 0 } },
+    { "id": "韦千里·梅兰芳", "source_case": "classics/mei-lanfang.case.json", "guard_class": "ok", "guard_direction": "强", "score": 3.82, "verdict": "偏旺", "confidence": "中", "breakdown": { "得令": -2, "长生": 0, "得地": 3, "得势": 1.02, "会局": 1.8 } },
+    { "id": "韦千里·宋子文", "source_case": "classics/song-ziwen.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -2.5, "verdict": "偏弱", "confidence": "低", "breakdown": { "得令": -3, "长生": -1, "得地": 2.8, "得势": -1.3, "会局": 0 } },
+    { "id": "韦千里·蒋介石", "source_case": "classics/jiang-jieshi.case.json", "guard_class": "ok", "guard_direction": "强", "score": 11.78, "verdict": "偏旺", "confidence": "高", "breakdown": { "得令": 5.7, "长生": 0, "得地": 3.3, "得势": 0.26, "会局": 2.52 } },
+    { "id": "韦千里·蒋邦彦", "source_case": "classics/jiang-bangyan.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -2.5, "verdict": "偏弱", "confidence": "低", "breakdown": { "得令": -3, "长生": -1, "得地": 1.6, "得势": -0.1, "会局": 0 } },
+    { "id": "韦千里·李国杰", "source_case": "classics/li-guojie.case.json", "guard_class": "ok", "guard_direction": "强", "score": 13.9, "verdict": "极旺(可能从强)", "confidence": "高", "breakdown": { "得令": 4, "长生": 0, "得地": 4.5, "得势": 5.4, "会局": 0 } },
+    { "id": "韦千里·某军人", "source_case": "classics/mou-junren.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -5.3, "verdict": "偏弱", "confidence": "高", "breakdown": { "得令": -4, "长生": -3, "得地": 4, "得势": -2.3, "会局": 0 } },
+    { "id": "韦千里·冼冠生", "source_case": "classics/xian-guansheng.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -2.5, "verdict": "偏弱", "confidence": "低", "breakdown": { "得令": -3, "长生": -1, "得地": 0.6, "得势": 0.9, "会局": 0 } },
+    { "id": "韦千里·杨宇霆", "source_case": "classics/yang-yuting.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -4.1, "verdict": "偏弱", "confidence": "中", "breakdown": { "得令": -5, "长生": -1, "得地": 1, "得势": 0.9, "会局": 0 } },
+    { "id": "韦千里·虞洽卿", "source_case": "classics/yu-qiaqing.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -5.1, "verdict": "偏弱", "confidence": "高", "breakdown": { "得令": -3.3, "长生": 0, "得地": 0.5, "得势": -2.3, "会局": 0 } },
+    { "id": "韦千里·镇江金君", "source_case": "classics/zhenjiang-jin-jun.case.json", "guard_class": "ok", "guard_direction": "弱", "score": -6.1, "verdict": "偏弱", "confidence": "高", "breakdown": { "得令": -3.3, "长生": -3, "得地": 1.5, "得势": -1.3, "会局": 0 } },
+    { "id": "韦千里·商震", "source_case": "classics/shang-zhen.case.json", "guard_class": "partial", "guard_direction": "弱", "score": -5.2, "verdict": "偏弱", "confidence": "高", "breakdown": { "得令": -4, "长生": -3, "得地": 3.5, "得势": -3.5, "会局": 1.8 } },
+    { "id": "韦千里·孙传芳", "source_case": "classics/sun-chuanfang.case.json", "guard_class": "partial", "guard_direction": "强", "score": -1.74, "verdict": "中和", "confidence": "低", "breakdown": { "得令": -3, "长生": 0, "得地": 2, "得势": -0.74, "会局": 0 } },
+    { "id": "韦千里·杨杏佛", "source_case": "classics/yang-xingfo.case.json", "guard_class": "partial", "guard_direction": "强", "score": 0.3, "verdict": "中和", "confidence": "高", "breakdown": { "得令": -3, "长生": 0, "得地": 2.3, "得势": 1, "会局": 0 } },
+    { "id": "韦千里·袁克文", "source_case": "classics/yuan-kewen.case.json", "guard_class": "partial", "guard_direction": "强", "score": -1.7, "verdict": "中和", "confidence": "低", "breakdown": { "得令": -3.3, "长生": -3, "得地": 2.5, "得势": 2.1, "会局": 0 } },
+    { "id": "韦千里·顾维钧", "source_case": "classics/gu-weijun.case.json", "guard_class": "target", "guard_direction": "弱", "score": 8.5, "verdict": "偏旺", "confidence": "高", "breakdown": { "得令": 5, "长生": 0, "得地": 2, "得势": 1.5, "会局": 0 } },
+    { "id": "韦千里·阮玲玉", "source_case": "classics/ruan-lingyu.case.json", "guard_class": "target", "guard_direction": "弱", "score": 5.8, "verdict": "偏旺", "confidence": "高", "breakdown": { "得令": 4, "长生": 2, "得地": 2.3, "得势": -2.5, "会局": 0 } },
+    { "id": "韦千里·郑正秋", "source_case": "classics/zheng-zhengqiu.case.json", "guard_class": "cross_axis", "guard_direction": "不适用", "score": 6.26, "verdict": "偏旺", "confidence": "高", "breakdown": { "得令": 4, "长生": 0, "得地": 2.5, "得势": -0.24, "会局": 0 } },
+    { "id": "韦千里·周信芳", "source_case": "classics/zhou-xinfang.case.json", "guard_class": "target", "guard_direction": "弱", "score": 5.3, "verdict": "偏旺", "confidence": "高", "breakdown": { "得令": 4, "长生": 0, "得地": 3, "得势": -3.5, "会局": 1.8 } }
+  ]
+}

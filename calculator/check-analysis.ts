@@ -42,6 +42,52 @@ function childhoodViolations(text: string): string[] {
   return out;
 }
 
+// 正向语义漏标兜底：先移除已正确包进 hl-good 的内容，再在剩余可见文字中
+// 查高置信的正向/偏正向线索。它不是语义模型，不能穷尽中文表达；最终仍由评审遍
+// 做逐句语义复核。但它能拦住最常见的「一段只标一处，其余优点仍是普通字」。
+const POSITIVE_CUE_RE = new RegExp([
+  '优势', '优点', '长板', '强项', '天赋', '天分', '潜力',
+  '擅长', '善于', '拿手', '抗压', '执行力', '行动力', '判断力', '洞察力', '创造力', '学习力', '表达力', '适应力', '恢复力',
+  '能扛', '能干', '能托底', '能承载', '能落地', '能接住', '能守住', '能稳住', '能带队', '能成事',
+  '可靠', '靠得住', '值得托付', '厚实', '稳当', '稳健', '沉稳', '冷静', '清醒', '理性', '果断', '有主见', '有担当', '责任感',
+  '温和', '温厚', '包容', '细腻', '耐心', '坚韧', '韧劲', '灵活', '敏锐', '聪明', '通透', '务实', '踏实', '自律', '专注', '大方', '豪爽', '真诚', '善良', '同理心', '共情',
+  '人缘(?:好|佳|不差)', '贵人', '助力', '援手', '拉你一把', '扶持', '支持你', '帮手',
+  '顺风', '好运', '吉利', '加分', '好机会', '机会窗口', '窗口(?:期|年)', '适合', '更合适', '更顺', '顺手', '顺利', '省力',
+  '渐宽', '抬升', '上行', '走高', '提升', '改善', '突破', '成长', '收获', '成果', '回报', '有利', '利于', '有望', '可期',
+  '正业生财', '稳定收入', '财路渐宽', '聚财', '积蓄', '财富积累', '话语权', '名望', '名声', '职位',
+  '良缘', '感情更稳', '关系更稳', '走向确定', '历久弥新', '越走越(?:宽|稳|顺)', '底色是稳', '办事很稳',
+].join('|'), 'g');
+const GOOD_SPAN_RE = /<span\b[^>]*class=(['"])[^'"]*\bhl-good\b[^'"]*\1[^>]*>[\s\S]*?<\/span>/gi;
+
+function positiveHighlightViolations(html: string): string[] {
+  const outside = strip(String(html || '').replace(GOOD_SPAN_RE, ' '));
+  const leaks: string[] = [];
+  for (const raw of outside.split(/[。！？!?；;\n]/)) {
+    const clause = raw.trim();
+    if (!clause) continue;
+    POSITIVE_CUE_RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = POSITIVE_CUE_RE.exec(clause))) {
+      const before = clause.slice(Math.max(0, m.index - 5), m.index);
+      const after = clause.slice(m.index + m[0].length, m.index + m[0].length + 4);
+      // 「不擅长/难有贵人/能力不够」等是否定描述，不误判成正向漏标。
+      if (/(?:不|未|无|非|难|欠|缺|莫|勿|别|不太|很难|难以|缺乏|欠缺|不够).{0,2}$/.test(before)) continue;
+      if (/^(?:有限|不足|不多|偏少|欠缺|薄弱|较弱|不够)/.test(after)) continue;
+      const excerpt = clause.length > 46 ? `${clause.slice(0, 46)}…` : clause;
+      if (!leaks.includes(excerpt)) leaks.push(excerpt);
+      break;
+    }
+  }
+  return leaks.slice(0, 4);
+}
+
+function addPositiveHighlightChecks(bad: string[], html: string, minGood = 0) {
+  const g = (String(html).match(/hl-good/g) || []).length;
+  if (g < minGood) bad.push(`绿色粗体过少(绿${g},至少${minGood}处只是机器底线;所有正向/偏正向语义仍须逐处标记)`);
+  const leaks = positiveHighlightViolations(html);
+  if (leaks.length) bad.push(`正向/偏正向描述仍是普通字体:${leaks.map(x => `「${x}」`).join('、')}`);
+}
+
 export function checkAnalysis(a: any, chart: any, currentYear: number): Record<string, Rep> {
   const R: Record<string, Rep> = {};
   const put = (k: string, bad: string[], warn: string[] = []) => {
@@ -85,16 +131,16 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     put('_全局禁词', bad);
   }
 
-  // ---- 两句类:恰两句 + 下句以所以你/意味着你开头 ----
-  // tg 特例:mech=上句(恰一句报盘面)、plain=下句(恰一句,以所以你开头)
+  // ---- 十神长段:1句盘面证据 + 完整白话长段 ----
   {
     const bad1: string[] = []; const bad2: string[] = [];
     const m = a?.tg?.mech_html, p = a?.tg?.plain_html;
-    const TG_N = SEC.tg_block.exact_sentences;
-    if (m == null) bad1.push('缺字段'); else if (sentences(m).length !== TG_N) bad1.push(`上句应恰${TG_N}句,实际${sentences(m).length}句`);
+    const TG = SEC.tg_block;
+    if (m == null) bad1.push('缺字段'); else if (sentences(m).length !== TG.mech_exact_sentences) bad1.push(`十神盘面证据应恰${TG.mech_exact_sentences}句,实际${sentences(m).length}句`);
     if (p == null) bad2.push('缺字段'); else {
-      if (sentences(p).length !== TG_N) bad2.push(`下句应恰${TG_N}句,实际${sentences(p).length}句`);
-      if (!CONNECTOR_RE.test(strip(p).trim())) bad2.push(`下句须以连接词开头(${CONNECTOR_DESC})`);
+      const n = sentences(p).length, len = strip(p).length;
+      if (n < TG.plain_min_sentences || len < TG.plain_min_chars) bad2.push(`十神解读详写不足(句数${n}/字数${len},要求≥${TG.plain_min_sentences}句≥${TG.plain_min_chars}字)`);
+      addPositiveHighlightChecks(bad2, p, TG.min_good_highlights || 0);
     }
     put('tg.mech_html', bad1); put('tg.plain_html', bad2);
   }
@@ -106,10 +152,12 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
       // 日主固定句式:特性是…意味着你…最强的能力是…但…
       const t = strip(path);
       for (const m of ['特性是', '意味着你', '最强的能力', '但']) if (!t.includes(m)) bad.push(`日主固定句式缺「${m}」`);
+      if (!/最强的能力是\s*<span\b[^>]*class=(['"])[^'"]*\bhl-good\b[^'"]*\1/i.test(path)) bad.push('「最强的能力」内容须完整标绿加粗');
     } else {
       if (ss.length !== SEC.two_sentence_block.exact_sentences) bad.push(`应恰${SEC.two_sentence_block.exact_sentences}句,实际 ${ss.length} 句`);
       if (ss[1] && !CONNECTOR_RE.test(ss[1])) bad.push(`第二句须以连接词开头(${CONNECTOR_DESC})`);
     }
+    addPositiveHighlightChecks(bad, path);
     put(k, bad);
   }
   // 缺补说明转述(wuxing)
@@ -122,7 +170,7 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     }
   }
 
-  // ---- 四大段落:句数/字数/着色存在 ----
+  // ---- 四大段落:句数/字数/着色全覆盖 ----
   for (const k of ['personality_html', 'career_html', 'marriage_html', 'health_html']) {
     const v = a?.interp?.[k];
     if (v == null) { put(`interp.${k}`, ['缺字段']); continue; }
@@ -132,6 +180,7 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     if (ss.length < MI.min_sentences || len < MI.min_chars) bad.push(`详写不足(句数${ss.length}/字数${len},要求≥${MI.min_sentences}句≥${MI.min_chars}字)`);
     const g = (v.match(/hl-good/g) || []).length, r = (v.match(/class="hl"/g) || []).length;
     if (g + r < MI.min_highlights) bad.push(`着色不足(绿${g}红${r},特质短语应成段着色)`);
+    addPositiveHighlightChecks(bad, v, MI.min_good_highlights || 0);
     put(`interp.${k}`, bad);
   }
   // 婚恋画像句式(v3.7.1 四型分型:按 正缘倾向.宫坐 确定性选锚头,治全盘一刀切同质化;同盘分型可复现)
@@ -158,6 +207,7 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     const bad: string[] = []; const warn: string[] = [];
     const n = sentences(v).length;
     if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`精读段应${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}句,实际${n}句`);
+    addPositiveHighlightChecks(bad, v);
     if (k === 'yunsui.reading_html') {
       // 批4 修:运岁段本来就要讲大运,而一步大运横跨十年——「1997-2006 癸未」这种年份
       //   必然落在「今年起 5 年窗口」之外,却是算法自己给的事实,警它没有道理。
@@ -189,28 +239,34 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     }
   }
 
-  // ---- 罕象提及(v2.5):chart 有罕象时,神煞/合冲精读段须至少点名一个罕象 ----
+  // ---- 独立罕见现象:算法列事实，LLM 逐项判两面与现实映射 ----
   {
     const rare = (chart?.bazi?.enrichment?.罕象 || []) as any[];
+    const v = String(a?.rare?.reading_html || '');
+    const bad: string[] = [];
     if (rare.length) {
-      const names = rare.map(r => String(r.名 || '').replace(/[(（].*$/, ''));
-      const text = strip(String(a?.shensha?.reading_html || '')) + strip(String(a?.hechong?.reading_html || ''));
-      // 批4 修:原判据是「名字前 3 字出现在文里」,这个前缀太脆——
-      //   「原局天克地冲」前 3 字是「原局天」,可文里自然写的是「天克地冲」;
-      //   「原局伏吟」前 3 字是「原局伏」。于是模型明明点名了罕象,照样判 FAIL。
-      //   改为按罕象自带的 匹配词(rare.ts 定义处说了算)判,缺省回退到「去括号、去『原局』前缀的全名」。
-      const 匹配词 = (r: any): string[] => {
-        const 全 = String(r.名 || '').replace(/[(（].*$/, '');
-        const alias: string[] = Array.isArray(r.匹配词) ? r.匹配词 : [];
-        return [全, 全.replace(/^原局/, ''), ...alias].filter(x => x && x.length >= 2);
-      };
-      const mentioned = rare.some(r => 匹配词(r).some(w => text.includes(w)));
-      if (!mentioned) {
-        for (const k of ['shensha.reading_html', 'hechong.reading_html']) {
-          R[k] = { status: 'FAIL', reasons: [...(R[k]?.reasons || []), `盘有罕象(${names.join('/')})但精读段未提及`] };
-        }
+      const RR = SEC.rare_reading;
+      const text = strip(v);
+      const n = sentences(v).length, len = text.length;
+      if (!v) bad.push('盘有罕象但缺 rare.reading_html 独立解读');
+      else {
+        if (n < RR.min_sentences || len < RR.min_chars) bad.push(`罕见现象详写不足(句数${n}/字数${len},要求≥${RR.min_sentences}句≥${RR.min_chars}字)`);
+        const terms = (r: any): string[] => {
+          const full = String(r.名 || '').replace(/[(（].*$/, '');
+          const alias: string[] = Array.isArray(r.匹配词) ? r.匹配词 : [];
+          return [full, full.replace(/^原局/, ''), ...alias].filter(x => x && x.length >= 2);
+        };
+        for (const r of rare) if (!terms(r).some(w => text.includes(w))) bad.push(`漏解算法罕象「${r.名}」`);
+        const judgments = text.match(/偏正向|偏提醒|两面性/g) || [];
+        if (judgments.length < rare.length) bad.push(`每项罕象都须明确判断偏正向/偏提醒/两面性(罕象${rare.length}项,判断${judgments.length}处)`);
+        if (!/(现实|生活|性格|工作|事业|关系|感情|家庭|财务|阶段|合作)/.test(text)) bad.push('未说明现实中可能出现的现象');
+        if (!/(hl-good|class="hl")/.test(v)) bad.push('罕象好坏判断未用绿色/红色区分');
+        addPositiveHighlightChecks(bad, v);
       }
+    } else if (v.trim()) {
+      bad.push('算法层无罕象时 rare.reading_html 必须为空，禁止硬凑');
     }
+    put('rare.reading_html', bad);
   }
 
   // ---- J4(v3.11.0):调候条例引用防编造 ----
@@ -285,7 +341,7 @@ export function checkMbti(a: any, chart: any): Record<string, Rep> {
     if (v == null || v === '-') { R[k] = { status: 'FAIL', reasons: ['缺字段'] }; continue; }
     const n = sentences(v).length;
     if (n < 4) bad.push(`应≥4句,实际${n}`);
-    if (!/hl-good|class="hl"/.test(v)) bad.push('无着色');
+    addPositiveHighlightChecks(bad, v, 2);
     R[k] = { status: bad.length ? 'FAIL' : 'PASS', reasons: bad };
   }
   const tested = String(a?.meta?.tested_mbti || '').trim();
@@ -314,8 +370,10 @@ export function checkMbti(a: any, chart: any): Record<string, Rep> {
     }
     R['diff_verdict'] = { status: dvBad.length ? 'FAIL' : 'PASS', reasons: dvBad };
     const len = strip(String(a?.diff_html || '')).length;
-    const MD = SEC.mbti_diff; const okLen = len >= MD.min_chars && len <= MD.max_chars;
-    R['diff_html'] = { status: okLen ? 'PASS' : 'FAIL', reasons: okLen ? [] : [`差异版块应${MD.min_chars}~${MD.max_chars}字,实际${len}`] };
+    const MD = SEC.mbti_diff; const badDiff: string[] = [];
+    if (len < MD.min_chars || len > MD.max_chars) badDiff.push(`差异版块应${MD.min_chars}~${MD.max_chars}字,实际${len}`);
+    if (a?.diff_html) addPositiveHighlightChecks(badDiff, a.diff_html, 3);
+    R['diff_html'] = { status: badDiff.length ? 'FAIL' : 'PASS', reasons: badDiff };
   }
   // P0 修复:_全局 汇总赋值挪到所有违规 push(含意象嫁接/主导功能块)完成之后,避免提前冻结放行
   R['_全局'] = { status: bad0.length ? 'FAIL' : 'PASS', reasons: bad0 };
@@ -356,13 +414,30 @@ export function checkZonghe(a: any, _chart: any): Record<string, Rep> {
     const bad: string[] = []; const len = strip(a?.section_01?.text || '').length;
     if (!a?.section_01?.text) bad.push('缺字段');
     else if (len < 160 || len > 280) bad.push(`主轴印证段应约180-250字(容差160-280),实际${len}`);
+    if (a?.section_01?.text) addPositiveHighlightChecks(bad, a.section_01.text, 3);
     put('section_01.text', bad);
   }
   { // section_02: ≥3 句
     const bad: string[] = []; const n = sentences(a?.section_02?.conclusion || '').length;
     if (!a?.section_02?.conclusion) bad.push('缺字段');
     else if (n < 3) bad.push(`阶段印证结论应≥3句成段,实际${n}句`);
+    if (a?.section_02?.conclusion) addPositiveHighlightChecks(bad, a.section_02.conclusion, 2);
     put('section_02.conclusion', bad);
+  }
+  { // 其余用户可见结论：自动着绿的 strengths/leverage 除外，其余正向语义不得漏标
+    const bad: string[] = [];
+    const skip = /^(meta\.archetype_name|consistency|strengths(?:\[|\.|$)|weaknesses(?:\[|\.|$)|conflicts(?:\[|\.|$)|final\.leverage(?:\[|\.|$)|final\.risks(?:\[|\.|$)|confidence(?:\.|$)|section_01\.|section_02\.)/;
+    const walkVisible = (obj: any, path: string) => {
+      if (typeof obj === 'string') {
+        if (!skip.test(path)) {
+          const leaks = positiveHighlightViolations(obj);
+          if (leaks.length) bad.push(`${path} 正向/偏正向描述仍是普通字体:${leaks.map(x => `「${x}」`).join('、')}`);
+        }
+      } else if (Array.isArray(obj)) obj.forEach((v, i) => walkVisible(v, `${path}[${i}]`));
+      else if (obj && typeof obj === 'object') for (const k of Object.keys(obj)) walkVisible(obj[k], path ? `${path}.${k}` : k);
+    };
+    walkVisible(a, '');
+    put('_正向着色覆盖', bad);
   }
   { // 枚举与条目数
     const bad: string[] = [];
@@ -410,7 +485,7 @@ export function checkZiwei(a: any, _chart: any): Record<string, Rep> {
     if (v == null || v === '' || v === '-') { put(k, ['缺字段']); continue; }
     const n = sentences(v).length, len = strip(v).length;
     if (n < 5 || len < 140) bad.push(`详写不足(句数${n}/字数${len},要求≥6句约200字起,容差5句140字)`);
-    if (['mingshen_html', 'career_html', 'wealth_html', 'marriage_html', 'health_html'].includes(k) && !/hl-good|class="hl"/.test(v)) bad.push('无着色(特质短语应成段着色)');
+    addPositiveHighlightChecks(bad, v, 2);
     put(k, bad);
   }
   return R;

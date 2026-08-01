@@ -1,4 +1,4 @@
-// 旺衰判定 v2 — 得令(月令) + 长生修正 + 得地(余三支) + 得势(余三干·通根加成) + 会局
+// 旺衰判定 v3 — v2 五项基线 + 耗方群势 + 经 open 裁决的月令六冲折损
 // ---------------------------------------------------------------------------
 // v3.12 批A(v2,梅兰芳例结案):v1 把梅盘(甲午 甲戌 丁酉 癸卯,韦千里断「全局木火太旺」)
 // 判成 中和 -0.1——两处结构性低估:①透干帮身却不看通根(双甲正印通根卯只各得 +0.7 平权分);
@@ -20,6 +20,8 @@
 
 import { Tiangan, Dizhi, GAN_WUXING, ZHI_CANG_GAN, getShiShen, getChangSheng, ShiShen } from './tables';
 import { detectZhiRelations } from './zhi-relations';
+import { AdjudicatedRelation } from './interactions';
+import { scoreWangShuaiV3Adjustments, WangShuaiAuditItem } from './wang-shuai-v3';
 
 type Pillar = '年'|'月'|'日'|'时';
 
@@ -29,6 +31,10 @@ export type WangShuaiVerdict =
   | '中和'
   | '偏弱'
   | '极弱(可能从弱)';
+
+export type WangShuaiOptions = {
+  interactions: AdjudicatedRelation[];
+};
 
 export type WangShuaiResult = {
   score: number;
@@ -40,6 +46,9 @@ export type WangShuaiResult = {
     得地: number;
     得势: number;
     会局: number;
+    耗方群势: number;
+    冲根修正: number;
+    audit: WangShuaiAuditItem[];
     details: string[];
   };
 };
@@ -173,7 +182,10 @@ function scoreHuJu(dayMaster: Tiangan, siZhu: Record<Pillar, {gan: Tiangan, zhi:
   return {score: total, desc};
 }
 
-export function judgeWangShuai(siZhu: Record<Pillar, {gan: Tiangan, zhi: Dizhi}>): WangShuaiResult {
+export function judgeWangShuai(
+  siZhu: Record<Pillar, {gan: Tiangan, zhi: Dizhi}>,
+  options: WangShuaiOptions,
+): WangShuaiResult {
   const dm = siZhu.日.gan;
   const monthZhi = siZhu.月.zhi;
   const month = scoreMonthOrder(dm, monthZhi);
@@ -181,7 +193,8 @@ export function judgeWangShuai(siZhu: Record<Pillar, {gan: Tiangan, zhi: Dizhi}>
   const ground = scoreGround(dm, siZhu);
   const stems = scoreStems(dm, siZhu);
   const huju = scoreHuJu(dm, siZhu);
-  const score = +(month.score + cs.score + ground.score + stems.score + huju.score).toFixed(2);
+  const adjustments = scoreWangShuaiV3Adjustments(dm, siZhu, month.score, cs.score, options.interactions);
+  const score = +(month.score + cs.score + ground.score + stems.score + huju.score + adjustments.耗方群势 + adjustments.冲根修正).toFixed(2);
 
   // 阈值不对称: 月令对负向影响更直接,偏弱区门槛略宽
   // v3.5: 极旺门槛 8→9.5——得令(+5)+帝旺(+2)+一根即达 8,普通偏旺盘曾误报「可能从强」
@@ -211,7 +224,10 @@ export function judgeWangShuai(siZhu: Record<Pillar, {gan: Tiangan, zhi: Dizhi}>
       得地: +ground.score.toFixed(2),
       得势: +stems.score.toFixed(2),
       会局: +huju.score.toFixed(2),
-      details: [month.desc, cs.desc, ...ground.desc, ...stems.desc, ...huju.desc]
+      耗方群势: adjustments.耗方群势,
+      冲根修正: adjustments.冲根修正,
+      audit: adjustments.audit,
+      details: [month.desc, cs.desc, ...ground.desc, ...stems.desc, ...huju.desc, ...adjustments.details]
     }
   };
 }
