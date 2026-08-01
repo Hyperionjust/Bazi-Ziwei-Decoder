@@ -69,7 +69,9 @@
 
   "timeline": {
     "exact_items": 5,
-    "_desc": "时间轴恰 5 项,年份须落在算法层『运岁引动.建议节点』白名单内",
+    "growth_required": true,
+    "growth_max_chars": 18,
+    "_desc": "时间轴恰 5 项,年份须落在算法层『运岁引动.建议节点』白名单内；每项必须另给不超过18字的助长焦点，逆风/体弱也不得留空",
     "mirrored_in": ["prompts/bazi-poster.md"]
   },
 

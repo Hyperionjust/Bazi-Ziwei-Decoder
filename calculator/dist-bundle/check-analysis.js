@@ -108,7 +108,9 @@ var spec_default = {
   },
   timeline: {
     exact_items: 5,
-    _desc: "\u65F6\u95F4\u8F74\u6070 5 \u9879,\u5E74\u4EFD\u987B\u843D\u5728\u7B97\u6CD5\u5C42\u300E\u8FD0\u5C81\u5F15\u52A8.\u5EFA\u8BAE\u8282\u70B9\u300F\u767D\u540D\u5355\u5185",
+    growth_required: true,
+    growth_max_chars: 18,
+    _desc: "\u65F6\u95F4\u8F74\u6070 5 \u9879,\u5E74\u4EFD\u987B\u843D\u5728\u7B97\u6CD5\u5C42\u300E\u8FD0\u5C81\u5F15\u52A8.\u5EFA\u8BAE\u8282\u70B9\u300F\u767D\u540D\u5355\u5185\uFF1B\u6BCF\u9879\u5FC5\u987B\u53E6\u7ED9\u4E0D\u8D85\u8FC718\u5B57\u7684\u52A9\u957F\u7126\u70B9\uFF0C\u9006\u98CE/\u4F53\u5F31\u4E5F\u4E0D\u5F97\u7559\u7A7A",
     mirrored_in: ["prompts/bazi-poster.md"]
   },
   algorithm_owned_blocks: {
@@ -17998,7 +18000,7 @@ function checkAnalysis(a, chart, currentYear) {
       if (expect && mt[1] !== expect) bad.push(`\u753B\u50CF\u951A\u5934\u300C${mt[1]}\u300D\u4E0E\u5BAB\u5750(${gz})\u5E94\u9009\u578B\u300C${expect}\u300D\u4E0D\u7B26(\u5206\u578B\u7531\u7B97\u6CD5\u5BAB\u5750\u786E\u5B9A,\u4E0D\u5F97\u6DF7\u7528)`);
       if (!new RegExp("hl-good[^>]*>[^<]*\u66F4\u53EF\u80FD\u662F\u4E00\u4E2A").test(v) && !/更可能是一个[^<]*<\/span>/.test(v) && !/<span class="hl-good">[^<]*更可能是一个/.test(v))
         bad.push("\u753B\u50CF\u6574\u53E5\u672A\u52A0\u7C97\u6807\u7EFF");
-      if (/(相仿或|或年长|或年轻|或同龄)/.test(mt[2])) bad.push("\u753B\u50CF\u5E74\u9F84\u9A91\u5899(\u987B\u62E9\u4E00\u6216\u660E\u786E\u6539\u7528\u6027\u683C\u8F74)");
+      if (/(相仿或|或年长|或年轻|或同龄)/.test(mt[2])) bad.push("\u753B\u50CF\u5173\u7CFB\u6C14\u8D28\u9A91\u5899(\u987B\u62E9\u4E00\u6761\u6E05\u6670\u7684\u6210\u719F\u627F\u63A5/\u7EC6\u817B\u9C9C\u6D3B/\u5E73\u7B49\u540C\u9891\u4E3B\u8F74)");
     }
     if (bad.length) R["interp.marriage_html"] = { status: "FAIL", reasons: [...(R["interp.marriage_html"]?.reasons || []).filter((x) => !bad.includes(x)), ...bad] };
   }
@@ -18013,6 +18015,8 @@ function checkAnalysis(a, chart, currentYear) {
     if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`\u7CBE\u8BFB\u6BB5\u5E94${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}\u53E5,\u5B9E\u9645${n}\u53E5`);
     addPositiveHighlightChecks(bad, v);
     if (k === "yunsui.reading_html") {
+      if (!/(助长|练出|补结构|练边界|承载力|积累筹码|完成换挡)/.test(strip(v)))
+        bad.push("\u8FD0\u5C81\u6BB5\u672A\u8BF4\u660E\u8FD9\u6BB5\u7ECF\u5386\u4ECD\u5728\u52A9\u957F\u4EC0\u4E48\uFF1B\u987A\u98CE\u3001\u9006\u98CE\u4E0E\u4F53\u5F31\u90FD\u987B\u7ED9\u52A9\u957F\u7126\u70B9");
       const \u5927\u8FD0\u5E74 = /* @__PURE__ */ new Set();
       for (const d of chart?.bazi?.dayun || []) {
         \u5927\u8FD0\u5E74.add(+d.startYear);
@@ -18030,13 +18034,18 @@ function checkAnalysis(a, chart, currentYear) {
     const zy = chart?.bazi?.enrichment?.\u6B63\u7F18\u503E\u5411;
     const v = String(a?.interp?.marriage_html || "");
     if (zy && v) {
-      const said = [];
-      if (/比你年长|年长/.test(strip(v))) said.push("\u5E74\u957F");
-      if (/比你年轻|年轻/.test(strip(v))) said.push("\u5E74\u8F7B");
-      if (/同龄/.test(strip(v))) said.push("\u540C\u9F84");
       const bad = [];
-      if (said.length && !said.includes(zy.\u5E74\u9F84\u503E\u5411)) bad.push(`\u753B\u50CF\u5E74\u9F84\u8BCD(${said.join("/")})\u4E0E\u7B97\u6CD5\u5224\u5B9A(${zy.\u5E74\u9F84\u503E\u5411})\u77DB\u76FE`);
-      if (!said.length && zy.\u7F6E\u4FE1 === "\u9AD8") bad.push(`\u5224\u5B9A\u7F6E\u4FE1\u9AD8(${zy.\u5E74\u9F84\u503E\u5411})\u4F46\u753B\u50CF\u672A\u7528\u5E74\u9F84\u8BCD`);
+      const text = strip(v);
+      const hardAge = /(比你年长|比你大|比你年轻|比你小|实际年长|实际年轻|同龄|年龄相仿|年纪偏长|年纪偏小|年龄偏大|年龄偏小)/.test(text);
+      const softened = /(不限定实际年龄|不等于实际年龄|不一定真的比你|说的是.{0,8}(气质|心智|相处)|实际年龄并不重要|未必体现在年龄)/.test(text);
+      if (hardAge && !softened) bad.push("\u6B63\u7F18\u753B\u50CF\u628A\u4F20\u7EDF\u5E74\u9F84\u4FE1\u53F7\u5361\u6B7B\u4E3A\u5B9E\u9645\u5E74\u9F84\uFF1B\u5E94\u6539\u5199\u4E3A\u5FC3\u667A/\u76F8\u5904\u6C14\u8D28\uFF0C\u6216\u660E\u786E\u8BF4\u660E\u4E0D\u9650\u5B9A\u5B9E\u9645\u5E74\u9F84");
+      const expected = {
+        \u5E74\u957F: /(成熟|稳重|承接|担当|心智稳定)/,
+        \u5E74\u8F7B: /(细腻|鲜活|灵动|少年感|轻盈)/,
+        \u540C\u9F84: /(平等|同频|伙伴感|并肩|节奏接近)/
+      };
+      if (zy.\u5E74\u9F84\u503E\u5411 && expected[zy.\u5E74\u9F84\u503E\u5411] && !expected[zy.\u5E74\u9F84\u503E\u5411].test(text))
+        bad.push(`\u6B63\u7F18\u753B\u50CF\u672A\u628A\u4F20\u7EDF\u300C${zy.\u5E74\u9F84\u503E\u5411}\u300D\u4FE1\u53F7\u8F6C\u8BD1\u4E3A\u5BF9\u5E94\u7684\u5FC3\u667A/\u76F8\u5904\u6C14\u8D28`);
       if (bad.length) R["interp.marriage_html"] = { status: "FAIL", reasons: [...R["interp.marriage_html"]?.reasons || [], ...bad] };
     }
   }
@@ -18091,8 +18100,11 @@ function checkAnalysis(a, chart, currentYear) {
     const tl = a?.timeline;
     const wl = new Set((chart?.bazi?.enrichment?.\u8FD0\u5C81\u5F15\u52A8?.\u5EFA\u8BAE\u8282\u70B9 || []).map((n) => n.\u5E74));
     if (!Array.isArray(tl) || tl.length !== spec_default.timeline.exact_items) bad.push(`timeline \u5E94\u6070${spec_default.timeline.exact_items}\u9879,\u5B9E\u9645${Array.isArray(tl) ? tl.length : 0}`);
-    else if (wl.size) {
-      for (const t of tl) if (!wl.has(+t.year)) bad.push(`\u8282\u70B9\u5E74\u4EFD${t.year}\u4E0D\u5728\u5EFA\u8BAE\u8282\u70B9\u767D\u540D\u5355`);
+    else for (const t of tl) {
+      if (wl.size && !wl.has(+t.year)) bad.push(`\u8282\u70B9\u5E74\u4EFD${t.year}\u4E0D\u5728\u5EFA\u8BAE\u8282\u70B9\u767D\u540D\u5355`);
+      const growth = String(t?.growth || "").trim();
+      if (spec_default.timeline.growth_required && !growth) bad.push(`\u8282\u70B9\u5E74\u4EFD${t.year}\u7F3A\u52A9\u957F\u7126\u70B9growth`);
+      if ([...growth].length > spec_default.timeline.growth_max_chars) bad.push(`\u8282\u70B9\u5E74\u4EFD${t.year}\u52A9\u957F\u7126\u70B9\u8D85\u8FC7${spec_default.timeline.growth_max_chars}\u5B57`);
     }
     put("timeline", bad);
   }
@@ -18334,13 +18346,11 @@ function checkLongform(text, chart, currentYear) {
     const bad = [];
     if (zy?.\u5E74\u9F84\u503E\u5411) {
       const mtext = segs.filter((s) => /(正缘|配偶|另一半|伴侣|对象|婚配|择偶|另一伴)/.test(s)).join(" ");
-      const said = [];
-      if (/年长|比你大/.test(mtext)) said.push("\u5E74\u957F");
-      if (/年轻|比你小/.test(mtext)) said.push("\u5E74\u8F7B");
-      if (/同龄|相仿/.test(mtext)) said.push("\u540C\u9F84");
-      if (said.length && !said.includes(zy.\u5E74\u9F84\u503E\u5411)) bad.push(`\u6B63\u7F18\u5E74\u9F84\u8BCD(${said.join("/")})\u4E0E\u7B97\u6CD5\u5224\u5B9A(${zy.\u5E74\u9F84\u503E\u5411})\u77DB\u76FE`);
+      const hardAge = /(比你年长|比你大|比你年轻|比你小|实际年长|实际年轻|同龄|年龄相仿|年纪偏长|年纪偏小|年龄偏大|年龄偏小)/.test(mtext);
+      const softened = /(不限定实际年龄|不等于实际年龄|不一定真的比你|说的是.{0,8}(气质|心智|相处)|实际年龄并不重要|未必体现在年龄)/.test(mtext);
+      if (hardAge && !softened) bad.push("\u6B63\u7F18\u753B\u50CF\u628A\u4F20\u7EDF\u5E74\u9F84\u4FE1\u53F7\u5361\u6B7B\u4E3A\u5B9E\u9645\u5E74\u9F84\uFF1B\u5E94\u6539\u5199\u4E3A\u5FC3\u667A/\u76F8\u5904\u6C14\u8D28\u6216\u660E\u786E\u8BF4\u660E\u4E0D\u9650\u5B9A\u5B9E\u9645\u5E74\u9F84");
     }
-    push("\u6B63\u7F18\u5E74\u9F84\u4E00\u81F4\u6027", bad);
+    push("\u6B63\u7F18\u5E74\u9F84\u67D4\u6027\u8868\u8FF0", bad);
   }
   return R;
 }

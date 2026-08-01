@@ -274,10 +274,12 @@ function dumpBazi(b: any, bi: any): string[] {
       if (bw.依据) lines.push(`│ │ ├依据: ${bw.依据}`);
       lines.push(`│ │ └声明: ${bw.声明}`);
     }
-    // 正缘倾向(v2.6:画像年龄照抄本判定,不得自行裁量)
+    // 正缘画像:传统年龄信号只作辅助，用户文案优先转译为心智/相处气质
     const zy = en.正缘倾向;
     if (zy) {
-      lines.push(`│ ├正缘倾向(算法判定·画像年龄照抄) : 【${zy.年龄倾向}】置信${zy.置信} — ${zy.夫妻星}:${zy.星位};宫坐${zy.宫坐} — ${zy.依据}`);
+      const temperament = zy.相处气质 || ({年长:'成熟承接型', 年轻:'细腻鲜活型', 同龄:'平等同频型'} as any)[zy.年龄倾向] || '关系气质待定';
+      lines.push(`│ ├正缘倾向(关系气质优先·实际年龄不锁定) : 【${temperament}】— 传统年龄信号${zy.年龄倾向}(仅作辅助,置信${zy.置信});${zy.夫妻星}:${zy.星位};宫坐${zy.宫坐} — ${zy.依据}`);
+      lines.push(`│ │ 解读口径: ${zy.解读口径 || '优先解读心智与相处气质，不限定实际年龄'}`);
     }
     lines.push(`│ ├格局 : ${en.格局?.primary || '-'}  (置信度: ${en.格局?.confidence || '-'})`);
     if (en.格局?.basis) lines.push(`│ │ └依据 : ${en.格局.basis}`);

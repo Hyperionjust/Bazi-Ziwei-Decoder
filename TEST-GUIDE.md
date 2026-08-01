@@ -94,6 +94,7 @@ npx --no-install tsx fixtures/test-compare.ts              # 多年对比
 npx --no-install tsx fixtures/test-shunni.ts               # 顺逆双轴 + 三机制锚点
 npx --no-install tsx fixtures/check-template.ts            # 海报模板完整性
 npx --no-install tsx fixtures/test-spec-sync.ts            # ⭐ spec ↔ SKILL/提示词规格同步
+npx --no-install tsx fixtures/test-ux-contract.ts           # ⭐ Codex 开场/详解状态/AI 指引/助长/关系气质
 npx --no-install tsx fixtures/test-poster-v2.ts            # ⭐ 五项算法海报块/兼容/source↔dist
 npx --no-install tsx fixtures/test-golden.ts               # ⭐ 四线随包金标 + 最终 HTML 条件块
 npx --no-install tsx schema-check.ts                       # shensha/lineages 配置一致性

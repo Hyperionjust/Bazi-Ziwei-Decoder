@@ -111,6 +111,8 @@ for (const f of ['prompts/bazi-poster.md', 'prompts/bazi-poster-review.md']) {
 
 // ---- timeline 项数 ----
 mustMention('prompts/bazi-poster.md', `恰${SPEC.timeline.exact_items}项`, 'spec.timeline.exact_items');
+mustMention('prompts/bazi-poster.md', `≤${SPEC.timeline.growth_max_chars}字`, 'spec.timeline.growth_max_chars');
+mustMention('prompts/bazi-poster.md', 'growth 每项必填', 'spec.timeline.growth_required');
 
 // ---- 连接词白名单:评审遍须列出全部 ----
 for (const w of SPEC.connectors.allow) {

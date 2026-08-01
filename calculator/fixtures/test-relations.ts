@@ -105,13 +105,15 @@ ok(rr2[0].罕见度==='极罕', '排序:极罕在前');
 const rrN = detectRarePatterns({年:{gan:'庚',zhi:'午'},月:{gan:'戊',zhi:'寅'},日:{gan:'甲',zhi:'子'},时:{gan:'丙',zhi:'寅'}} as any, [], [], []);
 ok(!rrN.some(r=>r.罕见度==='极罕'), '普通盘无极罕误报');
 
-// 17) v2.6 正缘倾向判定
+// 17) 正缘倾向判定:传统年龄信号保留，用户文案首选关系气质
 const F1 = {年:{gan:'庚',zhi:'申'},月:{gan:'辛',zhi:'巳'},日:{gan:'甲',zhi:'子'},时:{gan:'丙',zhi:'寅'}} as any; // 女命,官杀(庚辛金)透年月
 const z1 = judgeSpouseProfile(F1, 'female');
 ok(z1.年龄倾向==='年长' && z1.置信==='高', `女命官杀透年月→年长(高): ${z1.年龄倾向}/${z1.置信}`);
+ok(z1.相处气质==='成熟承接型' && z1.解读口径.includes('不限定实际年龄'), `年长信号→成熟承接型,且不锁死实际年龄: ${z1.相处气质}`);
 const M1 = {年:{gan:'甲',zhi:'寅'},月:{gan:'丙',zhi:'子'},日:{gan:'甲',zhi:'午'},时:{gan:'己',zhi:'巳'}} as any; // 男命,正财己土仅透时干
 const z2 = judgeSpouseProfile(M1, 'male');
 ok(z2.年龄倾向==='年轻', `男命财星独现时柱→年轻: ${z2.年龄倾向}`);
+ok(z2.相处气质==='细腻鲜活型', `年轻信号→细腻鲜活型: ${z2.相处气质}`);
 ok(JSON.stringify(judgeSpouseProfile(F1,'female'))===JSON.stringify(z1), '正缘判定可复现');
 
 // 18) v2.8 八维结构

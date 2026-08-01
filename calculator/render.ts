@@ -717,7 +717,7 @@ function analysisToFlatBazi(a:any): Record<string,any> {
   if(a.hechong?.reading_html)out['hechong.reading_html']=a.hechong.reading_html;
   if(a.yunsui?.reading_html)out['yunsui.reading_html']=a.yunsui.reading_html;
   if(a.shensha?.reading_html)out['shensha.reading_html']=a.shensha.reading_html;
-  if(Array.isArray(a.timeline))for(let i=0;i<5;i++){ const t=a.timeline[i]||{}; for(const f of ['age','year','run','run_class','desc','marker_class'])out[`timeline.${i}.${f}`]=t[f]!=null?t[f]:'-'; }
+  if(Array.isArray(a.timeline))for(let i=0;i<5;i++){ const t=a.timeline[i]||{}; for(const f of ['age','year','run','run_class','desc','growth','marker_class'])out[`timeline.${i}.${f}`]=t[f]!=null?t[f]:'-'; }
   if(a.dayun_head_note)out['dayun.head_note']=a.dayun_head_note;
   if(a.liunian_head_note)out['liunian.head_note']=a.liunian_head_note;
   if(Array.isArray(a.dayun_luck))a.dayun_luck.forEach((v:string,i:number)=>{ if(i<10&&v)out[`dayun.${i}.luck_class`]=v; });

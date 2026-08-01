@@ -10,7 +10,7 @@
     "dump": "node dist-bundle/dump-text.js",
     "render": "node dist-bundle/render.js",
     "check": "node dist-bundle/check-analysis.js",
-    "test": "tsx fixtures/test-shensha.ts && tsx fixtures/test-relations.ts && tsx fixtures/test-boundary.ts && tsx fixtures/test-wangshuai-v3.ts && tsx fixtures/test-lineage-invariance.ts && tsx fixtures/test-wangshuai-distribution.ts && tsx fixtures/test-tiaohou.ts && tsx fixtures/test-check.ts && tsx fixtures/test-shichen.ts && tsx fixtures/test-liuyue.ts && tsx fixtures/test-compare.ts && tsx fixtures/test-shunni.ts && tsx fixtures/check-template.ts && tsx fixtures/test-spec-sync.ts && tsx fixtures/test-poster-v2.ts && tsx fixtures/test-golden.ts && tsx schema-check.ts",
+    "test": "tsx fixtures/test-shensha.ts && tsx fixtures/test-relations.ts && tsx fixtures/test-boundary.ts && tsx fixtures/test-wangshuai-v3.ts && tsx fixtures/test-lineage-invariance.ts && tsx fixtures/test-wangshuai-distribution.ts && tsx fixtures/test-tiaohou.ts && tsx fixtures/test-check.ts && tsx fixtures/test-shichen.ts && tsx fixtures/test-liuyue.ts && tsx fixtures/test-compare.ts && tsx fixtures/test-shunni.ts && tsx fixtures/check-template.ts && tsx fixtures/test-spec-sync.ts && tsx fixtures/test-ux-contract.ts && tsx fixtures/test-poster-v2.ts && tsx fixtures/test-golden.ts && tsx schema-check.ts",
     "calibration:audit": "tsx fixtures/calibration/run-wangshuai-audit.ts"
   },
   "dependencies": {

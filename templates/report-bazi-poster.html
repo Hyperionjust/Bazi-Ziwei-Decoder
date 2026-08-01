@@ -457,6 +457,12 @@
   .month-term, .month-gz, .month-dir { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .month-term { color: var(--ink-faint); } .month-gz { color: var(--ink); font-size: 10px; font-weight: 700; margin: 1px 0; }
   .month-dir { font-weight: 700; } .month-cell.flow-up .month-dir { color: var(--jade-deep); font-weight: 900; } .month-cell.flow-flat .month-dir { color: var(--indigo); } .month-cell.flow-down .month-dir { color: var(--vermillion); }
+  .luck-growth-guide {
+    margin: -6px 0 20px; padding: 9px 12px; border: 1px solid rgba(74,124,78,.42);
+    border-left: 4px solid var(--jade); background: rgba(74,124,78,.055);
+    color: var(--ink-soft); font-size: 10.5px; line-height: 1.75;
+  }
+  .luck-growth-guide b { color: var(--jade-deep); font-weight: 900; }
 
   /* ============ NUMBERED SECTIONS ============ */
   .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -528,6 +534,8 @@
   .tl-run { font-size: 11px; font-weight: 600; color: var(--indigo); margin-bottom: 4px; }
   .tl-run.down { color: var(--vermillion); } .tl-run.up { color: var(--jade-deep); font-weight: 900; }
   .tl-desc { font-size: 10px; color: var(--ink-soft); line-height: 1.6; }
+  .tl-growth { margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(74,124,78,.34); color: var(--jade-deep); font-size: 9.5px; line-height: 1.5; font-weight: 800; }
+  .tl-growth::before { content: "助长 · "; color: var(--gold); font-weight: 900; }
 
   /* shensha overview */
   .shensha-list { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 16px; }
@@ -647,7 +655,7 @@
 
   <aside class="reader-guide" aria-label="海报阅读说明">
     <div class="guide-title">小白这样看</div>
-    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的风险。第一次看可以跳过上方专业盘面，先读下方 01—04 的现实解读，再看大运流年找时机，最后照 09 的建议行动；括号里的命理词不影响理解。</div>
+    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的风险。第一次看可以跳过上方专业盘面，先读下方 01—04 的现实解读，再看大运流年找时机，最后照 09 的建议行动；括号里的命理词不影响理解。对任何一句有疑惑或想进一步了解，都可以直接把海报内容发给 AI 问。</div>
   </aside>
 
   <!-- ============ INFO BAR ============ -->
@@ -843,6 +851,8 @@
       <div class="cell {{liunian.9.current_class}}"><div class="yr num">{{liunian.9.year}}</div><div class="gz">{{liunian.9.gz}}</div><div class="ss">{{liunian.9.shishen}}</div><span class="luck {{liunian.9.luck_class}}"></span>{{liunian.9.state_html}}</div>
     </div>
   </div>
+
+  <div class="luck-growth-guide"><b>逆风或体弱，不等于没有助力。</b>顺风更适合兑现与扩张；逆风更助长取舍、边界、补结构与换挡；体弱时先助长恢复、节奏和承载力。每个关键节点下方都标了本阶段的“助长”重点；想知道某步大运或某一年怎样用好它，可直接问 AI 详谈。</div>
   {{algo.month_flow_html}}
 
   <!-- 条件板块：罕见现象（无算法命中时由 render 输出空字符串） -->
@@ -896,30 +906,35 @@
         <div class="tl-marker {{timeline.0.marker_class}}">{{timeline.0.trigger_html}}</div>
         <div class="tl-run {{timeline.0.run_class}}">{{timeline.0.run}}</div>
         <div class="tl-desc">{{timeline.0.desc}}</div>
+        <div class="tl-growth">{{timeline.0.growth}}</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">{{timeline.1.age}}</div><div class="tl-year num">{{timeline.1.year}}</div>
         <div class="tl-marker {{timeline.1.marker_class}}">{{timeline.1.trigger_html}}</div>
         <div class="tl-run {{timeline.1.run_class}}">{{timeline.1.run}}</div>
         <div class="tl-desc">{{timeline.1.desc}}</div>
+        <div class="tl-growth">{{timeline.1.growth}}</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">{{timeline.2.age}}</div><div class="tl-year num">{{timeline.2.year}}</div>
         <div class="tl-marker {{timeline.2.marker_class}}">{{timeline.2.trigger_html}}</div>
         <div class="tl-run {{timeline.2.run_class}}">{{timeline.2.run}}</div>
         <div class="tl-desc">{{timeline.2.desc}}</div>
+        <div class="tl-growth">{{timeline.2.growth}}</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">{{timeline.3.age}}</div><div class="tl-year num">{{timeline.3.year}}</div>
         <div class="tl-marker {{timeline.3.marker_class}}">{{timeline.3.trigger_html}}</div>
         <div class="tl-run {{timeline.3.run_class}}">{{timeline.3.run}}</div>
         <div class="tl-desc">{{timeline.3.desc}}</div>
+        <div class="tl-growth">{{timeline.3.growth}}</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">{{timeline.4.age}}</div><div class="tl-year num">{{timeline.4.year}}</div>
         <div class="tl-marker {{timeline.4.marker_class}}">{{timeline.4.trigger_html}}</div>
         <div class="tl-run {{timeline.4.run_class}}">{{timeline.4.run}}</div>
         <div class="tl-desc">{{timeline.4.desc}}</div>
+        <div class="tl-growth">{{timeline.4.growth}}</div>
       </div>
     </div>
   </section>

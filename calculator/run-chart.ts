@@ -265,7 +265,7 @@ function main() {
       // v2.5: 罕象检测(四库全/德秀满盘/三德会聚等) — 罕见度由算法定义,解读层优先讲解
       enr.罕象 = detectRarePatterns(siZhuCN, fullHits as any[], enr.地支关系 || [], enr.天干关系 || []);
 
-      // v2.6: 正缘倾向判定(年长/年轻/同龄) — 通行断法确定性计算,画像年龄照抄不裁量
+      // 正缘倾向:保留传统年龄信号供校准，用户文案优先使用相处气质，不锁死现实年龄差
       enr.正缘倾向 = judgeSpouseProfile(siZhuCN, birthInfo.gender);
 
 

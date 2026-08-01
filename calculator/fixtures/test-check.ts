@@ -14,10 +14,10 @@ const good: any = {
   wuxing: { note_html: '全盘缺金而金非用忌关键。所以你不必刻意补金。' },
   tg: { mech_html: '官杀生印。', plain_html: goodPara },
   yongshen: { note_html: '临界盘体用两分。所以你护体发用并行。' },
-  interp: { personality_html: goodPara, career_html: goodPara, marriage_html: goodPara + '<span class="hl-good">你适合的另一半更可能是一个比你年长、有担当、性格柔和的男生</span>。他会在大事上替你拿主意。', health_html: goodPara },
-  hechong: { reading_html: seg(4) }, yunsui: { reading_html: seg(3) }, shensha: { reading_html: seg(4) },
+  interp: { personality_html: goodPara, career_html: goodPara, marriage_html: goodPara + '<span class="hl-good">你适合的另一半更可能是一个心智成熟、有担当、性格柔和的男生</span>。这里说的是成熟承接的相处气质，不限定实际年龄。他会在大事上替你拿主意。', health_html: goodPara },
+  hechong: { reading_html: seg(4) }, yunsui: { reading_html: '这段逆风仍在助长你的稳定节奏。' + seg(2) }, shensha: { reading_html: seg(4) },
   kaiyun: { ye: 'x', place_html: 'x', item_html: 'x', skill_html: 'x', note_html: 'x' },
-  timeline: [2030, 2035, 2040, 2045, 2050].map((y, i) => ({ age: i * 10, year: y, run: '干支', run_class: 'flat', desc: '平路', marker_class: 'flat' })),
+  timeline: [2030, 2035, 2040, 2045, 2050].map((y, i) => ({ age: i * 10, year: y, run: '干支', run_class: 'flat', desc: '平路', growth: '助长稳定节奏', marker_class: 'flat' })),
 };
 const rep1 = checkAnalysis(good, chart, 2026);
 ok(Object.values(rep1).every((r: any) => r.status !== 'FAIL'), '合格样本全 PASS: ' + JSON.stringify(Object.entries(rep1).filter(([,r]:any)=>r.status==='FAIL').map(([k])=>k)));
@@ -31,6 +31,14 @@ ok(rep2['meta.archetype_name'].status === 'FAIL', '判词术语被抓');
 ok(rep2['_全局禁词'].status === 'FAIL', 'tier/大凶被抓');
 ok(rep2['interp.marriage_html'].status === 'FAIL', '画像骑墙被抓');
 ok(rep2['timeline'].status === 'FAIL', '白名单越界被抓');
+const noGrowth = JSON.parse(JSON.stringify(good));
+delete noGrowth.timeline[2].growth;
+const repGrowth = checkAnalysis(noGrowth, chart, 2026);
+ok(repGrowth['timeline'].status === 'FAIL' && repGrowth['timeline'].reasons.some(r => r.includes('助长焦点')), '时间轴缺助长焦点被抓');
+const noYunsuiGrowth = JSON.parse(JSON.stringify(good));
+noYunsuiGrowth.yunsui.reading_html = seg(3);
+const repYunsuiGrowth = checkAnalysis(noYunsuiGrowth, chart, 2026);
+ok(repYunsuiGrowth['yunsui.reading_html'].status === 'FAIL' && repYunsuiGrowth['yunsui.reading_html'].reasons.some(r => r.includes('助长')), '运岁精读缺助长面被抓');
 const noGreen = JSON.parse(JSON.stringify(good));
 noGreen.interp.career_html = seg(6) + `<span class="hl">${seg(2)}</span>`;
 const repGreen = checkAnalysis(noGreen, chart, 2026);
@@ -47,13 +55,15 @@ ok(repTg['tg.plain_html'].status === 'FAIL' && repTg['tg.plain_html'].reasons.so
 {
   const mk = (marriage: string) => { const b = JSON.parse(JSON.stringify(good)); b.interp.marriage_html = goodPara + marriage; return b; };
   const chartGZ = JSON.parse(JSON.stringify(chart));
-  chartGZ.bazi.enrichment.正缘倾向 = { 年龄倾向: '年长', 置信: '高', 宫坐: '七杀' };
+  chartGZ.bazi.enrichment.正缘倾向 = { 年龄倾向: '年长', 相处气质: '成熟承接型', 置信: '高', 宫坐: '七杀' };
   // 七杀宫坐 + 印星锚头 → 分型错位被抓
-  const rWrong = checkAnalysis(mk('<span class="hl-good">你适合的另一半更可能是一个比你年长、有担当、外柔内刚的男生</span>。他会在大事上撑住你。'), chartGZ, 2026);
+  const rWrong = checkAnalysis(mk('<span class="hl-good">你适合的另一半更可能是一个成熟稳重、有担当、外柔内刚的男生</span>。这里说的是相处气质，不限定实际年龄。他会在大事上撑住你。'), chartGZ, 2026);
   ok(rWrong['interp.marriage_html'].status === 'FAIL' && rWrong['interp.marriage_html'].reasons.some(r => r.includes('不符')), '分型:七杀宫坐配印星锚头被抓');
   // 七杀宫坐 + 官杀锚头 → PASS
-  const rRight = checkAnalysis(mk('<span class="hl-good">能接住你的，更可能是一个比你年长、有担当、雷厉风行的男生</span>。他会在你硬扛的时候毫不含糊地接手。'), chartGZ, 2026);
+  const rRight = checkAnalysis(mk('<span class="hl-good">能接住你的，更可能是一个心智成熟、有担当、雷厉风行的男生</span>。这里说的是成熟承接的相处气质，不限定实际年龄。他会在你硬扛的时候毫不含糊地接手。'), chartGZ, 2026);
   ok(rRight['interp.marriage_html'] == null || rRight['interp.marriage_html'].status !== 'FAIL', '分型:官杀宫坐配官杀锚头 PASS: ' + JSON.stringify(rRight['interp.marriage_html']?.reasons || []));
+  const rHardAge = checkAnalysis(mk('<span class="hl-good">能接住你的，更可能是一个比你年长、有担当、雷厉风行的男生</span>。他会在你硬扛的时候毫不含糊地接手。'), chartGZ, 2026);
+  ok(rHardAge['interp.marriage_html'].status === 'FAIL' && rHardAge['interp.marriage_html'].reasons.some(r => r.includes('卡死为实际年龄')), '正缘画像:实际年龄硬结论被抓');
   // 无宫坐数据 → 任一锚头均可(向后兼容,good 样本已验证)
   // 连接词白名单:新连接词「这让你」PASS,盘外开头 FAIL
   const bC = JSON.parse(JSON.stringify(good));
@@ -81,11 +91,13 @@ ok(rl['_播报腔'].status === 'FAIL', '长文:第三人称播报(该命主)被�
 ok(rl['_绝对凶语'].status === 'FAIL', '长文:大凶/灾年被抓');
 ok(rl['_行为频率断言'].status === 'FAIL', '长文:频率断言(你总是)被抓');
 ok(rl['_童年行为断言'].status === 'FAIL', '长文:童年行为(从小…牵头攒局)被抓');
-const lfClean = '你天生带着一股沉静的韧劲。紫微命主星落在事业宫。今年走顺风，后年略有逆风宜守。这一层的置信度：低，仅供参考。你的正缘更可能比你年长一些，性格温厚。';
+const lfClean = '你天生带着一股沉静的韧劲。紫微命主星落在事业宫。今年走顺风，后年略有逆风宜守。这一层的置信度：低，仅供参考。你的正缘更偏心智成熟、能承接关系的类型，这不限定实际年龄。';
 const rc = checkLongform(lfClean, lfChart, 2026);
-ok(Object.values(rc).every((r: any) => r.status !== 'FAIL'), '长文:合规样零误伤(置信度/命主星/顺逆/年长): ' + JSON.stringify(Object.entries(rc).filter(([, r]: any) => r.status === 'FAIL').map(([k]) => k)));
+ok(Object.values(rc).every((r: any) => r.status !== 'FAIL'), '长文:合规样零误伤(置信度/命主星/顺逆/关系气质): ' + JSON.stringify(Object.entries(rc).filter(([, r]: any) => r.status === 'FAIL').map(([k]) => k)));
 const rAge = checkLongform('你温厚踏实。你的正缘更可能比你年轻活泼。', lfChart, 2026);
-ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与算法判定矛盾被抓');
+ok(rAge['正缘年龄柔性表述'].status === 'FAIL', '长文:正缘实际年龄硬结论被抓');
+const rAgeSoft = checkLongform('你温厚踏实。你的正缘可能带有比你年轻的鲜活感，但这说的是相处气质，不限定实际年龄。', lfChart, 2026);
+ok(rAgeSoft['正缘年龄柔性表述'].status !== 'FAIL', '长文:年龄信号明确转译为相处气质后放行');
 
 // ---- P0-C 置信度传播: 边界盘高确定断语红线(正/反样例) ----
 {
@@ -185,10 +197,10 @@ ok(rAge['正缘年龄一致性'].status === 'FAIL', '长文:正缘年龄词与�
   {
     const ch: any = JSON.parse(JSON.stringify(chart));
     ch.bazi.dayun = [{ startYear: 2028, endYear: 2037 }];
-    const a = 基(); a.yunsui.reading_html = '2028-2037这步大运是关键窗口。' + seg(2);
+    const a = 基(); a.yunsui.reading_html = '2028-2037这步大运是关键窗口，也在助长你的换挡能力。' + seg(2);
     ok((checkAnalysis(a, ch, 2026) as any)['yunsui.reading_html'].status === 'PASS',
       '批4-b 正例:引用大运起止年 2028-2037 不再报警(算法层自己给的年份)');
-    const b = 基(); b.yunsui.reading_html = '1949年是个转折点。' + seg(2);
+    const b = 基(); b.yunsui.reading_html = '1949年是个转折点，也在助长你的换挡能力。' + seg(2);
     const r = (checkAnalysis(b, ch, 2026) as any)['yunsui.reading_html'];
     ok(r.status === 'WARN' && r.reasons.some((x: string) => x.includes('1949')),
       '批4-b 反例:白名单外的无关年份 1949 仍报警');

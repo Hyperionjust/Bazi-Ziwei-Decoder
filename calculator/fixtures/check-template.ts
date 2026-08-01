@@ -29,16 +29,17 @@ check('report-bazi-poster.html', [
   // 条件式罕见现象整块：算法列事实，LLM 讲现实含义；无罕象时整块空字符串。
   '{{rare.block_html}}', 'rare-phenomena', '罕见现象',
   '{{timeline.0.trigger_html}}', '{{timeline.4.trigger_html}}',
+  '{{timeline.0.growth}}', '{{timeline.4.growth}}', 'luck-growth-guide', '逆风或体弱，不等于没有助力', '直接把海报内容发给 AI 问',
   '{{dayun.0.state_html}}', '{{dayun.9.state_html}}', '{{liunian.0.state_html}}', '{{liunian.9.state_html}}',
 ]);
-check('report-zonghe-poster.html', ['reader-guide', '小白这样看', '--jade-deep', '.hl-good', 'font-weight: 900']);
+check('report-zonghe-poster.html', ['reader-guide', '小白这样看', '--jade-deep', '.hl-good', 'font-weight: 900', '直接把海报内容发给 AI 问']);
 check('report-ziwei-poster.html', [
   'footer-disclaim', '{{meta.name}}', '{{meta.archetype_name}}', '{{meta.axis_oneliner}}',
   '{{ziwei.ming_zhu}}', '{{ziwei.shen_zhu}}', '{{ziwei.wuxing_ju}}',
   '{{gongs.子.mainStarsHtml}}', '{{gongs.子.shenBadge}}', '{{gongs.子.flag}}', '{{gongs.子.daxian_range}}',
   '{{z.axis_html}}', '{{z.mingshen_html}}', '{{z.career_html}}', '{{z.wealth_html}}',
   '{{z.marriage_html}}', '{{z.health_html}}', '{{z.daxian_html}}', '{{z.liunian_html}}', '{{z.advice_html}}',
-  '{{mbti.char_svg}}', 'reader-guide', '小白这样看', '--jade-deep', '.hl-good', 'font-weight: 900',
+  '{{mbti.char_svg}}', 'reader-guide', '小白这样看', '--jade-deep', '.hl-good', 'font-weight: 900', '直接把海报内容发给 AI 问',
 ]);
 check('report-mbti-poster.html', [
   'footer-disclaim', '{{meta.name}}', '{{meta.gender}}', '{{meta.solar_date}}',
@@ -47,6 +48,6 @@ check('report-mbti-poster.html', [
   '{{m.overview_html}}', '{{m.sanguan_html}}', '{{m.friends_html}}', '{{m.love_html}}',
   '{{m.work_html}}', '{{m.family_html}}', '{{m.hobbies_html}}',
   '{{bazi.year.gan}}', '{{bazi.year.gan_wx}}', '{{bazi.day.gan}}', '{{bazi.day.zhi_wx}}',
-  'reader-guide', '小白这样看', '--jade-deep', '.hl-good', 'font-weight:900',
+  'reader-guide', '小白这样看', '--jade-deep', '.hl-good', 'font-weight:900', '直接把海报内容发给 AI 问',
 ]);
 process.exit(failed ? 1 : 0);

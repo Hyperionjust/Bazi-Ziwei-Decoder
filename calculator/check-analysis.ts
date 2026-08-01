@@ -196,7 +196,7 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
       if (expect && mt[1] !== expect) bad.push(`画像锚头「${mt[1]}」与宫坐(${gz})应选型「${expect}」不符(分型由算法宫坐确定,不得混用)`);
       if (!new RegExp('hl-good[^>]*>[^<]*更可能是一个').test(v) && !/更可能是一个[^<]*<\/span>/.test(v) && !/<span class="hl-good">[^<]*更可能是一个/.test(v))
         bad.push('画像整句未加粗标绿');
-      if (/(相仿或|或年长|或年轻|或同龄)/.test(mt[2])) bad.push('画像年龄骑墙(须择一或明确改用性格轴)');
+      if (/(相仿或|或年长|或年轻|或同龄)/.test(mt[2])) bad.push('画像关系气质骑墙(须择一条清晰的成熟承接/细腻鲜活/平等同频主轴)');
     }
     if (bad.length) R['interp.marriage_html'] = { status: 'FAIL', reasons: [...(R['interp.marriage_html']?.reasons || []).filter(x => !bad.includes(x)), ...bad] };
   }
@@ -209,6 +209,8 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     if (n < SEC.close_read.min_sentences || n > SEC.close_read.max_sentences) bad.push(`精读段应${SEC.close_read.min_sentences}~${SEC.close_read.max_sentences}句,实际${n}句`);
     addPositiveHighlightChecks(bad, v);
     if (k === 'yunsui.reading_html') {
+      if (!/(助长|练出|补结构|练边界|承载力|积累筹码|完成换挡)/.test(strip(v)))
+        bad.push('运岁段未说明这段经历仍在助长什么；顺风、逆风与体弱都须给助长焦点');
       // 批4 修:运岁段本来就要讲大运,而一步大运横跨十年——「1997-2006 癸未」这种年份
       //   必然落在「今年起 5 年窗口」之外,却是算法自己给的事实,警它没有道理。
       //   豁免:大运起止年 与 建议节点年(都由算法层产出,不是模型自由发挥的年份)。
@@ -223,18 +225,23 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     put(k, bad, warn);
   }
 
-  // ---- 正缘年龄一致性(v2.6):画像年龄词须与算法判定一致 ----
+  // ---- 正缘画像柔性化:优先关系气质，不把传统信号锁死为现实年龄 ----
   {
     const zy = chart?.bazi?.enrichment?.正缘倾向;
     const v = String(a?.interp?.marriage_html || '');
     if (zy && v) {
-      const said: string[] = [];
-      if (/比你年长|年长/.test(strip(v))) said.push('年长');
-      if (/比你年轻|年轻/.test(strip(v))) said.push('年轻');
-      if (/同龄/.test(strip(v))) said.push('同龄');
       const bad: string[] = [];
-      if (said.length && !said.includes(zy.年龄倾向)) bad.push(`画像年龄词(${said.join('/')})与算法判定(${zy.年龄倾向})矛盾`);
-      if (!said.length && zy.置信 === '高') bad.push(`判定置信高(${zy.年龄倾向})但画像未用年龄词`);
+      const text = strip(v);
+      const hardAge = /(比你年长|比你大|比你年轻|比你小|实际年长|实际年轻|同龄|年龄相仿|年纪偏长|年纪偏小|年龄偏大|年龄偏小)/.test(text);
+      const softened = /(不限定实际年龄|不等于实际年龄|不一定真的比你|说的是.{0,8}(气质|心智|相处)|实际年龄并不重要|未必体现在年龄)/.test(text);
+      if (hardAge && !softened) bad.push('正缘画像把传统年龄信号卡死为实际年龄；应改写为心智/相处气质，或明确说明不限定实际年龄');
+      const expected: Record<string, RegExp> = {
+        年长: /(成熟|稳重|承接|担当|心智稳定)/,
+        年轻: /(细腻|鲜活|灵动|少年感|轻盈)/,
+        同龄: /(平等|同频|伙伴感|并肩|节奏接近)/,
+      };
+      if (zy.年龄倾向 && expected[zy.年龄倾向] && !expected[zy.年龄倾向].test(text))
+        bad.push(`正缘画像未把传统「${zy.年龄倾向}」信号转译为对应的心智/相处气质`);
       if (bad.length) R['interp.marriage_html'] = { status: 'FAIL', reasons: [...(R['interp.marriage_html']?.reasons || []), ...bad] };
     }
   }
@@ -299,13 +306,18 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     }
   }
 
-  // ---- timeline:恰5项 + 年份∈建议节点白名单 ----
+  // ---- timeline:恰5项 + 年份∈建议节点白名单 + 每项有助长焦点 ----
   {
     const bad: string[] = [];
     const tl = a?.timeline;
     const wl = new Set(((chart?.bazi?.enrichment?.运岁引动?.建议节点) || []).map((n: any) => n.年));
     if (!Array.isArray(tl) || tl.length !== SPEC.timeline.exact_items) bad.push(`timeline 应恰${SPEC.timeline.exact_items}项,实际${Array.isArray(tl) ? tl.length : 0}`);
-    else if (wl.size) for (const t of tl) if (!wl.has(+t.year)) bad.push(`节点年份${t.year}不在建议节点白名单`);
+    else for (const t of tl) {
+      if (wl.size && !wl.has(+t.year)) bad.push(`节点年份${t.year}不在建议节点白名单`);
+      const growth = String(t?.growth || '').trim();
+      if (SPEC.timeline.growth_required && !growth) bad.push(`节点年份${t.year}缺助长焦点growth`);
+      if ([...growth].length > SPEC.timeline.growth_max_chars) bad.push(`节点年份${t.year}助长焦点超过${SPEC.timeline.growth_max_chars}字`);
+    }
     put('timeline', bad);
   }
 
@@ -543,19 +555,17 @@ export function checkLongform(text: string, chart: any, currentYear: number): Re
     }
     push('_边界盘高确定断语', bad);
   }
-  // 5) 正缘年龄一致性(v2.6):仅在「婚配/正缘」语境句里比对年龄词
+  // 5) 正缘年龄柔性表述:传统年龄信号不得写成现实年龄硬结论
   {
     const zy = chart?.bazi?.enrichment?.正缘倾向;
     const bad: string[] = [];
     if (zy?.年龄倾向) {
       const mtext = segs.filter(s => /(正缘|配偶|另一半|伴侣|对象|婚配|择偶|另一伴)/.test(s)).join(' ');
-      const said: string[] = [];
-      if (/年长|比你大/.test(mtext)) said.push('年长');
-      if (/年轻|比你小/.test(mtext)) said.push('年轻');
-      if (/同龄|相仿/.test(mtext)) said.push('同龄');
-      if (said.length && !said.includes(zy.年龄倾向)) bad.push(`正缘年龄词(${said.join('/')})与算法判定(${zy.年龄倾向})矛盾`);
+      const hardAge = /(比你年长|比你大|比你年轻|比你小|实际年长|实际年轻|同龄|年龄相仿|年纪偏长|年纪偏小|年龄偏大|年龄偏小)/.test(mtext);
+      const softened = /(不限定实际年龄|不等于实际年龄|不一定真的比你|说的是.{0,8}(气质|心智|相处)|实际年龄并不重要|未必体现在年龄)/.test(mtext);
+      if (hardAge && !softened) bad.push('正缘画像把传统年龄信号卡死为实际年龄；应改写为心智/相处气质或明确说明不限定实际年龄');
     }
-    push('正缘年龄一致性', bad);
+    push('正缘年龄柔性表述', bad);
   }
   return R;
 }
@@ -564,7 +574,7 @@ function main() {
   const MODE_HELP = '模式说明(--mode,默认 bazi): bazi=八字海报JSON体检 / zonghe=综合印证海报体检 / ziwei=紫微独立海报体检 / mbti=MBTI海报体检 / longform=长文(Markdown)体检';
   const args: Record<string, string> = {};
   for (const x of process.argv.slice(2)) { const m = x.match(/^--([^=]+)=(.*)$/); if (m) args[m[1]] = m[2]; }
-  // 长文模式:输入为 Markdown/文本(--text 或 --analysis 指向 .md),chart 可选(用于正缘年龄一致性)
+  // 长文模式:输入为 Markdown/文本(--text 或 --analysis 指向 .md),chart 可选(用于正缘年龄柔性表述)
   if (args.mode === 'longform') {
     const p = args.text || args.analysis;
     if (!p) { console.error('Usage: node check-analysis.js --mode=longform --text=report.md [--chart=chart.json] [--currentYear=YYYY]\n' + MODE_HELP); process.exit(1); }

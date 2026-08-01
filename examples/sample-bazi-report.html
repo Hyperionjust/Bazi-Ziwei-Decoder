@@ -457,6 +457,12 @@
   .month-term, .month-gz, .month-dir { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .month-term { color: var(--ink-faint); } .month-gz { color: var(--ink); font-size: 10px; font-weight: 700; margin: 1px 0; }
   .month-dir { font-weight: 700; } .month-cell.flow-up .month-dir { color: var(--jade-deep); font-weight: 900; } .month-cell.flow-flat .month-dir { color: var(--indigo); } .month-cell.flow-down .month-dir { color: var(--vermillion); }
+  .luck-growth-guide {
+    margin: -6px 0 20px; padding: 9px 12px; border: 1px solid rgba(74,124,78,.42);
+    border-left: 4px solid var(--jade); background: rgba(74,124,78,.055);
+    color: var(--ink-soft); font-size: 10.5px; line-height: 1.75;
+  }
+  .luck-growth-guide b { color: var(--jade-deep); font-weight: 900; }
 
   /* ============ NUMBERED SECTIONS ============ */
   .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -528,6 +534,8 @@
   .tl-run { font-size: 11px; font-weight: 600; color: var(--indigo); margin-bottom: 4px; }
   .tl-run.down { color: var(--vermillion); } .tl-run.up { color: var(--jade-deep); font-weight: 900; }
   .tl-desc { font-size: 10px; color: var(--ink-soft); line-height: 1.6; }
+  .tl-growth { margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(74,124,78,.34); color: var(--jade-deep); font-size: 9.5px; line-height: 1.5; font-weight: 800; }
+  .tl-growth::before { content: "助长 · "; color: var(--gold); font-weight: 900; }
 
   /* shensha overview */
   .shensha-list { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 16px; }
@@ -670,7 +678,7 @@
       <div class="subtitle">底盘厚、进项稳，靠长期累积换回旋余地</div>
     </div>
     <div class="header-right">
-      <div class="gen-time">生成时间：<span class="num">2026-08-02 01:39</span></div>
+      <div class="gen-time">生成时间：<span class="num">2026-08-02 03:15</span></div>
       <div>自身能量（旺衰）</div>
       <div class="badge-grade">◆ 中和</div>
       <div class="meta-row"><span>日主：<b>戊</b></span></div>
@@ -681,7 +689,7 @@
 
   <aside class="reader-guide" aria-label="海报阅读说明">
     <div class="guide-title">小白这样看</div>
-    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的风险。第一次看可以跳过上方专业盘面，先读下方 01—04 的现实解读，再看大运流年找时机，最后照 09 的建议行动；括号里的命理词不影响理解。</div>
+    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的风险。第一次看可以跳过上方专业盘面，先读下方 01—04 的现实解读，再看大运流年找时机，最后照 09 的建议行动；括号里的命理词不影响理解。对任何一句有疑惑或想进一步了解，都可以直接把海报内容发给 AI 问。</div>
   </aside>
 
   <!-- ============ INFO BAR ============ -->
@@ -877,6 +885,8 @@
       <div class="cell "><div class="yr num">2027</div><div class="gz">丁未</div><div class="ss"></div><span class="luck luck-xiong"></span><span class="state-pair"><span class="dir-token dir-down">▼ 逆</span><span class="body-token body-mid">体中</span></span></div>
     </div>
   </div>
+
+  <div class="luck-growth-guide"><b>逆风或体弱，不等于没有助力。</b>顺风更适合兑现与扩张；逆风更助长取舍、边界、补结构与换挡；体弱时先助长恢复、节奏和承载力。每个关键节点下方都标了本阶段的“助长”重点；想知道某步大运或某一年怎样用好它，可直接问 AI 详谈。</div>
   <section class="month-flow"><div class="month-flow-head"><b>2026 十二月风向</b><span><strong>最顺</strong> 立春·庚寅　<strong>最逆</strong> 寒露·戊戌</span></div><div class="month-grid"><div class="month-cell flow-up"><span class="month-term">立春</span><span class="month-gz">庚寅</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-up"><span class="month-term">惊蛰</span><span class="month-gz">辛卯</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-down"><span class="month-term">清明</span><span class="month-gz">壬辰</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-flat"><span class="month-term">立夏</span><span class="month-gz">癸巳</span><span class="month-dir">◆ 平</span></div><div class="month-cell flow-up"><span class="month-term">芒种</span><span class="month-gz">甲午</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-flat"><span class="month-term">小暑</span><span class="month-gz">乙未</span><span class="month-dir">◆ 平</span></div><div class="month-cell flow-up"><span class="month-term">立秋</span><span class="month-gz">丙申</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-up"><span class="month-term">白露</span><span class="month-gz">丁酉</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-down"><span class="month-term">寒露</span><span class="month-gz">戊戌</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-down"><span class="month-term">立冬</span><span class="month-gz">己亥</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-up"><span class="month-term">大雪</span><span class="month-gz">庚子</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-flat"><span class="month-term">小寒</span><span class="month-gz">辛丑</span><span class="month-dir">◆ 平</span></div></div></section>
 
   <!-- 条件板块：罕见现象（无算法命中时由 render 输出空字符串） -->
@@ -898,7 +908,7 @@
   <div class="row-2col">
     <section class="section">
       <h2><span class="num-box">03</span>感情与相处模式 <small>怎么爱人、怎样相处更顺</small></h2>
-      <div class="prose">配偶宫坐印，妻星见于月柱，这一组合带来<span class="hl-good">成熟、稳重、愿意照顾现实生活的伴侣倾向</span>。<span class="hl-good">你适合的另一半，更可能是一个沉静、务实又肯替你托底的女生</span>，<span class="hl-good">年纪偏长一些的相处节奏更容易顺手</span>。你真正需要的是<span class="hl-good">一个能在你埋头做事时把生活另一头稳住的人</span>。相处中，你<span class="hl-good">很会把在意变成具体行动：修好东西、接住麻烦、提前把路铺好</span>。但对方未必总能读懂，<span class="hl">把想法讲出来是你需要刻意练习的功课；最消耗关系的，是你一个人默默把问题吞下去</span>。<span class="hl-good">愿意及时开口，会让关系多出回旋余地，也更容易长期稳定</span>。</div>
+      <div class="prose">配偶宫坐印，妻星见于月柱，这一组合带来<span class="hl-good">成熟、稳重、愿意照顾现实生活的伴侣倾向</span>。<span class="hl-good">你适合的另一半，更可能是一个沉静、务实又肯替你托底的女生</span>。这种信号更多落在成熟承接的相处气质上，不限定实际年龄。你真正需要的是<span class="hl-good">一个能在你埋头做事时把生活另一头稳住的人</span>。相处中，你<span class="hl-good">很会把在意变成具体行动：修好东西、接住麻烦、提前把路铺好</span>。但对方未必总能读懂，<span class="hl">把想法讲出来是你需要刻意练习的功课；最消耗关系的，是你一个人默默把问题吞下去</span>。<span class="hl-good">愿意及时开口，会让关系多出回旋余地，也更容易长期稳定</span>。</div>
     </section>
     <section class="section">
       <h2><span class="num-box">04</span>身体保养重点 <small>优先守住什么习惯</small></h2>
@@ -912,7 +922,7 @@
     <section class="section">
       <h2><span class="num-box">06</span>哪些年份更有感 <small>什么时候宜进、宜稳、宜避险</small></h2>
       <div class="hc-table"><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运天干甲合年干己(合绊)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运支戌合年柱(祖上/早年宫)卯(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运癸酉与年柱(祖上/早年宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运支酉破月柱(提纲·父母兄弟/事业宫)子(力轻)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合日干戊(合绊,合动日主本人)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合时干戊(合绊)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运天干辛合月干丙(合绊)</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未害(穿)月柱(提纲·父母兄弟/事业宫)子</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合日支(夫妻宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午破年柱(祖上/早年宫)卯(力轻)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运庚午与月柱(提纲·父母兄弟/事业宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与日支自刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运戊辰 2078-2087年(约79-88岁)</span><span class="hc-cause">大运支辰害(穿)年柱(祖上/早年宫)卯</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯刑月支子(无礼之刑)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破日支(夫妻宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破时柱(子女/晚年宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2026 丙午</span><span class="hc-cause">[支破][支冲][自刑][自刑] 支午破年柱(祖上/早年宫)卯(力轻);支午冲月柱(提纲·父母兄弟/事业宫)子——冲提纲,岁运大动;支午与日支自刑;支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2027 丁未</span><span class="hc-cause">[支害(穿)][支合][支合] 支未害(穿)月柱(提纲·父母兄弟/事业宫)子;支未合日支(夫妻宫)午(引动/合绊该宫);支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div></div>
-      <div class="prose lead" style="margin-top:12px;">当前走甲戌大运，甲木透出正是你的开运用神，<span class="hl-good">这一段适合把手艺立起来、把长期关系铺开</span>。2026 丙午年支冲提纲，动的力道偏重，工作地点、职务或居所有一头会明显松动。<span class="hl-good">这类年份顺着走比拧着走省力，把变动当成筛选更有利于留下真正适合你的选择</span>。2028 交癸酉大运，天克地冲年柱，是一次重量级的换挡，宜提前一年把手上的事做出可交接的样子。<span class="hl-good">整体节奏是眼下打桩、两年后换场，提前准备会让换挡更顺</span>。</div>
+      <div class="prose lead" style="margin-top:12px;">当前走甲戌大运，甲木透出正是你的开运用神，<span class="hl-good">这一段适合把手艺立起来、把长期关系铺开</span>。2026 丙午年支冲提纲，动的力道偏重，工作地点、职务或居所有一头会明显松动；这段变化仍在助长你的筛选力与边界感。<span class="hl-good">把变动当成筛选，更有利于留下真正适合你的选择</span>。2028 交癸酉大运，天克地冲年柱，是一次重量级的换挡，宜提前一年把手上的事做出可交接的样子。<span class="hl-good">整体节奏是眼下打桩、两年后换场，提前准备会让换挡更顺</span>。</div>
     </section>
   </div>
 
@@ -930,30 +940,35 @@
         <div class="tl-marker flat"></div>
         <div class="tl-run up">甲戌</div>
         <div class="tl-desc">支冲提纲，位置与职务有一头松动，顺势筛选</div>
+        <div class="tl-growth">筛选方向与主动换挡</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">29</div><div class="tl-year num">2028</div>
         <div class="tl-marker down"></div>
         <div class="tl-run flat">癸酉</div>
         <div class="tl-desc">天克地冲年柱，重量级换挡，宜提前交接</div>
+        <div class="tl-growth">交接能力与风险边界</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">39</div><div class="tl-year num">2038</div>
         <div class="tl-marker up"></div>
         <div class="tl-run up">壬申</div>
         <div class="tl-desc">交壬申运，金水转旺，补上缺金一环</div>
+        <div class="tl-growth">资源整合与成果放大</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">49</div><div class="tl-year num">2048</div>
         <div class="tl-marker flat"></div>
         <div class="tl-run up">辛未</div>
         <div class="tl-desc">干合月柱，合作与家宅两线同时收拢</div>
+        <div class="tl-growth">关系协同与长期经营</div>
       </div>
       <div class="tl-node">
         <div class="tl-age num">59</div><div class="tl-year num">2058</div>
         <div class="tl-marker down"></div>
         <div class="tl-run flat">庚午</div>
         <div class="tl-desc">天克地冲月柱，逆风段，守成优于扩张</div>
+        <div class="tl-growth">取舍、节奏与承载力</div>
       </div>
     </div>
   </section>

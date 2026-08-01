@@ -697,7 +697,7 @@ function analysisToFlatBazi(a) {
   if (a.shensha?.reading_html) out["shensha.reading_html"] = a.shensha.reading_html;
   if (Array.isArray(a.timeline)) for (let i = 0; i < 5; i++) {
     const t = a.timeline[i] || {};
-    for (const f of ["age", "year", "run", "run_class", "desc", "marker_class"]) out[`timeline.${i}.${f}`] = t[f] != null ? t[f] : "-";
+    for (const f of ["age", "year", "run", "run_class", "desc", "growth", "marker_class"]) out[`timeline.${i}.${f}`] = t[f] != null ? t[f] : "-";
   }
   if (a.dayun_head_note) out["dayun.head_note"] = a.dayun_head_note;
   if (a.liunian_head_note) out["liunian.head_note"] = a.liunian_head_note;
