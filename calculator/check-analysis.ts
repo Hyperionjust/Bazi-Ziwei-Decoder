@@ -103,6 +103,40 @@ export function checkAnalysis(a: any, chart: any, currentYear: number): Record<s
     put('meta.archetype_name', bad);
   }
 
+  // ---- 首屏八项坐标：与 01~08 一一对应；每项 3~4 个短词，零术语 ----
+  {
+    const bad: string[] = [];
+    const ov = a?.overview;
+    const labels: Record<string,string> = {
+      personality:'01性格与天赋', career:'02事业与赚钱', relationship:'03感情与相处', wellbeing:'04身体与节律',
+      change:'05关系与变化', timing:'06未来几年怎么走', milestones:'07人生关键段', action:'08日常行动法',
+    };
+    const termRe = /(五行|十神|格局|用神|忌神|大运|日主|月令|透干|藏干)/;
+    for (const [key, label] of Object.entries(labels)) {
+      const value = strip(ov?.[key] || '');
+      const words = String(ov?.[key] || '').split(/[·•、，,／/|]+/u).map((x:string) => strip(x)).filter(Boolean);
+      if (!value) bad.push(`缺${label}坐标词`);
+      else {
+        if (words.length < 3 || words.length > 4) bad.push(`${label}应含3~4个短词,实际${words.length}个`);
+        words.forEach((word:string, index:number) => {
+          const len = [...word].length;
+          if (len < 2 || len > 8) bad.push(`${label}第${index + 1}个短词应2~8字,实际${len}字`);
+        });
+        if (termRe.test(value)) bad.push(`${label}含专业术语,应只说现实结论`);
+      }
+    }
+    const summary = String(ov?.summary_html || '');
+    const summaryText = strip(summary);
+    const summarySentences = sentences(summary).length;
+    if (!summaryText) bad.push('缺两句总领');
+    else {
+      if (summarySentences !== 2) bad.push(`总领应恰2句,实际${summarySentences}句`);
+      if ([...summaryText].length > 120) bad.push(`总领超过120字,实际${[...summaryText].length}字`);
+      if (termRe.test(summaryText)) bad.push('总领含专业术语,应只说现实结论');
+    }
+    put('overview', bad);
+  }
+
   // ---- 全局禁词(所有解读字段;分层定义见 spec.json forbid) ----
   const FORBID_ALL = SPEC.forbid.all;
   // 批4 修:`命主` 是全局禁词(播报腔),但 bazi-poster.md 又明写「name:没提供填『命主』」——

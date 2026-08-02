@@ -1,7 +1,13 @@
 {
   "name": "bazi-ziwei-calculator",
-  "version": "3.13.0",
+  "version": "4.0.0",
   "description": "八字+紫微算法层 — Yiqi core (vendored) + enrichBazi 补层。版本号由根目录 VERSION 派生，改版本一律跑 scripts/release.sh，不要手改本字段。",
+  "author": "Hyperionjust <hyperionjust@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hyperionjust/Bazi-Ziwei-Decoder.git"
+  },
   "private": true,
   "scripts": {
     "build": "tsc",

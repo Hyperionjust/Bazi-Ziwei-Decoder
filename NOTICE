@@ -1,12 +1,42 @@
-bazi-ziwei-skill
-Copyright (c) 2026 dzcmemory-web
+Bazi-Ziwei-Decoder
+Copyright (c) 2026 Hyperionjust
+Portions copyright (c) 2026 dzcmemory-web
 
 ================================================================================
-本项目包含以下第三方开源组件
-This product includes third-party open-source components.
+项目身份与原创范围
+PROJECT IDENTITY AND ORIGINAL SCOPE
 ================================================================================
 
-1. Yiqi-BaZi-ZiWei (易奇八字紫微排盘系统 / BZZW)
+Bazi-Ziwei-Decoder 由 Hyperionjust 独立主导设计、开发与维护。当前项目的产品
+架构、bazi-enrich 增强与校准体系、AI 对话工作流、质量门禁、解读规范、发布工程，
+以及现行四套海报的信息架构与视觉系统，均在本仓库中独立新增或实质重构。
+
+Bazi-Ziwei-Decoder is independently designed, developed, and maintained by
+Hyperionjust. Its current product architecture, bazi-enrich and calibration
+systems, AI conversation workflows, quality gates, interpretation contracts,
+release engineering, and the information/visual systems of its four current
+posters were newly developed or substantially rewritten in this repository.
+
+================================================================================
+第三方组件与历史来源
+THIRD-PARTY COMPONENTS AND HISTORICAL LINEAGE
+================================================================================
+
+1. bazi-ziwei-skill
+   ------------------------------------------------------------
+   上游 / Upstream: https://github.com/dzcmemory-web/bazi-ziwei-skill
+   版权所有 / Copyright: Copyright (c) 2026 dzcmemory-web
+   说明 / Description:
+     本项目早期版本曾以该 MIT 项目为初始代码基线。当前项目不是该上游项目的
+     官方延续；对仍构成其实质代码副本或衍生部分的内容，继续保留其 MIT 版权
+     声明与许可文本。
+     Early versions of this project used the MIT-licensed upstream repository
+     as an initial code baseline. This project is not an official continuation
+     of that upstream project. Its MIT copyright and permission notice remain
+     preserved for retained copies or derivative portions.
+   许可 / License: MIT (see LICENSE)
+
+2. Yiqi-BaZi-ZiWei (易奇八字紫微排盘系统 / BZZW)
    ------------------------------------------------------------
    上游 / Upstream: https://github.com/fdxuyq/Yiqi-BaZi-ZiWei
    位置 / Location: calculator/yiqi-core/
@@ -18,16 +48,20 @@ This product includes third-party open-source components.
      twelve palaces, birth-year transformations, major limits, etc.) are
      derived from this upstream project and vendored, with minor edits, into
      calculator/yiqi-core/.
-   许可 / License: MIT (per upstream project README)
+   许可 / License: MIT (as stated in the upstream README)
 
-2. lunar-typescript
+3. lunar-typescript
    ------------------------------------------------------------
+   上游 / Upstream: https://github.com/6tail/lunar-typescript
    使用方式 / Usage: npm dependency (calculator/package.json)
    说明 / Description: 农历 / 节气 / 干支换算底层库。
    许可 / License: MIT
 
 ================================================================================
-本项目自有部分（calculator/bazi-enrich/、prompts/、templates/、render.ts、
-dump-text.ts、run-chart.ts 等）以 MIT 协议发布，见 LICENSE 文件。
-The original parts of this project are released under the MIT License (see LICENSE).
+本项目由 Hyperionjust 创作或实质重构的部分以 MIT 协议发布；第三方与历史来源
+部分仍分别受其原始许可证和版权声明约束。完整许可文本见 LICENSE。
+
+Parts authored or substantially rewritten by Hyperionjust are released under
+the MIT License. Third-party and historically retained portions remain subject
+to their original licenses and copyright notices. See LICENSE for the full text.
 ================================================================================

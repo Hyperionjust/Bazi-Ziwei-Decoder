@@ -9,6 +9,13 @@ const seg = (n: number, extra = '') => Array.from({ length: n }, (_, i) => `第$
 const goodPara = `<span class="hl-good">${seg(1)}</span>${seg(1)}<span class="hl-good">${seg(1)}</span>${seg(2)}<span class="hl-good">${seg(1)}</span>${seg(1)}<span class="hl">${seg(1)}</span>`;
 const good: any = {
   meta: { archetype_name: '厚土载物·静水流深' },
+  overview: {
+    personality: '沉稳 · 有主见 · 秩序感强', career: '长期主义 · 结构清楚 · 复利成长',
+    relationship: '行动表达 · 慢热可靠 · 重视承诺', wellbeing: '节律优先 · 规律恢复 · 忌长期硬扛',
+    change: '重复成经验 · 边界重整 · 先缓后动', timing: '眼下打桩 · 两年换挡 · 顺势筛选',
+    milestones: '前稳后展 · 中段放大 · 晚段取舍', action: '写清边界 · 固定复盘 · 持续表达',
+    summary_html: '你最鲜明的底色是稳、能扛、能把事情收拢。眼下先把方法与边界立稳，再为下一次换挡留空间。'
+  },
   dm: { desc_html: '己土，属田园之土，特性是<span class="hl-good">包容</span>，意味着你<span class="hl-good">能托底</span>，最强的能力是<span class="hl-good">整合</span>，但易被琐事缠身。' },
   geju: { sub_html: '官印相生格局清。所以你宜借平台推进。' },
   wuxing: { note_html: '全盘缺金而金非用忌关键。所以你不必刻意补金。' },
@@ -31,6 +38,11 @@ ok(rep2['meta.archetype_name'].status === 'FAIL', '判词术语被抓');
 ok(rep2['_全局禁词'].status === 'FAIL', 'tier/大凶被抓');
 ok(rep2['interp.marriage_html'].status === 'FAIL', '画像骑墙被抓');
 ok(rep2['timeline'].status === 'FAIL', '白名单越界被抓');
+const badOverview = JSON.parse(JSON.stringify(good));
+badOverview.overview.personality = '稳';
+badOverview.overview.summary_html = '你的五行格局很好，适合发展。';
+const repOverview = checkAnalysis(badOverview, chart, 2026);
+ok(repOverview['overview'].status === 'FAIL' && repOverview['overview'].reasons.some(r => r.includes('专业术语')), '首屏总领过短或泄漏术语会被抓');
 const noGrowth = JSON.parse(JSON.stringify(good));
 delete noGrowth.timeline[2].growth;
 const repGrowth = checkAnalysis(noGrowth, chart, 2026);

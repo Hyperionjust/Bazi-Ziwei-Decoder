@@ -15,15 +15,23 @@ function check(file: string, requiredKeys: string[]) {
   if (dOpen !== dClose) errs.push(`div ${dOpen}/${dClose} 不平衡`);
   if (sOpen !== sClose) errs.push(`section ${sOpen}/${sClose} 不平衡`);
   for (const k of requiredKeys) if (!c.includes(k)) errs.push(`缺 ${k}`);
+  // v4.0 项目身份：成品只展示当前项目与作者；历史来源集中放在 NOTICE/LICENSE，
+  // 不再让“魔改版/原作者模板”措辞覆盖现行产品的原创主叙事。
+  for (const k of ['Bazi-Ziwei-Decoder', 'Hyperionjust']) if (!c.includes(k)) errs.push(`缺项目署名 ${k}`);
+  for (const legacy of ['本魔改版', '原作者 dzcmemory', '海报模板借用自', '海报模板风格延续自'])
+    if (c.includes(legacy)) errs.push(`残留旧身份措辞 ${legacy}`);
   if (errs.length) { console.log(`✗ ${file}:`, errs.join('; ')); failed++; }
   else console.log(`✓ ${file} (div ${dOpen}/${dClose}, section ${sOpen}/${sClose}, </html> ✓)`);
 }
 check('report-bazi-poster.html', [
   'footer-disclaim', '{{meta.name}}', '{{kaiyun.ye}}', '{{kaiyun.tiaohou_html}}', '{{kaiyun.note_html}}',
   '{{kaiyun.place_html}}', '{{kaiyun.item_html}}', '{{kaiyun.skill_html}}',
-  '{{hechong.rows_html}}', '{{yunsui.rows_html}}', '{{shensha.reading_html}}', '{{meta.taiyuan}}', '{{meta.minggong}}',
+  '{{hechong.rows_html}}', '{{yunsui.cards_html}}', '{{yunsui.rows_html}}', '{{shensha.reading_html}}', '{{meta.taiyuan}}', '{{meta.minggong}}',
   // 小白阅读入口 + 中式纹样 + 正向信息视觉令牌不可回退。
-  'reader-guide', '小白这样看', '--jade-deep', '.section h2::after', '.hl-good', 'font-weight: 900',
+  'reader-guide', '沿编号展开', '{{overview.block_html}}', 'at-a-glance', 'overview-bazi-core', 'bazi-core-pillars', '.bazi-core-pillar.is-day', '四柱命盘详表', 'overview-grid', 'coordinate-card', 'data-watermark', 'evidence-divider', '专业依据',
+  'id="section-01"', 'id="section-08"', '未来几年怎么走', 'timing-signal-grid', 'timing-evidence', 'tone-personality', 'tone-career', 'tone-relationship', 'tone-wellbeing', 'tone-change', 'tone-timing', 'tone-milestones', 'tone-action',
+  'data-day-element="{{bazi.day.gan_wx}}"', '.report[data-day-element="木"]', '.report[data-day-element="火"]', '.report[data-day-element="土"]', '.report[data-day-element="金"]', '.report[data-day-element="水"]',
+  '--theme-primary', '--jade-deep', '--type-body', '--type-title-card', '--type-title-panel', '--type-title-section', '.section h2::after', '.section::after', '.narrative-paragraph', '.hl-good', 'font-weight: 900',
   // v3.14 五项算法所有块：整块/内联占位符必须由模板预留，空值由 render 注入 ''，不留空卡片。
   '{{algo.classics_html}}', '{{algo.insights_html}}', '{{algo.month_flow_html}}',
   // 条件式罕见现象整块：算法列事实，LLM 讲现实含义；无罕象时整块空字符串。

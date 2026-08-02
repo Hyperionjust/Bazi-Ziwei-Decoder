@@ -17904,6 +17904,44 @@ function checkAnalysis(a, chart, currentYear) {
     if (ARCHETYPE_FORBID_RE.test(t)) bad.push(ARCH.forbid_desc);
     put("meta.archetype_name", bad);
   }
+  {
+    const bad = [];
+    const ov = a?.overview;
+    const labels = {
+      personality: "01\u6027\u683C\u4E0E\u5929\u8D4B",
+      career: "02\u4E8B\u4E1A\u4E0E\u8D5A\u94B1",
+      relationship: "03\u611F\u60C5\u4E0E\u76F8\u5904",
+      wellbeing: "04\u8EAB\u4F53\u4E0E\u8282\u5F8B",
+      change: "05\u5173\u7CFB\u4E0E\u53D8\u5316",
+      timing: "06\u672A\u6765\u51E0\u5E74\u600E\u4E48\u8D70",
+      milestones: "07\u4EBA\u751F\u5173\u952E\u6BB5",
+      action: "08\u65E5\u5E38\u884C\u52A8\u6CD5"
+    };
+    const termRe = /(五行|十神|格局|用神|忌神|大运|日主|月令|透干|藏干)/;
+    for (const [key, label] of Object.entries(labels)) {
+      const value = strip(ov?.[key] || "");
+      const words = String(ov?.[key] || "").split(/[·•、，,／/|]+/u).map((x) => strip(x)).filter(Boolean);
+      if (!value) bad.push(`\u7F3A${label}\u5750\u6807\u8BCD`);
+      else {
+        if (words.length < 3 || words.length > 4) bad.push(`${label}\u5E94\u542B3~4\u4E2A\u77ED\u8BCD,\u5B9E\u9645${words.length}\u4E2A`);
+        words.forEach((word, index) => {
+          const len = [...word].length;
+          if (len < 2 || len > 8) bad.push(`${label}\u7B2C${index + 1}\u4E2A\u77ED\u8BCD\u5E942~8\u5B57,\u5B9E\u9645${len}\u5B57`);
+        });
+        if (termRe.test(value)) bad.push(`${label}\u542B\u4E13\u4E1A\u672F\u8BED,\u5E94\u53EA\u8BF4\u73B0\u5B9E\u7ED3\u8BBA`);
+      }
+    }
+    const summary = String(ov?.summary_html || "");
+    const summaryText = strip(summary);
+    const summarySentences = sentences(summary).length;
+    if (!summaryText) bad.push("\u7F3A\u4E24\u53E5\u603B\u9886");
+    else {
+      if (summarySentences !== 2) bad.push(`\u603B\u9886\u5E94\u60702\u53E5,\u5B9E\u9645${summarySentences}\u53E5`);
+      if ([...summaryText].length > 120) bad.push(`\u603B\u9886\u8D85\u8FC7120\u5B57,\u5B9E\u9645${[...summaryText].length}\u5B57`);
+      if (termRe.test(summaryText)) bad.push("\u603B\u9886\u542B\u4E13\u4E1A\u672F\u8BED,\u5E94\u53EA\u8BF4\u73B0\u5B9E\u7ED3\u8BBA");
+    }
+    put("overview", bad);
+  }
   const FORBID_ALL = spec_default.forbid.all;
   const FORBID_EXEMPT = (spec_default.forbid.all_exempt_paths || []).map((r) => new RegExp(r));
   const FORBID_FREQ = spec_default.forbid.freq;

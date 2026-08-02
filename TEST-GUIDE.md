@@ -77,7 +77,7 @@ check-analysis / version-check 五个 js 均由 `npm run bundle` 重建，改任
 cd calculator && npm test
 ```
 
-它按顺序串起下面 17 个入口，任一非 0 即中断：
+它按顺序串起下面 18 个入口，任一非 0 即中断：
 
 ```bash
 npx --no-install tsx fixtures/test-shensha.ts              # 神煞引擎 13 例
@@ -131,7 +131,7 @@ node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0
 | 路径 2 | 紫微独立分析 | Markdown 长文 |
 | 路径 3 | 综合印证 + 长文（A） | Markdown 长文 |
 | 路径 4 | 综合印证 + 海报（B）⭐ | 单文件 HTML 海报 |
-| 路径 5 | 综合印证 + 两种（C） | Markdown + HTML |
+| 路径 5 | 综合印证 + 两种（C） | 先 Markdown，确认重点后再 HTML |
 
 ---
 
@@ -149,6 +149,8 @@ node dist-bundle/run-chart.js --year=2000 --month=1 --day=1 --hour=12 --minute=0
 4. 加载 `prompts/bazi-prompt.md`，喂入 chart.txt，输出 Markdown
 
 **验证点**：
+- ✅ 开头注意事项只有两个短段与一行免责声明，随后立刻出现「你的底色 / 最强长板 / 最该留意 / 眼下阶段」四个加粗小段
+- ✅ 11 章入口按三个短段分组，不出现三行交付状态或 11 行表格挡在解读前
 - ✅ 标明 "日主：戊土"
 - ✅ 提到 "正财格"
 - ✅ 提到 "调候用神：丙、甲"
@@ -252,7 +254,7 @@ node -e "const j=require('./analysis.json'); console.log('strengths:', j.strengt
 我是 2000 年 1 月 1 日中午 12 点出生的男生，请同时给我综合印证的长文版和 HTML 海报。
 ```
 
-**期望**：路径 3 + 路径 4 都跑。如上下文紧张，先出 HTML 海报（更核心）。
+**期望**：默认分两步交付——本轮先跑路径 3；用户看完并回复「做成海报」后再跑路径 4。只有用户明确要求“现在两种都生成”时才同轮完成。
 
 ---
 

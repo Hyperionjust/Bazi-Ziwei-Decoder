@@ -1,12 +1,12 @@
 <div align="center">
 
-# bazi-ziwei-skill
+# Bazi-Ziwei-Decoder
 
-**An AI Skill for BaZi (Four Pillars) + Zi Wei Dou Shu charting & cross-validation**
+**An independently designed AI engine for BaZi (Four Pillars) + Zi Wei Dou Shu analysis**
 
 Deterministic charting (not LLM guesswork) · 3 analysis modes · 4 ink-style HTML poster themes
 
-[![Version](https://img.shields.io/badge/version-3.13.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![SKILL.md](https://img.shields.io/badge/SKILL.md-compatible-c1432f.svg)](#-installation)
 
@@ -18,13 +18,17 @@ Deterministic charting (not LLM guesswork) · 3 analysis modes · 4 ink-style HT
 
 <sub>Cross-validation poster sample (synthetic subject, for display only)</sub>
 
+<sub>Designed and maintained by <a href="https://github.com/Hyperionjust">Hyperionjust</a></sub>
+
 </div>
 
 ---
 
 ## What is this
 
-A Chinese metaphysics analysis Skill following the [SKILL.md open standard](https://code.claude.com/docs/en/skills). It plugs into any compatible AI agent — Claude Code / Claude Desktop / Codex / Cursor / Hermes / OpenClaw, etc.
+Bazi-Ziwei-Decoder is an independently evolved Chinese-metaphysics analysis project designed and maintained by [Hyperionjust](https://github.com/Hyperionjust). Its current product architecture, enrichment and calibration systems, AI conversation workflows, quality gates, interpretation contracts, and four poster systems were newly developed or substantially rewritten in this repository. Third-party and historically retained code remains credited under its applicable license in [`NOTICE`](./NOTICE).
+
+The project follows the [SKILL.md open standard](https://code.claude.com/docs/en/skills) and plugs into compatible AI agents — Claude Code / Claude Desktop / Codex / Cursor / Hermes / OpenClaw, etc.
 
 It does three things an LLM alone does poorly:
 
@@ -57,27 +61,27 @@ It does three things an LLM alone does poorly:
 ### 1. Clone
 
 ```bash
-git clone https://github.com/dzcmemory-web/bazi-ziwei-skill.git
+git clone https://github.com/Hyperionjust/Bazi-Ziwei-Decoder.git
 ```
 
 ### 2. Install algorithm dependencies
 
 ```bash
-cd bazi-ziwei-skill/calculator
+cd Bazi-Ziwei-Decoder/calculator
 npm install
 ```
 > Requires Node.js >= 18. Only one runtime dependency: `lunar-typescript` (MIT).
 
 ### 3. Register with your agent
 
-Drop the whole `bazi-ziwei-skill/` folder into your agent's skills directory:
+Drop the whole `Bazi-Ziwei-Decoder/` folder into your agent's skills directory:
 
 | Agent | skills directory |
 |---|---|
-| Claude Code / Claude Desktop | `~/.claude/skills/bazi-ziwei/` |
-| Codex | `~/.codex/skills/bazi-ziwei/` or reference via project AGENTS.md |
+| Claude Code / Claude Desktop | `~/.claude/skills/bazi-ziwei-decoder/` |
+| Codex | `~/.codex/skills/bazi-ziwei-decoder/` or reference via project AGENTS.md |
 | Cursor | reference from project `.cursor/` rules |
-| Hermes Agent | `~/.hermes/skills/bazi-ziwei/` |
+| Hermes Agent | `~/.hermes/skills/bazi-ziwei-decoder/` |
 | OpenClaw | its skills directory / local ClawHub install |
 
 The agent reads `SKILL.md` automatically and invokes it on demand.
@@ -93,9 +97,9 @@ I'm a male born at noon (12:00) on Jan 1, 2000. Read my chart.
 ```
 
 The agent will:
-1. Ask which analysis you want (BaZi / Zi Wei / cross-validation)
-2. For cross-validation, ask long-form vs. HTML poster
-3. Call the algorithm layer → load the matching prompt → output analysis or render the poster
+1. Ask which analysis you want (BaZi / Zi Wei / cross-validation) and whether you prefer plain-language or professional detail
+2. Produce a concise chart-specific overview, then strongly recommend discussing the important points with the AI before turning them into a poster
+3. Call the deterministic algorithm layer, load the matching prompt, and render an HTML poster when requested
 
 See [`SKILL.md`](./SKILL.md) for the full flow and [`TEST-GUIDE.md`](./TEST-GUIDE.md) for testing.
 
@@ -162,7 +166,7 @@ Bazi-Ziwei-Decoder/
 
 ```bash
 cd calculator
-npm test                    # 17 regression entry points; stops on the first failure
+npm test                    # 18 regression entry points; stops on the first failure
 ```
 
 ---
@@ -189,6 +193,7 @@ birth time ──> run-chart.ts ──> chart.json ──> dump-text.ts ──> 
 
 ## 🙏 Acknowledgements
 
+- **Historical baseline:** early versions started from [dzcmemory-web / bazi-ziwei-skill](https://github.com/dzcmemory-web/bazi-ziwei-skill) (MIT). Bazi-Ziwei-Decoder is not an official continuation of that project; its copyright and permission notice are retained for copied or derivative portions in [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE).
 - Charting core derived from the [Yiqi BaZi/Zi Wei system](https://github.com/fdxuyq/Yiqi-BaZi-ZiWei) (MIT); see [`NOTICE`](./NOTICE)
 - Lunar conversion via [lunar-typescript](https://github.com/6tail/lunar-typescript) (MIT)
 
@@ -196,7 +201,7 @@ birth time ──> run-chart.ts ──> chart.json ──> dump-text.ts ──> 
 
 ## 📬 Contact
 
-Feedback, collaboration, or questions: **dzcmemory@gmail.com**
+Feedback, collaboration, or questions: **hyperionjust@gmail.com**
 
 If this project helps you, a ⭐ Star is appreciated.
 
@@ -210,4 +215,4 @@ This project is based on traditional BaZi and Zi Wei Dou Shu theory and is **for
 
 ## 📄 License
 
-[MIT](./LICENSE) © 2026 dzcmemory-web
+[MIT](./LICENSE) © 2026 Hyperionjust. Retained portions © 2026 dzcmemory-web; third-party notices are listed in [`NOTICE`](./NOTICE).

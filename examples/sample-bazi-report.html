@@ -10,29 +10,44 @@
 <link href="https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #f5f1e8;
-    --paper-deep: #ebe5d5;
+    --paper: #f4efe3;
+    --paper-deep: #e6decc;
     --paper-card: #faf6ec;
-    --ink: #2b2825;
-    --ink-soft: #6b6660;
-    --ink-faint: #a8a298;
-    --vermillion: #c1432f;
-    --vermillion-deep: #8e2f20;
-    --indigo: #2a4a72;        /* 藏蓝（原绀紫/亮蓝统一） */
-    --indigo-soft: #5c7aa3;
-    --water: #2a4a72;
-    --jade: #4a7c4e;
-    --jade-deep: #28623d;
-    --jade-soft: #6f9971;
-    --gold: #a07c4a;
-    --gold-soft: #c8ab78;
-    --metal: #9c9382;
-    --obsidian: #1a1a1a;
-    --line: #8b8378;
-    --line-soft: #c4bdb0;
-    --line-faint: #e0d9c8;
-    --warn: #c97c3a;
-    --warn-bg: #faf1e2;
+    --bone: #f6f1e6;
+    --moon: #dce5e3;
+    --ink: #202b31;
+    --ink-soft: #667078;
+    --ink-faint: #9aa09e;
+    --midnight: #102d47;
+    --midnight-2: #173c5b;
+    --vermillion: #b64a3a;
+    --vermillion-deep: #833328;
+    --indigo: #173f61;
+    --indigo-soft: #68849b;
+    --water: #2b5a73;
+    --jade: #547b69;
+    --jade-deep: #2e624e;
+    --jade-soft: #7f9c8d;
+    --gold: #a98650;
+    --gold-soft: #c9ae7b;
+    --metal: #999487;
+    --obsidian: #171c20;
+    --line: #817b70;
+    --line-soft: #c8c0af;
+    --line-faint: #e0d8c8;
+    --warn: #bd7642;
+    --warn-bg: #f8efe0;
+    --space-1: 6px;
+    --space-2: 10px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 36px;
+    --space-6: 52px;
+    --type-body: 12.5px;
+    --type-title-card: 14.5px;
+    --type-title-panel: 14px;
+    --type-title-section: 18px;
+    --weight-title: 800;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -45,41 +60,50 @@
   }
   body {
     background-image:
-      repeating-linear-gradient(7deg, rgba(90,72,48,.025) 0, rgba(90,72,48,.025) 1px, transparent 1px, transparent 7px),
-      repeating-linear-gradient(97deg, rgba(255,255,255,.22) 0, rgba(255,255,255,.22) 1px, transparent 1px, transparent 11px),
-      radial-gradient(circle at 15% 20%, rgba(42,74,114,0.06), transparent 48%),
-      radial-gradient(circle at 85% 80%, rgba(180,160,130,0.08), transparent 48%);
+      repeating-linear-gradient(7deg, rgba(79,65,43,.026) 0, rgba(79,65,43,.026) 1px, transparent 1px, transparent 8px),
+      repeating-linear-gradient(97deg, rgba(255,255,255,.24) 0, rgba(255,255,255,.24) 1px, transparent 1px, transparent 13px),
+      radial-gradient(circle at 16% 18%, rgba(96,88,72,.045), transparent 46%),
+      radial-gradient(circle at 84% 82%, rgba(169,134,80,.09), transparent 44%);
     min-height: 100vh;
     padding: 24px;
   }
   .num { font-family: "JetBrains Mono", "IBM Plex Mono", "Courier New", monospace; }
 
   .report {
-    max-width: 1080px;
+    --theme-primary: #a58250;
+    --theme-deep: #765c36;
+    --theme-rgb: 165,130,80;
+    --theme-wash-rgb: 236,226,204;
+    max-width: 1120px;
     margin: 0 auto;
     position: relative;
     isolation: isolate;
     overflow: hidden;
     background:
-      linear-gradient(rgba(245,241,232,.96), rgba(245,241,232,.96)),
-      repeating-linear-gradient(0deg, transparent 0 14px, rgba(160,124,74,.045) 14px 15px);
-    border: 1px solid #8e795d;
-    outline: 5px double rgba(160,124,74,.22);
+      linear-gradient(rgba(244,239,227,.965), rgba(244,239,227,.965)),
+      repeating-linear-gradient(0deg, transparent 0 17px, rgba(169,134,80,.038) 17px 18px);
+    border: 1px solid rgba(102,87,63,.72);
+    outline: 1px solid rgba(169,134,80,.24);
     outline-offset: -9px;
-    box-shadow: 0 18px 54px rgba(50,36,20,0.12);
-    padding: 28px;
+    box-shadow: 0 24px 70px rgba(23,35,42,.15);
+    padding: 40px;
   }
+  .report[data-day-element="木"] { --theme-primary:#4d7b65; --theme-deep:#2e5c48; --theme-rgb:77,123,101; --theme-wash-rgb:222,235,227; }
+  .report[data-day-element="火"] { --theme-primary:#b76250; --theme-deep:#853e33; --theme-rgb:183,98,80; --theme-wash-rgb:242,224,217; }
+  .report[data-day-element="土"] { --theme-primary:#a58250; --theme-deep:#765c36; --theme-rgb:165,130,80; --theme-wash-rgb:236,226,204; }
+  .report[data-day-element="金"] { --theme-primary:#78858b; --theme-deep:#4e5c63; --theme-rgb:120,133,139; --theme-wash-rgb:229,232,229; }
+  .report[data-day-element="水"] { --theme-primary:#4a738a; --theme-deep:#2e536a; --theme-rgb:74,115,138; --theme-wash-rgb:221,233,235; }
   .report::before,
   .report::after {
     content: "";
     position: absolute;
-    width: 74px; height: 74px;
-    pointer-events: none; z-index: 3; opacity: .58;
+    width: 64px; height: 64px;
+    pointer-events: none; z-index: 3; opacity: .4;
     background:
-      linear-gradient(var(--gold), var(--gold)) 0 0 / 42px 1px no-repeat,
-      linear-gradient(var(--gold), var(--gold)) 0 0 / 1px 42px no-repeat,
-      linear-gradient(var(--vermillion), var(--vermillion)) 8px 8px / 26px 1px no-repeat,
-      linear-gradient(var(--vermillion), var(--vermillion)) 8px 8px / 1px 26px no-repeat;
+      linear-gradient(var(--gold), var(--gold)) 0 0 / 38px 1px no-repeat,
+      linear-gradient(var(--gold), var(--gold)) 0 0 / 1px 38px no-repeat,
+      linear-gradient(var(--vermillion), var(--vermillion)) 9px 9px / 19px 1px no-repeat,
+      linear-gradient(var(--vermillion), var(--vermillion)) 9px 9px / 1px 19px no-repeat;
   }
   .report::before { top: 13px; left: 13px; }
   .report::after { right: 13px; bottom: 13px; transform: rotate(180deg); }
@@ -88,47 +112,52 @@
   /* ============ HEADER ============ */
   .header {
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
-    gap: 16px;
-    align-items: start;
-    padding: 6px 4px 25px;
-    margin-bottom: 20px;
+    grid-template-columns: auto 72px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 8px 4px 32px;
+    margin-bottom: 26px;
     position: relative;
-    background: linear-gradient(90deg, rgba(193,67,47,.035), transparent 42%, rgba(42,74,114,.028));
+    background:
+      radial-gradient(circle at 9% 46%, rgba(var(--theme-rgb),.065), transparent 13%),
+      linear-gradient(90deg, rgba(182,74,58,.02), transparent 36%, rgba(var(--theme-rgb),.025));
   }
   .header::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 9px;
-    opacity: .75;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='10' viewBox='0 0 42 10'%3E%3Cpath d='M0 8h16V2H6v3h7M21 2h16v6H27V5h7' fill='none' stroke='%23a07c4a' stroke-width='1'/%3E%3C/svg%3E");
-    background-repeat: repeat-x;
-    background-position: center;
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    opacity: .68;
+    background: linear-gradient(90deg, var(--gold) 0 54%, transparent 54% 55.5%, var(--vermillion) 55.5% 58%, transparent 58% 60%, var(--theme-primary) 60% 100%);
   }
   /* v3.7 古风小人（按最像类型×性别，与 MBTI 海报同源 32 变体） */
-  .h-char { width: 78px; align-self: center; }
-  .h-char svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 3px rgba(0,0,0,.08)); }
+  .h-char {
+    width: 72px; height: 72px; align-self: center; padding: 7px;
+    border: 1px solid rgba(var(--theme-rgb),.34); border-radius: 50%; position: relative;
+    background: radial-gradient(circle, rgba(var(--theme-wash-rgb),.68), rgba(244,239,227,.15) 68%, transparent 70%);
+  }
+  .h-char::after { content: ""; position: absolute; inset: -5px; border: 1px dashed rgba(var(--theme-rgb),.42); border-radius: 50%; border-right-color: transparent; transform: rotate(-14deg); }
+  .h-char svg { display: block; width: 100%; height: auto; filter: grayscale(.4) saturate(.72) drop-shadow(0 2px 3px rgba(0,0,0,.08)); }
   .h-char:empty { display: none; }
   .seal {
-    width: 46px; height: 46px;
-    border: 1.5px solid var(--vermillion);
+    width: 42px; height: 42px;
+    border: 1px solid var(--vermillion);
     color: var(--vermillion);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    font-size: 13px; letter-spacing: 2px; line-height: 1.15;
+    font-size: 11px; letter-spacing: 2px; line-height: 1.2;
     transform: rotate(-3deg);
     font-weight: 600;
-    background: rgba(193,67,47,.035);
-    box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(193,67,47,.55);
+    background: linear-gradient(145deg, rgba(182,74,58,.075), rgba(244,239,227,.5));
+    box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px rgba(182,74,58,.45);
   }
   .title-block .kicker {
-    font-size: 10px; color: var(--ink-soft);
-    letter-spacing: 3px; margin-bottom: 5px;
+    font-size: 9.5px; color: var(--theme-primary);
+    letter-spacing: 4px; margin-bottom: 7px;
   }
   .title-block .mingzhu { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
   .title-block .mz-label { font-size: 10px; color: var(--paper); background: var(--ink); padding: 1.5px 7px; border-radius: 2px; letter-spacing: 2px; }
   .title-block .mz-name { font-size: 21px; font-weight: 700; letter-spacing: 3px; color: var(--ink); }
   .title-block h1 {
-    font-size: 38px; margin: 0 0 7px;
-    letter-spacing: 5px; font-weight: 700;
+    font-size: 42px; margin: 0 0 8px;
+    letter-spacing: 6px; font-weight: 700;
     text-shadow: 0 1px 0 rgba(255,255,255,.7);
   }
   .title-block .subtitle {
@@ -153,20 +182,138 @@
   }
   .header-right .meta-row span { color: var(--ink); }
   .header-right .meta-row b { color: var(--vermillion); font-weight: 600; }
+  .header-right .reading-order {
+    margin-top: 10px; padding: 7px 11px; border: 1px solid rgba(var(--theme-rgb),.38);
+    color: var(--theme-deep); background: linear-gradient(120deg, rgba(var(--theme-wash-rgb),.66), rgba(244,239,227,.25)); line-height: 1.55;
+  }
+  .header-right .reading-order b { color: var(--vermillion-deep); }
 
   /* ============ NOVICE READING GUIDE ============ */
   .reader-guide {
     display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
-    margin: -2px 0 18px; padding: 11px 15px;
-    border: 1px solid rgba(160,124,74,.55); border-left: 4px solid var(--vermillion);
-    background: linear-gradient(90deg, rgba(250,246,236,.92), rgba(235,229,213,.72));
-    box-shadow: inset 0 0 18px rgba(160,124,74,.05);
+    margin: 0 0 28px; padding: 12px 16px;
+    border-top: 1px solid rgba(169,134,80,.42); border-bottom: 1px solid rgba(169,134,80,.25);
+    background: linear-gradient(90deg, rgba(var(--theme-wash-rgb),.34), rgba(250,246,236,.76) 42%, rgba(var(--theme-wash-rgb),.26));
   }
-  .reader-guide .guide-title { color: var(--vermillion-deep); font-size: 12px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+  .reader-guide .guide-title { color: var(--theme-deep); font-size: 13.5px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
   .reader-guide .guide-copy { font-size: 11px; color: var(--ink-soft); line-height: 1.75; }
   .reader-guide .guide-copy b { font-weight: 900; }
   .reader-guide .guide-good { color: var(--jade-deep); }
   .reader-guide .guide-warn { color: var(--vermillion-deep); }
+
+  /* ============ AT A GLANCE · CONCLUSION FIRST ============ */
+  .at-a-glance {
+    --overview-ink: var(--ink);
+    position: relative; overflow: hidden; isolation: isolate;
+    margin: 0 0 18px; padding: 30px;
+    color: var(--overview-ink);
+    border: 1px solid rgba(var(--theme-rgb),.38);
+    background:
+      radial-gradient(circle at 82% 14%, rgba(var(--theme-rgb),.13), transparent 31%),
+      radial-gradient(circle at 12% 92%, rgba(var(--theme-wash-rgb),.7), transparent 31%),
+      linear-gradient(128deg, rgba(250,247,239,.98) 0%, rgba(var(--theme-wash-rgb),.58) 52%, rgba(245,240,229,.96) 100%);
+    box-shadow: 0 16px 34px rgba(var(--theme-rgb),.09), inset 0 0 0 1px rgba(255,255,255,.58);
+  }
+  .at-a-glance::before {
+    content: ""; position: absolute; width: 520px; height: 520px; right: -170px; top: -260px;
+    border: 1px solid rgba(var(--theme-rgb),.12); border-radius: 50%; z-index: -1;
+    box-shadow: 0 0 0 42px rgba(var(--theme-rgb),.026), 0 0 0 86px rgba(var(--theme-rgb),.018);
+    border-left-color: transparent; transform: rotate(17deg);
+  }
+  .at-a-glance::after {
+    content: ""; position: absolute; left: -16px; right: -16px; bottom: -3px; height: 146px; z-index: -1; opacity: .34;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='140' viewBox='0 0 420 140'%3E%3Cg fill='none' stroke='%23817b70' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M-20 84Q20 46 60 84T140 84T220 84T300 84T380 84T460 84'/%3E%3Cpath d='M-20 101Q20 63 60 101T140 101T220 101T300 101T380 101T460 101'/%3E%3Cpath d='M-20 118Q20 80 60 118T140 118T220 118T300 118T380 118T460 118'/%3E%3C/g%3E%3Cg fill='none' stroke='%23a98650' stroke-opacity='.2' stroke-width='1'%3E%3Cpath d='M250 73a48 48 0 1 1 84 32' stroke-dasharray='88 20'/%3E%3Cpath d='M270 73a28 28 0 1 1 48 20' stroke-dasharray='48 14'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat-x; background-position: center bottom; background-size: 420px 140px;
+  }
+  .overview-bazi-core {
+    display: grid; grid-template-columns: minmax(215px, .9fr) minmax(0, 2.2fr); gap: 18px; align-items: stretch;
+    margin: 0 0 24px; padding: 0 0 24px; border-bottom: 1px solid rgba(var(--theme-rgb),.24);
+  }
+  .bazi-core-intro { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-width: 0; padding: 8px 4px 8px 0; }
+  .bazi-core-kicker { color: var(--theme-primary); font-size: 8.5px; letter-spacing: 2px; margin-bottom: 7px; }
+  .bazi-core-intro > strong { color: var(--ink); font-size: 24px; letter-spacing: 3px; line-height: 1.25; }
+  .bazi-core-intro p { margin: 6px 0 10px; color: var(--ink-soft); font-size: 10px; line-height: 1.65; }
+  .bazi-core-daymaster { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-soft); border: 1px solid rgba(var(--theme-rgb),.4); background: rgba(var(--theme-wash-rgb),.42); padding: 4px 9px; font-size: 9px; letter-spacing: 1px; }
+  .bazi-core-daymaster b { color: var(--theme-deep); font-size: 12px; letter-spacing: .5px; }
+  .bazi-core-pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .bazi-core-pillar {
+    min-width: 0; min-height: 112px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 11px 7px 9px; border: 1px solid rgba(var(--theme-rgb),.22); border-top: 2px solid rgba(var(--theme-rgb),.38);
+    background: linear-gradient(155deg, rgba(255,255,255,.56), rgba(var(--theme-wash-rgb),.26), rgba(250,246,236,.6));
+  }
+  .bazi-core-pillar::after { content: ""; position: absolute; right: -25px; bottom: -30px; width: 70px; height: 70px; border: 1px solid rgba(var(--theme-rgb),.1); border-radius: 50%; border-left-color: transparent; }
+  .bazi-core-pillar.is-day { border-color: rgba(var(--theme-rgb),.62); border-top: 3px solid var(--theme-primary); background: linear-gradient(155deg, rgba(255,255,255,.62), rgba(var(--theme-wash-rgb),.62), rgba(250,246,236,.64)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.48), 0 7px 16px rgba(var(--theme-rgb),.08); }
+  .bazi-core-pillar-label { color: var(--ink-soft); font-size: 8.5px; letter-spacing: .7px; margin-bottom: 5px; white-space: nowrap; }
+  .bazi-core-gz { display: flex; gap: 5px; color: var(--ink); font-size: 30px; line-height: 1.12; letter-spacing: 1px; font-weight: 900; }
+  .bazi-core-pillar-note { color: var(--ink-faint); font-size: 8px; margin-top: 7px; white-space: nowrap; }
+  .bazi-core-pillar.is-day .bazi-core-pillar-label, .bazi-core-pillar.is-day .bazi-core-pillar-note { color: var(--theme-deep); font-weight: 700; }
+  .bazi-core-only .overview-bazi-core { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
+  .overview-head {
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 20px;
+    padding-bottom: 17px; margin-bottom: 22px; border-bottom: 1px solid rgba(var(--theme-rgb),.2);
+    color: var(--ink-soft); font-size: 10px; letter-spacing: 1px;
+  }
+  .overview-head > div { display: flex; flex-direction: column; gap: 4px; }
+  .overview-head span { color: var(--theme-deep); font-weight: 900; letter-spacing: 4px; font-size: 11px; }
+  .overview-head b { color: var(--overview-ink); font-size: 18px; letter-spacing: 1px; }
+  .overview-head em { color: var(--theme-primary); font-style: normal; font-size: 9px; letter-spacing: 1.5px; }
+  .overview-summary {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start;
+    max-width: 820px; margin: 0 0 26px; color: var(--overview-ink);
+    font-size: 16px; line-height: 1.95; letter-spacing: .3px;
+  }
+  .summary-mark { margin-top: 5px; padding: 3px 8px; color: var(--theme-deep); border: 1px solid rgba(var(--theme-rgb),.55); font-size: 9px; letter-spacing: 2px; white-space: nowrap; }
+  .overview-summary .hl-good { color: var(--theme-deep); background: linear-gradient(transparent 72%, rgba(var(--theme-rgb),.15) 72%); }
+  .overview-summary .hl { color: var(--vermillion-deep); background: linear-gradient(transparent 72%, rgba(182,74,58,.12) 72%); }
+  .overview-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); grid-auto-rows: 1fr; gap: 12px; }
+  .coordinate-card {
+    --accent: var(--moon);
+    min-width: 0; min-height: 162px; padding: 16px 15px 14px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: flex-start;
+    color: var(--overview-ink); text-decoration: none;
+    border: 1px solid rgba(var(--theme-rgb),.2); border-top: 2px solid var(--accent);
+    background: linear-gradient(150deg, rgba(255,255,255,.58), rgba(var(--theme-wash-rgb),.25) 58%, rgba(244,239,227,.34));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.46);
+  }
+  .coordinate-card::before { content: ""; position: absolute; left: 15px; bottom: 12px; width: 30px; height: 1px; background: var(--accent); opacity: .78; }
+  .coordinate-card::after {
+    content: attr(data-watermark); position: absolute; right: 3px; bottom: -20px;
+    color: var(--accent); opacity: .085; font-size: 88px; font-weight: 900; line-height: 1;
+    font-family: "Noto Serif SC", "STSong", serif; pointer-events: none;
+  }
+  .coordinate-card > * { position: relative; z-index: 1; }
+  .coordinate-index { color: var(--accent); font-size: 10px; letter-spacing: 1px; margin-bottom: 7px; }
+  .coordinate-title { color: var(--ink); font-size: var(--type-title-card); font-weight: var(--weight-title); line-height: 1.45; letter-spacing: .7px; margin-bottom: 12px; }
+  .coordinate-keywords { display: flex; align-content: flex-start; flex-wrap: wrap; gap: 7px 9px; padding-right: 10px; font-size: 13.5px; font-weight: 700; line-height: 1.55; }
+  .coordinate-keyword { white-space: nowrap; }
+  .coordinate-keyword:not(:last-child)::after { content: "·"; color: var(--accent); margin-left: 9px; opacity: .72; }
+  .coordinate-link { margin-top: auto; padding-top: 16px; align-self: flex-end; color: var(--ink-faint); font-size: 8.5px; letter-spacing: .5px; }
+  .coordinate-card.tone-personality { --accent: #416a88; }
+  .coordinate-card.tone-career { --accent: #547b69; }
+  .coordinate-card.tone-relationship { --accent: #b64a3a; }
+  .coordinate-card.tone-wellbeing { --accent: #a98650; }
+  .coordinate-card.tone-change { --accent: #68849b; }
+  .coordinate-card.tone-timing { --accent: #446e7c; }
+  .coordinate-card.tone-milestones { --accent: #8e7044; }
+  .coordinate-card.tone-action { --accent: #3f735b; }
+  .coordinate-caption { margin-top: 15px; color: var(--ink-faint); font-size: 9px; letter-spacing: .4px; text-align: right; }
+  .coordinate-caption .num { color: var(--theme-deep); margin-right: 8px; letter-spacing: 1px; }
+
+  .evidence-divider {
+    margin: 34px 0 24px; padding: 20px 24px; position: relative; overflow: hidden;
+    display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center;
+    border: 1px solid rgba(var(--theme-rgb),.48); border-left: 5px solid var(--theme-primary);
+    background:
+      radial-gradient(circle at 88% 25%, rgba(var(--theme-rgb),.13), transparent 24%),
+      repeating-linear-gradient(105deg, transparent 0 15px, rgba(var(--theme-rgb),.014) 15px 16px),
+      linear-gradient(100deg, rgba(250,247,239,.94), rgba(var(--theme-wash-rgb),.62), rgba(244,239,227,.9));
+    box-shadow: 0 10px 24px rgba(var(--theme-rgb),.07);
+  }
+  .evidence-divider::after { content: "据"; position: absolute; right: 18px; top: -33px; color: rgba(var(--theme-rgb),.065); font-size: 118px; font-weight: 900; line-height: 1; }
+  .evidence-kicker { grid-row: 1 / 3; color: var(--theme-deep); border: 1px solid rgba(var(--theme-rgb),.58); padding: 5px 9px; font-size: 10px; font-weight: 900; letter-spacing: 2px; z-index: 1; }
+  .evidence-divider strong { color: var(--ink); font-size: 16px; font-weight: var(--weight-title); letter-spacing: 1px; z-index: 1; }
+  .evidence-divider p { margin: 0; color: var(--ink-soft); font-size: 10.5px; line-height: 1.7; z-index: 1; }
 
   /* ============ INFO BAR ============ */
   .info-bar {
@@ -186,7 +333,7 @@
   .info-cell .v .sub { font-size: 10px; color: var(--ink-soft); }
 
   .section-title {
-    font-size: 14px; font-weight: 700;
+    font-size: var(--type-title-panel); font-weight: var(--weight-title);
     margin: 0 0 10px; color: var(--ink);
     letter-spacing: 1px;
     display: flex; align-items: baseline; gap: 8px;
@@ -205,7 +352,7 @@
     padding: 9px 14px; background: linear-gradient(90deg, var(--paper-deep), rgba(250,246,236,.9));
     border-bottom: 1px solid var(--line-soft);
   }
-  .hero-head h3 { margin: 0; font-size: 13px; letter-spacing: 1px; }
+  .hero-head h3 { margin: 0; font-size: 15px; font-weight: var(--weight-title); letter-spacing: 1px; }
   .hero-head .legend { font-size: 10px; color: var(--ink-soft); }
   .hero-head .legend b { color: var(--vermillion); font-weight: 600; }
   .pillars {
@@ -289,7 +436,7 @@
     padding: 12px 14px;
   }
   .a-card h4 {
-    margin: 0 0 10px; font-size: 12.5px; letter-spacing: 1px;
+    margin: 0 0 10px; font-size: var(--type-title-panel); font-weight: var(--weight-title); line-height: 1.45; letter-spacing: 1px;
     display: flex; justify-content: space-between; align-items: baseline;
   }
   .a-card h4 .verdict { color: var(--vermillion); font-weight: 700; }
@@ -336,7 +483,7 @@
   .tgi-fill { height: 100%; border-radius: 2px; min-width: 0; }
   .tgi-n { text-align: right; color: var(--ink); font-size: 12px; }
   .tg-mech { margin-top: 10px; font-size: 10.5px; color: var(--ink-soft); line-height: 1.65; border-top: 1px dashed var(--line-faint); padding-top: 8px; }
-  .tg-plain { margin-top: 9px; font-size: 12.2px; line-height: 1.9; color: var(--ink); }
+  .tg-plain { margin-top: 9px; font-size: 12.2px; line-height: 1.9; color: var(--ink); text-wrap: pretty; }
 
   /* ============ GEJU + YONGSHEN ============ */
   .core-block {
@@ -344,7 +491,7 @@
     gap: 14px; margin-bottom: 20px;
   }
   .core-panel { position: relative; background: linear-gradient(145deg, rgba(250,246,236,.96), rgba(245,241,232,.86)); border: 1px solid rgba(160,124,74,.43); padding: 12px 14px; }
-  .core-panel h4 { margin: 0 0 10px; font-size: 12.5px; letter-spacing: 1px; }
+  .core-panel h4 { margin: 0 0 10px; font-size: var(--type-title-panel); font-weight: var(--weight-title); line-height: 1.45; letter-spacing: 1px; }
   .geju-name { font-size: 22px; font-weight: 700; color: var(--vermillion); letter-spacing: 2px; margin-bottom: 4px; }
   .geju-sub { font-size: 11.5px; color: var(--ink-soft); line-height: 1.75; }
   .geju-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
@@ -378,7 +525,7 @@
   .algo-card.insights-card { margin-right: 0; }
   .algo-card.solo { width: 100%; min-height: 0; margin-right: 0; }
   .algo-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
-  .algo-card-head b { font-size: 13px; letter-spacing: 1px; }
+  .algo-card-head b { font-size: var(--type-title-panel); font-weight: var(--weight-title); letter-spacing: 1px; }
   .algo-card-head span { font-size: 9.5px; color: var(--ink-faint); text-align: right; }
   .classic-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
   .classic-list li {
@@ -418,7 +565,7 @@
     font-size: 12px; border-bottom: 1px solid var(--line-soft);
     display: flex; justify-content: space-between; align-items: center;
   }
-  .strip-head .sh-title { font-weight: 700; letter-spacing: 1px; }
+  .strip-head .sh-title { font-size: 13.5px; font-weight: var(--weight-title); letter-spacing: 1px; }
   .strip-head .sh-note { font-size: 10px; color: var(--ink-soft); font-weight: 400; }
   .strip-head .luck-legend { font-size: 10px; color: var(--ink-soft); display: flex; gap: 12px; }
   .luck-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
@@ -449,7 +596,7 @@
   .liunian .cell .gz { font-size: 14px; }
   .month-flow { border: 1px solid var(--line-soft); margin: -6px 0 20px; background: var(--paper-card); break-inside: avoid; page-break-inside: avoid; }
   .month-flow-head { display: flex; justify-content: space-between; gap: 12px; padding: 7px 12px; border-bottom: 1px solid var(--line-soft); background: var(--paper-deep); font-size: 10px; color: var(--ink-soft); }
-  .month-flow-head b { color: var(--ink); font-size: 11.5px; letter-spacing: 1px; }
+  .month-flow-head b { color: var(--ink); font-size: 13px; font-weight: var(--weight-title); letter-spacing: 1px; }
   .month-flow-head strong:first-child { color: var(--jade-deep); font-weight: 900; } .month-flow-head strong:last-of-type { color: var(--vermillion); font-weight: 900; }
   .month-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
   .month-cell { min-width: 0; padding: 6px 2px; text-align: center; border-right: 1px solid var(--line-faint); font-size: 8.5px; }
@@ -465,26 +612,48 @@
   .luck-growth-guide b { color: var(--jade-deep); font-weight: 900; }
 
   /* ============ NUMBERED SECTIONS ============ */
-  .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
   .section {
-    position: relative;
-    background: linear-gradient(145deg, rgba(250,246,236,.82), rgba(245,241,232,.68)); border: 1px solid rgba(160,124,74,.46);
-    padding: 14px 18px; margin-bottom: 14px;
-    box-shadow: inset 3px 0 0 rgba(160,124,74,.13);
+    --tone: var(--indigo); --tone-rgb: 23,63,97; --watermark: "阅";
+    position: relative; isolation: isolate; overflow: hidden; scroll-margin-top: 18px;
+    display: flex; flex-direction: column;
+    border: 1px solid rgba(var(--tone-rgb),.34); border-top: 2px solid rgba(var(--tone-rgb),.62);
+    padding: 20px 22px; margin-bottom: 18px;
+    background-image:
+      linear-gradient(145deg, rgba(var(--tone-rgb),.075), rgba(250,246,236,.91) 42%, rgba(244,239,227,.76)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='150' viewBox='0 0 360 150'%3E%3Cg fill='none' stroke='%23173f61' stroke-opacity='.11' stroke-width='1'%3E%3Cpath d='M-30 104Q10 69 50 104T130 104T210 104T290 104T390 104'/%3E%3Cpath d='M-30 121Q10 86 50 121T130 121T210 121T290 121T390 121'/%3E%3Cpath d='M232 94a46 46 0 1 1 78 30' stroke-dasharray='72 18'/%3E%3C/g%3E%3C/svg%3E");
+    background-position: 0 0, right bottom;
+    background-repeat: no-repeat;
+    background-size: auto, 360px 150px;
+    box-shadow: inset 4px 0 0 rgba(var(--tone-rgb),.18), 0 8px 20px rgba(32,43,49,.035);
   }
+  .section > * { position: relative; z-index: 1; }
+  .section::after {
+    content: var(--watermark); position: absolute; right: 14px; bottom: -34px; z-index: 0;
+    color: rgba(var(--tone-rgb),.055); font-size: 142px; font-weight: 900; line-height: 1;
+    font-family: "Noto Serif SC", "STSong", serif; pointer-events: none;
+  }
+  .section.tone-personality { --tone: #416a88; --tone-rgb: 65,106,136; --watermark: "性"; }
+  .section.tone-career { --tone: #547b69; --tone-rgb: 84,123,105; --watermark: "业"; }
+  .section.tone-relationship { --tone: #b64a3a; --tone-rgb: 182,74,58; --watermark: "缘"; }
+  .section.tone-wellbeing { --tone: #a98650; --tone-rgb: 169,134,80; --watermark: "养"; }
+  .section.tone-change { --tone: #68849b; --tone-rgb: 104,132,155; --watermark: "变"; }
+  .section.tone-timing { --tone: #446e7c; --tone-rgb: 68,110,124; --watermark: "时"; }
+  .section.tone-milestones { --tone: #8e7044; --tone-rgb: 142,112,68; --watermark: "程"; }
+  .section.tone-action { --tone: #3f735b; --tone-rgb: 63,115,91; --watermark: "行"; }
   .a-card::before, .core-panel::before, .algo-card::before, .section::before {
     content: ""; position: absolute; top: -1px; right: -1px; width: 16px; height: 16px;
     border-top: 2px solid rgba(160,124,74,.72); border-right: 2px solid rgba(160,124,74,.72);
     pointer-events: none;
   }
   .section h2 {
-    margin: 0 0 11px; font-size: 14px; letter-spacing: 1px;
+    margin: 0 0 15px; font-size: var(--type-title-section); font-weight: 900; line-height: 1.35; letter-spacing: 1.1px;
     display: flex; align-items: center; gap: 8px;
   }
   .section h2 .num-box {
-    background: rgba(193,67,47,.055); color: var(--vermillion-deep);
-    border: 1px solid var(--vermillion); box-shadow: inset 0 0 0 2px var(--paper);
-    padding: 2px 7px; border-radius: 0;
+    background: linear-gradient(145deg, rgba(var(--tone-rgb),.12), rgba(250,246,236,.35)); color: var(--tone);
+    border: 1px solid var(--tone); box-shadow: inset 0 0 0 2px var(--paper);
+    padding: 3px 8px; border-radius: 0;
     font-size: 11px; font-family: "JetBrains Mono", monospace;
   }
   .section h2 small { font-size: 10px; color: var(--ink-soft); font-weight: 500; letter-spacing: 0; }
@@ -493,8 +662,10 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='8' viewBox='0 0 34 8'%3E%3Cpath d='M0 7h13V1H5v3h6M17 1h13v6H22V4h6' fill='none' stroke='%23a07c4a' stroke-width='.8'/%3E%3C/svg%3E");
     background-repeat: repeat-x; background-position: right center;
   }
-  .prose { font-size: 12.5px; line-height: 2.05; color: var(--ink); text-align: justify; }
-  .prose.lead { border-left: 3px solid var(--indigo); background: var(--paper-card); padding: 10px 14px; }
+  .prose { font-size: var(--type-body); line-height: 2.08; color: var(--ink); text-align: justify; text-wrap: pretty; }
+  .prose.lead { border-left: 3px solid var(--tone); background: linear-gradient(110deg, rgba(250,246,236,.82), rgba(var(--tone-rgb),.035)); padding: 11px 15px; }
+  .narrative-paragraph { margin: 0; }
+  .narrative-paragraph + .narrative-paragraph { margin-top: .95em; }
   /* 合冲刑害 / 运岁引动 行 */
   .hc-table { display: flex; flex-direction: column; gap: 5px; }
   .hc-row { display: flex; gap: 8px; align-items: baseline; font-size: 10.5px; line-height: 1.7; border-bottom: 1px dashed var(--line-faint); padding-bottom: 4px; }
@@ -508,6 +679,63 @@
   .hc-trigger { display: block; margin-top: 2px; color: var(--warn); font-size: 9.5px; font-weight: 600; overflow-wrap: anywhere; }
   .hl { color: var(--vermillion-deep); font-weight: 800; background: linear-gradient(transparent 72%, rgba(193,67,47,.10) 72%); }
   .hl-good { color: var(--jade-deep); font-weight: 900; background: linear-gradient(transparent 70%, rgba(74,124,78,.17) 70%); padding: 0 .04em; }
+
+  /* 06 未来几年：主视图只留年份、节奏与行动；术语明细后置折叠 */
+  .timing-plain-guide {
+    display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 8px 14px;
+    margin: 0 0 12px; padding: 10px 13px;
+    border: 1px solid rgba(var(--tone-rgb),.22); border-left: 3px solid var(--tone);
+    background: linear-gradient(105deg, rgba(var(--tone-rgb),.07), rgba(250,246,236,.38));
+    color: var(--ink-soft); font-size: 10.5px; line-height: 1.75;
+  }
+  .timing-plain-guide b { color: var(--tone); font-size: 11px; font-weight: 900; }
+  .timing-signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 9px; margin-bottom: 14px; }
+  .timing-signal-card {
+    --signal: var(--tone); position: relative; isolation: isolate; overflow: hidden;
+    min-width: 0; min-height: 142px; padding: 15px 13px 13px;
+    border: 1px solid color-mix(in srgb, var(--signal) 34%, var(--line-faint));
+    background:
+      linear-gradient(145deg, color-mix(in srgb, var(--signal) 8%, transparent), rgba(250,246,236,.52) 56%, rgba(255,255,255,.18));
+  }
+  .timing-signal-card::before {
+    content: ""; position: absolute; z-index: -1; inset: 0 auto auto 0; width: 100%; height: 3px;
+    background: var(--signal); opacity: .78;
+  }
+  .timing-signal-card::after {
+    content: ""; position: absolute; z-index: -1; width: 84px; height: 84px; right: -39px; bottom: -43px;
+    border: 1px solid color-mix(in srgb, var(--signal) 24%, transparent); border-radius: 50%;
+    box-shadow: 0 0 0 13px color-mix(in srgb, var(--signal) 5%, transparent), 0 0 0 27px color-mix(in srgb, var(--signal) 3%, transparent);
+  }
+  .timing-signal-card.tone-high { --signal: var(--theme-primary); }
+  .timing-signal-card.tone-transition { --signal: var(--gold); }
+  .timing-signal-card.tone-caution { --signal: var(--vermillion); }
+  .timing-signal-card.tone-up { --signal: var(--jade); }
+  .timing-signal-card.tone-shift { --signal: #68849b; }
+  .timing-signal-card.tone-steady { --signal: var(--indigo); }
+  .timing-card-head { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+  .timing-year { color: var(--signal); font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -.7px; }
+  .timing-gz { color: var(--ink-soft); font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .timing-badge {
+    margin-left: auto; padding: 1px 5px; border: 1px solid color-mix(in srgb, var(--signal) 36%, transparent);
+    color: var(--signal); background: rgba(250,246,236,.64); font-size: 7.5px; font-weight: 800; white-space: nowrap;
+  }
+  .timing-card-title { display: block; margin: 18px 0 8px; color: var(--ink); font-size: 14px; line-height: 1.35; font-weight: 900; }
+  .timing-signal-card p { margin: 0; color: var(--ink-soft); font-size: 10px; line-height: 1.65; }
+  .timing-signal-card p span { display: block; margin-bottom: 2px; color: var(--signal); font-size: 7.5px; font-weight: 900; letter-spacing: 1.2px; }
+  .timing-evidence {
+    margin: 2px 0 18px; border: 1px solid var(--line-faint);
+    background: linear-gradient(120deg, rgba(var(--theme-wash-rgb),.14), rgba(250,246,236,.52));
+  }
+  .timing-evidence summary {
+    display: flex; align-items: baseline; gap: 8px; cursor: pointer; list-style: none;
+    padding: 9px 12px; color: var(--ink-soft); font-size: 10.5px; font-weight: 800;
+  }
+  .timing-evidence summary::-webkit-details-marker { display: none; }
+  .timing-evidence summary::before { content: "＋"; color: var(--theme-primary); font-family: "JetBrains Mono", monospace; }
+  .timing-evidence[open] summary::before { content: "－"; }
+  .timing-evidence summary small { margin-left: auto; color: var(--ink-faint); font-size: 8.5px; font-weight: 500; }
+  .timing-evidence-copy { padding: 0 12px 8px 28px; color: var(--ink-faint); font-size: 9.5px; line-height: 1.65; }
+  .timing-evidence .hc-table { padding: 10px 12px 12px; border-top: 1px dashed var(--line-faint); }
 
   /* timeline */
   .timeline-legend { display: flex; gap: 16px; font-size: 10.5px; margin-bottom: 14px; color: var(--ink-soft); }
@@ -576,13 +804,44 @@
     body { padding: 0; overflow-x: hidden; }
     .report { width: 100%; max-width: 100%; padding: 16px; border-left: 0; border-right: 0; box-shadow: none; overflow: hidden; }
     .header { grid-template-columns: auto auto 1fr; gap: 10px; }
+    .h-char { width: 58px; height: 58px; padding: 6px; }
     .header-right { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; text-align: left; white-space: normal; }
     .header-right .gen-time { width: 100%; margin: 0; }
     .header-right .meta-row { justify-content: flex-start; margin: 0; }
     .reader-guide { grid-template-columns: 1fr; gap: 3px; padding: 10px 12px; }
-    .title-block h1 { font-size: clamp(25px, 8vw, 34px); letter-spacing: 2px; overflow-wrap: anywhere; }
+    .at-a-glance { padding: 21px 14px 18px; }
+    .at-a-glance::before { width: 320px; height: 320px; right: -170px; top: -165px; }
+    .overview-bazi-core { grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; padding-bottom: 20px; }
+    .bazi-core-intro { padding: 0; }
+    .bazi-core-intro > strong { font-size: 21px; }
+    .bazi-core-intro p { margin-bottom: 8px; }
+    .bazi-core-pillars { gap: 6px; }
+    .bazi-core-pillar { min-height: 100px; padding: 9px 3px 8px; }
+    .bazi-core-pillar-label { font-size: 7.5px; letter-spacing: 0; }
+    .bazi-core-gz { gap: 2px; font-size: 24px; letter-spacing: 0; }
+    .bazi-core-pillar-note { font-size: 7px; margin-top: 6px; }
+    .overview-head { align-items: flex-start; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .overview-head b { font-size: 16px; }
+    .overview-summary { grid-template-columns: 1fr; gap: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.9; }
+    .summary-mark { width: max-content; }
+    .overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .coordinate-card { min-height: 156px; padding: 13px 11px 12px; }
+    .coordinate-title { min-height: 38px; margin-bottom: 8px; font-size: 12.5px; font-weight: var(--weight-title); }
+    .coordinate-keywords { display: flex; flex-direction: column; gap: 4px; padding-right: 0; font-size: 12px; font-weight: 700; line-height: 1.45; }
+    .coordinate-keyword:not(:last-child)::after { content: ""; margin: 0; }
+    .coordinate-link { display: block; font-size: 8px; }
+    .coordinate-card::after { font-size: 66px; bottom: -14px; }
+    .coordinate-caption { text-align: left; line-height: 1.7; }
+    .evidence-divider { grid-template-columns: 1fr; gap: 5px; }
+    .evidence-kicker { grid-row: auto; width: max-content; }
+    .title-block { min-width: 0; }
+    .title-block h1 { font-size: clamp(23px, 7vw, 29px); letter-spacing: 1px; overflow-wrap: anywhere; text-wrap: balance; }
     .info-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .info-cell, .core-panel, .section { min-width: 0; overflow-wrap: anywhere; }
+    .section { padding: 17px 15px; }
+    .section::after { font-size: 94px; right: 4px; bottom: -20px; }
+    .section h2 { flex-wrap: wrap; font-size: 17px; }
+    .section h2 small { flex-basis: calc(100% - 48px); margin-left: 42px; }
     .core-block, .row-2col { grid-template-columns: 1fr; }
     .algo-card { display: block; width: 100%; min-height: 0; margin: 0 0 12px; }
     .classic-list li { grid-template-columns: minmax(74px, .8fr) auto; }
@@ -595,6 +854,12 @@
     .month-flow-head { flex-direction: column; gap: 3px; }
     .month-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .month-cell { border-bottom: 1px solid var(--line-faint); }
+    .timing-plain-guide { grid-template-columns: 1fr; gap: 1px; }
+    .timing-signal-grid { grid-template-columns: 1fr; }
+    .timing-signal-card { min-height: 0; padding: 14px 13px 13px; }
+    .timing-card-title { margin-top: 13px; }
+    .timing-evidence summary { align-items: flex-start; flex-wrap: wrap; }
+    .timing-evidence summary small { width: 100%; margin: 0 0 0 20px; }
     .section:has(.timeline) { overflow-x: auto; }
     .timeline { min-width: 600px; }
     .hc-row { flex-wrap: wrap; gap: 3px 7px; }
@@ -631,7 +896,7 @@
                / dayun.0-9 / liunian.0-9 / interp / timeline.0-4 / shensha / kaiyun
   ================================================================================
 -->
-<div class="report">
+<div class="report" data-day-element="土">
 
   <!-- ============ HEADER ============ -->
   <header class="header">
@@ -678,19 +943,127 @@
       <div class="subtitle">底盘厚、进项稳，靠长期累积换回旋余地</div>
     </div>
     <div class="header-right">
-      <div class="gen-time">生成时间：<span class="num">2026-08-02 03:15</span></div>
-      <div>自身能量（旺衰）</div>
-      <div class="badge-grade">◆ 中和</div>
-      <div class="meta-row"><span>日主：<b>戊</b></span></div>
-      <div class="meta-row"><span>格局：<b>正财格</b></span></div>
-      <div class="meta-row"><span>起运：<b>8岁起运</b></span></div>
+      <div class="gen-time">生成时间：<span class="num">2026-08-02 22:31</span></div>
+      <div class="reading-order">先看<b>现实结论</b><br>再看专业依据</div>
     </div>
   </header>
 
+  <section class="at-a-glance coordinate-map" aria-label="八字本体与八项人生坐标总览"><div class="overview-bazi-core" aria-label="八字本体四柱速览"><div class="bazi-core-intro"><span class="bazi-core-kicker num">BAZI / FOUR PILLARS</span><strong>八字本体</strong><p>四柱先定身份，再沿人生坐标展开</p><span class="bazi-core-daymaster">日主 <b class="wx-土">戊土</b></span></div><div class="bazi-core-pillars"><div class="bazi-core-pillar" data-pillar="year"><span class="bazi-core-pillar-label">年柱</span><strong class="bazi-core-gz"><span class="wx-土">己</span><span class="wx-木">卯</span></strong><span class="bazi-core-pillar-note" aria-hidden="true">&nbsp;</span></div><div class="bazi-core-pillar" data-pillar="month"><span class="bazi-core-pillar-label">月柱</span><strong class="bazi-core-gz"><span class="wx-火">丙</span><span class="wx-水">子</span></strong><span class="bazi-core-pillar-note" aria-hidden="true">&nbsp;</span></div><div class="bazi-core-pillar is-day" data-pillar="day"><span class="bazi-core-pillar-label">日柱 · 本人</span><strong class="bazi-core-gz"><span class="wx-土">戊</span><span class="wx-火">午</span></strong><span class="bazi-core-pillar-note">日主 戊土</span></div><div class="bazi-core-pillar" data-pillar="hour"><span class="bazi-core-pillar-label">时柱</span><strong class="bazi-core-gz"><span class="wx-土">戊</span><span class="wx-火">午</span></strong><span class="bazi-core-pillar-note" aria-hidden="true">&nbsp;</span></div></div></div><div class="overview-head"><div><span>人生坐标</span><b>再用八组关键词看懂整张海报</b></div><em class="num">01—08 / LIFE COORDINATES</em></div><div class="overview-summary"><span class="summary-mark">总领</span><div>你最鲜明的底色是<span class="hl-good">稳、能扛，也擅长把混乱变成秩序</span>。眼下先把方法与边界立稳，再为下一次换挡留出空间。</div></div><div class="overview-grid"><a class="coordinate-card tone-personality" href="#section-01" data-watermark="性" aria-label="01 性格与天赋"><span class="coordinate-index num">01</span><span class="coordinate-title">性格与天赋</span><strong class="coordinate-keywords"><span class="coordinate-keyword">沉稳</span><span class="coordinate-keyword">有主见</span><span class="coordinate-keyword">秩序感强</span></strong><span class="coordinate-link">对应下方 01</span></a><a class="coordinate-card tone-career" href="#section-02" data-watermark="业" aria-label="02 事业与赚钱方式"><span class="coordinate-index num">02</span><span class="coordinate-title">事业与赚钱方式</span><strong class="coordinate-keywords"><span class="coordinate-keyword">长期主义</span><span class="coordinate-keyword">结构清楚</span><span class="coordinate-keyword">复利成长</span></strong><span class="coordinate-link">对应下方 02</span></a><a class="coordinate-card tone-relationship" href="#section-03" data-watermark="缘" aria-label="03 感情与相处模式"><span class="coordinate-index num">03</span><span class="coordinate-title">感情与相处模式</span><strong class="coordinate-keywords"><span class="coordinate-keyword">行动表达</span><span class="coordinate-keyword">慢热可靠</span><span class="coordinate-keyword">重视承诺</span></strong><span class="coordinate-link">对应下方 03</span></a><a class="coordinate-card tone-wellbeing" href="#section-04" data-watermark="养" aria-label="04 身体保养重点"><span class="coordinate-index num">04</span><span class="coordinate-title">身体保养重点</span><strong class="coordinate-keywords"><span class="coordinate-keyword">节律优先</span><span class="coordinate-keyword">规律恢复</span><span class="coordinate-keyword">忌长期硬扛</span></strong><span class="coordinate-link">对应下方 04</span></a><a class="coordinate-card tone-change" href="#section-05" data-watermark="变" aria-label="05 关系与变化提醒"><span class="coordinate-index num">05</span><span class="coordinate-title">关系与变化提醒</span><strong class="coordinate-keywords"><span class="coordinate-keyword">重复成经验</span><span class="coordinate-keyword">边界重整</span><span class="coordinate-keyword">先缓后动</span></strong><span class="coordinate-link">对应下方 05</span></a><a class="coordinate-card tone-timing" href="#section-06" data-watermark="时" aria-label="06 未来几年怎么走"><span class="coordinate-index num">06</span><span class="coordinate-title">未来几年怎么走</span><strong class="coordinate-keywords"><span class="coordinate-keyword">眼下打桩</span><span class="coordinate-keyword">两年换挡</span><span class="coordinate-keyword">顺势筛选</span></strong><span class="coordinate-link">对应下方 06</span></a><a class="coordinate-card tone-milestones" href="#section-07" data-watermark="程" aria-label="07 人生关键阶段"><span class="coordinate-index num">07</span><span class="coordinate-title">人生关键阶段</span><strong class="coordinate-keywords"><span class="coordinate-keyword">前稳后展</span><span class="coordinate-keyword">中段放大</span><span class="coordinate-keyword">晚段取舍</span></strong><span class="coordinate-link">对应下方 07</span></a><a class="coordinate-card tone-action" href="#section-08" data-watermark="行" aria-label="08 日常可执行建议"><span class="coordinate-index num">08</span><span class="coordinate-title">日常可执行建议</span><strong class="coordinate-keywords"><span class="coordinate-keyword">写清边界</span><span class="coordinate-keyword">固定复盘</span><span class="coordinate-keyword">持续表达</span></strong><span class="coordinate-link">对应下方 08</span></a></div><div class="coordinate-caption"><span class="num">CALIBRATED MAP</span> 每个坐标与下方同编号章节一一对应；先扫关键词，再沿编号向下展开。</div></section>
+
   <aside class="reader-guide" aria-label="海报阅读说明">
-    <div class="guide-title">小白这样看</div>
-    <div class="guide-copy">凡是<b class="guide-good">绿色粗体</b>，都是你的优势、助力、适合方向或顺风点，正文里的正向信息会全部这样标出；<b class="guide-warn">红色粗体</b>是需要留意的风险。第一次看可以跳过上方专业盘面，先读下方 01—04 的现实解读，再看大运流年找时机，最后照 09 的建议行动；括号里的命理词不影响理解。对任何一句有疑惑或想进一步了解，都可以直接把海报内容发给 AI 问。</div>
+    <div class="guide-title">沿编号展开</div>
+    <div class="guide-copy">顶部四柱是这张海报的<b>八字本体</b>，其中日柱代表你自己；总领里的 01—08 与下方同编号章节逐项对应。<b class="guide-good">绿色粗体</b>是优势与助力，<b class="guide-warn">红色粗体</b>是提醒；完整盘面与十神等依据仍在后半页。有疑惑或想进一步了解，可直接把海报内容发给 AI 问。</div>
   </aside>
+
+  <!-- ============ 01 性格 / 02 事业 ============ -->
+  <div class="row-2col">
+    <section class="section tone-personality" id="section-01" data-coordinate="01">
+      <h2><span class="num-box">01</span>性格与天赋 <small>你平时怎么想、怎么做</small></h2>
+      <div class="prose"><p class="narrative-paragraph">你是那种<span class="hl-good">先把地基打稳、再谈盖几层楼</span>的人。戊土坐午，火来生土，让你<span class="hl-good">对秩序和分寸有近乎本能的敏感，能很快看见事情该由谁落地、什么时候交付</span>。</p><p class="narrative-paragraph"><span class="hl-good">这份稳当带来的直接好处，是你说出口的承诺别人敢信</span>。同时月支子水正财透着<span class="hl-good">一股清醒的计算，让你在热闹场合也能保持一分不轻易上头的距离感</span>。</p><p class="narrative-paragraph">你<span class="hl-good">更愿意把事情拆成条件、成本和期限，用清楚的标准解决问题</span>。<span class="hl-good">这份把混乱翻译成秩序的能力，是你最经得起时间检验的长板</span>。要留意的是，<span class="hl-good">太能承载</span>有时会变成<span class="hl">默认自己该扛，界线一模糊，消耗就悄悄堆上来</span>。</p></div>
+    </section>
+    <section class="section tone-career" id="section-02" data-coordinate="02">
+      <h2><span class="num-box">02</span>事业与赚钱方式 <small>适合什么环境，收入从哪里来</small></h2>
+      <div class="prose"><p class="narrative-paragraph">事业上你<span class="hl-good">适合走长期累积型的路</span>，而不是靠一次爆发定输赢。正财格的底色决定了<span class="hl-good">你的优势在于把一件事做深、做出可复用的方法</span>，而不是频繁换赛道。</p><p class="narrative-paragraph">用神在木，意味着<span class="hl-good">教育、内容、规划设计等需要持续生长与输出的方向，更能把你的力气使出来</span>。你在团队里有<span class="hl-good">把流程理顺、把责任分清，让项目长期稳定运转的能力</span>，这类价值时间一拉长就会成为别人绕不开的依赖。</p><p class="narrative-paragraph">金在盘中缺位，提示你要有意识地补上<span class="hl-good">该结束时果断收口</span>的一环；<span class="hl">该谈的价格、该拒的请求若一直拖着，成本会越堆越高</span>。给自己设一个明确的复盘节奏，<span class="hl-good">会比单纯增加工时更容易换来稳定成果</span>。</p></div>
+    </section>
+  </div>
+
+  <!-- ============ 03 婚姻 / 04 健康 ============ -->
+  <div class="row-2col">
+    <section class="section tone-relationship" id="section-03" data-coordinate="03">
+      <h2><span class="num-box">03</span>感情与相处模式 <small>怎么爱人、怎样相处更顺</small></h2>
+      <div class="prose"><p class="narrative-paragraph">配偶宫坐印，妻星见于月柱，这一组合带来<span class="hl-good">成熟、稳重、愿意照顾现实生活的伴侣倾向</span>。<span class="hl-good">你适合的另一半，更可能是一个沉静、务实又肯替你托底的女生</span>。</p><p class="narrative-paragraph">这种信号更多落在成熟承接的相处气质上，不限定实际年龄。你真正需要的是<span class="hl-good">一个能在你埋头做事时把生活另一头稳住的人</span>。</p><p class="narrative-paragraph">相处中，你<span class="hl-good">很会把在意变成具体行动：修好东西、接住麻烦、提前把路铺好</span>。但对方未必总能读懂，<span class="hl">把想法讲出来是你需要刻意练习的功课；最消耗关系的，是你一个人默默把问题吞下去</span>。<span class="hl-good">愿意及时开口，会让关系多出回旋余地，也更容易长期稳定</span>。</p></div>
+    </section>
+    <section class="section tone-wellbeing" id="section-04" data-coordinate="04">
+      <h2><span class="num-box">04</span>身体保养重点 <small>优先守住什么习惯</small></h2>
+      <div class="prose"><p class="narrative-paragraph">火土偏旺而金水偏薄，身体上要重点照看脾胃与消化节律。这类盘常见的不是急病，而是长期作息不规律积出来的钝痛——饭点被工作推迟、坐着的时间过长、口味偏重偏燥。</p><p class="narrative-paragraph">金缺又提示呼吸道和皮肤在干燥季节会更敏感，秋冬记得给房间补湿。运动上不必追求强度，<span class="hl-good">规律优先于剧烈，快走、游泳、拉伸这类能让身体舒展开的方式更适合你</span>。</p><p class="narrative-paragraph">饮食上<span class="hl-good">增加清润食物、减少厚味重油，更容易帮你守住稳定的消化节奏</span>。情绪上最需要防的是<span class="hl">把压力憋成沉默，让紧绷感长期积在身体里</span>。</p><p class="narrative-paragraph"><span class="hl-good">找一个能定期说话或记录的出口，对你的睡眠与消化都会有实际帮助</span>。<span class="hl-good">只要把饮食、运动和情绪出口做成固定节律，你的日常状态就会更稳</span>。</p></div>
+    </section>
+  </div>
+
+  <!-- 长短差异较大，改为全宽顺序阅读，避免双栏形成大块单侧留白 -->
+  <section class="section tone-change" id="section-05" data-coordinate="05">
+    <h2><span class="num-box">05</span>关系与变化提醒 <small>合冲刑害在现实里会带来什么</small></h2>
+    <div class="hc-table"><div class="hc-row"><span class="hc-type">六冲</span><span class="hc-mem">子午(月-日·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">紧贴相冲有力·冲及提纲(月令),动摇格基</span></div><div class="hc-row"><span class="hc-type">六冲</span><span class="hc-mem">子午(月-时·隔柱)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">隔柱相冲有力·冲及提纲(月令),动摇格基</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">卯子(年-月·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">无礼之刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">午午(日-时·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">自刑</span></div><div class="hc-row"><span class="hc-type">相破</span><span class="hc-mem">卯午(年-日·隔柱)</span><span class="hc-status st-mid">【减力】</span><span class="hc-cause">相破:损而不毁,力最轻</span></div><div class="hc-row"><span class="hc-type">相破</span><span class="hc-mem">卯午(年-时·遥隔)</span><span class="hc-status st-mid">【减力】</span><span class="hc-cause">相破:损而不毁,力最轻</span></div></div>
+    <div class="prose lead" style="margin-top:12px;"><p class="narrative-paragraph">日时两柱同为戊午，构成原局伏吟，同一件事在你身上常以相似的形式重来一遍。这既是重复，也是熟练——<span class="hl-good">同类场景你第二次处理时会明显更省力</span>。</p><p class="narrative-paragraph">年支卯木与日时午火之间木火相生，<span class="hl-good">把早期形成的方向感一路输送到中年，长期主线不容易断</span>。子午一冲落在月日之间，是这张盘最要紧的一处张力：<span class="hl">进项与家宅两头，容易出现需要你先协调取舍的时刻</span>。逆风时不必硬顶，<span class="hl-good">把节奏放慢半拍，会更容易等到力量重新理顺再行动</span>。</p></div>
+  </section>
+  <section class="section tone-timing" id="section-06" data-coordinate="06">
+    <h2><span class="num-box">06</span>未来几年怎么走 <small>只看变化最明显的节点</small></h2>
+    <div class="timing-plain-guide"><b>先抓这几段节奏</b><span>没有列出的年份不代表不好，只是变化感相对较弱。</span></div>
+    <div class="timing-signal-grid"><article class="timing-signal-card tone-high" data-year="2026" aria-label="2026年变化最明显"><div class="timing-card-head"><span class="timing-year num">2026</span><span class="timing-gz">丙午</span><span class="timing-badge">今年</span></div><strong class="timing-card-title">变化最明显</strong><p><span>建议</span>先定主线，再处理变化</p></article><article class="timing-signal-card tone-caution" data-year="2027" aria-label="2027年适合收整"><div class="timing-card-head"><span class="timing-year num">2027</span><span class="timing-gz">丁未</span><span class="timing-badge">明年</span></div><strong class="timing-card-title">适合收整</strong><p><span>建议</span>放慢半步，检查边界</p></article><article class="timing-signal-card tone-transition" data-year="2028" aria-label="2028年进入换挡期"><div class="timing-card-head"><span class="timing-year num">2028</span><span class="timing-gz">癸酉</span><span class="timing-badge">新阶段</span></div><strong class="timing-card-title">进入换挡期</strong><p><span>建议</span>提前整理交接，给自己留出适应空间</p></article></div>
+    <div class="prose lead" style="margin-top:12px;"><p class="narrative-paragraph">眼下到 2027 年更像在打地基，<span class="hl-good">适合把手艺、方法和长期关系逐步立稳</span>。这两年最值得做的是沉淀能重复的方法，不必同时开太多新方向。</p><p class="narrative-paragraph">2026 年的变化感最强，遇到工作安排、职责或居住计划需要调整时，先定主线，再处理细节；这段变化仍在助长你的筛选力和边界感。<span class="hl-good">2027 年更适合收整与交接，把未完成的事逐项收口</span>。2028 年进入新阶段，<span class="hl-good">提前把手头事项整理成可交接状态，会让换挡更顺</span>。</p></div>
+  </section>
+
+  <!-- 条件板块：罕见现象（无算法命中时由 render 输出空字符串） -->
+  <section class="section rare-phenomena"><h2><span class="rare-title-seal">特别观察</span>罕见现象 <small>少见不等于吉凶，重点看它怎样落到现实</small></h2><div class="rare-list"><div class="rare-item"><span class="rare-grade rare-extreme">极罕</span><span class="rare-name">德秀满盘</span><span class="rare-evidence">德秀贵人见于年日时月柱</span></div><div class="rare-item"><span class="rare-grade rare-mid">少见</span><span class="rare-name">原局伏吟</span><span class="rare-evidence">日时柱戊午</span></div></div><div class="prose rare-reading"><p class="narrative-paragraph">这张盘有两项需要单独看的罕见现象，罕见只说明组合少见，不等于天然全好或全坏。第一项是极罕的德秀满盘，整体判断<span class="hl-good">偏正向：聪明、温厚、愿意把事情做得体面周全的气质，会成为你取得信任的重要来源</span>；<span class="hl-good">现实里更容易表现为学习新规则快、写作表达有条理、遇到关键任务时被人托付</span>。</p><p class="narrative-paragraph">它的发挥条件是让能力进入可被看见的作品、证书或长期项目，而不是只在熟人圈里默默帮忙。第二项是日时两柱戊午相同形成的原局伏吟，判断属于两面性：<span class="hl-good">相似问题第二次出现时，你会因为经验积累而处理得更熟练</span>，但<span class="hl">同一种责任、关系模式或内耗也可能反复回来，若一直沿用旧办法，就会有“怎么又是这件事”的感觉</span>。现实中遇到重复问题时，不要只加力气；把触发条件、旧做法和这次要改的一步写下来，<span class="hl-good">会更容易把重复变成升级，而不是循环消耗</span>。</p></div></section>
+
+  <!-- ============ 07 人生关键节点时间轴 ============ -->
+  <section class="section tone-milestones" id="section-07" data-coordinate="07">
+    <h2><span class="num-box">07</span>人生关键阶段 <small>五个值得提前留意的时间窗口</small></h2>
+    <div class="timeline-legend">
+      <span><span class="dot up"></span>上升 / 进取期</span>
+      <span><span class="dot flat"></span>平稳 / 名位期</span>
+      <span><span class="dot down"></span>关口 / 谨慎期</span>
+    </div>
+    <div class="timeline">
+      <div class="tl-node">
+        <div class="tl-age num">27</div><div class="tl-year num">2026</div>
+        <div class="tl-marker flat"></div>
+        <div class="tl-run up">甲戌</div>
+        <div class="tl-desc">支冲提纲，位置与职务有一头松动，顺势筛选</div>
+        <div class="tl-growth">筛选方向与主动换挡</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-age num">29</div><div class="tl-year num">2028</div>
+        <div class="tl-marker down"></div>
+        <div class="tl-run flat">癸酉</div>
+        <div class="tl-desc">天克地冲年柱，重量级换挡，宜提前交接</div>
+        <div class="tl-growth">交接能力与风险边界</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-age num">39</div><div class="tl-year num">2038</div>
+        <div class="tl-marker up"></div>
+        <div class="tl-run up">壬申</div>
+        <div class="tl-desc">交壬申运，金水转旺，补上缺金一环</div>
+        <div class="tl-growth">资源整合与成果放大</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-age num">49</div><div class="tl-year num">2048</div>
+        <div class="tl-marker flat"></div>
+        <div class="tl-run up">辛未</div>
+        <div class="tl-desc">干合月柱，合作与家宅两线同时收拢</div>
+        <div class="tl-growth">关系协同与长期经营</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-age num">59</div><div class="tl-year num">2058</div>
+        <div class="tl-marker down"></div>
+        <div class="tl-run flat">庚午</div>
+        <div class="tl-desc">天克地冲月柱，逆风段，守成优于扩张</div>
+        <div class="tl-growth">取舍、节奏与承载力</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 ACTIONS ============ -->
+  <section class="section tone-action" id="section-08" data-coordinate="08">
+    <h2><span class="num-box">08</span>日常可执行建议 <small>今天就能开始做</small></h2>
+    <div class="kaiyun-grid">
+      <div class="ky-row"><span class="ky-k">用神</span><span class="ky-v"><span class="wx-chip wx-木">木</span></span></div>
+      <div class="ky-row"><span class="ky-k">吉方</span><span class="ky-v">东·西</span></div>
+      <div class="ky-row"><span class="ky-k">吉色</span><span class="ky-v">青绿·白金</span></div>
+      <div class="ky-row"><span class="ky-k">吉数</span><span class="ky-v num">3·8、4·9</span></div>
+      <div class="ky-row"><span class="ky-k">宜业</span><span class="ky-v">教育培训、内容策划、规划设计</span></div>
+      <div class="ky-row"><span class="ky-k">调候</span><span class="ky-v">先<span class="wx-chip wx-火">丙</span>后<span class="wx-chip wx-木">甲</span></span></div>
+      <div class="ky-row"><span class="ky-k">宜往</span><span class="ky-v">东方城市、林木葱茏之地</span></div>
+      <div class="ky-row"><span class="ky-k">宜置</span><span class="ky-v">木质家具、绿植、素色金属饰品</span></div>
+      <div class="ky-row"><span class="ky-k">宜学</span><span class="ky-v">外语、写作、结构化表达</span></div>
+    </div>
+    <div class="ky-note"><p class="narrative-paragraph">把开运的落点放在“生长”而不是“囤积”上：工作往教育、内容、设计这类需要持续输出的方向靠，居所与出行偏东方和有林木的地方。日常添几件木质家具与绿植，配一两样素色金属小物补上缺金的那一环。每周留一段固定时间练表达——写下来或讲出来都行，这是你最短的一条补课路径。</p></div>
+  </section>
+
+  <div class="evidence-divider" role="separator" aria-label="专业依据从这里开始">
+    <span class="evidence-kicker">专业依据</span>
+    <strong>想知道上面的结论从哪里来，再从这里往下看</strong>
+    <p>顶部已经给出四柱本体；以下进一步补齐出生资料、藏干、十神、旺衰、五行、格局、用神与运势表，不熟悉术语也不影响前半页阅读。</p>
+  </div>
 
   <!-- ============ INFO BAR ============ -->
   <div class="info-bar">
@@ -705,7 +1078,7 @@
   <!-- ============ FOUR PILLARS HERO ============ -->
   <div class="hero">
     <div class="hero-head">
-      <h3>四柱命盘 <span style="font-size:10px;color:var(--ink-soft);font-weight:400">· 解读所依据的原始盘面</span></h3>
+      <h3>四柱命盘详表 <span style="font-size:10px;color:var(--ink-soft);font-weight:400">· 顶部四柱速览的完整展开</span></h3>
       <div class="legend">第一次看可直接跳到下方现实解读 · <b>红框“日柱”代表你自己</b> · 其余专业名词无需记忆</div>
     </div>
     <div class="pillars">
@@ -797,7 +1170,7 @@
         <div class="wx-bar"><div class="col" style="height:0%;background:var(--metal)"></div><div class="name">金</div><div class="num-val num">0</div></div>
         <div class="wx-bar"><div class="col" style="height:11%;background:var(--water)"></div><div class="name">水</div><div class="num-val num">1</div></div>
       </div>
-      <div class="wx-note">全盘火土偏旺、水木尚有根，唯独金一点不见，而金恰恰是你最缺又最对症的那一味。这让你在需要<span class="hl-good">果断切割、划清边界</span>的场合，往往要比旁人多花一倍力气。</div>
+      <div class="wx-note"><p class="narrative-paragraph">全盘火土偏旺、水木尚有根，唯独金一点不见，而金恰恰是你最缺又最对症的那一味。这让你在需要<span class="hl-good">果断切割、划清边界</span>的场合，往往要比旁人多花一倍力气。</p></div>
     </div>
     </div>
     <!-- 十神分布 -->
@@ -816,7 +1189,7 @@
         <div class="tg10-item"><span class="tgi-name">正印</span><div class="tgi-track"><div class="tgi-fill" style="width:22%;background:var(--gold)"></div></div><span class="tgi-n num">2</span></div>
       </div>
       <div class="tg-mech">你的日主是戊土，生在子月正财当令，年支卯木、日时两柱同为戊午。</div>
-      <div class="tg-plain">这组十神最鲜明的主轴，是正财负责现实与结果，比肩负责自主和承压，正印负责吸收经验，三股力量一起把你推向“先站稳、再扩张”的节奏。<span class="hl-good">你的核心能力，是把复杂任务拆成成本、责任和时间表，再一步一步做成可交付的结果</span>。做决定时，你<span class="hl-good">很少只凭一时情绪，更愿意先核对条件、判断能否长期维持</span>，所以涉及钱、资源和承诺的事情交给你更容易让人放心。与人协作时，比肩让你<span class="hl-good">有独立扛事、守住自己判断的能力</span>，正印又让你愿意先把规则和来龙去脉弄明白，不会为了显得快而跳过基础。放到工作和赚钱上，<span class="hl-good">稳定进项、可重复的方法、长期客户与有清楚制度的平台更适合你</span>，你的收益往往来自复利，而不是一次性的运气。代价是<span class="hl">当责任边界含糊时，你容易一边觉得别人不够可靠，一边把任务越接越多，最后让自己变成整个流程的瓶颈</span>。把“谁负责、何时交、做到什么标准”在开工前写清楚，并固定留一个复盘节点，<span class="hl-good">既能保住你的可靠，也能让成果不再只靠你一个人硬撑</span>。</div>
+      <div class="tg-plain"><p class="narrative-paragraph">这组十神最鲜明的主轴，是正财负责现实与结果，比肩负责自主和承压，正印负责吸收经验，三股力量一起把你推向“先站稳、再扩张”的节奏。<span class="hl-good">你的核心能力，是把复杂任务拆成成本、责任和时间表，再一步一步做成可交付的结果</span>。</p><p class="narrative-paragraph">做决定时，你<span class="hl-good">很少只凭一时情绪，更愿意先核对条件、判断能否长期维持</span>，所以涉及钱、资源和承诺的事情交给你更容易让人放心。与人协作时，比肩让你<span class="hl-good">有独立扛事、守住自己判断的能力</span>，正印又让你愿意先把规则和来龙去脉弄明白，不会为了显得快而跳过基础。</p><p class="narrative-paragraph">放到工作和赚钱上，<span class="hl-good">稳定进项、可重复的方法、长期客户与有清楚制度的平台更适合你</span>，你的收益往往来自复利，而不是一次性的运气。代价是<span class="hl">当责任边界含糊时，你容易一边觉得别人不够可靠，一边把任务越接越多，最后让自己变成整个流程的瓶颈</span>。把“谁负责、何时交、做到什么标准”在开工前写清楚，并固定留一个复盘节点，<span class="hl-good">既能保住你的可靠，也能让成果不再只靠你一个人硬撑</span>。</p></div>
     </div>
   </div>
 
@@ -825,7 +1198,7 @@
     <div class="core-panel">
       <h4>你的优势模式 <span style="font-size:10px;color:var(--ink-faint);font-weight:400">格局</span></h4>
       <div class="geju-name">正财格</div>
-      <div class="geju-sub">月支子水本气癸正落在正财位，纯气立格，走的是稳定进项而非横财一路。意味着你<span class="hl-good">适合把收入建在可累积的手艺与长期关系上</span>，而不是押注一次性的机会。</div>
+      <div class="geju-sub"><p class="narrative-paragraph">月支子水本气癸正落在正财位，纯气立格，走的是稳定进项而非横财一路。意味着你<span class="hl-good">适合把收入建在可累积的手艺与长期关系上</span>，而不是押注一次性的机会。</p></div>
       <div class="geju-tags">
         <span class="gt">成格 <b>成格</b></span>
         <span class="gt">置信度 <b>高</b></span>
@@ -839,7 +1212,7 @@
         <div class="ys-item"><span class="ys-k">喜神</span><span style="font-size:12.5px;color:var(--ink-soft)"><span class="wx-chip wx-金">金</span>、<span class="wx-chip wx-木">木</span></span></div>
         <div class="ys-item"><span class="ys-k">调候</span><span>先<span class="wx-chip wx-火">丙</span>后<span class="wx-chip wx-木">甲</span></span></div>
         <div class="ys-divergence">⚖调候线取火、木/格局线取金、木·旺衰置信度高　缺金而金正是所需——补金最对症</div>
-        <div class="ys-note">开运用神取木，喜神兼看金木两路，忌神落在土——土再添只是把本就够厚的底盘压得更实。落到你身上，就是多向外生长、少往内堆积，凡事给自己留一条能透气的出口。</div>
+        <div class="ys-note"><p class="narrative-paragraph">开运用神取木，喜神兼看金木两路，忌神落在土——土再添只是把本就够厚的底盘压得更实。落到你身上，就是多向外生长、少往内堆积，凡事给自己留一条能透气的出口。</p></div>
       </div>
     </div>
   </div>
@@ -886,120 +1259,25 @@
     </div>
   </div>
 
+  <details class="timing-evidence">
+    <summary><span>查看运岁专业明细</span><small>合冲刑害原始依据 · 熟悉命理时再展开</small></summary>
+    <div class="timing-evidence-copy">这里保留完整的大运、流年引动记录，供核对盘面；不影响前面的白话年份结论。</div>
+    <div class="hc-table"><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运天干甲合年干己(合绊)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运支戌合年柱(祖上/早年宫)卯(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运癸酉与年柱(祖上/早年宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运支酉破月柱(提纲·父母兄弟/事业宫)子(力轻)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合日干戊(合绊,合动日主本人)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合时干戊(合绊)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运天干辛合月干丙(合绊)</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未害(穿)月柱(提纲·父母兄弟/事业宫)子</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合日支(夫妻宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午破年柱(祖上/早年宫)卯(力轻)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运庚午与月柱(提纲·父母兄弟/事业宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与日支自刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运戊辰 2078-2087年(约79-88岁)</span><span class="hc-cause">大运支辰害(穿)年柱(祖上/早年宫)卯</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯刑月支子(无礼之刑)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破日支(夫妻宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破时柱(子女/晚年宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2026 丙午</span><span class="hc-cause">[支破][支冲][自刑][自刑] 支午破年柱(祖上/早年宫)卯(力轻);支午冲月柱(提纲·父母兄弟/事业宫)子——冲提纲,岁运大动;支午与日支自刑;支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2027 丁未</span><span class="hc-cause">[支害(穿)][支合][支合] 支未害(穿)月柱(提纲·父母兄弟/事业宫)子;支未合日支(夫妻宫)午(引动/合绊该宫);支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div></div>
+  </details>
+
   <div class="luck-growth-guide"><b>逆风或体弱，不等于没有助力。</b>顺风更适合兑现与扩张；逆风更助长取舍、边界、补结构与换挡；体弱时先助长恢复、节奏和承载力。每个关键节点下方都标了本阶段的“助长”重点；想知道某步大运或某一年怎样用好它，可直接问 AI 详谈。</div>
   <section class="month-flow"><div class="month-flow-head"><b>2026 十二月风向</b><span><strong>最顺</strong> 立春·庚寅　<strong>最逆</strong> 寒露·戊戌</span></div><div class="month-grid"><div class="month-cell flow-up"><span class="month-term">立春</span><span class="month-gz">庚寅</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-up"><span class="month-term">惊蛰</span><span class="month-gz">辛卯</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-down"><span class="month-term">清明</span><span class="month-gz">壬辰</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-flat"><span class="month-term">立夏</span><span class="month-gz">癸巳</span><span class="month-dir">◆ 平</span></div><div class="month-cell flow-up"><span class="month-term">芒种</span><span class="month-gz">甲午</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-flat"><span class="month-term">小暑</span><span class="month-gz">乙未</span><span class="month-dir">◆ 平</span></div><div class="month-cell flow-up"><span class="month-term">立秋</span><span class="month-gz">丙申</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-up"><span class="month-term">白露</span><span class="month-gz">丁酉</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-down"><span class="month-term">寒露</span><span class="month-gz">戊戌</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-down"><span class="month-term">立冬</span><span class="month-gz">己亥</span><span class="month-dir">▼ 逆</span></div><div class="month-cell flow-up"><span class="month-term">大雪</span><span class="month-gz">庚子</span><span class="month-dir">▲ 顺</span></div><div class="month-cell flow-flat"><span class="month-term">小寒</span><span class="month-gz">辛丑</span><span class="month-dir">◆ 平</span></div></div></section>
 
-  <!-- 条件板块：罕见现象（无算法命中时由 render 输出空字符串） -->
-  <section class="section rare-phenomena"><h2><span class="rare-title-seal">特别观察</span>罕见现象 <small>少见不等于吉凶，重点看它怎样落到现实</small></h2><div class="rare-list"><div class="rare-item"><span class="rare-grade rare-extreme">极罕</span><span class="rare-name">德秀满盘</span><span class="rare-evidence">德秀贵人见于年日时月柱</span></div><div class="rare-item"><span class="rare-grade rare-mid">少见</span><span class="rare-name">原局伏吟</span><span class="rare-evidence">日时柱戊午</span></div></div><div class="prose rare-reading">这张盘有两项需要单独看的罕见现象，罕见只说明组合少见，不等于天然全好或全坏。第一项是极罕的德秀满盘，整体判断<span class="hl-good">偏正向：聪明、温厚、愿意把事情做得体面周全的气质，会成为你取得信任的重要来源</span>；<span class="hl-good">现实里更容易表现为学习新规则快、写作表达有条理、遇到关键任务时被人托付</span>。它的发挥条件是让能力进入可被看见的作品、证书或长期项目，而不是只在熟人圈里默默帮忙。第二项是日时两柱戊午相同形成的原局伏吟，判断属于两面性：<span class="hl-good">相似问题第二次出现时，你会因为经验积累而处理得更熟练</span>，但<span class="hl">同一种责任、关系模式或内耗也可能反复回来，若一直沿用旧办法，就会有“怎么又是这件事”的感觉</span>。现实中遇到重复问题时，不要只加力气；把触发条件、旧做法和这次要改的一步写下来，<span class="hl-good">会更容易把重复变成升级，而不是循环消耗</span>。</div></section>
-
-  <!-- ============ 01 性格 / 02 事业 ============ -->
-  <div class="row-2col">
-    <section class="section">
-      <h2><span class="num-box">01</span>性格与天赋 <small>你平时怎么想、怎么做</small></h2>
-      <div class="prose">你是那种<span class="hl-good">先把地基打稳、再谈盖几层楼</span>的人。戊土坐午，火来生土，让你<span class="hl-good">对秩序和分寸有近乎本能的敏感，能很快看见事情该由谁落地、什么时候交付</span>。<span class="hl-good">这份稳当带来的直接好处，是你说出口的承诺别人敢信</span>。同时月支子水正财透着<span class="hl-good">一股清醒的计算，让你在热闹场合也能保持一分不轻易上头的距离感</span>。你<span class="hl-good">更愿意把事情拆成条件、成本和期限，用清楚的标准解决问题</span>。<span class="hl-good">这份把混乱翻译成秩序的能力，是你最经得起时间检验的长板</span>。要留意的是，<span class="hl-good">太能承载</span>有时会变成<span class="hl">默认自己该扛，界线一模糊，消耗就悄悄堆上来</span>。</div>
-    </section>
-    <section class="section">
-      <h2><span class="num-box">02</span>事业与赚钱方式 <small>适合什么环境，收入从哪里来</small></h2>
-      <div class="prose">事业上你<span class="hl-good">适合走长期累积型的路</span>，而不是靠一次爆发定输赢。正财格的底色决定了<span class="hl-good">你的优势在于把一件事做深、做出可复用的方法</span>，而不是频繁换赛道。用神在木，意味着<span class="hl-good">教育、内容、规划设计等需要持续生长与输出的方向，更能把你的力气使出来</span>。你在团队里有<span class="hl-good">把流程理顺、把责任分清，让项目长期稳定运转的能力</span>，这类价值时间一拉长就会成为别人绕不开的依赖。金在盘中缺位，提示你要有意识地补上<span class="hl-good">该结束时果断收口</span>的一环；<span class="hl">该谈的价格、该拒的请求若一直拖着，成本会越堆越高</span>。给自己设一个明确的复盘节奏，<span class="hl-good">会比单纯增加工时更容易换来稳定成果</span>。</div>
-    </section>
-  </div>
-
-  <!-- ============ 03 婚姻 / 04 健康 ============ -->
-  <div class="row-2col">
-    <section class="section">
-      <h2><span class="num-box">03</span>感情与相处模式 <small>怎么爱人、怎样相处更顺</small></h2>
-      <div class="prose">配偶宫坐印，妻星见于月柱，这一组合带来<span class="hl-good">成熟、稳重、愿意照顾现实生活的伴侣倾向</span>。<span class="hl-good">你适合的另一半，更可能是一个沉静、务实又肯替你托底的女生</span>。这种信号更多落在成熟承接的相处气质上，不限定实际年龄。你真正需要的是<span class="hl-good">一个能在你埋头做事时把生活另一头稳住的人</span>。相处中，你<span class="hl-good">很会把在意变成具体行动：修好东西、接住麻烦、提前把路铺好</span>。但对方未必总能读懂，<span class="hl">把想法讲出来是你需要刻意练习的功课；最消耗关系的，是你一个人默默把问题吞下去</span>。<span class="hl-good">愿意及时开口，会让关系多出回旋余地，也更容易长期稳定</span>。</div>
-    </section>
-    <section class="section">
-      <h2><span class="num-box">04</span>身体保养重点 <small>优先守住什么习惯</small></h2>
-      <div class="prose">火土偏旺而金水偏薄，身体上要重点照看脾胃与消化节律。这类盘常见的不是急病，而是长期作息不规律积出来的钝痛——饭点被工作推迟、坐着的时间过长、口味偏重偏燥。金缺又提示呼吸道和皮肤在干燥季节会更敏感，秋冬记得给房间补湿。运动上不必追求强度，<span class="hl-good">规律优先于剧烈，快走、游泳、拉伸这类能让身体舒展开的方式更适合你</span>。饮食上<span class="hl-good">增加清润食物、减少厚味重油，更容易帮你守住稳定的消化节奏</span>。情绪上最需要防的是<span class="hl">把压力憋成沉默，让紧绷感长期积在身体里</span>。<span class="hl-good">找一个能定期说话或记录的出口，对你的睡眠与消化都会有实际帮助</span>。<span class="hl-good">只要把饮食、运动和情绪出口做成固定节律，你的日常状态就会更稳</span>。</div>
-    </section>
-    <section class="section">
-      <h2><span class="num-box">05</span>关系与变化提醒 <small>合冲刑害在现实里会带来什么</small></h2>
-      <div class="hc-table"><div class="hc-row"><span class="hc-type">六冲</span><span class="hc-mem">子午(月-日·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">紧贴相冲有力·冲及提纲(月令),动摇格基</span></div><div class="hc-row"><span class="hc-type">六冲</span><span class="hc-mem">子午(月-时·隔柱)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">隔柱相冲有力·冲及提纲(月令),动摇格基</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">卯子(年-月·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">无礼之刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">午午(日-时·紧贴)</span><span class="hc-status st-on">【生效】</span><span class="hc-cause">自刑</span></div><div class="hc-row"><span class="hc-type">相破</span><span class="hc-mem">卯午(年-日·隔柱)</span><span class="hc-status st-mid">【减力】</span><span class="hc-cause">相破:损而不毁,力最轻</span></div><div class="hc-row"><span class="hc-type">相破</span><span class="hc-mem">卯午(年-时·遥隔)</span><span class="hc-status st-mid">【减力】</span><span class="hc-cause">相破:损而不毁,力最轻</span></div></div>
-      <div class="prose lead" style="margin-top:12px;">日时两柱同为戊午，构成原局伏吟，同一件事在你身上常以相似的形式重来一遍。这既是重复，也是熟练——<span class="hl-good">同类场景你第二次处理时会明显更省力</span>。年支卯木与日时午火之间木火相生，<span class="hl-good">把早期形成的方向感一路输送到中年，长期主线不容易断</span>。子午一冲落在月日之间，是这张盘最要紧的一处张力：<span class="hl">进项与家宅两头，容易出现需要你先协调取舍的时刻</span>。逆风时不必硬顶，<span class="hl-good">把节奏放慢半拍，会更容易等到力量重新理顺再行动</span>。</div>
-    </section>
-    <section class="section">
-      <h2><span class="num-box">06</span>哪些年份更有感 <small>什么时候宜进、宜稳、宜避险</small></h2>
-      <div class="hc-table"><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运天干甲合年干己(合绊)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运甲戌 2018-2027年(约19-28岁)</span><span class="hc-cause">大运支戌合年柱(祖上/早年宫)卯(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运癸酉与年柱(祖上/早年宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运支酉破月柱(提纲·父母兄弟/事业宫)子(力轻)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合日干戊(合绊,合动日主本人)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运癸酉 2028-2037年(约29-38岁)</span><span class="hc-cause">大运天干癸合时干戊(合绊)</span></div><div class="hc-row"><span class="hc-type">干合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运天干辛合月干丙(合绊)</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未害(穿)月柱(提纲·父母兄弟/事业宫)子</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合日支(夫妻宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支合</span><span class="hc-mem">大运辛未 2048-2057年(约49-58岁)</span><span class="hc-cause">大运支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午破年柱(祖上/早年宫)卯(力轻)</span></div><div class="hc-row"><span class="hc-type">天克地冲</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运庚午与月柱(提纲·父母兄弟/事业宫)天克地冲(反吟),动荡最烈</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与日支自刑</span></div><div class="hc-row"><span class="hc-type">自刑</span><span class="hc-mem">大运庚午 2058-2067年(约59-68岁)</span><span class="hc-cause">大运支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">支害(穿)</span><span class="hc-mem">大运戊辰 2078-2087年(约79-88岁)</span><span class="hc-cause">大运支辰害(穿)年柱(祖上/早年宫)卯</span></div><div class="hc-row"><span class="hc-type">相刑</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯刑月支子(无礼之刑)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破日支(夫妻宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">支破</span><span class="hc-mem">大运丁卯 2088-2097年(约89-98岁)</span><span class="hc-cause">大运支卯破时柱(子女/晚年宫)午(力轻)</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2026 丙午</span><span class="hc-cause">[支破][支冲][自刑][自刑] 支午破年柱(祖上/早年宫)卯(力轻);支午冲月柱(提纲·父母兄弟/事业宫)子——冲提纲,岁运大动;支午与日支自刑;支午与时支自刑</span></div><div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">2027 丁未</span><span class="hc-cause">[支害(穿)][支合][支合] 支未害(穿)月柱(提纲·父母兄弟/事业宫)子;支未合日支(夫妻宫)午(引动/合绊该宫);支未合时柱(子女/晚年宫)午(引动/合绊该宫)</span></div></div>
-      <div class="prose lead" style="margin-top:12px;">当前走甲戌大运，甲木透出正是你的开运用神，<span class="hl-good">这一段适合把手艺立起来、把长期关系铺开</span>。2026 丙午年支冲提纲，动的力道偏重，工作地点、职务或居所有一头会明显松动；这段变化仍在助长你的筛选力与边界感。<span class="hl-good">把变动当成筛选，更有利于留下真正适合你的选择</span>。2028 交癸酉大运，天克地冲年柱，是一次重量级的换挡，宜提前一年把手上的事做出可交接的样子。<span class="hl-good">整体节奏是眼下打桩、两年后换场，提前准备会让换挡更顺</span>。</div>
-    </section>
-  </div>
-
-  <!-- ============ 07 人生关键节点时间轴 ============ -->
+  <!-- ============ PROFESSIONAL SHENSHA ============ -->
   <section class="section">
-    <h2><span class="num-box">07</span>人生关键阶段 <small>五个值得提前留意的时间窗口</small></h2>
-    <div class="timeline-legend">
-      <span><span class="dot up"></span>上升 / 进取期</span>
-      <span><span class="dot flat"></span>平稳 / 名位期</span>
-      <span><span class="dot down"></span>关口 / 谨慎期</span>
-    </div>
-    <div class="timeline">
-      <div class="tl-node">
-        <div class="tl-age num">27</div><div class="tl-year num">2026</div>
-        <div class="tl-marker flat"></div>
-        <div class="tl-run up">甲戌</div>
-        <div class="tl-desc">支冲提纲，位置与职务有一头松动，顺势筛选</div>
-        <div class="tl-growth">筛选方向与主动换挡</div>
-      </div>
-      <div class="tl-node">
-        <div class="tl-age num">29</div><div class="tl-year num">2028</div>
-        <div class="tl-marker down"></div>
-        <div class="tl-run flat">癸酉</div>
-        <div class="tl-desc">天克地冲年柱，重量级换挡，宜提前交接</div>
-        <div class="tl-growth">交接能力与风险边界</div>
-      </div>
-      <div class="tl-node">
-        <div class="tl-age num">39</div><div class="tl-year num">2038</div>
-        <div class="tl-marker up"></div>
-        <div class="tl-run up">壬申</div>
-        <div class="tl-desc">交壬申运，金水转旺，补上缺金一环</div>
-        <div class="tl-growth">资源整合与成果放大</div>
-      </div>
-      <div class="tl-node">
-        <div class="tl-age num">49</div><div class="tl-year num">2048</div>
-        <div class="tl-marker flat"></div>
-        <div class="tl-run up">辛未</div>
-        <div class="tl-desc">干合月柱，合作与家宅两线同时收拢</div>
-        <div class="tl-growth">关系协同与长期经营</div>
-      </div>
-      <div class="tl-node">
-        <div class="tl-age num">59</div><div class="tl-year num">2058</div>
-        <div class="tl-marker down"></div>
-        <div class="tl-run flat">庚午</div>
-        <div class="tl-desc">天克地冲月柱，逆风段，守成优于扩张</div>
-        <div class="tl-growth">取舍、节奏与承载力</div>
-      </div>
-    </div>
+    <h2><span class="num-box">专业</span>神煞补充 <small>只作加分与提醒，不替代整体判断</small></h2>
+    <div class="shensha-list"><span class="ss-name good">天乙贵人</span> <span class="ss-name neutral">桃花(咸池)</span> <span class="ss-name good">将星</span> <span class="ss-name warn">羊刃</span> <span class="ss-name neutral">空亡</span> <span class="ss-name good">德秀贵人</span> <span class="ss-name good">红鸾</span> <span class="ss-name good">天喜</span> <span class="ss-name neutral">红艳煞</span> <span class="ss-name good">天福贵人</span> <span class="ss-name warn">灾煞</span> <span class="ss-name warn">孤鸾煞</span> <span class="ss-name warn">流霞</span> <span class="ss-name warn">血刃</span> <span class="ss-name good">天厨贵人</span></div>
+    <div class="prose" style="margin-top:10px;"><p class="narrative-paragraph">这张盘最罕见的一处是德秀满盘，<span class="hl-good">德秀贵人遍布多柱，聪明温厚的气质贯穿全局，遇到重要事情更容易被人托付</span>。<span class="hl-good">天乙贵人与将星同现，说明你在关键时刻不缺愿意拉你一把的人</span>，前提是你肯开口。</p><p class="narrative-paragraph">桃花与红艳并见，<span class="hl-good">你在人际互动里有自然的吸引力</span>，但也<span class="hl">容易招来分散注意力的热闹</span>。羊刃与空亡各占一位，提示锋芒要收着用、期待值要放平一点。神煞只增色不定大局，真正的骨架仍在五行与格局那一层。</p></div>
   </section>
-
-  <!-- ============ 08 神煞速览 / 09 开运调理 ============ -->
-  <div class="row-2col">
-    <section class="section">
-      <h2><span class="num-box">08</span>性格加分与提醒 <small>神煞在现实里代表什么</small></h2>
-      <div class="shensha-list"><span class="ss-name good">天乙贵人</span> <span class="ss-name neutral">桃花(咸池)</span> <span class="ss-name good">将星</span> <span class="ss-name warn">羊刃</span> <span class="ss-name neutral">空亡</span> <span class="ss-name good">德秀贵人</span> <span class="ss-name good">红鸾</span> <span class="ss-name good">天喜</span> <span class="ss-name neutral">红艳煞</span> <span class="ss-name good">天福贵人</span> <span class="ss-name warn">灾煞</span> <span class="ss-name warn">孤鸾煞</span> <span class="ss-name warn">流霞</span> <span class="ss-name warn">血刃</span> <span class="ss-name good">天厨贵人</span></div>
-      <div class="prose" style="margin-top:10px;">这张盘最罕见的一处是德秀满盘，<span class="hl-good">德秀贵人遍布多柱，聪明温厚的气质贯穿全局，遇到重要事情更容易被人托付</span>。<span class="hl-good">天乙贵人与将星同现，说明你在关键时刻不缺愿意拉你一把的人</span>，前提是你肯开口。桃花与红艳并见，<span class="hl-good">你在人际互动里有自然的吸引力</span>，但也<span class="hl">容易招来分散注意力的热闹</span>。羊刃与空亡各占一位，提示锋芒要收着用、期待值要放平一点。神煞只增色不定大局，真正的骨架仍在五行与格局那一层。</div>
-    </section>
-    <section class="section">
-      <h2><span class="num-box">09</span>日常可执行建议 <small>今天就能开始做</small></h2>
-      <div class="kaiyun-grid">
-        <div class="ky-row"><span class="ky-k">用神</span><span class="ky-v"><span class="wx-chip wx-木">木</span></span></div>
-        <div class="ky-row"><span class="ky-k">吉方</span><span class="ky-v">东·西</span></div>
-        <div class="ky-row"><span class="ky-k">吉色</span><span class="ky-v">青绿·白金</span></div>
-        <div class="ky-row"><span class="ky-k">吉数</span><span class="ky-v num">3·8、4·9</span></div>
-        <div class="ky-row"><span class="ky-k">宜业</span><span class="ky-v">教育培训、内容策划、规划设计</span></div>
-        <div class="ky-row"><span class="ky-k">调候</span><span class="ky-v">先<span class="wx-chip wx-火">丙</span>后<span class="wx-chip wx-木">甲</span></span></div>
-        <div class="ky-row"><span class="ky-k">宜往</span><span class="ky-v">东方城市、林木葱茏之地</span></div>
-        <div class="ky-row"><span class="ky-k">宜置</span><span class="ky-v">木质家具、绿植、素色金属饰品</span></div>
-        <div class="ky-row"><span class="ky-k">宜学</span><span class="ky-v">外语、写作、结构化表达</span></div>
-      </div>
-      <div class="ky-note">把开运的落点放在“生长”而不是“囤积”上：工作往教育、内容、设计这类需要持续输出的方向靠，居所与出行偏东方和有林木的地方。日常添几件木质家具与绿植，配一两样素色金属小物补上缺金的那一环。每周留一段固定时间练表达——写下来或讲出来都行，这是你最短的一条补课路径。</div>
-    </section>
-  </div>
 
   <!-- ============ 10 你最像的是(八维映射·算法注入) ============ -->
   <section class="section">
-    <h2><span class="num-box">10</span>你最像的是 <small>（荣格八维 × 十神能量 · 映射参考，非测评结果）</small></h2>
+    <h2><span class="num-box">延伸</span>你最像的是 <small>（荣格八维 × 十神能量 · 映射参考，非测评结果）</small></h2>
     <div class="mbti-mini">
       <div class="mbti-type num">ESTJ</div>
       <div class="mbti-meta">
@@ -1012,7 +1290,7 @@
 
   <!-- ============ FOOTER ============ -->
   <div class="footer-disclaim">
-    <span>① 命理分析仅供参考，不构成任何决策依据。人生的方向掌握在自己手中。　📱 长按或截图保存，即可分享　　🎴 海报模板风格延续自原作者 dzcmemory　·　✉ 本魔改版联系：hyperionjust@gmail.com</span>
+    <span>① 命理分析仅供参考，不构成任何决策依据。人生的方向掌握在自己手中。　📱 长按或截图保存，即可分享　　🎴 Bazi-Ziwei-Decoder　·　✦ Hyperionjust　·　✉ hyperionjust@gmail.com</span>
     <span class="footer-seal">承运<br>承业</span>
   </div>
 

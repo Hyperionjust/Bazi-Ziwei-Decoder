@@ -274,6 +274,52 @@ function truncateChars(value, max) {
   const chars = [...String(value ?? "")];
   return chars.length > max ? `${chars.slice(0, max).join("")}\u2026` : chars.join("");
 }
+function baziNarrativeParagraphs(value) {
+  const html = String(value ?? "").trim();
+  if (!html) return "";
+  if (/<\/?(?:p|div|ul|ol|table|blockquote|section|article)\b/i.test(html)) return html;
+  const inlineTags = /* @__PURE__ */ new Set(["span", "strong", "em", "b", "i", "a", "small", "mark", "u", "s"]);
+  const trailingMarks = /[\s”’」』）》】〕〗〙〛]/u;
+  const sentenceMarks = /[。！？!?]/u;
+  const tokens = html.match(/<[^>]+>|[^<]+/g) || [html];
+  const sentences = [];
+  let current = "", depth = 0, pendingBoundary = false;
+  const flush = () => {
+    const sentence = current.trim();
+    if (sentence) sentences.push(sentence);
+    current = "";
+    pendingBoundary = false;
+  };
+  for (const token of tokens) {
+    if (token.startsWith("<")) {
+      const match = token.match(/^<\s*(\/?)\s*([a-z0-9-]+)/i);
+      const closing = !!match?.[1];
+      const tag = String(match?.[2] || "").toLowerCase();
+      const inline = inlineTags.has(tag);
+      const selfClosing = /\/\s*>$/.test(token) || ["br", "img", "hr", "wbr"].includes(tag);
+      if (pendingBoundary && depth === 0 && inline && !closing) flush();
+      current += token;
+      if (inline && closing) depth = Math.max(0, depth - 1);
+      else if (inline && !selfClosing) depth += 1;
+      continue;
+    }
+    for (const ch of token) {
+      if (pendingBoundary && depth === 0 && !trailingMarks.test(ch) && !sentenceMarks.test(ch)) flush();
+      current += ch;
+      if (sentenceMarks.test(ch)) pendingBoundary = true;
+    }
+  }
+  flush();
+  if (!sentences.length) return `<p class="narrative-paragraph">${html}</p>`;
+  const groups = [];
+  for (let i = 0; i < sentences.length; ) {
+    const remaining = sentences.length - i;
+    const take = remaining === 3 ? 3 : Math.min(2, remaining);
+    groups.push(sentences.slice(i, i + take).join(""));
+    i += take;
+  }
+  return groups.map((group) => `<p class="narrative-paragraph">${group}</p>`).join("");
+}
 function hasOwn(obj, key) {
   return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
 }
@@ -338,7 +384,50 @@ function baziRarePhenomenaBlock(items, readingHtml) {
     return `<div class="rare-item"><span class="rare-grade ${cls[rarity] || "rare-mid"}">${escapeHtml(rarity)}</span><span class="rare-name">${escapeHtml(item?.\u540D || "\u7F55\u89C1\u7ED3\u6784")}</span><span class="rare-evidence">${escapeHtml(item?.\u6D89\u53CA || "")}</span></div>`;
   }).join("");
   const reading = String(readingHtml || "").trim();
-  return `<section class="section rare-phenomena"><h2><span class="rare-title-seal">\u7279\u522B\u89C2\u5BDF</span>\u7F55\u89C1\u73B0\u8C61 <small>\u5C11\u89C1\u4E0D\u7B49\u4E8E\u5409\u51F6\uFF0C\u91CD\u70B9\u770B\u5B83\u600E\u6837\u843D\u5230\u73B0\u5B9E</small></h2><div class="rare-list">${rows}</div>${reading ? `<div class="prose rare-reading">${reading}</div>` : ""}</section>`;
+  return `<section class="section rare-phenomena"><h2><span class="rare-title-seal">\u7279\u522B\u89C2\u5BDF</span>\u7F55\u89C1\u73B0\u8C61 <small>\u5C11\u89C1\u4E0D\u7B49\u4E8E\u5409\u51F6\uFF0C\u91CD\u70B9\u770B\u5B83\u600E\u6837\u843D\u5230\u73B0\u5B9E</small></h2><div class="rare-list">${rows}</div>${reading ? `<div class="prose rare-reading">${baziNarrativeParagraphs(reading)}</div>` : ""}</section>`;
+}
+function baziOverviewBlock(overview, chart) {
+  const items = [
+    ["01", "\u6027\u683C\u4E0E\u5929\u8D4B", "personality", "tone-personality", "\u6027"],
+    ["02", "\u4E8B\u4E1A\u4E0E\u8D5A\u94B1\u65B9\u5F0F", "career", "tone-career", "\u4E1A"],
+    ["03", "\u611F\u60C5\u4E0E\u76F8\u5904\u6A21\u5F0F", "relationship", "tone-relationship", "\u7F18"],
+    ["04", "\u8EAB\u4F53\u4FDD\u517B\u91CD\u70B9", "wellbeing", "tone-wellbeing", "\u517B"],
+    ["05", "\u5173\u7CFB\u4E0E\u53D8\u5316\u63D0\u9192", "change", "tone-change", "\u53D8"],
+    ["06", "\u672A\u6765\u51E0\u5E74\u600E\u4E48\u8D70", "timing", "tone-timing", "\u65F6"],
+    ["07", "\u4EBA\u751F\u5173\u952E\u9636\u6BB5", "milestones", "tone-milestones", "\u7A0B"],
+    ["08", "\u65E5\u5E38\u53EF\u6267\u884C\u5EFA\u8BAE", "action", "tone-action", "\u884C"]
+  ];
+  const bz = chart?.bazi || {};
+  const siZhu = bz?.siZhu || {};
+  const pillarDefs = [
+    ["year", "\u5E74\u67F1"],
+    ["month", "\u6708\u67F1"],
+    ["day", "\u65E5\u67F1"],
+    ["hour", "\u65F6\u67F1"]
+  ];
+  const hasCore = pillarDefs.every(([key]) => String(siZhu?.[key]?.gan || "").trim() && String(siZhu?.[key]?.zhi || "").trim());
+  const dayGan = String(bz?.dayMaster || siZhu?.day?.gan || "-");
+  const dayWx = GAN_WX[dayGan] || "-";
+  const pillarHtml = hasCore ? pillarDefs.map(([key, label]) => {
+    const gan = String(siZhu[key].gan || "-");
+    const zhi = String(siZhu[key].zhi || "-");
+    const ganWx = GAN_WX[gan] || "-";
+    const zhiWx = ZHI_WX[zhi] || "-";
+    const isDay = key === "day";
+    return `<div class="bazi-core-pillar${isDay ? " is-day" : ""}" data-pillar="${key}"><span class="bazi-core-pillar-label">${label}${isDay ? " \xB7 \u672C\u4EBA" : ""}</span><strong class="bazi-core-gz"><span class="wx-${ganWx}">${escapeHtml(gan)}</span><span class="wx-${zhiWx}">${escapeHtml(zhi)}</span></strong>${isDay ? `<span class="bazi-core-pillar-note">\u65E5\u4E3B ${escapeHtml(dayGan)}${escapeHtml(dayWx)}</span>` : '<span class="bazi-core-pillar-note" aria-hidden="true">&nbsp;</span>'}</div>`;
+  }).join("") : "";
+  const core = hasCore ? `<div class="overview-bazi-core" aria-label="\u516B\u5B57\u672C\u4F53\u56DB\u67F1\u901F\u89C8"><div class="bazi-core-intro"><span class="bazi-core-kicker num">BAZI / FOUR PILLARS</span><strong>\u516B\u5B57\u672C\u4F53</strong><p>\u56DB\u67F1\u5148\u5B9A\u8EAB\u4EFD\uFF0C\u518D\u6CBF\u4EBA\u751F\u5750\u6807\u5C55\u5F00</p><span class="bazi-core-daymaster">\u65E5\u4E3B <b class="wx-${dayWx}">${escapeHtml(dayGan)}${escapeHtml(dayWx)}</b></span></div><div class="bazi-core-pillars">${pillarHtml}</div></div>` : "";
+  const hasCoordinates = !!overview && !items.some(([, , key]) => !String(overview[key] || "").trim());
+  if (!hasCore && !hasCoordinates) return "";
+  if (!hasCoordinates) return `<section class="at-a-glance bazi-core-only" aria-label="\u516B\u5B57\u672C\u4F53\u56DB\u67F1\u901F\u89C8">${core}</section>`;
+  const card = ([no, label, key, cls, watermark]) => {
+    const words = String(overview[key] || "").split(/[·•、，,／/|]+/u).map((x) => x.trim()).filter(Boolean).slice(0, 4);
+    const keywordHtml = (words.length ? words : [String(overview[key])]).map((word) => `<span class="coordinate-keyword">${escapeHtml(truncateChars(word, 8))}</span>`).join("");
+    return `<a class="coordinate-card ${cls}" href="#section-${no}" data-watermark="${watermark}" aria-label="${no} ${label}"><span class="coordinate-index num">${no}</span><span class="coordinate-title">${label}</span><strong class="coordinate-keywords">${keywordHtml}</strong><span class="coordinate-link">\u5BF9\u5E94\u4E0B\u65B9 ${no}</span></a>`;
+  };
+  const coordinates = items.map(card).join("");
+  const summary = String(overview.summary_html || "").trim();
+  return `<section class="at-a-glance coordinate-map" aria-label="\u516B\u5B57\u672C\u4F53\u4E0E\u516B\u9879\u4EBA\u751F\u5750\u6807\u603B\u89C8">${core}<div class="overview-head"><div><span>\u4EBA\u751F\u5750\u6807</span><b>\u518D\u7528\u516B\u7EC4\u5173\u952E\u8BCD\u770B\u61C2\u6574\u5F20\u6D77\u62A5</b></div><em class="num">01\u201408 / LIFE COORDINATES</em></div>${summary ? `<div class="overview-summary"><span class="summary-mark">\u603B\u9886</span><div>${summary}</div></div>` : ""}<div class="overview-grid">${coordinates}</div><div class="coordinate-caption"><span class="num">CALIBRATED MAP</span> \u6BCF\u4E2A\u5750\u6807\u4E0E\u4E0B\u65B9\u540C\u7F16\u53F7\u7AE0\u8282\u4E00\u4E00\u5BF9\u5E94\uFF1B\u5148\u626B\u5173\u952E\u8BCD\uFF0C\u518D\u6CBF\u7F16\u53F7\u5411\u4E0B\u5C55\u5F00\u3002</div></section>`;
 }
 function baziTriggerDetail(item) {
   const win = item?.\u5F15\u7206\u7A97\u53E3;
@@ -390,6 +479,102 @@ function baziMonthFlowCard(flow, currentYear) {
   const monthLabel = (m) => [m?.\u8282\u6C14 || m?.\u7EA6\u519C\u5386\u6708, m?.\u5E72\u652F].filter(Boolean).join("\xB7");
   return `<section class="month-flow"><div class="month-flow-head"><b>${currentYear} \u5341\u4E8C\u6708\u98CE\u5411</b><span><strong>\u6700\u987A</strong> ${escapeHtml(monthLabel(best))}\u3000<strong>\u6700\u9006</strong> ${escapeHtml(monthLabel(worst))}</span></div><div class="month-grid">${cells}</div></section>`;
 }
+function baziTimingCards(ys, currentYear) {
+  const cards = /* @__PURE__ */ new Map();
+  const inWindow = (year) => Number.isInteger(year) && year >= currentYear && year < currentYear + 5;
+  const ensure = (year) => {
+    if (!cards.has(year)) cards.set(year, { year, gz: "", signal: null, node: null, transition: false, score: 0 });
+    return cards.get(year);
+  };
+  const gzFromText = (value) => String(value || "").match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/)?.[0] || "";
+  const yearGz = (year) => {
+    const gan = ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"];
+    const zhi = ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"];
+    return gan[(year - 4) % 10] + zhi[(year - 4) % 12];
+  };
+  const signalByYear = /* @__PURE__ */ new Map();
+  for (const signal of ys?.\u987A\u9006?.\u6D41\u5E74 || []) {
+    const year = Number(signal?.\u5E74);
+    if (Number.isInteger(year)) signalByYear.set(year, signal);
+  }
+  for (const flow of ys?.\u5F53\u524D\u5927\u8FD0\u6D41\u5E74?.\u6D41\u5E74 || []) {
+    const year = Number(flow?.\u5E74);
+    if (!inWindow(year)) continue;
+    const card = ensure(year);
+    card.gz = String(flow?.\u5E72\u652F || card.gz || "");
+    card.signal = signalByYear.get(year) || flow?.\u987A\u9006 || card.signal;
+  }
+  for (const signal of ys?.\u987A\u9006?.\u6D41\u5E74 || []) {
+    const year = Number(signal?.\u5E74);
+    if (!inWindow(year)) continue;
+    const card = ensure(year);
+    card.gz = String(signal?.\u5E72\u652F || card.gz || "");
+    card.signal = signal;
+  }
+  for (const node of ys?.\u5EFA\u8BAE\u8282\u70B9 || []) {
+    const year = Number(node?.\u5E74);
+    if (!inWindow(year)) continue;
+    const card = ensure(year);
+    const carrier = String(node?.\u8F7D\u4F53 || "");
+    card.node = node;
+    card.transition = /^大运/.test(carrier) || String(node?.\u6807\u8BB0 || "").includes("\u5927\u8FD0\u4EA4\u63A5");
+    card.gz = card.gz || gzFromText(carrier);
+  }
+  const weightScore = { \u91CD: 6, \u4E2D: 3, \u8F7B: 1 };
+  const ampScore = { \u5267\u52A8: 6, \u52A8: 3, \u9759: 0 };
+  for (const card of cards.values()) {
+    const direction = String(card.signal?.\u65B9\u5411 || "\u5E73");
+    const amplitude = String(card.signal?.\u632F\u5E45 || "\u9759");
+    card.score = (card.year === currentYear ? 5 : 0) + (card.transition ? 6 : 0) + (weightScore[String(card.node?.\u6743\u91CD || "")] || 0) + (ampScore[amplitude] || 0) + (direction === "\u5E73" ? 0 : 2);
+  }
+  let selected = [...cards.values()].filter((card) => {
+    const direction = String(card.signal?.\u65B9\u5411 || "\u5E73");
+    const amplitude = String(card.signal?.\u632F\u5E45 || "\u9759");
+    return card.year === currentYear || card.transition || ["\u91CD", "\u4E2D"].includes(String(card.node?.\u6743\u91CD || "")) || amplitude !== "\u9759" || direction !== "\u5E73";
+  });
+  if (!selected.some((card) => card.year === currentYear)) {
+    const current = ensure(currentYear);
+    current.gz = current.gz || yearGz(currentYear);
+    current.score += 5;
+    selected.push(current);
+  }
+  selected = selected.sort((a, b) => b.score - a.score || a.year - b.year).slice(0, 4).sort((a, b) => a.year - b.year);
+  return selected.map((card) => {
+    const direction = String(card.signal?.\u65B9\u5411 || "\u5E73");
+    const amplitude = String(card.signal?.\u632F\u5E45 || "\u9759");
+    const body = String(card.signal?.\u4F53\u6863 || "");
+    const weight = String(card.node?.\u6743\u91CD || "");
+    let title = "\u76F8\u5BF9\u5E73\u7A33", action = "\u9002\u5408\u6253\u5E95\u3001\u590D\u76D8\u548C\u79EF\u7D2F", tone = "tone-steady";
+    if (card.transition) {
+      title = "\u8FDB\u5165\u6362\u6321\u671F";
+      action = "\u63D0\u524D\u6574\u7406\u4EA4\u63A5\uFF0C\u7ED9\u81EA\u5DF1\u7559\u51FA\u9002\u5E94\u7A7A\u95F4";
+      tone = "tone-transition";
+    } else if (amplitude === "\u5267\u52A8" || weight === "\u91CD") {
+      title = "\u53D8\u5316\u6700\u660E\u663E";
+      action = direction === "\u987A" ? "\u805A\u7126\u4E00\u4E24\u4EF6\u8981\u4E8B\uFF0C\u987A\u52BF\u63A8\u8FDB" : direction === "\u9006" ? "\u5148\u7A33\u4F4F\u8282\u594F\uFF0C\u518D\u5904\u7406\u53D8\u5316" : "\u5148\u5B9A\u4E3B\u7EBF\uFF0C\u518D\u5904\u7406\u53D8\u5316";
+      tone = "tone-high";
+    } else if (direction === "\u9006") {
+      title = "\u9002\u5408\u6536\u6574";
+      action = body === "\u5F31" ? "\u51CF\u5C11\u540C\u65F6\u5F00\u5DE5\uFF0C\u5148\u7A33\u4F4F\u8282\u594F" : "\u653E\u6162\u534A\u6B65\uFF0C\u68C0\u67E5\u8FB9\u754C";
+      tone = "tone-caution";
+    } else if (direction === "\u987A") {
+      title = "\u63A8\u8FDB\u611F\u589E\u5F3A";
+      action = body === "\u5F31" ? "\u805A\u7126\u4E00\u4E24\u4EF6\u8981\u4E8B\uFF0C\u907F\u514D\u900F\u652F" : "\u805A\u7126\u4E00\u4E24\u4EF6\u8981\u4E8B\uFF0C\u987A\u52BF\u63A8\u8FDB";
+      tone = "tone-up";
+    } else if (amplitude === "\u52A8" || weight === "\u4E2D") {
+      title = "\u8C03\u6574\u611F\u589E\u5F3A";
+      action = "\u8FB9\u8D70\u8FB9\u8C03\uFF0C\u7ED9\u8BA1\u5212\u7559\u51FA\u4F59\u5730";
+      tone = "tone-shift";
+    }
+    const badges = [];
+    if (card.year === currentYear) badges.push("\u4ECA\u5E74");
+    else if (card.year === currentYear + 1) badges.push("\u660E\u5E74");
+    if (card.transition) badges.push("\u65B0\u9636\u6BB5");
+    if (!badges.length) badges.push("\u91CD\u70B9\u5E74");
+    const gz = card.gz || yearGz(card.year);
+    return `<article class="timing-signal-card ${tone}" data-year="${card.year}" aria-label="${card.year}\u5E74${escapeHtml(title)}"><div class="timing-card-head"><span class="timing-year num">${card.year}</span><span class="timing-gz">${escapeHtml(gz)}</span><span class="timing-badge">${escapeHtml(badges.join(" \xB7 "))}</span></div><strong class="timing-card-title">${escapeHtml(title)}</strong><p><span>\u5EFA\u8BAE</span>${escapeHtml(action)}</p></article>`;
+  }).join("");
+}
 function baziStateBadge(direction, grade) {
   const body = safeClass(grade, ["\u5F3A", "\u4E2D", "\u5F31"], "");
   if (!body) return "";
@@ -427,6 +612,7 @@ function chartToFlatBazi(chart, currentYear) {
   out["algo.insights_html"] = "";
   out["algo.month_flow_html"] = "";
   out["rare.block_html"] = "";
+  out["overview.block_html"] = "";
   for (let i = 0; i < 5; i++) out[`timeline.${i}.trigger_html`] = "";
   for (let i = 0; i < 10; i++) {
     out[`dayun.${i}.state_html`] = "";
@@ -543,6 +729,7 @@ function chartToFlatBazi(chart, currentYear) {
     (r) => `<div class="hc-row"><span class="hc-type">${escapeHtml(r.type)}</span><span class="hc-mem">${escapeHtml((r.members || []).join(""))}(${escapeHtml((r.pillars || []).join("-"))}\xB7${escapeHtml(r.distance)})</span><span class="hc-status ${stCls(r.status)}">\u3010${escapeHtml(r.status)}\u3011</span><span class="hc-cause">${escapeHtml(r.cause || "")}${baziTriggerDetail(r)}</span></div>`
   ).join("") : '<div class="hc-row"><span class="hc-cause">\u672C\u76D8\u5E72\u652F\u4E4B\u95F4\u65E0\u663E\u8457\u5408\u51B2\u5211\u5BB3\u5173\u7CFB</span></div>';
   const ys = en.\u8FD0\u5C81\u5F15\u52A8;
+  const snX = ys?.\u987A\u9006;
   const ysRows = [];
   for (const dstep of ys?.\u5927\u8FD0\u5F15\u52A8 || []) {
     for (const h of dstep.hits || []) ysRows.push(
@@ -557,6 +744,7 @@ function chartToFlatBazi(chart, currentYear) {
     );
   }
   out["yunsui.rows_html"] = ysRows.length ? ysRows.join("") : '<div class="hc-row"><span class="hc-cause">\u8FD0\u5C81\u4E0E\u539F\u5C40\u65E0\u663E\u8457\u5F15\u52A8</span></div>';
+  out["yunsui.cards_html"] = baziTimingCards(ys, Number(currentYear));
   out["hechong.reading_html"] = "-";
   out["yunsui.reading_html"] = "-";
   out["shensha.reading_html"] = "-";
@@ -625,7 +813,6 @@ function chartToFlatBazi(chart, currentYear) {
     out[`liunian.${i}.luck_class`] = "luck-ping";
   }
   if (!synth) out["liunian.head_note"] = "";
-  const snX = en.\u8FD0\u5C81\u5F15\u52A8?.\u987A\u9006;
   if (snX) {
     const clsOf = (d) => d === "\u987A" ? "luck-ji" : d === "\u9006" ? "luck-xiong" : "luck-ping";
     const byStep = {};
@@ -666,7 +853,7 @@ function wxChip(s) {
     }).join("");
   });
 }
-function analysisToFlatBazi(a) {
+function analysisToFlatBazi(a, chart) {
   const out = {};
   if (a.meta) {
     if (a.meta.archetype_name) out["meta.archetype_name"] = a.meta.archetype_name;
@@ -674,27 +861,29 @@ function analysisToFlatBazi(a) {
     if (a.meta.name) out["meta.name"] = a.meta.name;
     if (a.meta.direction_note) out["meta.direction_note"] = a.meta.direction_note;
   }
+  out["overview.block_html"] = baziOverviewBlock(a.overview, chart);
   if (a.dm?.desc_html) out["dm.desc_html"] = a.dm.desc_html;
-  if (a.geju?.sub_html) out["geju.sub_html"] = a.geju.sub_html;
-  if (a.wuxing?.note_html) out["wuxing.note_html"] = a.wuxing.note_html;
+  if (a.geju?.sub_html) out["geju.sub_html"] = baziNarrativeParagraphs(a.geju.sub_html);
+  if (a.wuxing?.note_html) out["wuxing.note_html"] = baziNarrativeParagraphs(a.wuxing.note_html);
   if (a.tg) {
     if (a.tg.mech_html) out["tg.mech_html"] = a.tg.mech_html;
-    if (a.tg.plain_html) out["tg.plain_html"] = a.tg.plain_html;
+    if (a.tg.plain_html) out["tg.plain_html"] = baziNarrativeParagraphs(a.tg.plain_html);
   }
   if (a.yongshen) {
     for (const k of ["yong_html", "ji_html", "xi_text", "tiaohou_html"]) if (a.yongshen[k] != null) out[`yongshen.${k}`] = wxChip(a.yongshen[k]);
   }
-  if (a.yongshen?.note_html != null) out["yongshen.note_html"] = a.yongshen.note_html;
+  if (a.yongshen?.note_html != null) out["yongshen.note_html"] = baziNarrativeParagraphs(a.yongshen.note_html);
   if (a.interp) {
-    for (const k of ["personality_html", "career_html", "marriage_html", "health_html"]) if (a.interp[k] != null) out[`interp.${k}`] = a.interp[k];
+    for (const k of ["personality_html", "career_html", "marriage_html", "health_html"]) if (a.interp[k] != null) out[`interp.${k}`] = baziNarrativeParagraphs(a.interp[k]);
   }
   if (a.kaiyun) {
-    for (const k of ["fang_html", "se_html", "shu_html", "ye", "place_html", "item_html", "skill_html", "note_html"]) if (a.kaiyun[k] != null) out[`kaiyun.${k}`] = a.kaiyun[k];
+    for (const k of ["fang_html", "se_html", "shu_html", "ye", "place_html", "item_html", "skill_html"]) if (a.kaiyun[k] != null) out[`kaiyun.${k}`] = a.kaiyun[k];
   }
+  if (a.kaiyun?.note_html != null) out["kaiyun.note_html"] = baziNarrativeParagraphs(a.kaiyun.note_html);
   for (const k of ["tiaohou_html", "yong_html"]) if (a.kaiyun?.[k] != null) out[`kaiyun.${k}`] = wxChip(a.kaiyun[k]);
-  if (a.hechong?.reading_html) out["hechong.reading_html"] = a.hechong.reading_html;
-  if (a.yunsui?.reading_html) out["yunsui.reading_html"] = a.yunsui.reading_html;
-  if (a.shensha?.reading_html) out["shensha.reading_html"] = a.shensha.reading_html;
+  if (a.hechong?.reading_html) out["hechong.reading_html"] = baziNarrativeParagraphs(a.hechong.reading_html);
+  if (a.yunsui?.reading_html) out["yunsui.reading_html"] = baziNarrativeParagraphs(a.yunsui.reading_html);
+  if (a.shensha?.reading_html) out["shensha.reading_html"] = baziNarrativeParagraphs(a.shensha.reading_html);
   if (Array.isArray(a.timeline)) for (let i = 0; i < 5; i++) {
     const t = a.timeline[i] || {};
     for (const f of ["age", "year", "run", "run_class", "desc", "growth", "marker_class"]) out[`timeline.${i}.${f}`] = t[f] != null ? t[f] : "-";
@@ -893,7 +1082,7 @@ function main() {
     }
   } else if (mode === "bazi") {
     const chartFlat = chartToFlatBazi(chart, args.currentYear ? +args.currentYear : void 0);
-    const analysisFlat = analysisToFlatBazi(analysis);
+    const analysisFlat = analysisToFlatBazi(analysis, chart);
     if (chartFlat["__algo_yongshen"]) {
       for (const k of [
         "yongshen.yong_html",

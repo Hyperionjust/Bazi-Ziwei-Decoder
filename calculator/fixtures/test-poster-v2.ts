@@ -66,6 +66,35 @@ function noRenderDebris(html: string): boolean {
 // 1) 2000 随包样例：典出、12 月条、护体档与独立罕象块出现；无裁决时看点隐藏。
 const base = render('base', baseChart, baseAnalysis, 2026);
 ok(base.status === 0, '2000 随包样例可渲染');
+ok(base.html.includes('class="report" data-day-element="土"'), '日主戊土自动选择土系清浅主题');
+ok(count(base.html, '<div class="overview-bazi-core"') === 1 && count(base.html, ' data-pillar="') === 4 && ['year','month','day','hour'].every(k => base.html.includes(`data-pillar="${k}"`)) && base.html.includes('日主 戊土'), '总领顶部先显示四柱本体并突出戊土日主');
+const dayThemeCases: Array<[string, string]> = [
+  ['甲', '木'], ['丙', '火'], ['戊', '土'], ['庚', '金'], ['壬', '水'],
+];
+for (const [gan, element] of dayThemeCases) {
+  const themedChart = clone(baseChart);
+  themedChart.bazi.siZhu.day.gan = gan;
+  themedChart.bazi.dayMaster = gan;
+  const themed = render(`theme-${element}`, themedChart, baseAnalysis, 2026);
+  ok(themed.status === 0 && themed.html.includes(`class="report" data-day-element="${element}"`) && themed.html.includes(`日主 ${gan}${element}`), `日干${gan}自动路由到${element}系主题并同步核心条`);
+}
+ok(count(base.html, '<section class="at-a-glance coordinate-map"') === 1 && count(base.html, '<div class="overview-grid">') === 1 && count(base.html, 'class="coordinate-card ') === 8 && base.html.includes('秩序感强') && base.html.includes('持续表达'), '总领正例：八项坐标位于同一网格、每项多关键词');
+ok([1,2,3,4,5,6,7,8].every(n => {
+  const no = String(n).padStart(2, '0');
+  return count(base.html, `href="#section-${no}"`) === 1 && count(base.html, `id="section-${no}"`) === 1;
+}), '总领八项与正文 01~08 一一链接');
+const timingSection = base.html.match(/<section[^>]*id="section-06"[\s\S]*?<\/section>/)?.[0] || '';
+const timingEvidence = base.html.match(/<details class="timing-evidence"[\s\S]*?<\/details>/)?.[0] || '';
+ok(count(timingSection, 'class="timing-signal-card ') === 3 && [2026,2027,2028].every(year => timingSection.includes(`data-year="${year}"`)), '06 白话主区：样例只列 2026/2027/2028 三个关键节点');
+ok(timingSection.includes('变化最明显') && timingSection.includes('适合收整') && timingSection.includes('进入换挡期') && !timingSection.includes('class="hc-row"') && !/天克地冲|自刑|支合|干合/.test(timingSection), '06 白话主区：只说节奏与行动，不铺专业术语行');
+ok(timingEvidence.includes('查看运岁专业明细') && timingEvidence.includes('class="hc-row"') && /天克地冲|支合|干合/.test(timingEvidence), '06 专业依据：原始运岁记录完整后置并默认折叠');
+const narrativeSection = (no: string) => base.html.match(new RegExp(`<section[^>]*id="section-${no}"[\\s\\S]*?<\\/section>`))?.[0] || '';
+const narrativeParagraphs = (html: string) => count(html, 'class="narrative-paragraph"');
+ok(narrativeParagraphs(narrativeSection('01')) >= 3 && narrativeParagraphs(narrativeSection('02')) >= 3 && narrativeParagraphs(narrativeSection('03')) >= 3 && narrativeParagraphs(narrativeSection('04')) >= 3, '01~04 长解读自动拆成多个 2~3 句语义段落');
+ok(narrativeParagraphs(narrativeSection('05')) >= 2 && narrativeParagraphs(narrativeSection('06')) >= 2, '05~06 精读正文自动拆成多个短段');
+const allNarrativeParagraphs = base.html.match(/<p class="narrative-paragraph">[\s\S]*?<\/p>/g) || [];
+ok(allNarrativeParagraphs.length >= 20 && allNarrativeParagraphs.every(p => count(p, '<span') === count(p, '</span>')), '自动分段覆盖主叙事，并保持每段内联高亮标签平衡');
+ok(base.html.indexOf('class="overview-bazi-core"') < base.html.indexOf('class="overview-head"') && base.html.indexOf('class="overview-head"') < base.html.indexOf('class="reader-guide"') && base.html.indexOf('class="reader-guide"') < base.html.indexOf('id="section-01"') && base.html.indexOf('id="section-01"') < base.html.indexOf('class="evidence-divider"') && base.html.indexOf('class="evidence-divider"') < base.html.indexOf('四柱命盘详表'), '渐进披露顺序：四柱核心→八项坐标→现实解读→专业依据→四柱详表');
 ok(count(base.html, '<section class="algo-card classics-card') === 1, '典出正例：恰一块');
 ok(count(base.html, '<li><span class="classic-name">') === 3, '典出数量上限：原序最多三条');
 ok(count(base.html, '<section class="algo-card insights-card') === 0, '核心看点反例：无来源整块隐藏');
@@ -139,6 +168,14 @@ for (const [label, result] of [['旧 analysis', oldWithAnalysis], ['无 analysis
   ok(!/<section class="(?:algo-card|month-flow)|<section class="section rare-phenomena/.test(result.html) && !/<span class="(?:state-pair|tl-trigger|hc-trigger)"/.test(result.html), `${label} 缺新字段时算法可选 DOM 与罕象块全隐藏`);
   ok(noRenderDebris(result.html), `${label} 兼容输出无渲染残渣`);
 }
+ok(count(oldWithoutAnalysis.html, '<div class="overview-bazi-core"') === 1 && !oldWithoutAnalysis.html.includes('class="coordinate-card '), '无 analysis 时仍显示四柱本体，只隐藏八项坐标');
+const legacyOverviewAnalysis = clone(baseAnalysis);
+legacyOverviewAnalysis.overview = {
+  personality: '沉稳有主见', career: '长期积累型', relationship: '行动式表达', wellbeing: '节律优先', current: '稳中换挡',
+  summary_html: '你最鲜明的底色是稳、能扛、能把事情收拢。眼下先把方法与边界立稳，再为下一次换挡留空间。',
+};
+const legacyOverview = render('legacy-overview', baseChart, legacyOverviewAnalysis, 2026);
+ok(legacyOverview.status === 0 && count(legacyOverview.html, '<div class="overview-bazi-core"') === 1 && !legacyOverview.html.includes('class="coordinate-card '), '旧五项 overview 仍显示四柱本体，但不出现半套八项坐标');
 
 // 6) 源码与 dist-bundle 必须同输出（仅归一化跨分钟生成时间）。
 if (fs.existsSync(DIST_RENDER)) {
@@ -153,4 +190,4 @@ if (failed) {
   console.error(`\n八字海报 v2 门禁 ${failed} 处失败；临时产物：${TMP}`);
   process.exit(1);
 }
-console.log('✅ 八字海报 v2 全部通过（五项出现/隐藏 + 年份 + 流派同源 + 新旧兼容 + source/dist）');
+console.log('✅ 八字海报 v2 全部通过（四柱核心 + 八项坐标映射 + 五项算法块 + 年份 + 流派同源 + 新旧兼容 + source/dist）');

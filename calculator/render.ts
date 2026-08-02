@@ -340,6 +340,59 @@ function truncateChars(value:any, max:number): string {
   return chars.length > max ? `${chars.slice(0, max).join('')}…` : chars.join('');
 }
 
+// 长叙事按完整句义自动分成 2~3 句一段。分析层只负责内容，渲染层统一控制段落节奏，
+// 同时等待 span/strong 等内联标签闭合后再切段，避免破坏正向/提醒着色。
+function baziNarrativeParagraphs(value:any): string {
+  const html = String(value ?? '').trim();
+  if (!html) return '';
+  // 已显式给出块级结构时尊重原稿，避免生成嵌套 <p>。
+  if (/<\/?(?:p|div|ul|ol|table|blockquote|section|article)\b/i.test(html)) return html;
+
+  const inlineTags = new Set(['span','strong','em','b','i','a','small','mark','u','s']);
+  const trailingMarks = /[\s”’」』）》】〕〗〙〛]/u;
+  const sentenceMarks = /[。！？!?]/u;
+  const tokens = html.match(/<[^>]+>|[^<]+/g) || [html];
+  const sentences:string[] = [];
+  let current = '', depth = 0, pendingBoundary = false;
+  const flush = () => {
+    const sentence = current.trim();
+    if (sentence) sentences.push(sentence);
+    current = '';
+    pendingBoundary = false;
+  };
+
+  for (const token of tokens) {
+    if (token.startsWith('<')) {
+      const match = token.match(/^<\s*(\/?)\s*([a-z0-9-]+)/i);
+      const closing = !!match?.[1];
+      const tag = String(match?.[2] || '').toLowerCase();
+      const inline = inlineTags.has(tag);
+      const selfClosing = /\/\s*>$/.test(token) || ['br','img','hr','wbr'].includes(tag);
+      if (pendingBoundary && depth === 0 && inline && !closing) flush();
+      current += token;
+      if (inline && closing) depth = Math.max(0, depth - 1);
+      else if (inline && !selfClosing) depth += 1;
+      continue;
+    }
+    for (const ch of token) {
+      if (pendingBoundary && depth === 0 && !trailingMarks.test(ch) && !sentenceMarks.test(ch)) flush();
+      current += ch;
+      if (sentenceMarks.test(ch)) pendingBoundary = true;
+    }
+  }
+  flush();
+  if (!sentences.length) return `<p class="narrative-paragraph">${html}</p>`;
+
+  const groups:string[] = [];
+  for (let i = 0; i < sentences.length;) {
+    const remaining = sentences.length - i;
+    const take = remaining === 3 ? 3 : Math.min(2, remaining);
+    groups.push(sentences.slice(i, i + take).join(''));
+    i += take;
+  }
+  return groups.map(group => `<p class="narrative-paragraph">${group}</p>`).join('');
+}
+
 function hasOwn(obj:any, key:string): boolean {
   return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
 }
@@ -412,7 +465,49 @@ function baziRarePhenomenaBlock(items:any[], readingHtml:any): string {
     return `<div class="rare-item"><span class="rare-grade ${cls[rarity] || 'rare-mid'}">${escapeHtml(rarity)}</span><span class="rare-name">${escapeHtml(item?.名 || '罕见结构')}</span><span class="rare-evidence">${escapeHtml(item?.涉及 || '')}</span></div>`;
   }).join('');
   const reading = String(readingHtml || '').trim();
-  return `<section class="section rare-phenomena"><h2><span class="rare-title-seal">特别观察</span>罕见现象 <small>少见不等于吉凶，重点看它怎样落到现实</small></h2><div class="rare-list">${rows}</div>${reading ? `<div class="prose rare-reading">${reading}</div>` : ''}</section>`;
+  return `<section class="section rare-phenomena"><h2><span class="rare-title-seal">特别观察</span>罕见现象 <small>少见不等于吉凶，重点看它怎样落到现实</small></h2><div class="rare-list">${rows}</div>${reading ? `<div class="prose rare-reading">${baziNarrativeParagraphs(reading)}</div>` : ''}</section>`;
+}
+
+function baziOverviewBlock(overview:any, chart:any): string {
+  const items = [
+    ['01', '性格与天赋', 'personality', 'tone-personality', '性'],
+    ['02', '事业与赚钱方式', 'career', 'tone-career', '业'],
+    ['03', '感情与相处模式', 'relationship', 'tone-relationship', '缘'],
+    ['04', '身体保养重点', 'wellbeing', 'tone-wellbeing', '养'],
+    ['05', '关系与变化提醒', 'change', 'tone-change', '变'],
+    ['06', '未来几年怎么走', 'timing', 'tone-timing', '时'],
+    ['07', '人生关键阶段', 'milestones', 'tone-milestones', '程'],
+    ['08', '日常可执行建议', 'action', 'tone-action', '行'],
+  ] as const;
+  const bz = chart?.bazi || {};
+  const siZhu = bz?.siZhu || {};
+  const pillarDefs = [
+    ['year', '年柱'], ['month', '月柱'], ['day', '日柱'], ['hour', '时柱'],
+  ] as const;
+  const hasCore = pillarDefs.every(([key]) => String(siZhu?.[key]?.gan || '').trim() && String(siZhu?.[key]?.zhi || '').trim());
+  const dayGan = String(bz?.dayMaster || siZhu?.day?.gan || '-');
+  const dayWx = GAN_WX[dayGan] || '-';
+  const pillarHtml = hasCore ? pillarDefs.map(([key, label]) => {
+    const gan = String(siZhu[key].gan || '-');
+    const zhi = String(siZhu[key].zhi || '-');
+    const ganWx = GAN_WX[gan] || '-';
+    const zhiWx = ZHI_WX[zhi] || '-';
+    const isDay = key === 'day';
+    return `<div class="bazi-core-pillar${isDay ? ' is-day' : ''}" data-pillar="${key}"><span class="bazi-core-pillar-label">${label}${isDay ? ' · 本人' : ''}</span><strong class="bazi-core-gz"><span class="wx-${ganWx}">${escapeHtml(gan)}</span><span class="wx-${zhiWx}">${escapeHtml(zhi)}</span></strong>${isDay ? `<span class="bazi-core-pillar-note">日主 ${escapeHtml(dayGan)}${escapeHtml(dayWx)}</span>` : '<span class="bazi-core-pillar-note" aria-hidden="true">&nbsp;</span>'}</div>`;
+  }).join('') : '';
+  const core = hasCore ? `<div class="overview-bazi-core" aria-label="八字本体四柱速览"><div class="bazi-core-intro"><span class="bazi-core-kicker num">BAZI / FOUR PILLARS</span><strong>八字本体</strong><p>四柱先定身份，再沿人生坐标展开</p><span class="bazi-core-daymaster">日主 <b class="wx-${dayWx}">${escapeHtml(dayGan)}${escapeHtml(dayWx)}</b></span></div><div class="bazi-core-pillars">${pillarHtml}</div></div>` : '';
+  const hasCoordinates = !!overview && !items.some(([, , key]) => !String(overview[key] || '').trim());
+  if (!hasCore && !hasCoordinates) return '';
+  if (!hasCoordinates) return `<section class="at-a-glance bazi-core-only" aria-label="八字本体四柱速览">${core}</section>`;
+  const card = ([no, label, key, cls, watermark]: typeof items[number]) => {
+    const words = String(overview[key] || '').split(/[·•、，,／/|]+/u).map(x => x.trim()).filter(Boolean).slice(0, 4);
+    const keywordHtml = (words.length ? words : [String(overview[key])])
+      .map(word => `<span class="coordinate-keyword">${escapeHtml(truncateChars(word, 8))}</span>`).join('');
+    return `<a class="coordinate-card ${cls}" href="#section-${no}" data-watermark="${watermark}" aria-label="${no} ${label}"><span class="coordinate-index num">${no}</span><span class="coordinate-title">${label}</span><strong class="coordinate-keywords">${keywordHtml}</strong><span class="coordinate-link">对应下方 ${no}</span></a>`;
+  };
+  const coordinates = items.map(card).join('');
+  const summary = String(overview.summary_html || '').trim();
+  return `<section class="at-a-glance coordinate-map" aria-label="八字本体与八项人生坐标总览">${core}<div class="overview-head"><div><span>人生坐标</span><b>再用八组关键词看懂整张海报</b></div><em class="num">01—08 / LIFE COORDINATES</em></div>${summary ? `<div class="overview-summary"><span class="summary-mark">总领</span><div>${summary}</div></div>` : ''}<div class="overview-grid">${coordinates}</div><div class="coordinate-caption"><span class="num">CALIBRATED MAP</span> 每个坐标与下方同编号章节一一对应；先扫关键词，再沿编号向下展开。</div></section>`;
 }
 
 function baziTriggerDetail(item:any): string {
@@ -468,6 +563,109 @@ function baziMonthFlowCard(flow:any, currentYear:number): string {
   return `<section class="month-flow"><div class="month-flow-head"><b>${currentYear} 十二月风向</b><span><strong>最顺</strong> ${escapeHtml(monthLabel(best))}　<strong>最逆</strong> ${escapeHtml(monthLabel(worst))}</span></div><div class="month-grid">${cells}</div></section>`;
 }
 
+// 06 主视图只回答「哪年、什么节奏、怎么做」。合冲刑害等原始证据仍由
+// yunsui.rows_html 完整保留在后置专业区，避免把小白入口做成技术日志。
+function baziTimingCards(ys:any, currentYear:number): string {
+  type TimingCard = {
+    year:number; gz:string; signal:any; node:any; transition:boolean; score:number;
+  };
+  const cards = new Map<number, TimingCard>();
+  const inWindow = (year:number) => Number.isInteger(year) && year >= currentYear && year < currentYear + 5;
+  const ensure = (year:number):TimingCard => {
+    if (!cards.has(year)) cards.set(year, {year, gz:'', signal:null, node:null, transition:false, score:0});
+    return cards.get(year)!;
+  };
+  const gzFromText = (value:any) => String(value || '').match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/)?.[0] || '';
+  const yearGz = (year:number) => {
+    const gan = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    const zhi = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    return gan[(year - 4) % 10] + zhi[(year - 4) % 12];
+  };
+
+  const signalByYear = new Map<number, any>();
+  for (const signal of (ys?.顺逆?.流年 || [])) {
+    const year = Number(signal?.年);
+    if (Number.isInteger(year)) signalByYear.set(year, signal);
+  }
+  for (const flow of (ys?.当前大运流年?.流年 || [])) {
+    const year = Number(flow?.年);
+    if (!inWindow(year)) continue;
+    const card = ensure(year);
+    card.gz = String(flow?.干支 || card.gz || '');
+    card.signal = signalByYear.get(year) || flow?.顺逆 || card.signal;
+  }
+  for (const signal of (ys?.顺逆?.流年 || [])) {
+    const year = Number(signal?.年);
+    if (!inWindow(year)) continue;
+    const card = ensure(year);
+    card.gz = String(signal?.干支 || card.gz || '');
+    card.signal = signal;
+  }
+  for (const node of (ys?.建议节点 || [])) {
+    const year = Number(node?.年);
+    if (!inWindow(year)) continue;
+    const card = ensure(year);
+    const carrier = String(node?.载体 || '');
+    card.node = node;
+    card.transition = /^大运/.test(carrier) || String(node?.标记 || '').includes('大运交接');
+    card.gz = card.gz || gzFromText(carrier);
+  }
+
+  const weightScore:Record<string,number> = {重:6,中:3,轻:1};
+  const ampScore:Record<string,number> = {剧动:6,动:3,静:0};
+  for (const card of cards.values()) {
+    const direction = String(card.signal?.方向 || '平');
+    const amplitude = String(card.signal?.振幅 || '静');
+    card.score = (card.year === currentYear ? 5 : 0)
+      + (card.transition ? 6 : 0)
+      + (weightScore[String(card.node?.权重 || '')] || 0)
+      + (ampScore[amplitude] || 0)
+      + (direction === '平' ? 0 : 2);
+  }
+
+  let selected = [...cards.values()].filter(card => {
+    const direction = String(card.signal?.方向 || '平');
+    const amplitude = String(card.signal?.振幅 || '静');
+    return card.year === currentYear || card.transition || ['重','中'].includes(String(card.node?.权重 || ''))
+      || amplitude !== '静' || direction !== '平';
+  });
+  if (!selected.some(card => card.year === currentYear)) {
+    const current = ensure(currentYear);
+    current.gz = current.gz || yearGz(currentYear);
+    current.score += 5;
+    selected.push(current);
+  }
+  selected = selected.sort((a,b) => b.score - a.score || a.year - b.year).slice(0, 4).sort((a,b) => a.year - b.year);
+
+  return selected.map(card => {
+    const direction = String(card.signal?.方向 || '平');
+    const amplitude = String(card.signal?.振幅 || '静');
+    const body = String(card.signal?.体档 || '');
+    const weight = String(card.node?.权重 || '');
+    let title = '相对平稳', action = '适合打底、复盘和积累', tone = 'tone-steady';
+    if (card.transition) {
+      title = '进入换挡期'; action = '提前整理交接，给自己留出适应空间'; tone = 'tone-transition';
+    } else if (amplitude === '剧动' || weight === '重') {
+      title = '变化最明显';
+      action = direction === '顺' ? '聚焦一两件要事，顺势推进' : direction === '逆' ? '先稳住节奏，再处理变化' : '先定主线，再处理变化';
+      tone = 'tone-high';
+    } else if (direction === '逆') {
+      title = '适合收整'; action = body === '弱' ? '减少同时开工，先稳住节奏' : '放慢半步，检查边界'; tone = 'tone-caution';
+    } else if (direction === '顺') {
+      title = '推进感增强'; action = body === '弱' ? '聚焦一两件要事，避免透支' : '聚焦一两件要事，顺势推进'; tone = 'tone-up';
+    } else if (amplitude === '动' || weight === '中') {
+      title = '调整感增强'; action = '边走边调，给计划留出余地'; tone = 'tone-shift';
+    }
+    const badges:string[] = [];
+    if (card.year === currentYear) badges.push('今年');
+    else if (card.year === currentYear + 1) badges.push('明年');
+    if (card.transition) badges.push('新阶段');
+    if (!badges.length) badges.push('重点年');
+    const gz = card.gz || yearGz(card.year);
+    return `<article class="timing-signal-card ${tone}" data-year="${card.year}" aria-label="${card.year}年${escapeHtml(title)}"><div class="timing-card-head"><span class="timing-year num">${card.year}</span><span class="timing-gz">${escapeHtml(gz)}</span><span class="timing-badge">${escapeHtml(badges.join(' · '))}</span></div><strong class="timing-card-title">${escapeHtml(title)}</strong><p><span>建议</span>${escapeHtml(action)}</p></article>`;
+  }).join('');
+}
+
 function baziStateBadge(direction:any, grade:any): string {
   const body = safeClass(grade, ['强','中','弱'], '');
   if (!body) return '';
@@ -508,6 +706,7 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   out['algo.insights_html'] = '';
   out['algo.month_flow_html'] = '';
   out['rare.block_html'] = '';
+  out['overview.block_html'] = '';
   for (let i = 0; i < 5; i++) out[`timeline.${i}.trigger_html`] = '';
   for (let i = 0; i < 10; i++) {
     out[`dayun.${i}.state_html`] = '';
@@ -599,8 +798,9 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   out['hechong.rows_html'] = ixItems.length ? ixItems.map((r:any)=>
     `<div class="hc-row"><span class="hc-type">${escapeHtml(r.type)}</span><span class="hc-mem">${escapeHtml((r.members||[]).join(''))}(${escapeHtml((r.pillars||[]).join('-'))}·${escapeHtml(r.distance)})</span><span class="hc-status ${stCls(r.status)}">【${escapeHtml(r.status)}】</span><span class="hc-cause">${escapeHtml(r.cause||'')}${baziTriggerDetail(r)}</span></div>`
   ).join('') : '<div class="hc-row"><span class="hc-cause">本盘干支之间无显著合冲刑害关系</span></div>';
-  // v1.6: 运岁引动注入 — 大运引动全列 + 当前大运流年(有引动的年份)
+  // v1.6: 运岁引动专业明细完整保留；v3.14 G8 另生成最多四张白话年份卡作主入口。
   const ys = en.运岁引动;
+  const snX = ys?.顺逆;
   const ysRows: string[] = [];
   for (const dstep of (ys?.大运引动||[])) {
     for (const h of (dstep.hits||[])) ysRows.push(
@@ -613,6 +813,7 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
       `<div class="hc-row"><span class="hc-type">流年</span><span class="hc-mem">${escapeHtml(y.年)} ${escapeHtml(y.干支)}</span><span class="hc-cause">${all.map((h:any)=>`[${escapeHtml(h.type)}]`).join('')} ${all.map((h:any)=>escapeHtml(String(h.desc || '').replace(/^(大运|流年)/,''))).join(';')}</span></div>`);
   }
   out['yunsui.rows_html'] = ysRows.length ? ysRows.join('') : '<div class="hc-row"><span class="hc-cause">运岁与原局无显著引动</span></div>';
+  out['yunsui.cards_html'] = baziTimingCards(ys, Number(currentYear));
   out['hechong.reading_html']='-'; out['yunsui.reading_html']='-'; out['shensha.reading_html']='-';
   // v2.8: 「你最像的是」小版块(全算法注入)
   const bw = en.八维结构;
@@ -663,7 +864,6 @@ function chartToFlatBazi(chart:any, currentYear?:number): Record<string,any> {
   //   ② 原重级降级把「方向」和「振幅」揉进一个色阶,表达不了「大动且有利」;
   //   ③ 原降级类型表两处硬编、都没复用 hitWeight(),大运漏岁运并临/冲提纲、流年漏冲提纲。
   //   现在色阶只承载【方向】,振幅另出 amp_label(模板未用则自然忽略),两轴不再混淆。
-  const snX = en.运岁引动?.顺逆;
   if (snX) {
     const clsOf = (d: string) => d === '顺' ? 'luck-ji' : d === '逆' ? 'luck-xiong' : 'luck-ping';
     const byStep: Record<number, any> = {};
@@ -702,21 +902,23 @@ function wxChip(s:any): any {
   });
 }
 
-function analysisToFlatBazi(a:any): Record<string,any> {
+function analysisToFlatBazi(a:any, chart:any): Record<string,any> {
   const out:Record<string,any>={};
   if(a.meta){ if(a.meta.archetype_name)out['meta.archetype_name']=a.meta.archetype_name; if(a.meta.axis_oneliner)out['meta.axis_oneliner']=a.meta.axis_oneliner; if(a.meta.name)out['meta.name']=a.meta.name; if(a.meta.direction_note)out['meta.direction_note']=a.meta.direction_note; }
+  out['overview.block_html'] = baziOverviewBlock(a.overview, chart);
   if(a.dm?.desc_html)out['dm.desc_html']=a.dm.desc_html;
-  if(a.geju?.sub_html)out['geju.sub_html']=a.geju.sub_html;
-  if(a.wuxing?.note_html)out['wuxing.note_html']=a.wuxing.note_html;
-  if(a.tg){ if(a.tg.mech_html)out['tg.mech_html']=a.tg.mech_html; if(a.tg.plain_html)out['tg.plain_html']=a.tg.plain_html; }
+  if(a.geju?.sub_html)out['geju.sub_html']=baziNarrativeParagraphs(a.geju.sub_html);
+  if(a.wuxing?.note_html)out['wuxing.note_html']=baziNarrativeParagraphs(a.wuxing.note_html);
+  if(a.tg){ if(a.tg.mech_html)out['tg.mech_html']=a.tg.mech_html; if(a.tg.plain_html)out['tg.plain_html']=baziNarrativeParagraphs(a.tg.plain_html); }
   if(a.yongshen)for(const k of ['yong_html','ji_html','xi_text','tiaohou_html'])if(a.yongshen[k]!=null)out[`yongshen.${k}`]=wxChip(a.yongshen[k]);
-  if(a.yongshen?.note_html!=null)out['yongshen.note_html']=a.yongshen.note_html;
-  if(a.interp)for(const k of ['personality_html','career_html','marriage_html','health_html'])if(a.interp[k]!=null)out[`interp.${k}`]=a.interp[k];
-  if(a.kaiyun)for(const k of ['fang_html','se_html','shu_html','ye','place_html','item_html','skill_html','note_html'])if(a.kaiyun[k]!=null)out[`kaiyun.${k}`]=a.kaiyun[k];
+  if(a.yongshen?.note_html!=null)out['yongshen.note_html']=baziNarrativeParagraphs(a.yongshen.note_html);
+  if(a.interp)for(const k of ['personality_html','career_html','marriage_html','health_html'])if(a.interp[k]!=null)out[`interp.${k}`]=baziNarrativeParagraphs(a.interp[k]);
+  if(a.kaiyun)for(const k of ['fang_html','se_html','shu_html','ye','place_html','item_html','skill_html'])if(a.kaiyun[k]!=null)out[`kaiyun.${k}`]=a.kaiyun[k];
+  if(a.kaiyun?.note_html!=null)out['kaiyun.note_html']=baziNarrativeParagraphs(a.kaiyun.note_html);
   for(const k of ['tiaohou_html','yong_html'])if(a.kaiyun?.[k]!=null)out[`kaiyun.${k}`]=wxChip(a.kaiyun[k]);
-  if(a.hechong?.reading_html)out['hechong.reading_html']=a.hechong.reading_html;
-  if(a.yunsui?.reading_html)out['yunsui.reading_html']=a.yunsui.reading_html;
-  if(a.shensha?.reading_html)out['shensha.reading_html']=a.shensha.reading_html;
+  if(a.hechong?.reading_html)out['hechong.reading_html']=baziNarrativeParagraphs(a.hechong.reading_html);
+  if(a.yunsui?.reading_html)out['yunsui.reading_html']=baziNarrativeParagraphs(a.yunsui.reading_html);
+  if(a.shensha?.reading_html)out['shensha.reading_html']=baziNarrativeParagraphs(a.shensha.reading_html);
   if(Array.isArray(a.timeline))for(let i=0;i<5;i++){ const t=a.timeline[i]||{}; for(const f of ['age','year','run','run_class','desc','growth','marker_class'])out[`timeline.${i}.${f}`]=t[f]!=null?t[f]:'-'; }
   if(a.dayun_head_note)out['dayun.head_note']=a.dayun_head_note;
   if(a.liunian_head_note)out['liunian.head_note']=a.liunian_head_note;
@@ -936,7 +1138,7 @@ function main() {
     }
   } else if (mode === 'bazi') {
     const chartFlat = chartToFlatBazi(chart, args.currentYear ? +args.currentYear : undefined);
-    const analysisFlat = analysisToFlatBazi(analysis);
+    const analysisFlat = analysisToFlatBazi(analysis, chart);
     // v2.3: 算法已裁决的字段忽略 analysis 同名产出(同盘可复现)
     if (chartFlat['__algo_yongshen']) {
       for (const k of ['yongshen.yong_html','yongshen.xi_text','yongshen.ji_html','yongshen.tiaohou_html','yongshen.divergence_note',
